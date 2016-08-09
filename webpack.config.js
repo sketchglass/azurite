@@ -1,7 +1,7 @@
 module.exports = {
   entry: {
     main: "./src/main/index.ts",
-    renderer: "./src/renderer/index.ts",
+    renderer: "./src/renderer/index.tsx",
   },
   output: {
     path: "./dist/assets",

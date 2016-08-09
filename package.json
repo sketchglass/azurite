@@ -4,6 +4,9 @@
   "description": "Casual Painting App in Electron",
   "main": "dist/assets/main.js",
   "scripts": {
+    "watch": "webpack --watch -d",
+    "electron:start": "electron .",
+    "start": "npm-run-all --parallel watch electron:start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -25,5 +28,9 @@
     "ts-loader": "^0.8.2",
     "typescript": "^2.0.0",
     "webpack": "^1.13.1"
+  },
+  "dependencies": {
+    "react": "^15.3.0",
+    "react-dom": "^15.3.0"
   }
 }
