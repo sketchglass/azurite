@@ -26,10 +26,11 @@ class Pointer {
       const pressure = start.pressure + pressurePerLen * current
       pointers.push({pos, pressure})
     }
+    const remaining = len - (count - 1) - offset
 
     return {
       pointers,
-      nextOffset: 1 - (len - count)
+      nextOffset: 1 - remaining
     }
   }
 }
