@@ -1,4 +1,4 @@
-import {Point} from "./Geometry"
+import {Point} from "../../lib/Geometry"
 import Pointer from "./Pointer"
 import Tool from "./Tool"
 

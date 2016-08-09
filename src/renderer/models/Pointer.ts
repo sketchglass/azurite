@@ -1,4 +1,4 @@
-import {Point} from "./Geometry"
+import {Point} from "../../lib/Geometry"
 
 export default
 class Pointer {

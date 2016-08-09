@@ -1,4 +1,4 @@
-import {Size} from "./Geometry"
+import {Size} from "../../lib/Geometry"
 
 export default
 class Layer {

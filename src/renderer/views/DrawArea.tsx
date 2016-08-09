@@ -1,6 +1,6 @@
 import React = require("react")
 import Picture from "../models/Picture"
-import {Point} from "../models/Geometry"
+import {Point} from "../../lib/Geometry"
 import Tool from "../models/Tool"
 import BrushTool from "../models/BrushTool"
 import Pointer from "../models/Pointer"

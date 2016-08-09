@@ -1,5 +1,5 @@
 import Layer from "./Layer"
-import {Size} from "./Geometry"
+import {Size} from "../../lib/Geometry"
 
 export default
 class Picture {
