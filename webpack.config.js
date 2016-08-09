@@ -15,6 +15,7 @@ module.exports = {
   },
   externals: {
     electron: true,
+    "receive-tablet-event": true,
   },
   resolve: {
     extensions: ["", ".ts", ".tsx", ".js"],
