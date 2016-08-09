@@ -18,7 +18,7 @@ class DrawArea extends React.Component<void, DrawAreaState> {
   element: HTMLElement|undefined
   isPressed = false
   tool: Tool = new BrushTool()
-  isTabletInProximity = false
+  usingTablet = false
 
   constructor() {
     super()
@@ -32,22 +32,14 @@ class DrawArea extends React.Component<void, DrawAreaState> {
     this.element = this.refs["root"] as HTMLElement
     this.updateChildCanvases()
 
-    ipcRenderer.on("tablet.enterProximity", () => {
-      this.isTabletInProximity = true
-    })
-    ipcRenderer.on("tablet.leaveProximity", () => {
-      this.isTabletInProximity = false
-    })
-
     ipcRenderer.on("tablet.down", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
-      if (this.isTabletInProximity) {
-        const pos = this.mousePos(ev)
-        this.tool.start(new Pointer(pos, ev.pressure))
-        this.isPressed = true
-      }
+      this.usingTablet = true
+      const pos = this.mousePos(ev)
+      this.tool.start(new Pointer(pos, ev.pressure))
+      this.isPressed = true
     })
     ipcRenderer.on("tablet.move", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
-      if (this.isTabletInProximity && this.isPressed) {
+      if (this.usingTablet && this.isPressed) {
         const pos = this.mousePos(ev)
         this.tool.move(new Pointer(pos, ev.pressure))
       }
@@ -91,7 +83,7 @@ class DrawArea extends React.Component<void, DrawAreaState> {
   }
 
   onMouseDown(ev: MouseEvent) {
-    if (this.isTabletInProximity) {
+    if (this.usingTablet) {
       return
     }
 
@@ -101,7 +93,7 @@ class DrawArea extends React.Component<void, DrawAreaState> {
     ev.preventDefault()
   }
   onMouseMove(ev: MouseEvent) {
-    if (this.isTabletInProximity) {
+    if (this.usingTablet) {
       return
     }
 
