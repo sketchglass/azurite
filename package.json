@@ -7,7 +7,8 @@
     "watch": "webpack --watch -d",
     "electron:start": "electron .",
     "start": "npm-run-all --parallel watch electron:start",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "postinstall": "electron-rebuild"
   },
   "repository": {
     "type": "git",
@@ -34,6 +35,6 @@
   "dependencies": {
     "react": "^15.3.0",
     "react-dom": "^15.3.0",
-    "receive-tablet-event": "github:seanchas116/receive-tablet-event#2e8a2c13be5c8c3fea3aaa0bfad3867086f72dc6"
+    "receive-tablet-event": "github:seanchas116/receive-tablet-event#298c02cd099017a8e39fb9b6262d566316c591a8"
   }
 }

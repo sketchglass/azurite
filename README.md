@@ -5,6 +5,5 @@ Casual Painting App in Electron
 
 ```
 npm install
-$(npm bin)/electron-rebuild
 npm start
 ```
