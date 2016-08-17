@@ -33,6 +33,6 @@
   "dependencies": {
     "react": "^15.3.0",
     "react-dom": "^15.3.0",
-    "receive-tablet-event": "github:seanchas116/receive-tablet-event"
+    "receive-tablet-event": "github:seanchas116/receive-tablet-event#12c16ea1ca4c657be48f5c7e513096cd0b5c971f"
   }
 }

@@ -32,6 +32,15 @@ class DrawArea extends React.Component<void, DrawAreaState> {
     this.element = this.refs["root"] as HTMLElement
     this.updateChildCanvases()
 
+    const rect = this.element.getBoundingClientRect()
+    const captureArea = {
+      left: Math.round(rect.left),
+      top: Math.round(rect.top),
+      width: Math.round(rect.width),
+      height: Math.round(rect.height),
+    }
+    ipcRenderer.send("tablet.install", captureArea)
+
     ipcRenderer.on("tablet.down", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       this.usingTablet = true
       const pos = this.mousePos(ev)
