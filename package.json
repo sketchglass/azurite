@@ -4,9 +4,10 @@
   "description": "Casual Painting App in Electron",
   "main": "dist/assets/main.js",
   "scripts": {
+    "build": "webpack -d",
     "watch": "webpack --watch -d",
     "electron:start": "electron .",
-    "start": "npm-run-all --parallel watch electron:start",
+    "start": "npm-run-all build --parallel watch electron:start",
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "electron-rebuild"
   },
