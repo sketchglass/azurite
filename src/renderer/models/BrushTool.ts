@@ -6,7 +6,7 @@ export default
 class BrushTool extends Tool {
   private lastPointer: Pointer|undefined
   private nextDabOffset = 0
-  radius = 10
+  radius = 2
   color = "rgba(0,0,0,0.5)"
 
   start(pointer: Pointer) {
@@ -33,7 +33,7 @@ class BrushTool extends Tool {
     const {pos, pressure} = pointer
     context.fillStyle = this.color
     context.beginPath()
-    context.arc(pos.x, pos.y, 10 * pressure, 0, 2 * Math.PI)
+    context.arc(pos.x, pos.y, this.radius * pressure, 0, 2 * Math.PI)
     context.fill()
   }
 }
