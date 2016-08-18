@@ -12,37 +12,34 @@ function createWindow () {
   win.loadURL(`file://${__dirname}/../index.html`)
   win.webContents.openDevTools()
 
-  win.on('closed', () => {
-    window = undefined
-  })
-
-  let receiver: TabletEventReceiver|undefined;
+  const receiver = new TabletEventReceiver(win)
 
   ipcMain.on("tablet.install", (ev, captureArea) => {
-    if (!receiver) {
-      receiver = new TabletEventReceiver(win)
-      receiver.captureArea = captureArea
-
-      receiver.on("enterProximity", (ev) => {
-        win.webContents.send("tablet.enterProximity", ev)
-      })
-      receiver.on("leaveProximity", (ev) => {
-        win.webContents.send("tablet.leaveProximity", ev)
-      })
-      receiver.on("down", (ev) => {
-        win.webContents.send("tablet.down", ev)
-      })
-      receiver.on("move", (ev) => {
-        win.webContents.send("tablet.move", ev)
-      })
-      receiver.on("up", (ev) => {
-        win.webContents.send("tablet.up", ev)
-      })
-      win.on('closed', () => {
-        receiver!.dispose()
-      })
-    }
+    receiver.captureArea = captureArea;
   })
+
+  receiver.on("enterProximity", (ev) => {
+    win.webContents.send("tablet.enterProximity", ev)
+  })
+  receiver.on("leaveProximity", (ev) => {
+    win.webContents.send("tablet.leaveProximity", ev)
+  })
+  receiver.on("down", (ev) => {
+    win.webContents.send("tablet.down", ev)
+  })
+  receiver.on("move", (ev) => {
+    win.webContents.send("tablet.move", ev)
+  })
+  receiver.on("up", (ev) => {
+    win.webContents.send("tablet.up", ev)
+  })
+
+  win.on('closed', () => {
+    window = undefined
+    receiver.dispose()
+  })
+
+
 }
 
 app.on('ready', createWindow)
