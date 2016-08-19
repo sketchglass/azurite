@@ -1,25 +1,25 @@
-import {Point} from "../../lib/Geometry"
-import Pointer from "./Pointer"
+import {Vec2} from "../../lib/Geometry"
+import Waypoint from "./Waypoint"
 import Tool from "./Tool"
 
 export default
 class BrushTool extends Tool {
-  private lastPointer: Pointer|undefined
+  private lastWaypoint: Waypoint|undefined
   private nextDabOffset = 0
   radius = 2
   color = "rgba(0,0,0,0.5)"
 
-  start(pointer: Pointer) {
-    this.lastPointer = pointer
+  start(waypoint: Waypoint) {
+    this.lastWaypoint = waypoint
     this.nextDabOffset = 0
   }
 
-  move(pointer: Pointer) {
-    if (this.lastPointer) {
-      const {pointers, nextOffset} = Pointer.interpolate(this.lastPointer, pointer, this.nextDabOffset)
-      this.lastPointer = pointer
+  move(waypoint: Waypoint) {
+    if (this.lastWaypoint) {
+      const {waypoints, nextOffset} = Waypoint.interpolate(this.lastWaypoint, waypoint, this.nextDabOffset)
+      this.lastWaypoint = waypoint
       this.nextDabOffset = nextOffset
-      for (const p of pointers) {
+      for (const p of waypoints) {
         this.drawDab(p)
       }
     }
@@ -28,9 +28,9 @@ class BrushTool extends Tool {
   end() {
   }
 
-  drawDab(pointer: Pointer) {
+  drawDab(waypoint: Waypoint) {
     const {context} = this.layer
-    const {pos, pressure} = pointer
+    const {pos, pressure} = waypoint
     context.fillStyle = this.color
     context.beginPath()
     context.arc(pos.x, pos.y, this.radius * pressure, 0, 2 * Math.PI)

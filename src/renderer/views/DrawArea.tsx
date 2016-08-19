@@ -1,9 +1,9 @@
 import React = require("react")
 import Picture from "../models/Picture"
-import {Point} from "../../lib/Geometry"
+import {Vec2} from "../../lib/Geometry"
 import Tool from "../models/Tool"
 import BrushTool from "../models/BrushTool"
-import Pointer from "../models/Pointer"
+import Waypoint from "../models/Waypoint"
 import * as Electron from "electron"
 import {TabletEvent} from "receive-tablet-event"
 
@@ -44,13 +44,13 @@ class DrawArea extends React.Component<void, DrawAreaState> {
     ipcRenderer.on("tablet.down", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       this.usingTablet = true
       const pos = this.mousePos(ev)
-      this.tool.start(new Pointer(pos, ev.pressure))
+      this.tool.start(new Waypoint(pos, ev.pressure))
       this.isPressed = true
     })
     ipcRenderer.on("tablet.move", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       if (this.usingTablet && this.isPressed) {
         const pos = this.mousePos(ev)
-        this.tool.move(new Pointer(pos, ev.pressure))
+        this.tool.move(new Waypoint(pos, ev.pressure))
       }
     })
     ipcRenderer.on("tablet.up", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
@@ -93,7 +93,7 @@ class DrawArea extends React.Component<void, DrawAreaState> {
     const rect = this.element!.getBoundingClientRect()
     const x = ev.clientX - rect.left
     const y = ev.clientY - rect.top
-    return new Point(x * dpr, y * dpr)
+    return new Vec2(x * dpr, y * dpr)
   }
 
   onMouseDown(ev: MouseEvent) {
@@ -102,7 +102,7 @@ class DrawArea extends React.Component<void, DrawAreaState> {
     }
 
     const pos = this.mousePos(ev)
-    this.tool.start(new Pointer(pos, 1))
+    this.tool.start(new Waypoint(pos, 1))
     this.isPressed = true
     ev.preventDefault()
   }
@@ -114,7 +114,7 @@ class DrawArea extends React.Component<void, DrawAreaState> {
     const pos = this.mousePos(ev)
 
     if (this.isPressed) {
-      this.tool.move(new Pointer(pos, 1))
+      this.tool.move(new Waypoint(pos, 1))
       ev.preventDefault()
     }
   }

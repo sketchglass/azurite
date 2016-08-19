@@ -1,11 +1,11 @@
 import Layer from "./Layer"
-import Pointer from "./Pointer"
+import Waypoint from "./Waypoint"
 
 export default
 class Tool {
   layer: Layer
-  start(pointer: Pointer) {}
-  move(pointer: Pointer) {}
+  start(waypoint: Waypoint) {}
+  move(waypoint: Waypoint) {}
   end() {}
-  cursorMove(pointer: Pointer) {}
+  cursorMove(waypoint: Waypoint) {}
 }

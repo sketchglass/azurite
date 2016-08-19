@@ -1,22 +1,29 @@
 export
-class Point {
+class Vec2 {
   constructor(public x: number, public y: number) {
   }
 
-  add(a: Point) {
-      return new Point(this.x + a.x, this.y + a.y)
+  get width() {
+    return this.x;
+  }
+  get height() {
+    return this.y;
   }
 
-  sub(a: Point) {
-      return new Point(this.x - a.x, this.y - a.y)
+  add(a: Vec2) {
+      return new Vec2(this.x + a.x, this.y + a.y)
+  }
+
+  sub(a: Vec2) {
+      return new Vec2(this.x - a.x, this.y - a.y)
   }
 
   mul(a: number) {
-      return new Point(this.x * a, this.y * a)
+      return new Vec2(this.x * a, this.y * a)
   }
 
   div(a: number) {
-      return new Point(this.x / a, this.y / a)
+      return new Vec2(this.x / a, this.y / a)
   }
 
   length() {
@@ -24,11 +31,5 @@ class Point {
   }
   atan2() {
     return Math.atan2(this.y, this.x)
-  }
-}
-
-export
-class Size {
-  constructor(public width: number, public height: number) {
   }
 }

@@ -1,22 +1,22 @@
-import {Point} from "../../lib/Geometry"
+import {Vec2} from "../../lib/Geometry"
 
 export default
-class Pointer {
-  constructor(public pos: Point, public pressure: number) {
+class Waypoint {
+  constructor(public pos: Vec2, public pressure: number) {
   }
 
-  static interpolate(start: Pointer, end: Pointer, offset: number) {
+  static interpolate(start: Waypoint, end: Waypoint, offset: number) {
     const diff = end.pos.sub(start.pos)
     const len = diff.length()
     if (len == 0) {
       return {
-        pointers: [],
+        waypoints: [],
         nextOffset: 0
       }
     }
 
     const count = Math.floor(len - offset)
-    const pointers: Pointer[] = []
+    const waypoints: Waypoint[] = []
     const diffPerLen = diff.div(len)
     const pressurePerLen = (end.pressure - start.pressure) / len
 
@@ -24,12 +24,12 @@ class Pointer {
       const current = offset + i
       const pos = start.pos.add(diffPerLen.mul(current))
       const pressure = start.pressure + pressurePerLen * current
-      pointers.push({pos, pressure})
+      waypoints.push({pos, pressure})
     }
     const remaining = len - (count - 1) - offset
 
     return {
-      pointers,
+      waypoints,
       nextOffset: 1 - remaining
     }
   }
