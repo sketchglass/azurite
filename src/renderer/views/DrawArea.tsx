@@ -75,9 +75,10 @@ class DrawArea extends React.Component<void, DrawAreaState> {
 
   render() {
     this.updateChildCanvases()
+    const dpr = window.devicePixelRatio;
     const style = {
-      transformOrigin: "0 0",
-      transform: `scale(${1 / window.devicePixelRatio})`
+      width: this.state.picture.size.width / dpr + 'px',
+      height: this.state.picture.size.height / dpr + 'px',
     }
     return (
       <div ref="root" className="draw-area" style={style}
