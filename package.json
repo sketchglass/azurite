@@ -6,8 +6,8 @@
   "scripts": {
     "build": "webpack -d",
     "watch": "webpack --watch -d",
-    "electron:start": "electron .",
-    "start": "npm-run-all build --parallel watch electron:start",
+    "app": "electron .",
+    "start": "npm-run-all build --parallel watch app",
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "electron-rebuild"
   },
