@@ -75,8 +75,12 @@ class DrawArea extends React.Component<void, DrawAreaState> {
 
   render() {
     this.updateChildCanvases()
+    const style = {
+      transformOrigin: "0 0",
+      transform: `scale(${1 / window.devicePixelRatio})`
+    }
     return (
-      <div ref="root" className="draw-area"
+      <div ref="root" className="draw-area" style={style}
         onMouseDown={this.onMouseDown.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}
         onMouseUp={this.onMouseUp.bind(this)}
@@ -85,10 +89,11 @@ class DrawArea extends React.Component<void, DrawAreaState> {
   }
 
   mousePos(ev: {clientX: number, clientY: number}) {
+    const dpr = window.devicePixelRatio
     const rect = this.element!.getBoundingClientRect()
     const x = ev.clientX - rect.left
     const y = ev.clientY - rect.top
-    return new Point(x, y)
+    return new Point(x * dpr, y * dpr)
   }
 
   onMouseDown(ev: MouseEvent) {
