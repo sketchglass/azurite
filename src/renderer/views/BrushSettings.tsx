@@ -1,4 +1,5 @@
 import React = require("react")
+import {Color} from "../../lib/Color"
 import BrushTool from "../models/BrushTool"
 
 interface BrushSettingsProps {
@@ -14,7 +15,7 @@ class BrushSettings extends React.Component<BrushSettingsProps, void> {
   render() {
     const {tool} = this.props
     const onColorChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      tool.color = ev.target.value
+      tool.color = Color.parseHex(ev.target.value)
       this.forceUpdate()
     }
     const onWidthChange = (ev: React.FormEvent<HTMLInputElement>) => {
@@ -23,7 +24,7 @@ class BrushSettings extends React.Component<BrushSettingsProps, void> {
     }
     return (
       <div className="brush-settings">
-        <p>Color <input type="color" onChange={onColorChange} value={tool.color} /></p>
+        <p>Color <input type="color" onChange={onColorChange} value={tool.color.toHexString()} /></p>
         <p>Width <input type="range" onChange={onWidthChange} value={tool.width} /> {tool.width}px</p>
       </div>
     )
