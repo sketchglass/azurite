@@ -18,7 +18,6 @@ class DrawArea extends React.Component<void, DrawAreaState> {
   element: HTMLElement|undefined
   isPressed = false
   tool: Tool = new BrushTool()
-  usingTablet = false
 
   constructor() {
     super()
@@ -42,13 +41,12 @@ class DrawArea extends React.Component<void, DrawAreaState> {
     ipcRenderer.send("tablet.install", captureArea)
 
     ipcRenderer.on("tablet.down", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
-      this.usingTablet = true
       const pos = this.mousePos(ev)
       this.tool.start(new Waypoint(pos, ev.pressure))
       this.isPressed = true
     })
     ipcRenderer.on("tablet.move", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
-      if (this.usingTablet && this.isPressed) {
+      if (this.isPressed) {
         const pos = this.mousePos(ev)
         this.tool.move(new Waypoint(pos, ev.pressure))
       }
@@ -98,20 +96,12 @@ class DrawArea extends React.Component<void, DrawAreaState> {
   }
 
   onMouseDown(ev: MouseEvent) {
-    if (this.usingTablet) {
-      return
-    }
-
     const pos = this.mousePos(ev)
     this.tool.start(new Waypoint(pos, 1))
     this.isPressed = true
     ev.preventDefault()
   }
   onMouseMove(ev: MouseEvent) {
-    if (this.usingTablet) {
-      return
-    }
-
     const pos = this.mousePos(ev)
 
     if (this.isPressed) {
