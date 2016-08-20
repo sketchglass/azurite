@@ -10,6 +10,7 @@ class BrushTool extends Tool {
   width = 10
   color = Color.rgb(0, 0, 0)
   opacity = 1
+  minWidthRatio = 0.5
 
   start(waypoint: Waypoint) {
     this.lastWaypoint = waypoint
@@ -36,7 +37,8 @@ class BrushTool extends Tool {
     const opacity = this.opacity * 0.5 // correct opacity to soften edge
     context.fillStyle = this.color.withAlpha(opacity).toRgbaString()
     context.beginPath()
-    context.arc(pos.x, pos.y, this.width * 0.5 * pressure, 0, 2 * Math.PI)
+    const widthRatio = this.minWidthRatio + (1 - this.minWidthRatio) * pressure
+    context.arc(pos.x, pos.y, this.width * 0.5 * widthRatio, 0, 2 * Math.PI)
     context.fill()
   }
 }
