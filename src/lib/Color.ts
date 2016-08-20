@@ -119,4 +119,8 @@ class Color {
     const {r, g, b} = hsv2rgb(h, s, v)
     return {r, g, b, a}
   }
+
+  withAlpha(a: number) {
+    return new Color(this.h, this.s, this.v, a)
+  }
 }

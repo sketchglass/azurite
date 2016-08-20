@@ -18,6 +18,10 @@ class BrushSettings extends React.Component<BrushSettingsProps, void> {
       tool.color = Color.parseHex(ev.target.value)
       this.forceUpdate()
     }
+    const onOpacityChange = (ev: React.FormEvent<HTMLInputElement>) => {
+      tool.opacity = parseInt(ev.target.value) / 100
+      this.forceUpdate()
+    }
     const onWidthChange = (ev: React.FormEvent<HTMLInputElement>) => {
       tool.width = parseInt(ev.target.value)
       this.forceUpdate()
@@ -25,6 +29,7 @@ class BrushSettings extends React.Component<BrushSettingsProps, void> {
     return (
       <div className="brush-settings">
         <p>Color <input type="color" onChange={onColorChange} value={tool.color.toHexString()} /></p>
+        <p>Opacity <input type="range" onChange={onOpacityChange} value={Math.round(tool.opacity * 100)} /></p>
         <p>Width <input type="range" onChange={onWidthChange} value={tool.width} /> {tool.width}px</p>
       </div>
     )

@@ -9,6 +9,7 @@ class BrushTool extends Tool {
   private nextDabOffset = 0
   width = 10
   color = Color.rgb(0, 0, 0)
+  opacity = 1
 
   start(waypoint: Waypoint) {
     this.lastWaypoint = waypoint
@@ -32,7 +33,8 @@ class BrushTool extends Tool {
   drawDab(waypoint: Waypoint) {
     const {context} = this.layer
     const {pos, pressure} = waypoint
-    context.fillStyle = this.color.toRgbaString()
+    const opacity = this.opacity * 0.5 // correct opacity to soften edge
+    context.fillStyle = this.color.withAlpha(opacity).toRgbaString()
     context.beginPath()
     context.arc(pos.x, pos.y, this.width * 0.5 * pressure, 0, 2 * Math.PI)
     context.fill()
