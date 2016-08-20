@@ -6,8 +6,8 @@ export default
 class BrushTool extends Tool {
   private lastWaypoint: Waypoint|undefined
   private nextDabOffset = 0
-  radius = 2
-  color = "rgba(0,0,0,0.5)"
+  width = 10
+  color = "#000000"
 
   start(waypoint: Waypoint) {
     this.lastWaypoint = waypoint
@@ -33,7 +33,7 @@ class BrushTool extends Tool {
     const {pos, pressure} = waypoint
     context.fillStyle = this.color
     context.beginPath()
-    context.arc(pos.x, pos.y, this.radius * pressure, 0, 2 * Math.PI)
+    context.arc(pos.x, pos.y, this.width * 0.5 * pressure, 0, 2 * Math.PI)
     context.fill()
   }
 }

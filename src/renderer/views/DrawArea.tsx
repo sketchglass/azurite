@@ -6,25 +6,23 @@ import BrushTool from "../models/BrushTool"
 import Waypoint from "../models/Waypoint"
 import * as Electron from "electron"
 import {TabletEvent} from "receive-tablet-event"
+import BrushSettings from "./BrushSettings"
 
 const {ipcRenderer} = Electron
 
-interface DrawAreaState {
+interface DrawAreaProps {
+  tool: Tool
   picture: Picture
 }
 
 export default
-class DrawArea extends React.Component<void, DrawAreaState> {
+class DrawArea extends React.Component<DrawAreaProps, void> {
   element: HTMLElement|undefined
   isPressed = false
-  tool: Tool = new BrushTool()
 
-  constructor() {
-    super()
-    this.state = {
-      picture: new Picture()
-    }
-    this.tool.layer = this.state.picture.layers[0]
+  constructor(props: DrawAreaProps) {
+    super(props)
+    props.tool.layer = props.picture.layers[0]
   }
 
   componentDidMount() {
@@ -39,21 +37,22 @@ class DrawArea extends React.Component<void, DrawAreaState> {
       height: Math.round(rect.height),
     }
     ipcRenderer.send("tablet.install", captureArea)
+    const {tool} = this.props
 
     ipcRenderer.on("tablet.down", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       const pos = this.mousePos(ev)
-      this.tool.start(new Waypoint(pos, ev.pressure))
+      tool.start(new Waypoint(pos, ev.pressure))
       this.isPressed = true
     })
     ipcRenderer.on("tablet.move", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       if (this.isPressed) {
         const pos = this.mousePos(ev)
-        this.tool.move(new Waypoint(pos, ev.pressure))
+        tool.move(new Waypoint(pos, ev.pressure))
       }
     })
     ipcRenderer.on("tablet.up", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       if (this.isPressed) {
-        this.tool.end()
+        tool.end()
         this.isPressed = false
       }
     })
@@ -65,7 +64,7 @@ class DrawArea extends React.Component<void, DrawAreaState> {
       while (element.firstChild) {
         element.removeChild(element.firstChild)
       }
-      for (const layer of this.state.picture.layers) {
+      for (const layer of this.props.picture.layers) {
         element.appendChild(layer.canvas)
       }
     }
@@ -75,8 +74,8 @@ class DrawArea extends React.Component<void, DrawAreaState> {
     this.updateChildCanvases()
     const dpr = window.devicePixelRatio;
     const style = {
-      width: this.state.picture.size.width / dpr + 'px',
-      height: this.state.picture.size.height / dpr + 'px',
+      width: this.props.picture.size.width / dpr + 'px',
+      height: this.props.picture.size.height / dpr + 'px',
     }
     return (
       <div ref="root" className="draw-area" style={style}
@@ -97,7 +96,7 @@ class DrawArea extends React.Component<void, DrawAreaState> {
 
   onMouseDown(ev: MouseEvent) {
     const pos = this.mousePos(ev)
-    this.tool.start(new Waypoint(pos, 1))
+    this.props.tool.start(new Waypoint(pos, 1))
     this.isPressed = true
     ev.preventDefault()
   }
@@ -105,13 +104,13 @@ class DrawArea extends React.Component<void, DrawAreaState> {
     const pos = this.mousePos(ev)
 
     if (this.isPressed) {
-      this.tool.move(new Waypoint(pos, 1))
+      this.props.tool.move(new Waypoint(pos, 1))
       ev.preventDefault()
     }
   }
   onMouseUp(ev: MouseEvent) {
     if (this.isPressed) {
-      this.tool.end()
+      this.props.tool.end()
       this.isPressed = false
       ev.preventDefault()
     }

@@ -1,7 +1,7 @@
 import React = require("react")
 import ReactDOM = require("react-dom")
-import DrawArea from "./views/DrawArea"
+import App from "./views/App"
 
 window.addEventListener("DOMContentLoaded", () => {
-  ReactDOM.render(<DrawArea />, document.getElementById("app"))
+  ReactDOM.render(<App />, document.getElementById("app"))
 })
