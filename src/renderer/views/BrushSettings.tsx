@@ -31,12 +31,26 @@ class BrushSettings extends React.Component<BrushSettingsProps, void> {
       this.forceUpdate()
     }
     return (
-      <div className="brush-settings">
-        <p>Color <input type="color" onChange={onColorChange} value={tool.color.toHexString()} /></p>
-        <p>Opacity <input type="range" onChange={onOpacityChange} value={Math.round(tool.opacity * 100)} /> {Math.round(tool.opacity * 100)}%</p>
-        <p>Width <input type="range" onChange={onWidthChange} value={tool.width} /> {tool.width}px</p>
-        <p>Min Width <input type="range" onChange={onMinWidthChange} value={Math.round(tool.minWidthRatio * 100)} /> {Math.round(tool.minWidthRatio * 100)}%</p>
-      </div>
+      <table className="brush-settings">
+        <tbody>
+          <tr>
+            <td>Color</td>
+            <td><input type="color" onChange={onColorChange} value={tool.color.toHexString()} /></td>
+          </tr>
+          <tr>
+            <td>Opacity</td>
+            <td><input type="range" onChange={onOpacityChange} value={Math.round(tool.opacity * 100)} /> {Math.round(tool.opacity * 100)}%</td>
+          </tr>
+          <tr>
+            <td>Width</td>
+            <td><input type="range" onChange={onWidthChange} value={tool.width} /> {tool.width}px</td>
+          </tr>
+          <tr>
+            <td>Min Width</td>
+            <td><input type="range" onChange={onMinWidthChange} value={Math.round(tool.minWidthRatio * 100)} /> {Math.round(tool.minWidthRatio * 100)}%</td>
+          </tr>
+        </tbody>
+      </table>
     )
   }
 }
