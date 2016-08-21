@@ -1,5 +1,5 @@
 import React = require("react")
-import {Color} from "../../lib/Color"
+import {HSV} from "../../lib/Color"
 import BrushTool from "../models/BrushTool"
 
 interface BrushSettingsProps {
@@ -15,7 +15,7 @@ class BrushSettings extends React.Component<BrushSettingsProps, void> {
   render() {
     const {tool} = this.props
     const onColorChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      tool.color = Color.parseHex(ev.target.value)
+      tool.color = HSV.parseHex(ev.target.value)
       this.forceUpdate()
     }
     const onOpacityChange = (ev: React.FormEvent<HTMLInputElement>) => {

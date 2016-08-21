@@ -1,3 +1,4 @@
+import {Vec4} from "./Geometry"
 // http://www.rapidtables.com/convert/color/hsv-to-rgb.htm
 function hsv2rgb(h: number, s: number, v: number) {
   while (h >= 360) {
@@ -68,7 +69,7 @@ function rgb2hsv(r: number, g: number, b: number) {
 }
 
 export
-class Color {
+class HSV {
   constructor(
     public h: number,
     public s: number,
@@ -77,37 +78,25 @@ class Color {
   ) {
   }
 
-  // r: 0 ... 255
-  // g: 0 ... 255
-  // b: 0 ... 255
-  // a: 0 ... 1
   static rgb(r: number, g: number, b: number, a = 1) {
     const hsv = rgb2hsv(r, g, b)
-    return new Color(hsv.h, hsv.s, hsv.v, a)
-  }
-
-  // h: 0 ... 360
-  // s: 0 ... 1
-  // v: 0 ... 1
-  // a: 0 ... 1
-  static hsv(h: number, s: number, v: number, a = 1) {
-    return new Color(h, s, v, a)
+    return new HSV(hsv.h, hsv.s, hsv.v, a)
   }
 
   static parseHex(color: string) {
-    const r = parseInt(color.substr(1, 2), 16)
-    const g = parseInt(color.substr(3, 2), 16)
-    const b = parseInt(color.substr(5, 2), 16)
-    return Color.rgb(r, g, b)
+    const r = parseInt(color.substr(1, 2), 16) / 255
+    const g = parseInt(color.substr(3, 2), 16) / 255
+    const b = parseInt(color.substr(5, 2), 16) / 255
+    return HSV.rgb(r, g, b)
   }
 
   toRgbaString() {
-    const {r, g, b, a} = this.toRgba()
+    const {r, g, b, a} = this.toRgba255()
     return `rgba(${r},${g},${b},${a})`
   }
 
   toHexString() {
-    const {r, g, b} = this.toRgba()
+    const {r, g, b} = this.toRgba255()
     return '#' + [r, g, b].map(c => {
       const str = c.toString(16)
       return str.length == 1 ? "0" + str : str
@@ -117,10 +106,21 @@ class Color {
   toRgba() {
     const {h, s, v, a} = this
     const {r, g, b} = hsv2rgb(h, s, v)
-    return {r, g, b, a}
+    return new Vec4(r, g, b, a)
   }
-
-  withAlpha(a: number) {
-    return new Color(this.h, this.s, this.v, a)
+  toRgbaPremultiplied() {
+    const {h, s, v, a} = this
+    const {r, g, b} = hsv2rgb(h, s, v)
+    return new Vec4(r * a, g * a, b * a, a)
+  }
+  toRgba255() {
+    const {h, s, v, a} = this
+    const {r, g, b} = hsv2rgb(h, s, v)
+    return new Vec4(
+      Math.round(r * 255),
+      Math.round(g * 255),
+      Math.round(b * 255),
+      a
+    )
   }
 }
