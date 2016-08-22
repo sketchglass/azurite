@@ -1,7 +1,57 @@
-import {Vec2, Vec4} from "../../lib/Geometry"
+import {Vec2, Vec4, Transform} from "../../lib/Geometry"
 import {HSV} from "../../lib/Color"
 import Waypoint from "./Waypoint"
 import Tool from "./Tool"
+import {VertexBuffer, Shader, Model, VertexBufferUsage, Framebuffer} from "../../lib/GL"
+import {context} from "../GLContext"
+
+class BrushShader extends Shader {
+  get vertexShader() {
+    return `
+      precision mediump float;
+
+      uniform mediump float uBrushSize;
+      uniform mat3 uTransform;
+      attribute vec2 aPosition;
+      attribute vec2 aUVPosition;
+      varying vec2 vUVPosition;
+
+      void main(void) {
+        vUVPosition = aUVPosition;
+        vec3 pos = uTransform * vec3(aPosition, 1.0);
+        gl_Position = vec4(pos.xy, 0.0, 1.0);
+        gl_PointSize = uBrushSize + 2.0;
+      }
+    `
+  }
+
+  get fragmentShader() {
+    return `
+      precision lowp float;
+      varying mediump vec2 vUVPosition;
+      uniform mediump float uBrushSize;
+      uniform vec4 uColor;
+
+      void main(void) {
+        float r = distance(gl_PointCoord, vec2(0.5)) * (uBrushSize + 2.0) * 0.5;
+        float opacity = smoothstep(uBrushSize, uBrushSize - 1.0, r);
+        gl_FragColor = uColor * opacity;
+      }
+    `
+  }
+
+  setBrushSize(size: number) {
+    const {gl} = this.context
+    gl.useProgram(this.program)
+    gl.uniform1f(gl.getUniformLocation(this.program, 'uBrushSize')!, size)
+  }
+
+  setColor(color: Vec4) {
+    const {gl} = this.context
+    gl.useProgram(this.program)
+    gl.uniform4fv(gl.getUniformLocation(this.program, 'uColor')!, color.toGLData())
+  }
+}
 
 export default
 class BrushTool extends Tool {
@@ -11,13 +61,15 @@ class BrushTool extends Tool {
   color = HSV.rgb(0, 0, 0)
   opacity = 1
   minWidthRatio = 0.5
-  sampleCanvas = document.createElement("canvas")
-  sampleContext = this.sampleCanvas.getContext('2d')!
+  dabsBuffer = new VertexBuffer(context, new Float32Array(0), VertexBufferUsage.StreamDraw)
+  framebuffer = new Framebuffer(context)
+  shader = new BrushShader(context)
+  model = new Model(context, this.dabsBuffer, this.shader)
 
   start(waypoint: Waypoint) {
     this.lastWaypoint = waypoint
     this.nextDabOffset = 0
-    this.sampleCanvas.width = this.sampleCanvas.height = Math.floor(this.width + 1)
+    this.framebuffer.setTextures(this.layer.texture)
   }
 
   move(waypoint: Waypoint) {
@@ -25,9 +77,29 @@ class BrushTool extends Tool {
       const {waypoints, nextOffset} = Waypoint.interpolate(this.lastWaypoint, waypoint, this.nextDabOffset)
       this.lastWaypoint = waypoint
       this.nextDabOffset = nextOffset
-      // for (const p of waypoints) {
-      //   this.drawDab(p)
-      // }
+
+      if (waypoints.length == 0) {
+        return
+      }
+
+      const vertices = new Float32Array(waypoints.length * 4)
+      for (const [i, {pos, pressure}] of waypoints.entries()) {
+        // store pressure in u coordinate
+        vertices.set([pos.x, pos.y, pressure, 0], i * 4)
+      }
+      this.dabsBuffer.data = vertices
+      this.dabsBuffer.updateBuffer()
+
+      this.framebuffer.use(() => {
+        const layerSize = this.layer.size
+        const transform =
+          Transform.scale(new Vec2(2 / layerSize.width, 2 / layerSize.height))
+            .merge(Transform.translate(new Vec2(-1, -1)))
+        this.shader.setTransform(transform)
+        this.shader.setBrushSize(this.width)
+        this.shader.setColor(this.color.toRgbaPremultiplied())
+        this.model.renderPoints()
+      })
     }
   }
 

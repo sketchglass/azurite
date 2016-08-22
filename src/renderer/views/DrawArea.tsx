@@ -41,17 +41,20 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     ipcRenderer.on("tablet.down", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       const pos = this.mousePos(ev)
       tool.start(new Waypoint(pos, ev.pressure))
+      this.renderer.render()
       this.isPressed = true
     })
     ipcRenderer.on("tablet.move", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       if (this.isPressed) {
         const pos = this.mousePos(ev)
         tool.move(new Waypoint(pos, ev.pressure))
+        this.renderer.render()
       }
     })
     ipcRenderer.on("tablet.up", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       if (this.isPressed) {
         tool.end()
+        this.renderer.render()
         this.isPressed = false
       }
     })
@@ -97,6 +100,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   onMouseDown(ev: MouseEvent) {
     const pos = this.mousePos(ev)
     this.props.tool.start(new Waypoint(pos, 1))
+    this.renderer.render()
     this.isPressed = true
     ev.preventDefault()
   }
@@ -105,12 +109,14 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
     if (this.isPressed) {
       this.props.tool.move(new Waypoint(pos, 1))
+      this.renderer.render()
       ev.preventDefault()
     }
   }
   onMouseUp(ev: MouseEvent) {
     if (this.isPressed) {
       this.props.tool.end()
+      this.renderer.render()
       this.isPressed = false
       ev.preventDefault()
     }

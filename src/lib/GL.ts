@@ -150,21 +150,10 @@ class Shader extends ShaderBase {
     `
   }
 
-  aPosition: number
-  aUVPosition: number
-  uTransform: WebGLUniformLocation
-
-  constructor(public context: Context) {
-    super(context)
-    const {gl} = context
-    this.aPosition = gl.getAttribLocation(this.program, 'aPosition')!
-    this.aUVPosition = gl.getAttribLocation(this.program, 'aUVPosition')!
-    this.uTransform = gl.getUniformLocation(this.program, 'uTransform')!
-  }
-
   setTransform(transform: Transform) {
     const {gl} = this.context
-    gl.uniformMatrix3fv(this.uTransform, false, transform.toGLData());
+    gl.useProgram(this.program)
+    gl.uniformMatrix3fv(gl.getUniformLocation(this.program, 'uTransform')!, false, transform.toGLData());
   }
 }
 
@@ -205,11 +194,13 @@ class Model {
     this.vertexArray = vertexArrayExt.createVertexArrayOES()
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
     gl.useProgram(shader.program)
-    gl.enableVertexAttribArray(shader.aPosition)
-    gl.enableVertexAttribArray(shader.aUVPosition)
+    const aPosition = gl.getAttribLocation(shader.program, 'aPosition')!
+    const aUVPosition = gl.getAttribLocation(shader.program, 'aUVPosition')!
+    gl.enableVertexAttribArray(aPosition)
+    gl.enableVertexAttribArray(aUVPosition)
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer.buffer)
-    gl.vertexAttribPointer(shader.aPosition, 2, gl.FLOAT, false, 16, 0)
-    gl.vertexAttribPointer(shader.aUVPosition, 2, gl.FLOAT, false, 16, 8)
+    gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 16, 0)
+    gl.vertexAttribPointer(aUVPosition, 2, gl.FLOAT, false, 16, 8)
     vertexArrayExt.bindVertexArrayOES(null)
   }
 
@@ -219,14 +210,25 @@ class Model {
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vertexBuffer.data.length / 4)
     vertexArrayExt.bindVertexArrayOES(null)
   }
+
+  renderPoints() {
+    const {gl, vertexArrayExt} = this.context
+    vertexArrayExt.bindVertexArrayOES(this.vertexArray)
+    gl.drawArrays(gl.POINTS, 0, this.vertexBuffer.data.length / 4)
+    vertexArrayExt.bindVertexArrayOES(null)
+  }
 }
 
 export
 class Framebuffer {
   framebuffer: WebGLFramebuffer
-  constructor(public context: Context, public textures: Texture[]|Texture) {
+  constructor(public context: Context) {
     const {gl, drawBuffersExt} = context
     this.framebuffer = gl.createFramebuffer()!
+  }
+
+  setTextures(textures: Texture[]|Texture) {
+    const {gl, drawBuffersExt} = this.context
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
     if (Array.isArray(textures)) {
       for (const [i, tex] of textures.entries()) {

@@ -42,6 +42,10 @@ class Vec2 {
   frac() {
     return this.sub(this.floor())
   }
+
+  toGLData() {
+    return new Float32Array([this.x, this.y])
+  }
 }
 
 // for color / rectangle
@@ -86,6 +90,10 @@ class Vec4 {
 
   div(a: number) {
       return new Vec4(this.x / a, this.y / a, this.z / a, this.w / a)
+  }
+
+  toGLData() {
+    return new Float32Array([this.x, this.y, this.z, this.w])
   }
 }
 
