@@ -8,6 +8,7 @@ import * as Electron from "electron"
 import {TabletEvent} from "receive-tablet-event"
 import BrushSettings from "./BrushSettings"
 import {canvas} from "../GLContext"
+import Renderer from "./Renderer"
 
 const {ipcRenderer} = Electron
 
@@ -20,10 +21,12 @@ export default
 class DrawArea extends React.Component<DrawAreaProps, void> {
   element: HTMLElement|undefined
   isPressed = false
+  renderer: Renderer;
 
   constructor(props: DrawAreaProps) {
     super(props)
     props.tool.layer = props.picture.layers[0]
+    this.renderer = new Renderer(props.picture)
   }
 
   componentDidMount() {
@@ -32,14 +35,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       this.element.appendChild(canvas)
     }
 
-    const rect = this.element.getBoundingClientRect()
-    const captureArea = {
-      left: Math.round(rect.left),
-      top: Math.round(rect.top),
-      width: Math.round(rect.width),
-      height: Math.round(rect.height),
-    }
-    ipcRenderer.send("tablet.install", captureArea)
+    this.resize()
     const {tool} = this.props
 
     ipcRenderer.on("tablet.down", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
@@ -59,16 +55,29 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
         this.isPressed = false
       }
     })
+
+    window.addEventListener("resize", () => {
+      this.resize()
+    })
+  }
+
+  resize() {
+    const rect = this.element!.getBoundingClientRect()
+    const roundRect = {
+      left: Math.round(rect.left),
+      top: Math.round(rect.top),
+      width: Math.round(rect.width),
+      height: Math.round(rect.height),
+    }
+    const size = new Vec2(roundRect.width, roundRect.height).mul(window.devicePixelRatio)
+    this.renderer.resize(size)
+    ipcRenderer.send("tablet.install", roundRect)
   }
 
   render() {
-    const dpr = window.devicePixelRatio;
-    const style = {
-      width: this.props.picture.size.width / dpr + 'px',
-      height: this.props.picture.size.height / dpr + 'px',
-    }
+    this.renderer.render()
     return (
-      <div ref="root" className="draw-area" style={style}
+      <div ref="root" className="draw-area"
         onMouseDown={this.onMouseDown.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}
         onMouseUp={this.onMouseUp.bind(this)}

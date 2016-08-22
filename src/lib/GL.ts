@@ -17,17 +17,22 @@ class Context {
       premultipliedAlpha: true,
     };
     const gl = this.gl = element.getContext("webgl", glOpts)! as WebGLRenderingContext
-    this.halfFloatExt = this.gl.getExtension("OES_texture_half_float")
-    this.vertexArrayExt = this.gl.getExtension("OES_vertex_array_object")
-    this.drawBuffersExt = this.gl.getExtension("WEBGL_draw_buffers")
+    this.halfFloatExt = gl.getExtension("OES_texture_half_float")
+    gl.getExtension("OES_texture_half_float_linear")
+    this.vertexArrayExt = gl.getExtension("OES_vertex_array_object")
+    this.drawBuffersExt = gl.getExtension("WEBGL_draw_buffers")
 
-    gl.clearColor(1, 1, 1, 1)
     this.resize()
   }
 
   resize() {
     const {gl, element} = this
     gl.viewport(0, 0, element.width, element.height)
+  }
+
+  setClearColor(color: Vec4) {
+    const {gl} = this
+    gl.clearColor(color.r, color.g, color.b, color.a)
   }
 
   clear() {
@@ -170,7 +175,7 @@ class TexturedPolygonShader extends PolygonShader {
       varying mediump vec2 vTextureCoord;
       uniform sampler2D uTexture;
       void main(void) {
-        gl_FragColor = texture2D(uTexture, vTextureCoord));
+        gl_FragColor = texture2D(uTexture, vTextureCoord);
       }
     `
   }
@@ -207,6 +212,7 @@ class PolygonModel extends Model {
     gl.useProgram(shader.program)
     gl.enableVertexAttribArray(shader.aPosition)
     gl.enableVertexAttribArray(shader.aTextureCoord)
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.polygon.buffer)
     gl.vertexAttribPointer(shader.aPosition, 2, gl.FLOAT, false, 16, 0)
     gl.vertexAttribPointer(shader.aTextureCoord, 2, gl.FLOAT, false, 16, 8)
     vertexArrayExt.bindVertexArrayOES(null)

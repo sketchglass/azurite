@@ -12,7 +12,7 @@ class App extends React.Component<void, void> {
 
   render() {
     return (
-      <div>
+      <div className="app">
         <BrushSettings tool={this.tool} />
         <DrawArea tool={this.tool} picture={this.picture} />
       </div>

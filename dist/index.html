@@ -5,7 +5,12 @@
     <title>azurite</title>
     <style>
       body {
-        background-color: #f3f3f3;
+        margin: 0;
+      }
+      .app {
+        display: flex;
+        width: 100vw;
+        height: 100vh;
       }
       .draw-area canvas {
         position: absolute;
@@ -15,8 +20,12 @@
         height: 100%;
       }
       .draw-area {
-        background-color: white;
         position: relative;
+        flex: 1
+      }
+      .brush-settings {
+        width: 256px;
+        margin: 16px;
       }
     </style>
   </head>
