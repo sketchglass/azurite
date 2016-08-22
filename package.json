@@ -4,8 +4,8 @@
   "description": "Casual Painting App in Electron",
   "main": "dist/assets/main.js",
   "scripts": {
-    "build": "webpack -d",
-    "watch": "webpack --watch -d",
+    "build": "webpack",
+    "watch": "webpack --watch",
     "app": "electron .",
     "start": "npm-run-all build --parallel watch app",
     "test": "echo \"Error: no test specified\" && exit 1",
