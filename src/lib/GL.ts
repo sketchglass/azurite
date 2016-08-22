@@ -7,7 +7,7 @@ class Context {
   vertexArrayExt: any
   drawBuffersExt: any
 
-  constructor(public canvas: HTMLCanvasElement, size: Vec2) {
+  constructor(public element: HTMLCanvasElement) {
     const glOpts = {
       preserveDrawingBuffer: false,
       alpha: false,
@@ -16,18 +16,18 @@ class Context {
       antialias: true,
       premultipliedAlpha: true,
     };
-    const gl = this.gl = canvas.getContext("webgl", glOpts)! as WebGLRenderingContext
+    const gl = this.gl = element.getContext("webgl", glOpts)! as WebGLRenderingContext
     this.halfFloatExt = this.gl.getExtension("OES_texture_half_float")
     this.vertexArrayExt = this.gl.getExtension("OES_vertex_array_object")
     this.drawBuffersExt = this.gl.getExtension("WEBGL_draw_buffers")
 
     gl.clearColor(1, 1, 1, 1)
-    this.resize(size)
+    this.resize()
   }
 
-  resize(size: Vec2) {
-    const {gl} = this
-    gl.viewport(0, 0, size.width, size.height)
+  resize() {
+    const {gl, element} = this
+    gl.viewport(0, 0, element.width, element.height)
   }
 }
 
