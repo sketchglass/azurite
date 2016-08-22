@@ -1,17 +1,15 @@
-import {Scene, PolygonModel, Polygon, PolygonUsage, TexturedPolygonShader} from "../../lib/GL"
+import {PolygonModel, Polygon, PolygonUsage, TexturedPolygonShader} from "../../lib/GL"
 import {context, canvas} from "../GLContext"
 import Picture from "../models/Picture"
 import {Vec2, Transform} from "../../lib/Geometry"
 
 class Renderer {
-  scene: Scene
   layerShader: TexturedPolygonShader
   layerModel: PolygonModel
   size = new Vec2(100, 100)
   transform = Transform.identity
 
   constructor(public picture: Picture) {
-    this.scene = new Scene(context)
     const {width, height} = picture.size
     const vertices = new Float32Array([
       0, 0, 0, 0,
