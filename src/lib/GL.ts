@@ -29,6 +29,11 @@ class Context {
     const {gl, element} = this
     gl.viewport(0, 0, element.width, element.height)
   }
+
+  clear() {
+    const {gl} = this
+    gl.clear(gl.COLOR_BUFFER_BIT)
+  }
 }
 
 export
@@ -207,34 +212,12 @@ class PolygonModel extends Model {
     vertexArrayExt.bindVertexArrayOES(null)
   }
 
-  render(transform: Transform) {
+  render() {
     const {gl, vertexArrayExt} = this.context
-    this.shader.setTransform(transform)
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
     gl.bindBuffer(gl.ARRAY_BUFFER, this.polygon.buffer)
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.polygon.data.length / 4)
     vertexArrayExt.bindVertexArrayOES(null)
-  }
-}
-
-export
-class Scene {
-  models: Model[] = []
-  size = new Vec2(100, 100)
-  transform = Transform.identity
-
-  constructor(public context: Context) {
-  }
-
-  render() {
-    const sceneToUnit = Transform.scale(new Vec2(2 / this.size.width, 2 / this.size.height))
-    const transform = this.transform.merge(sceneToUnit)
-    const {gl} = this.context
-
-    gl.clear(gl.COLOR_BUFFER_BIT)
-    for (const model of this.models) {
-      model.render(transform)
-    }
   }
 }
 
@@ -255,10 +238,10 @@ class Framebuffer {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
   }
 
-  render(scene: Scene) {
+  use(render: () => void) {
     const {gl} = this.context
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
-    scene.render()
+    render()
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
   }
 }
