@@ -93,7 +93,7 @@ const enum PolygonUsage {
 }
 
 export
-class Polygon {
+class VertexBuffer {
   buffer: WebGLBuffer
   vertexArray: any
   constructor(public context: Context, public data: Float32Array, public usage: PolygonUsage) {
@@ -122,18 +122,18 @@ class Polygon {
 }
 
 export
-class PolygonShader extends Shader {
+class UVPolygonShader extends Shader {
   get vertexShader() {
     return `
       precision mediump float;
 
       uniform mat3 uTransform;
       attribute vec2 aPosition;
-      attribute vec2 aTextureCoord;
-      varying vec2 vTextureCoord;
+      attribute vec2 aUVPosition;
+      varying vec2 vUVPosition;
 
       void main(void) {
-        vTextureCoord = aTextureCoord;
+        vUVPosition = aUVPosition;
         vec3 pos = uTransform * vec3(aPosition, 1.0);
         gl_Position = vec4(pos.xy, 0.0, 1.0);
       }
@@ -142,7 +142,7 @@ class PolygonShader extends Shader {
   get fragmentShader() {
     return `
       precision lowp float;
-      varying mediump vec2 vTextureCoord;
+      varying mediump vec2 vUVPosition;
       void main(void) {
         gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
       }
@@ -150,14 +150,14 @@ class PolygonShader extends Shader {
   }
 
   aPosition: number
-  aTextureCoord: number
+  aUVPosition: number
   uTransform: WebGLUniformLocation
 
   constructor(public context: Context) {
     super(context)
     const {gl} = context
     this.aPosition = gl.getAttribLocation(this.program, 'aPosition')!
-    this.aTextureCoord = gl.getAttribLocation(this.program, 'aTextureCoord')!
+    this.aUVPosition = gl.getAttribLocation(this.program, 'aUVPosition')!
     this.uTransform = gl.getUniformLocation(this.program, 'uTransform')!
   }
 
@@ -168,14 +168,14 @@ class PolygonShader extends Shader {
 }
 
 export
-class TexturedPolygonShader extends PolygonShader {
+class TexturedPolygonShader extends UVPolygonShader {
   get fragmentShader() {
     return `
       precision lowp float;
-      varying mediump vec2 vTextureCoord;
+      varying mediump vec2 vUVPosition;
       uniform sampler2D uTexture;
       void main(void) {
-        gl_FragColor = texture2D(uTexture, vTextureCoord);
+        gl_FragColor = texture2D(uTexture, vUVPosition);
       }
     `
   }
@@ -202,27 +202,26 @@ abstract class Model {
 }
 
 export
-class PolygonModel extends Model {
+class UVModel extends Model {
   vertexArray: any
-  constructor(public context: Context, public polygon: Polygon, public shader: PolygonShader) {
+  constructor(public context: Context, public vertexBuffer: VertexBuffer, public shader: UVPolygonShader) {
     super()
     const {gl, vertexArrayExt} = context
     this.vertexArray = vertexArrayExt.createVertexArrayOES()
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
     gl.useProgram(shader.program)
     gl.enableVertexAttribArray(shader.aPosition)
-    gl.enableVertexAttribArray(shader.aTextureCoord)
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.polygon.buffer)
+    gl.enableVertexAttribArray(shader.aUVPosition)
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer.buffer)
     gl.vertexAttribPointer(shader.aPosition, 2, gl.FLOAT, false, 16, 0)
-    gl.vertexAttribPointer(shader.aTextureCoord, 2, gl.FLOAT, false, 16, 8)
+    gl.vertexAttribPointer(shader.aUVPosition, 2, gl.FLOAT, false, 16, 8)
     vertexArrayExt.bindVertexArrayOES(null)
   }
 
   render() {
     const {gl, vertexArrayExt} = this.context
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.polygon.buffer)
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.polygon.data.length / 4)
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vertexBuffer.data.length / 4)
     vertexArrayExt.bindVertexArrayOES(null)
   }
 }
