@@ -122,47 +122,7 @@ class VertexBuffer {
 }
 
 export
-class PolygonShader extends Shader {
-  get vertexShader() {
-    return `
-      precision mediump float;
-
-      uniform mat3 uTransform;
-      attribute vec2 aPosition;
-
-      void main(void) {
-        vec3 pos = uTransform * vec3(aPosition, 1.0);
-        gl_Position = vec4(pos.xy, 0.0, 1.0);
-      }
-    `
-  }
-  get fragmentShader() {
-    return `
-      precision lowp float;
-      void main(void) {
-        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-      }
-    `
-  }
-
-  aPosition: number
-  uTransform: WebGLUniformLocation
-
-  constructor(public context: Context) {
-    super(context)
-    const {gl} = context
-    this.aPosition = gl.getAttribLocation(this.program, 'aPosition')!
-    this.uTransform = gl.getUniformLocation(this.program, 'uTransform')!
-  }
-
-  setTransform(transform: Transform) {
-    const {gl} = this.context
-    gl.uniformMatrix3fv(this.uTransform, false, transform.toGLData());
-  }
-}
-
-export
-class UVPolygonShader extends PolygonShader {
+class UVPolygonShader extends Shader {
   get vertexShader() {
     return `
       precision mediump float;
@@ -189,12 +149,21 @@ class UVPolygonShader extends PolygonShader {
     `
   }
 
+  aPosition: number
   aUVPosition: number
+  uTransform: WebGLUniformLocation
 
   constructor(public context: Context) {
     super(context)
     const {gl} = context
+    this.aPosition = gl.getAttribLocation(this.program, 'aPosition')!
     this.aUVPosition = gl.getAttribLocation(this.program, 'aUVPosition')!
+    this.uTransform = gl.getUniformLocation(this.program, 'uTransform')!
+  }
+
+  setTransform(transform: Transform) {
+    const {gl} = this.context
+    gl.uniformMatrix3fv(this.uTransform, false, transform.toGLData());
   }
 }
 
