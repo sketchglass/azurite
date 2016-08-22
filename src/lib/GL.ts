@@ -42,36 +42,6 @@ class Context {
 }
 
 export
-abstract class Shader {
-  abstract vertexShader: string
-  abstract fragmentShader: string
-
-  program: WebGLProgram
-
-  constructor(public context: Context) {
-    const {gl} = context
-    this.program = gl.createProgram()!
-    this._addShader(gl.VERTEX_SHADER, this.vertexShader)
-    this._addShader(gl.FRAGMENT_SHADER, this.fragmentShader)
-    gl.linkProgram(this.program)
-    if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
-      throw new Error(`Failed to link shader:\n${gl.getProgramInfoLog(this.program)}`)
-    }
-  }
-
-  private _addShader(type: number, source: string) {
-    const {gl} = this.context
-    const shader = gl.createShader(type)
-    gl.shaderSource(shader, source)
-    gl.compileShader(shader)
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      throw new Error(`Failed to compile shader:\n${gl.getShaderInfoLog(shader)}`)
-    }
-    gl.attachShader(this.program, shader)
-  }
-}
-
-export
 class Texture {
   texture: WebGLTexture
 
@@ -121,8 +91,39 @@ class VertexBuffer {
   }
 }
 
+
 export
-class UVPolygonShader extends Shader {
+abstract class ShaderBase {
+  abstract vertexShader: string
+  abstract fragmentShader: string
+
+  program: WebGLProgram
+
+  constructor(public context: Context) {
+    const {gl} = context
+    this.program = gl.createProgram()!
+    this._addShader(gl.VERTEX_SHADER, this.vertexShader)
+    this._addShader(gl.FRAGMENT_SHADER, this.fragmentShader)
+    gl.linkProgram(this.program)
+    if (!gl.getProgramParameter(this.program, gl.LINK_STATUS)) {
+      throw new Error(`Failed to link shader:\n${gl.getProgramInfoLog(this.program)}`)
+    }
+  }
+
+  private _addShader(type: number, source: string) {
+    const {gl} = this.context
+    const shader = gl.createShader(type)
+    gl.shaderSource(shader, source)
+    gl.compileShader(shader)
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      throw new Error(`Failed to compile shader:\n${gl.getShaderInfoLog(shader)}`)
+    }
+    gl.attachShader(this.program, shader)
+  }
+}
+
+export
+class Shader extends ShaderBase {
   get vertexShader() {
     return `
       precision mediump float;
@@ -168,7 +169,7 @@ class UVPolygonShader extends Shader {
 }
 
 export
-class TexturedPolygonShader extends UVPolygonShader {
+class TextureShader extends Shader {
   get fragmentShader() {
     return `
       precision lowp float;
@@ -197,15 +198,9 @@ class TexturedPolygonShader extends UVPolygonShader {
 }
 
 export
-abstract class Model {
-  abstract render(transform: Transform): void
-}
-
-export
-class UVModel extends Model {
+class Model {
   vertexArray: any
-  constructor(public context: Context, public vertexBuffer: VertexBuffer, public shader: UVPolygonShader) {
-    super()
+  constructor(public context: Context, public vertexBuffer: VertexBuffer, public shader: Shader) {
     const {gl, vertexArrayExt} = context
     this.vertexArray = vertexArrayExt.createVertexArrayOES()
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
