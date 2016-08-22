@@ -147,13 +147,42 @@ class PolygonShader extends Shader {
     super(context)
     const {gl} = context
     this.aPosition = gl.getAttribLocation(this.program, 'aPosition')!
-    this.aTextureCoord = gl.getAttribLocation(this.program, 'aAAOffset')!
+    this.aTextureCoord = gl.getAttribLocation(this.program, 'aTextureCoord')!
     this.uTransform = gl.getUniformLocation(this.program, 'uTransform')!
   }
 
   setTransform(transform: Transform) {
     const {gl} = this.context
     gl.uniformMatrix3fv(this.uTransform, false, transform.toGLData());
+  }
+}
+
+export
+class TexturedPolygonShader extends PolygonShader {
+  get fragmentShader() {
+    return `
+      precision lowp float;
+      varying mediump vec2 vTextureCoord;
+      uniform sampler2D uTexture;
+      void main(void) {
+        gl_FragColor = texture2D(uTexture, vTextureCoord));
+      }
+    `
+  }
+
+  uTexture: WebGLUniformLocation
+
+  constructor(public context: Context) {
+    super(context)
+    const {gl} = context
+    this.uTexture = gl.getUniformLocation(this.program, "uSampler")!
+  }
+
+  setTexture(texture: Texture) {
+    const {gl} = this.context
+    gl.activeTexture(gl.TEXTURE0)
+    gl.bindTexture(gl.TEXTURE_2D, texture.texture)
+    gl.uniform1i(this.uTexture, 0);
   }
 }
 
