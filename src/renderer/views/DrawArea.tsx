@@ -7,6 +7,7 @@ import Waypoint from "../models/Waypoint"
 import * as Electron from "electron"
 import {TabletEvent} from "receive-tablet-event"
 import BrushSettings from "./BrushSettings"
+import {canvas} from "../GLContext"
 
 const {ipcRenderer} = Electron
 
@@ -27,7 +28,9 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   componentDidMount() {
     this.element = this.refs["root"] as HTMLElement
-    this.updateChildCanvases()
+    if (this.element.childElementCount == 0) {
+      this.element.appendChild(canvas)
+    }
 
     const rect = this.element.getBoundingClientRect()
     const captureArea = {
@@ -58,20 +61,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     })
   }
 
-  updateChildCanvases() {
-    const {element} = this
-    if (element) {
-      while (element.firstChild) {
-        element.removeChild(element.firstChild)
-      }
-      for (const layer of this.props.picture.layers) {
-        element.appendChild(layer.canvas)
-      }
-    }
-  }
-
   render() {
-    this.updateChildCanvases()
     const dpr = window.devicePixelRatio;
     const style = {
       width: this.props.picture.size.width / dpr + 'px',
@@ -82,7 +72,8 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
         onMouseDown={this.onMouseDown.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}
         onMouseUp={this.onMouseUp.bind(this)}
-      />
+      >
+      </div>
     )
   }
 

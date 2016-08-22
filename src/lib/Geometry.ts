@@ -69,7 +69,7 @@ class Vec4 {
     return new Vec2(this.z, this.w)
   }
   get size() {
-    return this.size
+    return new Vec2(this.z, this.w)
   }
 
   add(a: Vec4) {
