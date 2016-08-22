@@ -22,6 +22,9 @@ class Context {
     this.vertexArrayExt = gl.getExtension("OES_vertex_array_object")
     this.drawBuffersExt = gl.getExtension("WEBGL_draw_buffers")
 
+    gl.enable(gl.BLEND)
+    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
+
     this.resize()
   }
 

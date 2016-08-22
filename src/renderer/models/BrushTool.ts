@@ -33,8 +33,8 @@ class BrushShader extends Shader {
       uniform vec4 uColor;
 
       void main(void) {
-        float r = distance(gl_PointCoord, vec2(0.5)) * (uBrushSize + 2.0) * 0.5;
-        float opacity = smoothstep(uBrushSize, uBrushSize - 1.0, r);
+        float r = distance(gl_PointCoord, vec2(0.5)) * (uBrushSize + 2.0);
+        float opacity = smoothstep(uBrushSize * 0.5, uBrushSize * 0.5 - 1.0, r);
         gl_FragColor = uColor * opacity;
       }
     `
