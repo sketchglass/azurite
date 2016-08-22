@@ -58,7 +58,7 @@ class Texture {
 }
 
 export
-const enum PolygonUsage {
+const enum VertexBufferUsage {
   StaticDraw, StreamDraw, DynamicDraw
 }
 
@@ -66,7 +66,7 @@ export
 class VertexBuffer {
   buffer: WebGLBuffer
   vertexArray: any
-  constructor(public context: Context, public data: Float32Array, public usage: PolygonUsage) {
+  constructor(public context: Context, public data: Float32Array, public usage: VertexBufferUsage) {
     const {gl, vertexArrayExt} = context
     this.buffer = gl.createBuffer()!
     this.updateBuffer()
@@ -80,11 +80,11 @@ class VertexBuffer {
   glUsage() {
     const {gl} = this.context
     switch (this.usage) {
-      case PolygonUsage.StaticDraw:
+      case VertexBufferUsage.StaticDraw:
         return gl.STATIC_DRAW
-      case PolygonUsage.StreamDraw:
+      case VertexBufferUsage.StreamDraw:
         return gl.STREAM_DRAW
-      case PolygonUsage.DynamicDraw:
+      case VertexBufferUsage.DynamicDraw:
       default:
         return gl.DYNAMIC_DRAW
     }

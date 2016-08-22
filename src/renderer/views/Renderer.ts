@@ -1,4 +1,4 @@
-import {Model, VertexBuffer, PolygonUsage, TextureShader} from "../../lib/GL"
+import {Model, VertexBuffer, VertexBufferUsage, TextureShader} from "../../lib/GL"
 import {context, canvas} from "../GLContext"
 import Picture from "../models/Picture"
 import {Vec2, Vec4, Transform} from "../../lib/Geometry"
@@ -18,7 +18,7 @@ class Renderer {
       -width * 0.5, height * 0.5, 0, 1,
       width * 0.5, height * 0.5, 1, 1
     ])
-    const buffer = new VertexBuffer(context, vertices, PolygonUsage.StaticDraw)
+    const buffer = new VertexBuffer(context, vertices, VertexBufferUsage.StaticDraw)
     this.layerShader = new TextureShader(context)
     this.layerModel = new Model(context, buffer, this.layerShader)
     context.setClearColor(new Vec4(0.9, 0.9, 0.9, 1))
