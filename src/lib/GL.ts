@@ -6,6 +6,7 @@ class Context {
   halfFloatExt: any
   vertexArrayExt: any
   drawBuffersExt: any
+  textureUnits = new TextureUnits(this)
 
   constructor(public element: HTMLCanvasElement) {
     const glOpts = {
@@ -57,6 +58,24 @@ class Texture {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size.width, size.height, 0, gl.RGBA, halfFloatExt.HALF_FLOAT_OES, null as any);
+  }
+}
+
+export
+class TextureUnits {
+  constructor(public context: Context) {
+  }
+
+  set(i: number, texture: Texture) {
+    const {gl} = this.context
+    gl.activeTexture(gl.TEXTURE0 + i)
+    gl.bindTexture(gl.TEXTURE_2D, texture.texture)
+  }
+
+  delete(i: number) {
+    const {gl} = this.context
+    gl.activeTexture(gl.TEXTURE0 + i)
+    gl.bindTexture(gl.TEXTURE_2D, null)
   }
 }
 
@@ -181,11 +200,9 @@ class TextureShader extends Shader {
     this.uTexture = gl.getUniformLocation(this.program, "uSampler")!
   }
 
-  setTexture(texture: Texture) {
+  setTexture(textureUnit: number) {
     const {gl} = this.context
-    gl.activeTexture(gl.TEXTURE0)
-    gl.bindTexture(gl.TEXTURE_2D, texture.texture)
-    gl.uniform1i(this.uTexture, 0);
+    gl.uniform1i(this.uTexture, textureUnit);
   }
 }
 

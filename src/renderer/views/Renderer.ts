@@ -38,10 +38,12 @@ class Renderer {
       const sceneToUnit = Transform.scale(new Vec2(2 / canvas.width, 2 / canvas.height))
       const transform = this.transform.merge(sceneToUnit)
       this.layerShader.setTransform(transform)
+      this.layerShader.setTexture(0)
       for (const layer of this.picture.layers) {
-        this.layerShader.setTexture(layer.texture)
+        context.textureUnits.set(0, layer.texture)
         this.layerModel.render()
       }
+      context.textureUnits.delete(0)
     })
   }
 }
