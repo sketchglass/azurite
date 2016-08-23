@@ -36,7 +36,6 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       this.element.appendChild(canvas)
     }
 
-    this.resize()
     const {tool} = this.props
 
     ipcRenderer.on("tablet.down", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
@@ -60,6 +59,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       }
     })
 
+    this.resize()
     window.addEventListener("resize", () => {
       this.resize()
     })
@@ -88,8 +88,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
         onMouseDown={this.onMouseDown.bind(this)}
         onMouseMove={this.onMouseMove.bind(this)}
         onMouseUp={this.onMouseUp.bind(this)}
-      >
-      </div>
+      />
     )
   }
 
