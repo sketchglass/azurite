@@ -1,7 +1,7 @@
 // for point / size
 export
 class Vec2 {
-  constructor(public x: number, public y: number) {
+  constructor(public x: number, public y: number = x) {
   }
 
   get width() {
@@ -58,7 +58,11 @@ class Vec2 {
 // for color / rectangle
 export
 class Vec4 {
-  constructor(public x: number, public y: number, public z: number, public w: number) {
+  constructor(public x: number, public y: number = x, public z: number = x, public w: number = x) {
+  }
+
+  static fromVec2(xy: Vec2, zw: Vec2) {
+    return new Vec4(xy.x, xy.y, zw.x, zw.y)
   }
 
   get r() {
