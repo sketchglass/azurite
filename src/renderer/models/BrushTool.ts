@@ -1,5 +1,4 @@
 import {Vec2, Vec4, Transform} from "../../lib/Geometry"
-import {HSV} from "../../lib/Color"
 import Waypoint from "./Waypoint"
 import Tool from "./Tool"
 import {VertexBuffer, Shader, Model, VertexBufferUsage, Framebuffer} from "../../lib/GL"
@@ -48,7 +47,7 @@ class BrushTool extends Tool {
   private lastWaypoint: Waypoint|undefined
   private nextDabOffset = 0
   width = 10
-  color = HSV.rgb(0, 0, 0)
+  color = new Vec4(0, 0, 0, 1)
   opacity = 1
   minWidthRatio = 0.5
   dabsBuffer = new VertexBuffer(context, new Float32Array(0), VertexBufferUsage.StreamDraw)
@@ -69,7 +68,7 @@ class BrushTool extends Tool {
         .merge(Transform.translate(new Vec2(-1, 1)))
     this.shader.setTransform(transform)
     this.shader.setUniformFloat('uBrushSize', this.width)
-    this.shader.setUniformVec4('uColor', this.color.toRgbaPremultiplied().mul(this.opacity))
+    this.shader.setUniformVec4('uColor', this.color.mul(this.opacity))
     this.shader.setUniformFloat('uMinWidthRatio', this.minWidthRatio)
   }
 

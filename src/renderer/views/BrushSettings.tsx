@@ -1,6 +1,6 @@
 import React = require("react")
-import {HSV} from "../../lib/Color"
 import BrushTool from "../models/BrushTool"
+import {parseHexColor, toHexColor} from "../../lib/Color"
 
 interface BrushSettingsProps {
   tool: BrushTool
@@ -15,7 +15,7 @@ class BrushSettings extends React.Component<BrushSettingsProps, void> {
   render() {
     const {tool} = this.props
     const onColorChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      tool.color = HSV.parseHex(ev.target.value)
+      tool.color = parseHexColor(ev.target.value)
       this.forceUpdate()
     }
     const onOpacityChange = (ev: React.FormEvent<HTMLInputElement>) => {
@@ -35,7 +35,7 @@ class BrushSettings extends React.Component<BrushSettingsProps, void> {
         <tbody>
           <tr>
             <td>Color</td>
-            <td><input type="color" onChange={onColorChange} value={tool.color.toHexString()} /></td>
+            <td><input type="color" onChange={onColorChange} value={toHexColor(tool.color)} /></td>
           </tr>
           <tr>
             <td>Opacity</td>
