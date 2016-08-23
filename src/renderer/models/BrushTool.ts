@@ -27,14 +27,16 @@ class BrushShader extends Shader {
 
   get fragmentShader() {
     return `
-      precision lowp float;
+      precision mediump float;
       varying mediump vec2 vUVPosition;
       uniform mediump float uBrushSize;
-      uniform vec4 uColor;
+      uniform mediump float uMinWidthRatio;
+      uniform lowp vec4 uColor;
 
       void main(void) {
         float r = distance(gl_PointCoord, vec2(0.5)) * (uBrushSize + 2.0);
-        float opacity = smoothstep(uBrushSize * 0.5, uBrushSize * 0.5 - 1.0, r);
+        float radius = uBrushSize * 0.5 * (uMinWidthRatio + (1.0 - uMinWidthRatio) * vUVPosition.x);
+        lowp float opacity = smoothstep(radius, radius - 1.0, r);
         gl_FragColor = uColor * opacity;
       }
     `
@@ -50,6 +52,12 @@ class BrushShader extends Shader {
     const {gl} = this.context
     gl.useProgram(this.program)
     gl.uniform4fv(gl.getUniformLocation(this.program, 'uColor')!, color.toGLData())
+  }
+
+  setMinWidthRatio(ratio: number) {
+    const {gl} = this.context
+    gl.useProgram(this.program)
+    gl.uniform1f(gl.getUniformLocation(this.program, 'uMinWidthRatio')!, ratio)
   }
 }
 
@@ -79,7 +87,8 @@ class BrushTool extends Tool {
         .merge(Transform.translate(new Vec2(-1, 1)))
     this.shader.setTransform(transform)
     this.shader.setBrushSize(this.width)
-    this.shader.setColor(this.color.toRgbaPremultiplied())
+    this.shader.setColor(this.color.toRgbaPremultiplied().mul(this.opacity))
+    this.shader.setMinWidthRatio(this.minWidthRatio)
   }
 
   move(waypoint: Waypoint) {
