@@ -273,16 +273,10 @@ class Framebuffer {
     this.framebuffer = gl.createFramebuffer()!
   }
 
-  setTextures(textures: Texture[]|Texture) {
+  setTexture(texture: Texture) {
     const {gl, drawBuffersExt} = this.context
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
-    if (Array.isArray(textures)) {
-      for (const [i, tex] of textures.entries()) {
-        gl.framebufferTexture2D(gl.FRAMEBUFFER, drawBuffersExt[`COLOR_ATTACHMENT${i}_WEBGL`], gl.TEXTURE_2D, tex.texture, 0)
-      }
-    } else {
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, textures.texture, 0)
-    }
+    gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture.texture, 0)
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
   }
 
