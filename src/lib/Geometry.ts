@@ -46,6 +46,9 @@ class Vec2 {
   toGLData() {
     return new Float32Array([this.x, this.y])
   }
+  toString() {
+    return `Vec2(${this.x},${this.y})`
+  }
 }
 
 // for color / rectangle
@@ -95,6 +98,9 @@ class Vec4 {
   toGLData() {
     return new Float32Array([this.x, this.y, this.z, this.w])
   }
+  toString() {
+    return `Vec4(${this.x},${this.y},${this.z},${this.w})`
+  }
 }
 
 export
@@ -133,7 +139,7 @@ class Transform {
   }
 
   toString() {
-    return `Transform([${this.m11},${this.m12}],[${this.m21},${this.m22}],[${this.dx},${this.dy}])`
+    return `Transform(${this.m11},${this.m12}],[${this.m21},${this.m22}],[${this.dx},${this.dy})`
   }
 
   static identity = new Transform(1, 0, 0, 1, 0, 0)
@@ -144,5 +150,11 @@ class Transform {
 
   static translate(translation: Vec2) {
     return new Transform(1, 0, 0, 1, translation.x, translation.y)
+  }
+
+  transform(v: Vec2) {
+    const x = this.m11 * v.x + this.m21 * v.y + this.dx
+    const y = this.m12 * v.x + this.m22 * v.y + this.dy
+    return new Vec2(x, y)
   }
 }
