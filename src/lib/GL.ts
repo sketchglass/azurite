@@ -226,6 +226,7 @@ class Model {
 
   render() {
     const {gl, vertexArrayExt} = this.context
+    gl.useProgram(this.shader.program)
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vertexBuffer.data.length / 4)
     vertexArrayExt.bindVertexArrayOES(null)
@@ -233,6 +234,7 @@ class Model {
 
   renderPoints() {
     const {gl, vertexArrayExt} = this.context
+    gl.useProgram(this.shader.program)
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
     gl.drawArrays(gl.POINTS, 0, this.vertexBuffer.data.length / 4)
     vertexArrayExt.bindVertexArrayOES(null)
