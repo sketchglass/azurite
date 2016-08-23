@@ -1,12 +1,11 @@
-import {Vec2} from "../../lib/Geometry"
+import {Vec2, Transform} from "../../lib/Geometry"
+import {Texture} from "../../lib/GL"
+import {context} from "../GLContext"
 
 export default
 class Layer {
-  canvas = document.createElement("canvas")
-  context = this.canvas.getContext("2d")!
+  texture = new Texture(context, this.size)
 
   constructor(public size: Vec2) {
-    this.canvas.width = size.width
-    this.canvas.height = size.height
   }
 }

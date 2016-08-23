@@ -7,7 +7,7 @@ import {TabletEventReceiver} from "receive-tablet-event"
 let window: BrowserWindow|undefined
 
 function createWindow () {
-  const win = window = new BrowserWindow({width: 800, height: 600})
+  const win = window = new BrowserWindow({width: 1200, height: 768})
 
   win.loadURL(`file://${__dirname}/../index.html`)
   win.webContents.openDevTools()
