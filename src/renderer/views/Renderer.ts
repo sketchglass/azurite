@@ -1,4 +1,4 @@
-import {Model, VertexBuffer, VertexBufferUsage, TextureShader} from "../../lib/GL"
+import {Model, VertexBuffer, VertexBufferUsage, TextureShader, DefaultFramebuffer} from "../../lib/GL"
 import {context, canvas} from "../GLContext"
 import Picture from "../models/Picture"
 import {Vec2, Vec4, Transform} from "../../lib/Geometry"
@@ -33,13 +33,15 @@ class Renderer {
   }
 
   render() {
-    context.clear()
-    const sceneToUnit = Transform.scale(new Vec2(2 / canvas.width, 2 / canvas.height))
-    const transform = this.transform.merge(sceneToUnit)
-    this.layerShader.setTransform(transform)
-    for (const layer of this.picture.layers) {
-      this.layerShader.setTexture(layer.texture)
-      this.layerModel.render()
-    }
+    new DefaultFramebuffer(context).use(() => {
+      context.clear()
+      const sceneToUnit = Transform.scale(new Vec2(2 / canvas.width, 2 / canvas.height))
+      const transform = this.transform.merge(sceneToUnit)
+      this.layerShader.setTransform(transform)
+      for (const layer of this.picture.layers) {
+        this.layerShader.setTexture(layer.texture)
+        this.layerModel.render()
+      }
+    })
   }
 }

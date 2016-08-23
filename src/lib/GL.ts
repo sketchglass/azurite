@@ -225,7 +225,7 @@ class Model {
 export
 class Framebuffer {
   framebuffer: WebGLFramebuffer
-  constructor(public context: Context) {
+  constructor(public context: Context, public size: Vec2) {
     const {gl, drawBuffersExt} = context
     this.framebuffer = gl.createFramebuffer()!
   }
@@ -245,8 +245,20 @@ class Framebuffer {
 
   use(render: () => void) {
     const {gl} = this.context
+    gl.viewport(0, 0, this.size.width, this.size.height)
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
     render()
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+  }
+}
+
+export
+class DefaultFramebuffer {
+  constructor(public context: Context) {
+  }
+  use(render: () => void) {
+    const {gl, element} = this.context
+    gl.viewport(0, 0, element.width, element.height)
+    render()
   }
 }

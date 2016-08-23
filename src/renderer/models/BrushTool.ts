@@ -62,13 +62,14 @@ class BrushTool extends Tool {
   opacity = 1
   minWidthRatio = 0.5
   dabsBuffer = new VertexBuffer(context, new Float32Array(0), VertexBufferUsage.StreamDraw)
-  framebuffer = new Framebuffer(context)
+  framebuffer = new Framebuffer(context, new Vec2(0))
   shader = new BrushShader(context)
   model = new Model(context, this.dabsBuffer, this.shader)
 
   start(waypoint: Waypoint) {
     this.lastWaypoint = waypoint
     this.nextDabOffset = 0
+    this.framebuffer.size = this.layer.size
     this.framebuffer.setTextures(this.layer.texture)
   }
 
