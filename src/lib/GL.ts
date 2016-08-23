@@ -231,6 +231,28 @@ class TextureShader extends Shader {
 }
 
 export
+class ColorShader extends Shader {
+  get fragmentShader() {
+    return `
+      precision lowp float;
+      uniform lowp vec4 uColor;
+      void main(void) {
+        gl_FragColor = uColor;
+      }
+    `
+  }
+
+  constructor(public context: Context) {
+    super(context)
+    const {gl} = context
+  }
+
+  setColor(color: Vec4) {
+    this.setUniformVec4("uColor", color)
+  }
+}
+
+export
 class Model {
   vertexArray: any
   constructor(public context: Context, public vertexBuffer: VertexBuffer, public shader: Shader) {
