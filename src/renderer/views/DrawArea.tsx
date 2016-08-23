@@ -1,6 +1,6 @@
 import React = require("react")
 import Picture from "../models/Picture"
-import {Vec2} from "../../lib/Geometry"
+import {Vec2, Transform} from "../../lib/Geometry"
 import Tool from "../models/Tool"
 import BrushTool from "../models/BrushTool"
 import Waypoint from "../models/Waypoint"
@@ -22,6 +22,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   element: HTMLElement|undefined
   isPressed = false
   renderer: Renderer;
+  drawAreaToPicture = Transform.identity
 
   constructor(props: DrawAreaProps) {
     super(props)
@@ -74,6 +75,9 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     }
     const size = new Vec2(roundRect.width, roundRect.height).mul(window.devicePixelRatio)
     this.renderer.resize(size)
+    this.drawAreaToPicture = Transform.translate(
+      size.sub(this.props.picture.size).mul(-0.5)
+    )
     ipcRenderer.send("tablet.install", roundRect)
   }
 
@@ -94,7 +98,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const rect = this.element!.getBoundingClientRect()
     const x = ev.clientX - rect.left
     const y = ev.clientY - rect.top
-    return new Vec2(x * dpr, y * dpr)
+    return this.drawAreaToPicture.transform(new Vec2(x * dpr, y * dpr))
   }
 
   onMouseDown(ev: MouseEvent) {

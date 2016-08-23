@@ -93,8 +93,8 @@ class BrushTool extends Tool {
       this.framebuffer.use(() => {
         const layerSize = this.layer.size
         const transform =
-          Transform.scale(new Vec2(2 / layerSize.width, 2 / layerSize.height))
-            .merge(Transform.translate(new Vec2(-1, -1)))
+          Transform.scale(new Vec2(2 / layerSize.width, -2 / layerSize.height))
+            .merge(Transform.translate(new Vec2(-1, 1)))
         this.shader.setTransform(transform)
         this.shader.setBrushSize(this.width)
         this.shader.setColor(this.color.toRgbaPremultiplied())
