@@ -41,24 +41,6 @@ class BrushShader extends Shader {
       }
     `
   }
-
-  setBrushSize(size: number) {
-    const {gl} = this.context
-    gl.useProgram(this.program)
-    gl.uniform1f(gl.getUniformLocation(this.program, 'uBrushSize')!, size)
-  }
-
-  setColor(color: Vec4) {
-    const {gl} = this.context
-    gl.useProgram(this.program)
-    gl.uniform4fv(gl.getUniformLocation(this.program, 'uColor')!, color.toGLData())
-  }
-
-  setMinWidthRatio(ratio: number) {
-    const {gl} = this.context
-    gl.useProgram(this.program)
-    gl.uniform1f(gl.getUniformLocation(this.program, 'uMinWidthRatio')!, ratio)
-  }
 }
 
 export default
@@ -86,9 +68,9 @@ class BrushTool extends Tool {
       Transform.scale(new Vec2(2 / layerSize.width, -2 / layerSize.height))
         .merge(Transform.translate(new Vec2(-1, 1)))
     this.shader.setTransform(transform)
-    this.shader.setBrushSize(this.width)
-    this.shader.setColor(this.color.toRgbaPremultiplied().mul(this.opacity))
-    this.shader.setMinWidthRatio(this.minWidthRatio)
+    this.shader.setUniformFloat('uBrushSize', this.width)
+    this.shader.setUniformVec4('uColor', this.color.toRgbaPremultiplied().mul(this.opacity))
+    this.shader.setUniformFloat('uMinWidthRatio', this.minWidthRatio)
   }
 
   move(waypoint: Waypoint) {
