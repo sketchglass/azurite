@@ -75,9 +75,9 @@ class Renderer {
       context.clear()
       const sceneToUnit = Transform.scale(new Vec2(2 / canvas.width, 2 / canvas.height))
       const transform = this.transform.merge(sceneToUnit)
-      this.backgroundShader.setUniformTransform("uTransform", transform)
+      this.backgroundShader.setUniform("uTransform", transform)
       this.backgroundModel.render()
-      this.layerShader.setUniformTransform("uTransform", transform)
+      this.layerShader.setUniform("uTransform", transform)
       this.layerShader.setUniformInt("uTexture", 0)
       for (const layer of this.picture.layers) {
         context.textureUnits.set(0, layer.texture)

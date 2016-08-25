@@ -145,28 +145,18 @@ class Shader {
     gl.uniform1i(gl.getUniformLocation(this.program, name)!, value)
   }
 
-  setUniformFloat(name: string, value: number) {
+  setUniform(name: string, value: number|Vec2|Vec4|Transform) {
     const {gl} = this.context
     gl.useProgram(this.program)
-    gl.uniform1f(gl.getUniformLocation(this.program, name)!, value)
-  }
-
-  setUniformVec2(name: string, value: Vec2) {
-    const {gl} = this.context
-    gl.useProgram(this.program)
-    gl.uniform2fv(gl.getUniformLocation(this.program, name)!, value.toGLData())
-  }
-
-  setUniformVec4(name: string, value: Vec4) {
-    const {gl} = this.context
-    gl.useProgram(this.program)
-    gl.uniform4fv(gl.getUniformLocation(this.program, name)!, value.toGLData())
-  }
-
-  setUniformTransform(name: string, value: Transform) {
-    const {gl} = this.context
-    gl.useProgram(this.program)
-    gl.uniformMatrix3fv(gl.getUniformLocation(this.program, name)!, false, value.toGLData())
+    if (value instanceof Vec2) {
+      gl.uniform2fv(gl.getUniformLocation(this.program, name)!, value.toGLData())
+    } else if (value instanceof Vec4) {
+      gl.uniform4fv(gl.getUniformLocation(this.program, name)!, value.toGLData())
+    } else if (value instanceof Transform) {
+      gl.uniformMatrix3fv(gl.getUniformLocation(this.program, name)!, false, value.toGLData())
+    } else {
+      gl.uniform1f(gl.getUniformLocation(this.program, name)!, value)
+    }
   }
 }
 
