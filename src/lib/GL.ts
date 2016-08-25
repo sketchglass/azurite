@@ -87,7 +87,8 @@ const enum GeometryUsage {
 export
 class Geometry {
   buffer: WebGLBuffer
-  vertexArray: any
+  attributesStride = this.attributes.reduce((sum, {size}) => sum + size, 0)
+
   constructor(public context: Context, public data: Float32Array, public attributes: {attribute: string, size: number}[], public usage: GeometryUsage) {
     const {gl, vertexArrayExt} = context
     this.buffer = gl.createBuffer()!
@@ -163,7 +164,6 @@ class Shader {
 export
 class Model {
   vertexArray: any
-  stride = this.geometry.attributes.reduce((sum, {size}) => sum + size, 0)
   constructor(public context: Context, public geometry: Geometry, public shader: Shader) {
     const {gl, vertexArrayExt} = context
     this.vertexArray = vertexArrayExt.createVertexArrayOES()
@@ -174,7 +174,7 @@ class Model {
     for (const {attribute, size} of this.geometry.attributes) {
       const pos = gl.getAttribLocation(shader.program, attribute)!
       gl.enableVertexAttribArray(pos)
-      gl.vertexAttribPointer(pos, size, gl.FLOAT, false, this.stride * 4, offset * 4)
+      gl.vertexAttribPointer(pos, size, gl.FLOAT, false, this.geometry.attributesStride * 4, offset * 4)
       offset += size
     }
     vertexArrayExt.bindVertexArrayOES(null)
@@ -184,7 +184,7 @@ class Model {
     const {gl, vertexArrayExt} = this.context
     gl.useProgram(this.shader.program)
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.geometry.data.length / this.stride)
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.geometry.data.length / this.geometry.attributesStride)
     vertexArrayExt.bindVertexArrayOES(null)
   }
 
@@ -192,7 +192,7 @@ class Model {
     const {gl, vertexArrayExt} = this.context
     gl.useProgram(this.shader.program)
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
-    gl.drawArrays(gl.POINTS, 0, this.geometry.data.length / this.stride)
+    gl.drawArrays(gl.POINTS, 0, this.geometry.data.length / this.geometry.attributesStride)
     vertexArrayExt.bindVertexArrayOES(null)
   }
 }
