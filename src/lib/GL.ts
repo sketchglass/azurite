@@ -80,15 +80,15 @@ class TextureUnits {
 }
 
 export
-const enum VertexBufferUsage {
-  StaticDraw, StreamDraw, DynamicDraw
+const enum GeometryUsage {
+  Static, Stream, Dynamic
 }
 
 export
-class VertexBuffer {
+class Geometry {
   buffer: WebGLBuffer
   vertexArray: any
-  constructor(public context: Context, public data: Float32Array, public usage: VertexBufferUsage) {
+  constructor(public context: Context, public data: Float32Array, public attributes: {attribute: string, size: number}[], public usage: GeometryUsage) {
     const {gl, vertexArrayExt} = context
     this.buffer = gl.createBuffer()!
     this.updateBuffer()
@@ -102,26 +102,22 @@ class VertexBuffer {
   glUsage() {
     const {gl} = this.context
     switch (this.usage) {
-      case VertexBufferUsage.StaticDraw:
+      case GeometryUsage.Static:
         return gl.STATIC_DRAW
-      case VertexBufferUsage.StreamDraw:
+      case GeometryUsage.Stream:
         return gl.STREAM_DRAW
-      case VertexBufferUsage.DynamicDraw:
+      case GeometryUsage.Dynamic:
       default:
         return gl.DYNAMIC_DRAW
     }
   }
 }
 
-
 export
-abstract class ShaderBase {
-  abstract vertexShader: string
-  abstract fragmentShader: string
-
+class Shader {
   program: WebGLProgram
 
-  constructor(public context: Context) {
+  constructor(public context: Context, public vertexShader: string, public fragmentShader: string) {
     const {gl} = context
     this.program = gl.createProgram()!
     this._addShader(gl.VERTEX_SHADER, this.vertexShader)
@@ -175,98 +171,22 @@ abstract class ShaderBase {
 }
 
 export
-class Shader extends ShaderBase {
-  get vertexShader() {
-    return `
-      precision mediump float;
-
-      uniform mat3 uTransform;
-      attribute vec2 aPosition;
-      attribute vec2 aUVPosition;
-      varying vec2 vUVPosition;
-
-      void main(void) {
-        vUVPosition = aUVPosition;
-        vec3 pos = uTransform * vec3(aPosition, 1.0);
-        gl_Position = vec4(pos.xy, 0.0, 1.0);
-      }
-    `
-  }
-  get fragmentShader() {
-    return `
-      precision lowp float;
-      varying mediump vec2 vUVPosition;
-      void main(void) {
-        gl_FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-      }
-    `
-  }
-
-  setTransform(transform: Transform) {
-    this.setUniformTransform('uTransform', transform)
-  }
-}
-
-export
-class TextureShader extends Shader {
-  get fragmentShader() {
-    return `
-      precision lowp float;
-      varying mediump vec2 vUVPosition;
-      uniform sampler2D uTexture;
-      void main(void) {
-        gl_FragColor = texture2D(uTexture, vUVPosition);
-      }
-    `
-  }
-
-  constructor(public context: Context) {
-    super(context)
-    const {gl} = context
-  }
-
-  setTexture(textureUnit: number) {
-    this.setUniformInt("uTexture", textureUnit)
-  }
-}
-
-export
-class ColorShader extends Shader {
-  get fragmentShader() {
-    return `
-      precision lowp float;
-      uniform lowp vec4 uColor;
-      void main(void) {
-        gl_FragColor = uColor;
-      }
-    `
-  }
-
-  constructor(public context: Context) {
-    super(context)
-    const {gl} = context
-  }
-
-  setColor(color: Vec4) {
-    this.setUniformVec4("uColor", color)
-  }
-}
-
-export
 class Model {
   vertexArray: any
-  constructor(public context: Context, public vertexBuffer: VertexBuffer, public shader: Shader) {
+  stride = this.geometry.attributes.reduce((sum, {size}) => sum + size, 0)
+  constructor(public context: Context, public geometry: Geometry, public shader: Shader) {
     const {gl, vertexArrayExt} = context
     this.vertexArray = vertexArrayExt.createVertexArrayOES()
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
     gl.useProgram(shader.program)
-    const aPosition = gl.getAttribLocation(shader.program, 'aPosition')!
-    const aUVPosition = gl.getAttribLocation(shader.program, 'aUVPosition')!
-    gl.enableVertexAttribArray(aPosition)
-    gl.enableVertexAttribArray(aUVPosition)
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer.buffer)
-    gl.vertexAttribPointer(aPosition, 2, gl.FLOAT, false, 16, 0)
-    gl.vertexAttribPointer(aUVPosition, 2, gl.FLOAT, false, 16, 8)
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.geometry.buffer)
+    let offset = 0
+    for (const {attribute, size} of this.geometry.attributes) {
+      const pos = gl.getAttribLocation(shader.program, attribute)!
+      gl.enableVertexAttribArray(pos)
+      gl.vertexAttribPointer(pos, size, gl.FLOAT, false, this.stride * 4, offset * 4)
+      offset += size
+    }
     vertexArrayExt.bindVertexArrayOES(null)
   }
 
@@ -274,7 +194,7 @@ class Model {
     const {gl, vertexArrayExt} = this.context
     gl.useProgram(this.shader.program)
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.vertexBuffer.data.length / 4)
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.geometry.data.length / this.stride)
     vertexArrayExt.bindVertexArrayOES(null)
   }
 
@@ -282,7 +202,7 @@ class Model {
     const {gl, vertexArrayExt} = this.context
     gl.useProgram(this.shader.program)
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
-    gl.drawArrays(gl.POINTS, 0, this.vertexBuffer.data.length / 4)
+    gl.drawArrays(gl.POINTS, 0, this.geometry.data.length / this.stride)
     vertexArrayExt.bindVertexArrayOES(null)
   }
 }

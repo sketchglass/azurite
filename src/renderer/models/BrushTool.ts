@@ -1,46 +1,40 @@
 import {Vec2, Vec4, Transform} from "../../lib/Geometry"
 import Waypoint from "./Waypoint"
 import Tool from "./Tool"
-import {VertexBuffer, Shader, Model, VertexBufferUsage, Framebuffer} from "../../lib/GL"
+import {Geometry, Shader, Model, GeometryUsage, Framebuffer} from "../../lib/GL"
 import {context} from "../GLContext"
 
-class BrushShader extends Shader {
-  get vertexShader() {
-    return `
-      precision mediump float;
+const brushVertShader = `
+  precision mediump float;
 
-      uniform mediump float uBrushSize;
-      uniform mat3 uTransform;
-      attribute vec2 aPosition;
-      attribute vec2 aUVPosition;
-      varying vec2 vUVPosition;
+  uniform float uBrushSize;
+  uniform mat3 uTransform;
+  attribute vec2 aPosition;
+  attribute float aPressure;
+  varying float vPressure;
 
-      void main(void) {
-        vUVPosition = aUVPosition;
-        vec3 pos = uTransform * vec3(aPosition, 1.0);
-        gl_Position = vec4(pos.xy, 0.0, 1.0);
-        gl_PointSize = uBrushSize + 2.0;
-      }
-    `
+  void main(void) {
+    vPressure = aPressure;
+    vec3 pos = uTransform * vec3(aPosition, 1.0);
+    gl_Position = vec4(pos.xy, 0.0, 1.0);
+    gl_PointSize = uBrushSize + 2.0;
   }
+`
 
-  get fragmentShader() {
-    return `
-      precision mediump float;
-      varying mediump vec2 vUVPosition;
-      uniform mediump float uBrushSize;
-      uniform mediump float uMinWidthRatio;
-      uniform lowp vec4 uColor;
+const brushFragShader = `
+  precision mediump float;
+  varying float vPressure;
+  uniform float uBrushSize;
+  uniform float uMinWidthRatio;
+  uniform lowp vec4 uColor;
 
-      void main(void) {
-        float r = distance(gl_PointCoord, vec2(0.5)) * (uBrushSize + 2.0);
-        float radius = uBrushSize * 0.5 * (uMinWidthRatio + (1.0 - uMinWidthRatio) * vUVPosition.x);
-        lowp float opacity = smoothstep(radius, radius - 1.0, r);
-        gl_FragColor = uColor * opacity;
-      }
-    `
+  void main(void) {
+    float r = distance(gl_PointCoord, vec2(0.5)) * (uBrushSize + 2.0);
+    float radius = uBrushSize * 0.5 * (uMinWidthRatio + (1.0 - uMinWidthRatio) * vPressure);
+    lowp float opacity = smoothstep(radius, radius - 1.0, r);
+    gl_FragColor = uColor * opacity;
   }
-}
+`
 
 export default
 class BrushTool extends Tool {
@@ -50,10 +44,13 @@ class BrushTool extends Tool {
   color = new Vec4(0, 0, 0, 1)
   opacity = 1
   minWidthRatio = 0.5
-  dabsBuffer = new VertexBuffer(context, new Float32Array(0), VertexBufferUsage.StreamDraw)
+  dabsGeometry = new Geometry(context, new Float32Array(0), [
+    {attribute: "aPosition", size: 2},
+    {attribute: "aPressure", size: 1},
+  ], GeometryUsage.Stream)
   framebuffer = new Framebuffer(context, new Vec2(0))
-  shader = new BrushShader(context)
-  model = new Model(context, this.dabsBuffer, this.shader)
+  shader = new Shader(context, brushVertShader, brushFragShader)
+  model = new Model(context, this.dabsGeometry, this.shader)
 
   start(waypoint: Waypoint) {
     this.lastWaypoint = waypoint
@@ -66,7 +63,7 @@ class BrushTool extends Tool {
     const transform =
       Transform.scale(new Vec2(2 / layerSize.width, -2 / layerSize.height))
         .merge(Transform.translate(new Vec2(-1, 1)))
-    this.shader.setTransform(transform)
+    this.shader.setUniformTransform('uTransform', transform)
     this.shader.setUniformFloat('uBrushSize', this.width)
     this.shader.setUniformVec4('uColor', this.color.mul(this.opacity))
     this.shader.setUniformFloat('uMinWidthRatio', this.minWidthRatio)
@@ -82,13 +79,12 @@ class BrushTool extends Tool {
         return
       }
 
-      const vertices = new Float32Array(waypoints.length * 4)
+      const vertices = new Float32Array(waypoints.length * 3)
       for (const [i, {pos, pressure}] of waypoints.entries()) {
-        // store pressure in u coordinate
-        vertices.set([pos.x, pos.y, pressure, 0], i * 4)
+        vertices.set([pos.x, pos.y, pressure], i * 3)
       }
-      this.dabsBuffer.data = vertices
-      this.dabsBuffer.updateBuffer()
+      this.dabsGeometry.data = vertices
+      this.dabsGeometry.updateBuffer()
 
       this.framebuffer.use(() => {
         this.model.renderPoints()
