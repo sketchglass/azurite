@@ -15,19 +15,19 @@ class BrushSettings extends React.Component<BrushSettingsProps, void> {
   render() {
     const {tool} = this.props
     const onColorChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      tool.color = parseHexColor(ev.target.value)
+      tool.color = parseHexColor((ev.target as HTMLInputElement).value)
       this.forceUpdate()
     }
     const onOpacityChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      tool.opacity = parseInt(ev.target.value) / 100
+      tool.opacity = parseInt((ev.target as HTMLInputElement).value) / 100
       this.forceUpdate()
     }
     const onWidthChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      tool.width = parseInt(ev.target.value)
+      tool.width = parseInt((ev.target as HTMLInputElement).value)
       this.forceUpdate()
     }
     const onMinWidthChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      tool.minWidthRatio = parseInt(ev.target.value) / 100
+      tool.minWidthRatio = parseInt((ev.target as HTMLInputElement).value) / 100
       this.forceUpdate()
     }
     return (
