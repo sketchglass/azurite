@@ -23,14 +23,14 @@ const sampleVertShader = `
 `
 
 const copyOrigFragShader = `
-  precision mediump float;
+  precision lowp float;
 
-  uniform float uSampleSize;
+  uniform mediump float uSampleSize;
 
   uniform sampler2D uLayer;
-  uniform vec2 uLayerSize;
+  uniform mediump vec2 uLayerSize;
 
-  varying vec2 vCenter;
+  varying mediump vec2 vCenter;
 
   void main(void) {
     vec2 pos = (gl_PointCoord - vec2(0.5)) * vec2(uSampleSize) + vCenter;
@@ -39,10 +39,10 @@ const copyOrigFragShader = `
 `
 
 const shapeFragShader = `
-  precision mediump float;
+  precision lowp float;
 
-  uniform float uBrushRadius;
-  uniform float uSampleSize;
+  uniform mediump float uBrushRadius;
+  uniform mediump float uSampleSize;
 
   void main(void) {
     float r = distance(gl_PointCoord, vec2(0.5)) * uSampleSize;
@@ -52,7 +52,7 @@ const shapeFragShader = `
 `
 
 const sampleFragShader = `
-  precision mediump float;
+  precision lowp float;
 
   uniform sampler2D uOriginal;
   uniform sampler2D uBrushShape;
@@ -85,10 +85,10 @@ const brushVertShader = `
 `
 
 const brushFragShader = `
-  precision mediump float;
+  precision lowp float;
 
-  uniform float uBlending;
-  uniform float uThickness;
+  uniform lowp float uBlending;
+  uniform lowp float uThickness;
   uniform lowp vec4 uColor;
 
   uniform sampler2D uOriginal;
@@ -97,14 +97,14 @@ const brushFragShader = `
   varying lowp vec4 vMixColor;
 
   void main(void) {
-    lowp vec4 orig = texture2D(uOriginal, gl_PointCoord);
-    lowp float brushOpacity = texture2D(uOriginal, gl_PointCoord).a;
+    vec4 orig = texture2D(uOriginal, gl_PointCoord);
+    float brushOpacity = texture2D(uOriginal, gl_PointCoord).a;
 
-    lopw float mixRate = brushOpacity * uBlending;
+    float mixRate = brushOpacity * uBlending;
     // mix color
-    lowp vec4 color = orig * vec4(1.0 - mixRate) + vMixColor * vec4(mixRate);
+    vec4 color = orig * vec4(1.0 - mixRate) + vMixColor * vec4(mixRate);
     // add color
-    lopw vec4 addColor = uColor * vec4(uThickness * brushOpacity);
+    vec4 addColor = uColor * vec4(uThickness * brushOpacity);
     gl_FragColor = addColor + color * vec4(1.0 - addColor.a);
   }
 `
