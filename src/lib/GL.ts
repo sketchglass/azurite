@@ -63,6 +63,7 @@ class Texture {
   resize(size: Vec2) {
     const {gl, halfFloatExt} = this.context
     this.size = size
+    gl.bindTexture(gl.TEXTURE_2D, this.texture)
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size.width, size.height, 0, gl.RGBA, halfFloatExt.HALF_FLOAT_OES, null as any)
   }
 
@@ -179,8 +180,16 @@ class Shader {
 }
 
 export
+enum BlendMode {
+  Src,
+  SrcOver,
+  // TODO
+}
+
+export
 class Model {
   vertexArray: any
+  blendFuncs: [number, number]
   constructor(public context: Context, public geometry: Geometry, public shader: Shader) {
     const {gl, vertexArrayExt} = context
     this.vertexArray = vertexArrayExt.createVertexArrayOES()
@@ -195,10 +204,25 @@ class Model {
       offset += size
     }
     vertexArrayExt.bindVertexArrayOES(null)
+
+    this.setBlendMode(BlendMode.SrcOver)
+  }
+
+  setBlendMode(mode: BlendMode) {
+    const {gl} = this.context
+    switch (mode) {
+      case BlendMode.Src:
+        this.blendFuncs = [gl.ONE, gl.ZERO]
+        break
+      case BlendMode.SrcOver:
+        this.blendFuncs = [gl.ONE, gl.ONE_MINUS_SRC_ALPHA]
+        break
+    }
   }
 
   render(first = 0, count = this.geometry.vertexCount) {
     const {gl, vertexArrayExt} = this.context
+    gl.blendFunc(this.blendFuncs[0], this.blendFuncs[1])
     gl.useProgram(this.shader.program)
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
     gl.drawArrays(gl.TRIANGLE_STRIP, first, count)
@@ -207,6 +231,7 @@ class Model {
 
   renderPoints(first = 0, count = this.geometry.vertexCount) {
     const {gl, vertexArrayExt} = this.context
+    gl.blendFunc(this.blendFuncs[0], this.blendFuncs[1])
     gl.useProgram(this.shader.program)
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
     gl.drawArrays(gl.POINTS, first, count)
