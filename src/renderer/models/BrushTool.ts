@@ -8,31 +8,40 @@ const brushVertShader = `
   precision mediump float;
 
   uniform float uBrushSize;
+  uniform float uMinWidthRatio;
   uniform mat3 uTransform;
+  uniform float uOpacity;
+
   attribute vec2 aPosition;
   attribute float aPressure;
-  varying float vPressure;
+
+  varying float vRadius;
+  varying lowp float vOpacity;
 
   void main(void) {
-    vPressure = aPressure;
     vec3 pos = uTransform * vec3(aPosition, 1.0);
     gl_Position = vec4(pos.xy, 0.0, 1.0);
     gl_PointSize = uBrushSize + 2.0;
+    float radius = uBrushSize * 0.5 * (uMinWidthRatio + (1.0 - uMinWidthRatio) * aPressure);
+    vRadius = radius;
+    // transparency = (overlap count) √ (final transparency)
+    vOpacity = 1.0 - pow(1.0 - min(uOpacity, 0.998), 1.0 / (radius * 2.0));
   }
 `
 
 const brushFragShader = `
   precision mediump float;
-  varying float vPressure;
+
   uniform float uBrushSize;
-  uniform float uMinWidthRatio;
   uniform lowp vec4 uColor;
+
+  varying float vRadius;
+  varying lowp float vOpacity;
 
   void main(void) {
     float r = distance(gl_PointCoord, vec2(0.5)) * (uBrushSize + 2.0);
-    float radius = uBrushSize * 0.5 * (uMinWidthRatio + (1.0 - uMinWidthRatio) * vPressure);
-    lowp float opacity = smoothstep(radius, radius - 1.0, r);
-    gl_FragColor = uColor * opacity;
+    lowp float opacity = smoothstep(vRadius, vRadius- 1.0, r);
+    gl_FragColor = uColor * opacity * vOpacity;
   }
 `
 
@@ -65,7 +74,8 @@ class BrushTool extends Tool {
         .merge(Transform.translate(new Vec2(-1, 1)))
     this.shader.setUniform('uTransform', transform)
     this.shader.setUniform('uBrushSize', this.width)
-    this.shader.setUniform('uColor', this.color.mul(this.opacity))
+    this.shader.setUniform('uColor', this.color)
+    this.shader.setUniform('uOpacity', this.opacity)
     this.shader.setUniform('uMinWidthRatio', this.minWidthRatio)
   }
 
