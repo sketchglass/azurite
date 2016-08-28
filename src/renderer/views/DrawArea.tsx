@@ -2,11 +2,9 @@ import React = require("react")
 import Picture from "../models/Picture"
 import {Vec2, Transform} from "../../lib/Geometry"
 import Tool from "../models/Tool"
-import BrushTool from "../models/BrushTool"
 import Waypoint from "../models/Waypoint"
 import * as Electron from "electron"
 import {TabletEvent} from "receive-tablet-event"
-import BrushSettings from "./BrushSettings"
 import {canvas} from "../GLContext"
 import Renderer from "./Renderer"
 
