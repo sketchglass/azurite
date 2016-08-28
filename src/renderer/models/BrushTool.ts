@@ -57,7 +57,7 @@ class BrushTool extends Tool {
     {attribute: "aPosition", size: 2},
     {attribute: "aPressure", size: 1},
   ], GeometryUsage.Stream)
-  framebuffer = new Framebuffer(context, new Vec2(0))
+  framebuffer = new Framebuffer(context)
   shader = new Shader(context, brushVertShader, brushFragShader)
   model = new Model(context, this.dabsGeometry, this.shader)
 
