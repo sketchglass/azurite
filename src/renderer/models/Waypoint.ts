@@ -5,7 +5,7 @@ class Waypoint {
   constructor(public pos: Vec2, public pressure: number) {
   }
 
-  static interpolate(start: Waypoint, end: Waypoint, offset: number) {
+  static interpolate(start: Waypoint, end: Waypoint, getNextSpacing: (waypoint: Waypoint) => number, offset: number) {
     const diff = end.pos.sub(start.pos)
     const len = diff.length()
     if (len == 0) {
@@ -15,22 +15,27 @@ class Waypoint {
       }
     }
 
-    const count = Math.floor(len - offset)
     const waypoints: Waypoint[] = []
     const diffPerLen = diff.div(len)
     const pressurePerLen = (end.pressure - start.pressure) / len
+    let remaining = len
+    let spacing = offset
 
-    for (let i = 0; i < count; ++i) {
-      const current = offset + i
+    while (true) {
+      if (remaining < spacing) {
+        return {
+          waypoints,
+          nextOffset: spacing - remaining
+        }
+      }
+      remaining -= spacing
+      const current = len - remaining
       const pos = start.pos.add(diffPerLen.mul(current))
       const pressure = start.pressure + pressurePerLen * current
-      waypoints.push({pos, pressure})
-    }
-    const remaining = len - (count - 1) - offset
-
-    return {
-      waypoints,
-      nextOffset: 1 - remaining
+      const waypoint = {pos, pressure}
+      waypoints.push(waypoint)
+      spacing = Math.max(getNextSpacing(waypoint), 1)
+      console.log(spacing)
     }
   }
 }

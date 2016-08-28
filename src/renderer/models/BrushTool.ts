@@ -44,6 +44,7 @@ class BrushTool extends Tool {
   color = new Vec4(0, 0, 0, 1)
   opacity = 1
   minWidthRatio = 0.5
+  spacingRatio = 0.1
   dabsGeometry = new Geometry(context, new Float32Array(0), [
     {attribute: "aPosition", size: 2},
     {attribute: "aPressure", size: 1},
@@ -59,19 +60,25 @@ class BrushTool extends Tool {
     this.framebuffer.size = this.layer.size
     this.framebuffer.setTexture(this.layer.texture)
 
+    const opacityCorrection = 1 - Math.pow(1 / 255, this.spacingRatio)
+
     const layerSize = this.layer.size
     const transform =
       Transform.scale(new Vec2(2 / layerSize.width, -2 / layerSize.height))
         .merge(Transform.translate(new Vec2(-1, 1)))
     this.shader.setUniform('uTransform', transform)
     this.shader.setUniform('uBrushSize', this.width)
-    this.shader.setUniform('uColor', this.color.mul(this.opacity))
+    this.shader.setUniform('uColor', this.color.mul(this.opacity * opacityCorrection))
     this.shader.setUniform('uMinWidthRatio', this.minWidthRatio)
   }
 
   move(waypoint: Waypoint) {
     if (this.lastWaypoint) {
-      const {waypoints, nextOffset} = Waypoint.interpolate(this.lastWaypoint, waypoint, this.nextDabOffset)
+      const getNextSpacing = (waypoint: Waypoint) => {
+        const brushSize = this.width * (this.minWidthRatio + (1 - this.minWidthRatio) * waypoint.pressure)
+        return brushSize * this.spacingRatio
+      }
+      const {waypoints, nextOffset} = Waypoint.interpolate(this.lastWaypoint, waypoint, getNextSpacing, this.nextDabOffset)
       this.lastWaypoint = waypoint
       this.nextDabOffset = nextOffset
 
