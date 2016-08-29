@@ -70,8 +70,8 @@ class BrushTool extends Tool {
 
     const layerSize = this.layer.size
     const transform =
-      Transform.scale(new Vec2(2 / layerSize.width, -2 / layerSize.height))
-        .merge(Transform.translate(new Vec2(-1, 1)))
+      Transform.scale(new Vec2(2 / layerSize.width, 2 / layerSize.height))
+        .merge(Transform.translate(new Vec2(-1, -1)))
     this.shader.setUniform('uTransform', transform)
     this.shader.setUniform('uBrushSize', this.width)
     this.shader.setUniform('uColor', this.color)

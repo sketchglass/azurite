@@ -73,7 +73,7 @@ class Renderer {
   render() {
     new DefaultFramebuffer(context).use(() => {
       context.clear()
-      const sceneToUnit = Transform.scale(new Vec2(2 / canvas.width, 2 / canvas.height))
+      const sceneToUnit = Transform.scale(new Vec2(2 / canvas.width, -2 / canvas.height)) // invert y
       const transform = this.transform.merge(sceneToUnit)
       this.backgroundShader.setUniform("uTransform", transform)
       this.backgroundModel.render()
