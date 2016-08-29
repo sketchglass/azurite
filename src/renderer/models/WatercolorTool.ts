@@ -137,8 +137,8 @@ class WatercolorTool extends Tool {
 
     const layerSize = this.layer.size
     const transform =
-      Transform.scale(new Vec2(2 / layerSize.width, -2 / layerSize.height))
-        .merge(Transform.translate(new Vec2(-1, 1)))
+      Transform.scale(new Vec2(2 / layerSize.width, 2 / layerSize.height))
+        .merge(Transform.translate(new Vec2(-1, -1)))
     const sampleSize = Math.pow(2, Math.ceil(Math.log2(this.width + 2)))
     this.shader.setUniform('uTransform', transform)
     this.shader.setUniform("uSampleSize", sampleSize)
