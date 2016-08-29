@@ -93,7 +93,8 @@ const brushFragShader = `
     vec4 color = orig * vec4(1.0 - mixRate) + vMixColor * vec4(mixRate);
     // add color
     vec4 addColor = uColor * vec4(uThickness * brushOpacity);
-    gl_FragColor = addColor + color * vec4(1.0 - addColor.a);
+    // gl_FragColor = addColor + color * vec4(1.0 - addColor.a);
+    gl_FragColor = addColor + orig * vec4(1.0 - addColor.a);
   }
 `
 
