@@ -5,19 +5,10 @@ import {Geometry, Shader, Model, GeometryUsage, Framebuffer, Texture, BlendMode}
 import {context} from "../GLContext"
 
 const sampleVertShader = `
-  precision mediump float;
-
-  uniform float uSampleSize;
-
+  precision highp float;
   attribute vec2 aPosition;
-  attribute float aPressure;
-
-  varying vec2 vCenter;
-
   void main(void) {
-    vCenter = floor(aPosition - vec2(0.5)) + vec2(0.5);
-    gl_Position = vec4(0.0, 0.0, 0.0, 1.0);
-    gl_PointSize = uSampleSize;
+    gl_Position = vec4(aPosition, 0.0, 1.0);
   }
 `
 
@@ -28,18 +19,20 @@ const sampleFragShader = `
   uniform float uSampleSize;
   uniform vec2 uLayerSize;
   uniform float uBrushSize;
+  uniform vec2 uPosition;
 
   uniform sampler2D uLayer;
 
   varying vec2 vCenter;
 
   void main(void) {
-    vec2 pointPos = (gl_PointCoord - vec2(0.5)) * vec2(uSampleSize);
+    vec2 fragCoordFromCenter = gl_FragCoord.xy - uSampleSize * vec2(0.5);
+    vec2 pointPos = fragCoordFromCenter + fract(uPosition);
     float r = length(pointPos);
     float radius = uBrushSize * 0.5;
     lowp float opacity = smoothstep(radius, radius - 1.0, r);
 
-    vec2 layerPos = pointPos + vCenter;
+    vec2 layerPos = fragCoordFromCenter + floor(uPosition);
     lowp vec4 orig = texture2D(uLayer, layerPos / uLayerSize);
 
     gl_FragData[0] = orig; // copy of orignal
@@ -62,7 +55,7 @@ const brushVertShader = `
   varying lowp vec4 vMixColor;
 
   void main(void) {
-    vec2 center = floor(aPosition - vec2(0.5)) + vec2(0.5);
+    vec2 center = floor(aPosition) + vec2(0.5);
     vec2 pos = center / uLayerSize * vec2(2.0) - vec2(1.0);
     gl_Position = vec4(pos, 0.0, 1.0);
     gl_PointSize = uSampleSize;
@@ -85,7 +78,8 @@ const brushFragShader = `
   varying lowp vec4 vMixColor;
 
   void main(void) {
-    vec4 orig = texture2D(uSampleOriginal, gl_PointCoord);
+    // TODO: why i need to flip y of gl_PointCoord??
+    vec4 orig = texture2D(uSampleOriginal, vec2(gl_PointCoord.x, 1.0 - gl_PointCoord.y));
     float brushOpacity = texture2D(uSampleShape, gl_PointCoord).a;
 
     float mixRate = brushOpacity * uBlending;
@@ -116,8 +110,16 @@ class WatercolorTool extends Tool {
   shader = new Shader(context, brushVertShader, brushFragShader)
   model = new Model(context, this.dabsGeometry, this.shader)
 
+  sampleGeometry = new Geometry(context, new Float32Array([
+    -1, -1,
+    -1, 1,
+    1, -1,
+    1, 1,
+  ]), [
+    {attribute: "aPosition", size: 2}
+  ], GeometryUsage.Static)
   sampleShader = new Shader(context, sampleVertShader, sampleFragShader)
-  sampleModel = new Model(context, this.dabsGeometry, this.sampleShader)
+  sampleModel = new Model(context, this.sampleGeometry, this.sampleShader)
   sampleFramebuffer = new Framebuffer(context)
   sampleOriginalTexture = new Texture(context, new Vec2(0))
   sampleShapeTexture = new Texture(context, new Vec2(0))
@@ -176,8 +178,9 @@ class WatercolorTool extends Tool {
       for (let i = 0; i < waypoints.length; ++i) {
         context.textureUnits.set(0, this.layer.texture)
         this.sampleShader.setUniformInt("uLayer", 0)
+        this.sampleShader.setUniform("uPosition", waypoints[i].pos)
         this.sampleFramebuffer.use(() => {
-          this.sampleModel.renderPoints(i, 1)
+          this.sampleModel.render()
         })
 
         this.sampleShapeTexture.generateMipmap()
