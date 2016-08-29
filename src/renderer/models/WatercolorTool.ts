@@ -61,7 +61,8 @@ const brushVertShader = `
     gl_PointSize = uSampleSize;
 
     float topLevel = log2(uSampleSize);
-    vMixColor = texture2DLod(uSampleClip, vec2(0.0), topLevel) / vec4(texture2DLod(uSampleShape, vec2(0.0),  topLevel).a);
+    vMixColor = texture2DLod(uSampleClip, vec2(0.5), topLevel) / vec4(texture2DLod(uSampleShape, vec2(0.5),  topLevel).a);
+    //vMixColor = texture2DLod(uSampleClip, vec2(0.5), topLevel);
   }
 `
 
@@ -78,17 +79,16 @@ const brushFragShader = `
   varying lowp vec4 vMixColor;
 
   void main(void) {
-    // TODO: why i need to flip y of gl_PointCoord??
-    vec4 orig = texture2D(uSampleOriginal, vec2(gl_PointCoord.x, 1.0 - gl_PointCoord.y));
-    float brushOpacity = texture2D(uSampleShape, gl_PointCoord).a;
+    vec2 texCoord = vec2(gl_PointCoord.x, 1.0 - gl_PointCoord.y);
+    vec4 orig = texture2D(uSampleOriginal, texCoord);
+    float brushOpacity = texture2D(uSampleShape, texCoord).a;
 
     float mixRate = brushOpacity * uBlending;
     // mix color
     vec4 color = orig * vec4(1.0 - mixRate) + vMixColor * vec4(mixRate);
     // add color
     vec4 addColor = uColor * vec4(uThickness * brushOpacity);
-    // gl_FragColor = addColor + color * vec4(1.0 - addColor.a);
-    gl_FragColor = addColor + orig * vec4(1.0 - addColor.a);
+    gl_FragColor = addColor + color * vec4(1.0 - addColor.a);
   }
 `
 
@@ -129,6 +129,12 @@ class WatercolorTool extends Tool {
     super()
     this.model.setBlendMode(BlendMode.Src)
     this.sampleModel.setBlendMode(BlendMode.Src)
+
+    const {gl} = context
+    for (const texture of [this.sampleShapeTexture, this.sampleClipTexture]) {
+      gl.bindTexture(gl.TEXTURE_2D, texture.texture)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
+    }
   }
 
   start(waypoint: Waypoint) {
