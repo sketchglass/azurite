@@ -51,7 +51,7 @@ const sampleFragShader = `
 const brushVertShader = `
   precision mediump float;
 
-  uniform mat3 uTransform;
+  uniform vec2 uLayerSize;
   uniform float uSampleSize;
   attribute vec2 aPosition;
   attribute float aPressure;
@@ -63,8 +63,8 @@ const brushVertShader = `
 
   void main(void) {
     vec2 center = floor(aPosition - vec2(0.5)) + vec2(0.5);
-    vec3 pos = uTransform * vec3(center, 1.0);
-    gl_Position = vec4(pos.xy, 0.0, 1.0);
+    vec2 pos = center / uLayerSize * vec2(2.0) - vec2(1.0);
+    gl_Position = vec4(pos, 0.0, 1.0);
     gl_PointSize = uSampleSize;
 
     float topLevel = log2(uSampleSize);
@@ -137,11 +137,8 @@ class WatercolorTool extends Tool {
     this.framebuffer.setTexture(this.layer.texture)
 
     const layerSize = this.layer.size
-    const transform =
-      Transform.scale(new Vec2(2 / layerSize.width, 2 / layerSize.height))
-        .merge(Transform.translate(new Vec2(-1, -1)))
     const sampleSize = Math.pow(2, Math.ceil(Math.log2(this.width + 2)))
-    this.shader.setUniform('uTransform', transform)
+    this.shader.setUniform('uLayerSize', layerSize)
     this.shader.setUniform("uSampleSize", sampleSize)
     this.shader.setUniform('uBlending', this.blending)
     this.shader.setUniform('uThickness', this.thickness)
