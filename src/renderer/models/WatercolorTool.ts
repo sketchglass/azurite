@@ -7,7 +7,9 @@ import {context} from "../GLContext"
 const sampleVertShader = `
   precision highp float;
   attribute vec2 aPosition;
+  varying vec2 vPosition;
   void main(void) {
+    vPosition = aPosition;
     gl_Position = vec4(aPosition, 0.0, 1.0);
   }
 `
@@ -23,17 +25,18 @@ const sampleFragShader = `
 
   uniform sampler2D uLayer;
 
-  varying vec2 vCenter;
+  varying vec2 vPosition;
 
   void main(void) {
-    vec2 fragCoordFromCenter = gl_FragCoord.xy - uSampleSize * vec2(0.5);
-    vec2 pointPos = fragCoordFromCenter + fract(uPosition);
+    vec2 offset = vPosition * vec2(uSampleSize * 0.5);
+
+    vec2 pointPos = fract(uPosition) + offset;
     float r = length(pointPos);
     float radius = uBrushSize * 0.5;
-    lowp float opacity = smoothstep(radius, radius - 1.0, r);
+    float opacity = smoothstep(radius, radius - 1.0, r);
 
-    vec2 layerPos = fragCoordFromCenter + floor(uPosition);
-    lowp vec4 orig = texture2D(uLayer, layerPos / uLayerSize);
+    vec2 layerPos = floor(uPosition) + offset;
+    vec4 orig = texture2D(uLayer, layerPos / uLayerSize);
 
     gl_FragData[0] = orig; // copy of orignal
     gl_FragData[1] = vec4(opacity); // brush shape
@@ -42,7 +45,7 @@ const sampleFragShader = `
 `
 
 const brushVertShader = `
-  precision mediump float;
+  precision highp float;
 
   uniform vec2 uLayerSize;
   uniform float uSampleSize;
