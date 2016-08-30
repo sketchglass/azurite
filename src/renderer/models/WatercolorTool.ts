@@ -30,6 +30,10 @@ const sampleOriginalFragShader = `
   varying vec2 vOffset;
 
   void main(void) {
+    float r = distance(fract(uBrushPos), vOffset);
+    if (r >= uBrushRadius) {
+      discard;
+    }
     vec2 layerPos = floor(uBrushPos) + vOffset;
     vec2 layerUV = layerPos / uLayerSize;
 
