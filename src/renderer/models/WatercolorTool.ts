@@ -67,39 +67,6 @@ const sampleClipFragShader = `
   }
 `
 
-/*
-const sampleFragShader = `
-  #extension GL_EXT_draw_buffers : require
-  precision mediump float;
-
-  uniform vec2 uLayerSize;
-  uniform float uBrushRadius;
-  uniform vec2 uBrushPos;
-  uniform sampler2D uLayer;
-
-  varying vec2 vOffset;
-
-  void main(void) {
-    float r = distance(fract(uBrushPos), vOffset);
-    if (uBrushRadius <= r) {
-      gl_FragData[0] = vec4(0.0);
-      gl_FragData[1] = vec4(0.0);
-      gl_FragData[2] = vec4(0.0);
-      return;
-    }
-    float opacity = smoothstep(uBrushRadius, uBrushRadius - 1.0, r);
-
-    vec2 layerPos = floor(uBrushPos) + vOffset;
-    vec2 layerUV = layerPos / uLayerSize;
-    vec4 orig = texture2D(uLayer, layerUV);
-
-    gl_FragData[0] = orig; // copy of orignal
-    gl_FragData[1] = vec4(opacity); // brush shape
-    gl_FragData[2] = orig * opacity; // original clipped by brush shape
-  }
-`
-*/
-
 const brushVertShader = `
   precision highp float;
 
