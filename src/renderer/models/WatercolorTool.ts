@@ -31,6 +31,12 @@ const sampleFragShader = `
   void main(void) {
     float r = distance(fract(uPosition), vOffset);
     float radius = uBrushSize * 0.5;
+    if (radius <= r) {
+      gl_FragData[0] = vec4(0.0);
+      gl_FragData[1] = vec4(0.0);
+      gl_FragData[2] = vec4(0.0);
+      return;
+    }
     float opacity = smoothstep(radius, radius - 1.0, r);
 
     vec2 layerPos = floor(uPosition) + vOffset;
@@ -82,14 +88,17 @@ const brushFragShader = `
   varying vec2 vTexCoord;
 
   void main(void) {
+    float opacity = texture2D(uSampleShape, vTexCoord).a;
+    if (opacity == 0.0) {
+      discard;
+    }
     vec4 orig = texture2D(uSampleOriginal, vTexCoord);
-    float brushOpacity = texture2D(uSampleShape, vTexCoord).a;
 
-    float mixRate = brushOpacity * uBlending;
+    float mixRate = opacity * uBlending;
     // mix color
     vec4 color = orig * (1.0 - mixRate) + vMixColor * mixRate;
     // add color
-    vec4 addColor = uColor * (uThickness * brushOpacity);
+    vec4 addColor = uColor * (uThickness * opacity);
 
     gl_FragColor = addColor + color * (1.0 - addColor.a);
   }
