@@ -28,7 +28,7 @@ const sampleFragShader = `
   varying vec2 vPosition;
 
   void main(void) {
-    vec2 offset = vPosition * vec2(uSampleSize * 0.5);
+    vec2 offset = vPosition * (uSampleSize * 0.5);
 
     float r = distance(fract(uPosition), offset);
     float radius = uBrushSize * 0.5;
@@ -40,7 +40,7 @@ const sampleFragShader = `
 
     gl_FragData[0] = orig; // copy of orignal
     gl_FragData[1] = vec4(opacity); // brush shape
-    gl_FragData[2] = orig * vec4(opacity); // original clipped by brush shape
+    gl_FragData[2] = orig * opacity; // original clipped by brush shape
   }
 `
 
@@ -59,9 +59,9 @@ const brushVertShader = `
   varying vec2 vTexCoord;
 
   void main(void) {
-    vTexCoord = aPosition * vec2(0.5) + vec2(0.5);
-    vec2 layerPos = floor(uBrushPosition) + aPosition * vec2(uSampleSize * 0.5);
-    vec2 normalizedPos = layerPos / uLayerSize * vec2(2.0) - vec2(1.0);
+    vTexCoord = aPosition * 0.5 + 0.5;
+    vec2 layerPos = floor(uBrushPosition) + aPosition * (uSampleSize * 0.5);
+    vec2 normalizedPos = layerPos / uLayerSize * 2.0 - 1.0;
     gl_Position = vec4(normalizedPos, 0.0, 1.0);
 
     float topLevel = log2(uSampleSize);
@@ -88,11 +88,11 @@ const brushFragShader = `
 
     float mixRate = brushOpacity * uBlending;
     // mix color
-    vec4 color = orig * vec4(1.0 - mixRate) + vMixColor * vec4(mixRate);
+    vec4 color = orig * (1.0 - mixRate) + vMixColor * mixRate;
     // add color
-    vec4 addColor = uColor * vec4(uThickness * brushOpacity);
+    vec4 addColor = uColor * (uThickness * brushOpacity);
 
-    gl_FragColor = addColor + color * vec4(1.0 - addColor.a);
+    gl_FragColor = addColor + color * (1.0 - addColor.a);
   }
 `
 
