@@ -9,12 +9,9 @@ const sampleVertShader = `
 
   uniform mediump float uSampleSize;
   attribute vec2 aPosition;
-  attribute vec2 aCenter;
   varying mediump vec2 vOffset;
-  varying mediump vec2 vCenter;
 
   void main(void) {
-    vCenter = aCenter;
     vOffset = aPosition * (uSampleSize * 0.5);
     gl_Position = vec4(aPosition, 0.0, 1.0);
   }
@@ -26,13 +23,13 @@ const sampleFragShader = `
 
   uniform vec2 uLayerSize;
   uniform float uBrushRadius;
+  uniform vec2 uPosition;
   uniform sampler2D uLayer;
 
   varying vec2 vOffset;
-  varying vec2 vCenter;
 
   void main(void) {
-    float r = distance(fract(vCenter), vOffset);
+    float r = distance(fract(uPosition), vOffset);
     if (uBrushRadius <= r) {
       gl_FragData[0] = vec4(0.0);
       gl_FragData[1] = vec4(0.0);
@@ -41,7 +38,7 @@ const sampleFragShader = `
     }
     float opacity = smoothstep(uBrushRadius, uBrushRadius - 1.0, r);
 
-    vec2 layerPos = floor(vCenter) + vOffset;
+    vec2 layerPos = floor(uPosition) + vOffset;
     vec2 layerUV = layerPos / uLayerSize;
     vec4 orig = texture2D(uLayer, layerUV);
 
@@ -56,8 +53,8 @@ const brushVertShader = `
 
   uniform vec2 uLayerSize;
   uniform float uSampleSize;
+  uniform vec2 uBrushPosition;
   attribute vec2 aPosition;
-  attribute vec2 aCenter;
 
   uniform sampler2D uSampleShape;
   uniform sampler2D uSampleClip;
@@ -67,7 +64,7 @@ const brushVertShader = `
 
   void main(void) {
     vTexCoord = aPosition * 0.5 + 0.5;
-    vec2 layerPos = floor(aCenter) + aPosition * (uSampleSize * 0.5);
+    vec2 layerPos = floor(uBrushPosition) + aPosition * (uSampleSize * 0.5);
     vec2 normalizedPos = layerPos / uLayerSize * 2.0 - 1.0;
     gl_Position = vec4(normalizedPos, 0.0, 1.0);
 
@@ -116,19 +113,21 @@ class WatercolorTool extends Tool {
   blending = 0.5
   thickness = 0.5
 
-  dabsGeometry = new Geometry(context, new Float32Array(0), [
-    {attribute: "aPosition", size: 2},
-    {attribute: "aCenter", size: 2},
-    {attribute: "aPressure", size: 1},
+  squareGeometry = new Geometry(context, new Float32Array([
+    -1, -1,
+    -1, 1,
+    1, -1,
+    1, 1,
+  ]), [
+    {attribute: "aPosition", size: 2}
   ], GeometryUsage.Static)
 
   framebuffer = new Framebuffer(context)
   shader = new Shader(context, brushVertShader, brushFragShader)
-  model = new Model(context, this.dabsGeometry, this.shader)
+  model = new Model(context, this.squareGeometry, this.shader)
 
-  sampleSize = 0
   sampleShader = new Shader(context, sampleVertShader, sampleFragShader)
-  sampleModel = new Model(context, this.dabsGeometry, this.sampleShader)
+  sampleModel = new Model(context, this.squareGeometry, this.sampleShader)
   sampleFramebuffer = new Framebuffer(context)
   sampleOriginalTexture = new Texture(context, new Vec2(0))
   sampleShapeTexture = new Texture(context, new Vec2(0))
@@ -154,20 +153,16 @@ class WatercolorTool extends Tool {
     this.framebuffer.setTexture(this.layer.texture)
 
     const layerSize = this.layer.size
-    const sampleSize = this.sampleSize = Math.pow(2, Math.ceil(Math.log2(this.width + 2)))
+    const sampleSize = Math.pow(2, Math.ceil(Math.log2(this.width + 2)))
     this.shader.setUniform('uLayerSize', layerSize)
     this.shader.setUniform("uSampleSize", sampleSize)
     this.shader.setUniform('uBlending', this.blending)
     this.shader.setUniform('uThickness', this.thickness)
     this.shader.setUniform('uColor', this.color)
-    this.shader.setUniformInt("uSampleOriginal", 0)
-    this.shader.setUniformInt("uSampleShape", 1)
-    this.shader.setUniformInt("uSampleClip", 2)
 
     this.sampleShader.setUniform("uLayerSize", layerSize)
     this.sampleShader.setUniform("uSampleSize", sampleSize)
     this.sampleShader.setUniform("uBrushRadius", this.width * 0.5)
-    this.sampleShader.setUniformInt("uLayer", 0)
 
     this.sampleOriginalTexture.resize(new Vec2(sampleSize))
     this.sampleShapeTexture.resize(new Vec2(sampleSize))
@@ -186,20 +181,14 @@ class WatercolorTool extends Tool {
         return
       }
 
-      const geomData = new Float32Array(waypoints.length * 20)
-      for (const [i, {pos, pressure}] of waypoints.entries()) {
-        const positions = [[-1, -1], [-1, 1], [1, -1], [1, 1]]
-        for (const [j, [x, y]] of positions.entries()) {
-          geomData.set([x, y, pos.x, pos.y, pressure], i * 20 + j * 5)
-        }
-      }
-      this.dabsGeometry.data = geomData
-      this.dabsGeometry.updateBuffer()
+      const vertices = new Float32Array(waypoints.length * 3)
 
-      for (let [i, waypoint] of waypoints.entries()) {
+      for (let i = 0; i < waypoints.length; ++i) {
         context.textureUnits.set(0, this.layer.texture)
+        this.sampleShader.setUniformInt("uLayer", 0)
+        this.sampleShader.setUniform("uPosition", waypoints[i].pos)
         this.sampleFramebuffer.use(() => {
-          this.sampleModel.render(i * 4, 4)
+          this.sampleModel.render()
         })
 
         this.sampleShapeTexture.generateMipmap()
@@ -208,9 +197,12 @@ class WatercolorTool extends Tool {
         context.textureUnits.set(0, this.sampleOriginalTexture)
         context.textureUnits.set(1, this.sampleShapeTexture)
         context.textureUnits.set(2, this.sampleClipTexture)
-
+        this.shader.setUniformInt("uSampleOriginal", 0)
+        this.shader.setUniformInt("uSampleShape", 1)
+        this.shader.setUniformInt("uSampleClip", 2)
+        this.shader.setUniform("uBrushPosition", waypoints[i].pos)
         this.framebuffer.use(() => {
-          this.model.render(i * 4, 4)
+          this.model.render()
         })
         context.textureUnits.delete(0)
         context.textureUnits.delete(1)
