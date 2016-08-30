@@ -6,10 +6,13 @@ import {context} from "../GLContext"
 
 const sampleVertShader = `
   precision highp float;
+
+  uniform mediump float uSampleSize;
   attribute vec2 aPosition;
-  varying vec2 vPosition;
+  varying mediump vec2 vOffset;
+
   void main(void) {
-    vPosition = aPosition;
+    vOffset = aPosition * (uSampleSize * 0.5);
     gl_Position = vec4(aPosition, 0.0, 1.0);
   }
 `
@@ -18,23 +21,19 @@ const sampleFragShader = `
   #extension GL_EXT_draw_buffers : require
   precision mediump float;
 
-  uniform float uSampleSize;
   uniform vec2 uLayerSize;
   uniform float uBrushSize;
   uniform vec2 uPosition;
-
   uniform sampler2D uLayer;
 
-  varying vec2 vPosition;
+  varying vec2 vOffset;
 
   void main(void) {
-    vec2 offset = vPosition * (uSampleSize * 0.5);
-
-    float r = distance(fract(uPosition), offset);
+    float r = distance(fract(uPosition), vOffset);
     float radius = uBrushSize * 0.5;
     float opacity = smoothstep(radius, radius - 1.0, r);
 
-    vec2 layerPos = floor(uPosition) + offset;
+    vec2 layerPos = floor(uPosition) + vOffset;
     vec2 layerUV = layerPos / uLayerSize;
     vec4 orig = texture2D(uLayer, layerUV);
 
@@ -72,9 +71,9 @@ const brushVertShader = `
 const brushFragShader = `
   precision mediump float;
 
-  uniform lowp float uBlending;
-  uniform lowp float uThickness;
-  uniform lowp vec4 uColor;
+  uniform float uBlending;
+  uniform float uThickness;
+  uniform vec4 uColor;
 
   uniform sampler2D uSampleOriginal;
   uniform sampler2D uSampleShape;
