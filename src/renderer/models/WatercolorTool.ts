@@ -30,13 +30,13 @@ const sampleFragShader = `
   void main(void) {
     vec2 offset = vPosition * vec2(uSampleSize * 0.5);
 
-    vec2 pointPos = fract(uPosition) + offset;
-    float r = length(pointPos);
+    float r = distance(fract(uPosition), offset);
     float radius = uBrushSize * 0.5;
     float opacity = smoothstep(radius, radius - 1.0, r);
 
     vec2 layerPos = floor(uPosition) + offset;
-    vec4 orig = texture2D(uLayer, layerPos / uLayerSize);
+    vec2 layerUV = layerPos / uLayerSize;
+    vec4 orig = texture2D(uLayer, layerUV);
 
     gl_FragData[0] = orig; // copy of orignal
     gl_FragData[1] = vec4(opacity); // brush shape
@@ -59,9 +59,8 @@ const brushVertShader = `
   varying vec2 vTexCoord;
 
   void main(void) {
-    vec2 texCoord = aPosition * vec2(0.5) + vec2(0.5);
-    vTexCoord = vec2(1.0) - texCoord;
-    vec2 layerPos = floor(uBrushPosition) - aPosition * vec2(uSampleSize * 0.5);
+    vTexCoord = aPosition * vec2(0.5) + vec2(0.5);
+    vec2 layerPos = floor(uBrushPosition) + aPosition * vec2(uSampleSize * 0.5);
     vec2 normalizedPos = layerPos / uLayerSize * vec2(2.0) - vec2(1.0);
     gl_Position = vec4(normalizedPos, 0.0, 1.0);
 
@@ -92,6 +91,7 @@ const brushFragShader = `
     vec4 color = orig * vec4(1.0 - mixRate) + vMixColor * vec4(mixRate);
     // add color
     vec4 addColor = uColor * vec4(uThickness * brushOpacity);
+
     gl_FragColor = addColor + color * vec4(1.0 - addColor.a);
   }
 `
