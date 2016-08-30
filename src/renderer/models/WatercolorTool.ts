@@ -143,6 +143,11 @@ class WatercolorTool extends Tool {
       gl.bindTexture(gl.TEXTURE_2D, texture.texture)
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
     }
+
+    this.shader.setUniformInt("uSampleOriginal", 0)
+    this.shader.setUniformInt("uSampleShape", 1)
+    this.shader.setUniformInt("uSampleClip", 2)
+    this.sampleShader.setUniformInt("uLayer", 0)
   }
 
   start(waypoint: Waypoint) {
@@ -185,7 +190,6 @@ class WatercolorTool extends Tool {
 
       for (let i = 0; i < waypoints.length; ++i) {
         context.textureUnits.set(0, this.layer.texture)
-        this.sampleShader.setUniformInt("uLayer", 0)
         this.sampleShader.setUniform("uBrushPos", waypoints[i].pos)
         this.sampleFramebuffer.use(() => {
           this.sampleModel.render()
@@ -197,9 +201,6 @@ class WatercolorTool extends Tool {
         context.textureUnits.set(0, this.sampleOriginalTexture)
         context.textureUnits.set(1, this.sampleShapeTexture)
         context.textureUnits.set(2, this.sampleClipTexture)
-        this.shader.setUniformInt("uSampleOriginal", 0)
-        this.shader.setUniformInt("uSampleShape", 1)
-        this.shader.setUniformInt("uSampleClip", 2)
         this.shader.setUniform("uBrushPos", waypoints[i].pos)
         this.framebuffer.use(() => {
           this.model.render()
