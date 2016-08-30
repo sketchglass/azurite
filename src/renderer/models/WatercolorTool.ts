@@ -19,55 +19,45 @@ const sampleVertShader = `
   }
 `
 
-const sampleOriginalFragShader = `
+enum SampleModes {
+  Original, Shape, Clip
+}
+
+const sampleFragShader = `
   precision mediump float;
 
   uniform vec2 uLayerSize;
   uniform float uBrushRadius;
   uniform vec2 uBrushPos;
   uniform sampler2D uLayer;
+  uniform int uMode;
 
   varying vec2 vOffset;
+
+  vec4 fetchOriginal() {
+    vec2 layerPos = floor(uBrushPos) + vOffset;
+    vec2 layerUV = layerPos / uLayerSize;
+    return texture2D(uLayer, layerUV);
+  }
+
+  float calcOpacity(float r) {
+    return smoothstep(uBrushRadius, uBrushRadius - 1.0, r);
+  }
 
   void main(void) {
     float r = distance(fract(uBrushPos), vOffset);
     if (r >= uBrushRadius) {
-      discard;
+      gl_FragColor = vec4(0.0);
+      return;
     }
-    vec2 layerPos = floor(uBrushPos) + vOffset;
-    vec2 layerUV = layerPos / uLayerSize;
 
-    gl_FragColor = texture2D(uLayer, layerUV);
-  }
-`
-
-const sampleShapeFragShader = `
-  precision mediump float;
-
-  uniform vec2 uLayerSize;
-  uniform float uBrushRadius;
-  uniform vec2 uBrushPos;
-  uniform sampler2D uLayer;
-
-  varying vec2 vOffset;
-
-  void main(void) {
-    float r = distance(fract(uBrushPos), vOffset);
-    float opacity = smoothstep(uBrushRadius, uBrushRadius - 1.0, r);
-    gl_FragColor = vec4(opacity);
-  }
-`
-
-const sampleClipFragShader = `
-  precision mediump float;
-
-  varying vec2 vTexCoord;
-
-  uniform sampler2D uSampleOriginal;
-  uniform sampler2D uSampleShape;
-
-  void main(void) {
-    gl_FragColor = texture2D(uSampleOriginal, vTexCoord) * texture2D(uSampleShape, vTexCoord).a;
+    if (uMode == ${SampleModes.Original}) {
+      gl_FragColor = fetchOriginal();
+    } else if (uMode == ${SampleModes.Shape}) {
+      gl_FragColor = vec4(calcOpacity(r));
+    } else {
+      gl_FragColor = fetchOriginal() * calcOpacity(r);
+    }
   }
 `
 
@@ -149,30 +139,22 @@ class WatercolorTool extends Tool {
   shader = new Shader(context, brushVertShader, brushFragShader)
   model = new Model(context, this.squareGeometry, this.shader)
 
-  sampleOriginalShader = new Shader(context, sampleVertShader, sampleOriginalFragShader)
-  sampleOriginalModel = new Model(context, this.squareGeometry, this.sampleOriginalShader)
+  sampleShader = new Shader(context, sampleVertShader, sampleFragShader)
+  sampleModel = new Model(context, this.squareGeometry, this.sampleShader)
+
   sampleOriginalTexture = new Texture(context, new Vec2(0))
   sampleOrigianlFramebuffer = new Framebuffer(context, this.sampleOriginalTexture)
-
-  sampleShapeShader = new Shader(context, sampleVertShader, sampleShapeFragShader)
-  sampleShapeModel = new Model(context, this.squareGeometry, this.sampleShapeShader)
   sampleShapeTexture = new Texture(context, new Vec2(0))
   sampleShapeFramebuffer = new Framebuffer(context, this.sampleShapeTexture)
-
-  sampleClipShader = new Shader(context, sampleVertShader, sampleClipFragShader)
-  sampleClipModel = new Model(context, this.squareGeometry, this.sampleClipShader)
   sampleClipTexture = new Texture(context, new Vec2(0))
   sampleClipFramebuffer = new Framebuffer(context, this.sampleClipTexture)
 
-  shaders = [this.shader, this.sampleOriginalShader, this.sampleShapeShader, this.sampleClipShader]
-
+  shaders = [this.shader, this.sampleShader]
 
   constructor() {
     super()
     this.model.setBlendMode(BlendMode.Src)
-    this.sampleOriginalModel.setBlendMode(BlendMode.Src)
-    this.sampleShapeModel.setBlendMode(BlendMode.Src)
-    this.sampleClipModel.setBlendMode(BlendMode.Src)
+    this.sampleModel.setBlendMode(BlendMode.Src)
 
     const {gl} = context
     for (const texture of [this.sampleShapeTexture, this.sampleClipTexture]) {
@@ -183,9 +165,7 @@ class WatercolorTool extends Tool {
     this.shader.setUniformInt("uSampleOriginal", 0)
     this.shader.setUniformInt("uSampleShape", 1)
     this.shader.setUniformInt("uSampleClip", 2)
-    this.sampleOriginalShader.setUniformInt("uLayer", 0)
-    this.sampleClipShader.setUniformInt("uSampleOriginal", 0)
-    this.sampleClipShader.setUniformInt("uSampleShape", 1)
+    this.sampleShader.setUniformInt("uLayer", 0)
   }
 
   start(waypoint: Waypoint) {
@@ -229,16 +209,17 @@ class WatercolorTool extends Tool {
         }
 
         context.textureUnits.set(0, this.layer.texture)
+        this.sampleShader.setUniformInt("uMode", SampleModes.Original)
         this.sampleOrigianlFramebuffer.use(() => {
-          this.sampleOriginalModel.render()
+          this.sampleModel.render()
         })
+        this.sampleShader.setUniformInt("uMode", SampleModes.Shape)
         this.sampleShapeFramebuffer.use(() => {
-          this.sampleShapeModel.render()
+          this.sampleModel.render()
         })
-        context.textureUnits.set(0, this.sampleOriginalTexture)
-        context.textureUnits.set(1, this.sampleShapeTexture)
+        this.sampleShader.setUniformInt("uMode", SampleModes.Clip)
         this.sampleClipFramebuffer.use(() => {
-          this.sampleClipModel.render()
+          this.sampleModel.render()
         })
 
         this.sampleShapeTexture.generateMipmap()
