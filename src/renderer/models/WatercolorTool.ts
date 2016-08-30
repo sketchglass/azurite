@@ -46,28 +46,29 @@ const brushVertShader = `
 
   uniform vec2 uLayerSize;
   uniform float uSampleSize;
+  uniform vec2 uBrushPosition;
   attribute vec2 aPosition;
-  attribute float aPressure;
 
   uniform sampler2D uSampleShape;
   uniform sampler2D uSampleClip;
 
-  varying lowp vec4 vMixColor;
+  varying vec4 vMixColor;
+  varying vec2 vTexCoord;
 
   void main(void) {
-    vec2 center = floor(aPosition) + vec2(0.5);
-    vec2 pos = center / uLayerSize * vec2(2.0) - vec2(1.0);
-    gl_Position = vec4(pos, 0.0, 1.0);
-    gl_PointSize = uSampleSize;
+    vec2 texCoord = aPosition * vec2(0.5) + vec2(0.5);
+    vTexCoord = vec2(1.0) - texCoord;
+    vec2 layerPos = floor(uBrushPosition) - aPosition * vec2(uSampleSize * 0.5);
+    vec2 normalizedPos = layerPos / uLayerSize * vec2(2.0) - vec2(1.0);
+    gl_Position = vec4(normalizedPos, 0.0, 1.0);
 
     float topLevel = log2(uSampleSize);
     vMixColor = texture2DLod(uSampleClip, vec2(0.5), topLevel) / vec4(texture2DLod(uSampleShape, vec2(0.5),  topLevel).a);
-    //vMixColor = texture2DLod(uSampleClip, vec2(0.5), topLevel);
   }
 `
 
 const brushFragShader = `
-  precision lowp float;
+  precision mediump float;
 
   uniform lowp float uBlending;
   uniform lowp float uThickness;
@@ -76,12 +77,12 @@ const brushFragShader = `
   uniform sampler2D uSampleOriginal;
   uniform sampler2D uSampleShape;
 
-  varying lowp vec4 vMixColor;
+  varying vec4 vMixColor;
+  varying vec2 vTexCoord;
 
   void main(void) {
-    vec2 texCoord = vec2(gl_PointCoord.x, 1.0 - gl_PointCoord.y);
-    vec4 orig = texture2D(uSampleOriginal, texCoord);
-    float brushOpacity = texture2D(uSampleShape, texCoord).a;
+    vec4 orig = texture2D(uSampleOriginal, vTexCoord);
+    float brushOpacity = texture2D(uSampleShape, vTexCoord).a;
 
     float mixRate = brushOpacity * uBlending;
     // mix color
@@ -102,15 +103,7 @@ class WatercolorTool extends Tool {
   blending = 0.5
   thickness = 0.5
 
-  dabsGeometry = new Geometry(context, new Float32Array(0), [
-    {attribute: "aPosition", size: 2},
-    {attribute: "aPressure", size: 1},
-  ], GeometryUsage.Stream)
-  framebuffer = new Framebuffer(context)
-  shader = new Shader(context, brushVertShader, brushFragShader)
-  model = new Model(context, this.dabsGeometry, this.shader)
-
-  sampleGeometry = new Geometry(context, new Float32Array([
+  squareGeometry = new Geometry(context, new Float32Array([
     -1, -1,
     -1, 1,
     1, -1,
@@ -118,8 +111,13 @@ class WatercolorTool extends Tool {
   ]), [
     {attribute: "aPosition", size: 2}
   ], GeometryUsage.Static)
+
+  framebuffer = new Framebuffer(context)
+  shader = new Shader(context, brushVertShader, brushFragShader)
+  model = new Model(context, this.squareGeometry, this.shader)
+
   sampleShader = new Shader(context, sampleVertShader, sampleFragShader)
-  sampleModel = new Model(context, this.sampleGeometry, this.sampleShader)
+  sampleModel = new Model(context, this.squareGeometry, this.sampleShader)
   sampleFramebuffer = new Framebuffer(context)
   sampleOriginalTexture = new Texture(context, new Vec2(0))
   sampleShapeTexture = new Texture(context, new Vec2(0))
@@ -174,12 +172,6 @@ class WatercolorTool extends Tool {
       }
 
       const vertices = new Float32Array(waypoints.length * 3)
-      for (const [i, {pos, pressure}] of waypoints.entries()) {
-        vertices.set([pos.x, pos.y, pressure], i * 3)
-      }
-
-      this.dabsGeometry.data = vertices
-      this.dabsGeometry.updateBuffer()
 
       for (let i = 0; i < waypoints.length; ++i) {
         context.textureUnits.set(0, this.layer.texture)
@@ -198,8 +190,9 @@ class WatercolorTool extends Tool {
         this.shader.setUniformInt("uSampleOriginal", 0)
         this.shader.setUniformInt("uSampleShape", 1)
         this.shader.setUniformInt("uSampleClip", 2)
+        this.shader.setUniform("uBrushPosition", waypoints[i].pos)
         this.framebuffer.use(() => {
-          this.model.renderPoints(i, 1)
+          this.model.render()
         })
         context.textureUnits.delete(0)
         context.textureUnits.delete(1)
