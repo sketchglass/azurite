@@ -23,13 +23,13 @@ const sampleFragShader = `
 
   uniform vec2 uLayerSize;
   uniform float uBrushRadius;
-  uniform vec2 uPosition;
+  uniform vec2 uBrushPos;
   uniform sampler2D uLayer;
 
   varying vec2 vOffset;
 
   void main(void) {
-    float r = distance(fract(uPosition), vOffset);
+    float r = distance(fract(uBrushPos), vOffset);
     if (uBrushRadius <= r) {
       gl_FragData[0] = vec4(0.0);
       gl_FragData[1] = vec4(0.0);
@@ -38,7 +38,7 @@ const sampleFragShader = `
     }
     float opacity = smoothstep(uBrushRadius, uBrushRadius - 1.0, r);
 
-    vec2 layerPos = floor(uPosition) + vOffset;
+    vec2 layerPos = floor(uBrushPos) + vOffset;
     vec2 layerUV = layerPos / uLayerSize;
     vec4 orig = texture2D(uLayer, layerUV);
 
@@ -53,7 +53,7 @@ const brushVertShader = `
 
   uniform vec2 uLayerSize;
   uniform float uSampleSize;
-  uniform vec2 uBrushPosition;
+  uniform vec2 uBrushPos;
   attribute vec2 aPosition;
 
   uniform sampler2D uSampleShape;
@@ -64,7 +64,7 @@ const brushVertShader = `
 
   void main(void) {
     vTexCoord = aPosition * 0.5 + 0.5;
-    vec2 layerPos = floor(uBrushPosition) + aPosition * (uSampleSize * 0.5);
+    vec2 layerPos = floor(uBrushPos) + aPosition * (uSampleSize * 0.5);
     vec2 normalizedPos = layerPos / uLayerSize * 2.0 - 1.0;
     gl_Position = vec4(normalizedPos, 0.0, 1.0);
 
@@ -186,7 +186,7 @@ class WatercolorTool extends Tool {
       for (let i = 0; i < waypoints.length; ++i) {
         context.textureUnits.set(0, this.layer.texture)
         this.sampleShader.setUniformInt("uLayer", 0)
-        this.sampleShader.setUniform("uPosition", waypoints[i].pos)
+        this.sampleShader.setUniform("uBrushPos", waypoints[i].pos)
         this.sampleFramebuffer.use(() => {
           this.sampleModel.render()
         })
@@ -200,7 +200,7 @@ class WatercolorTool extends Tool {
         this.shader.setUniformInt("uSampleOriginal", 0)
         this.shader.setUniformInt("uSampleShape", 1)
         this.shader.setUniformInt("uSampleClip", 2)
-        this.shader.setUniform("uBrushPosition", waypoints[i].pos)
+        this.shader.setUniform("uBrushPos", waypoints[i].pos)
         this.framebuffer.use(() => {
           this.model.render()
         })
