@@ -22,7 +22,7 @@ const sampleFragShader = `
   precision mediump float;
 
   uniform vec2 uLayerSize;
-  uniform float uBrushSize;
+  uniform float uBrushRadius;
   uniform vec2 uPosition;
   uniform sampler2D uLayer;
 
@@ -30,14 +30,13 @@ const sampleFragShader = `
 
   void main(void) {
     float r = distance(fract(uPosition), vOffset);
-    float radius = uBrushSize * 0.5;
-    if (radius <= r) {
+    if (uBrushRadius <= r) {
       gl_FragData[0] = vec4(0.0);
       gl_FragData[1] = vec4(0.0);
       gl_FragData[2] = vec4(0.0);
       return;
     }
-    float opacity = smoothstep(radius, radius - 1.0, r);
+    float opacity = smoothstep(uBrushRadius, uBrushRadius - 1.0, r);
 
     vec2 layerPos = floor(uPosition) + vOffset;
     vec2 layerUV = layerPos / uLayerSize;
@@ -163,7 +162,7 @@ class WatercolorTool extends Tool {
 
     this.sampleShader.setUniform("uLayerSize", layerSize)
     this.sampleShader.setUniform("uSampleSize", sampleSize)
-    this.sampleShader.setUniform("uBrushSize", this.width)
+    this.sampleShader.setUniform("uBrushRadius", this.width * 0.5)
 
     this.sampleOriginalTexture.resize(new Vec2(sampleSize))
     this.sampleShapeTexture.resize(new Vec2(sampleSize))
