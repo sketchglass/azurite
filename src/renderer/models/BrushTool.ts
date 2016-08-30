@@ -65,7 +65,6 @@ class BrushTool extends Tool {
     this.lastWaypoint = waypoint
     this.nextDabOffset = 0
 
-    this.framebuffer.size = this.layer.size
     this.framebuffer.setTexture(this.layer.texture)
 
     const layerSize = this.layer.size

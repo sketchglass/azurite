@@ -242,40 +242,31 @@ class Model {
 export
 class Framebuffer {
   framebuffer: WebGLFramebuffer
-  size = new Vec2(0)
-  constructor(public context: Context) {
+  constructor(public context: Context, public texture?: Texture) {
     const {gl, drawBuffersExt} = context
     this.framebuffer = gl.createFramebuffer()!
+    if (texture) {
+      this.setTexture(texture)
+    }
   }
 
   setTexture(texture: Texture) {
     const {gl} = this.context
-    this.size = texture.size
+    this.texture = texture
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture.texture, 0)
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
   }
 
-  setTextures(textures: Texture[]) {
-    const {gl, drawBuffersExt} = this.context
-    this.size = textures[0].size
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
-    const buffers: any[] = []
-    for (const [i, texture] of textures.entries()) {
-      const buffer = drawBuffersExt.COLOR_ATTACHMENT0_WEBGL + i
-      gl.framebufferTexture2D(gl.FRAMEBUFFER, buffer, gl.TEXTURE_2D, texture.texture, 0)
-      buffers.push(buffer)
-    }
-    drawBuffersExt.drawBuffersWEBGL(buffers)
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
-  }
-
   use(render: () => void) {
-    const {gl} = this.context
-    gl.viewport(0, 0, this.size.width, this.size.height)
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
-    render()
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+    if (this.texture) {
+      const {gl} = this.context
+      const {width, height} = this.texture.size
+      gl.viewport(0, 0, width, height)
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
+      render()
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+    }
   }
 }
 
