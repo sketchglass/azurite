@@ -1,11 +1,14 @@
 import Layer from "./Layer"
 import Waypoint from "./Waypoint"
+import React = require("react")
 
-export default
-class Tool {
+abstract class Tool {
   layer: Layer
-  start(waypoint: Waypoint) {}
-  move(waypoint: Waypoint) {}
-  end() {}
+  abstract name: string
+  abstract start(waypoint: Waypoint): void
+  abstract move(waypoint: Waypoint): void
+  abstract end(): void
   cursorMove(waypoint: Waypoint) {}
+  renderSettings(): JSX.Element { return React.createElement("div") }
 }
+export default Tool

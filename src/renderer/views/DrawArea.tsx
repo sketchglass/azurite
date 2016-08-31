@@ -21,11 +21,18 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   isPressed = false
   renderer: Renderer;
   drawAreaToPicture = Transform.identity
+  tool: Tool
 
   constructor(props: DrawAreaProps) {
     super(props)
-    props.tool.layer = props.picture.layers[0]
+    this.tool = props.tool
+    this.tool.layer = props.picture.layers[0]
     this.renderer = new Renderer(props.picture)
+  }
+
+  componentWillReceiveProps(props: DrawAreaProps) {
+    this.tool = props.tool
+    this.tool.layer = props.picture.layers[0]
   }
 
   componentDidMount() {
@@ -34,24 +41,22 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       this.element.appendChild(canvas)
     }
 
-    const {tool} = this.props
-
     ipcRenderer.on("tablet.down", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       const pos = this.mousePos(ev)
-      tool.start(new Waypoint(pos, ev.pressure))
+      this.tool.start(new Waypoint(pos, ev.pressure))
       this.renderer.render()
       this.isPressed = true
     })
     ipcRenderer.on("tablet.move", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       if (this.isPressed) {
         const pos = this.mousePos(ev)
-        tool.move(new Waypoint(pos, ev.pressure))
+        this.tool.move(new Waypoint(pos, ev.pressure))
         this.renderer.render()
       }
     })
     ipcRenderer.on("tablet.up", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       if (this.isPressed) {
-        tool.end()
+        this.tool.end()
         this.renderer.render()
         this.isPressed = false
       }
@@ -100,7 +105,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   onMouseDown(ev: MouseEvent) {
     const pos = this.mousePos(ev)
-    this.props.tool.start(new Waypoint(pos, 1))
+    this.tool.start(new Waypoint(pos, 1))
     this.renderer.render()
     this.isPressed = true
     ev.preventDefault()
@@ -109,14 +114,14 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const pos = this.mousePos(ev)
 
     if (this.isPressed) {
-      this.props.tool.move(new Waypoint(pos, 1))
+      this.tool.move(new Waypoint(pos, 1))
       this.renderer.render()
       ev.preventDefault()
     }
   }
   onMouseUp(ev: MouseEvent) {
     if (this.isPressed) {
-      this.props.tool.end()
+      this.tool.end()
       this.renderer.render()
       this.isPressed = false
       ev.preventDefault()

@@ -3,6 +3,8 @@ import Waypoint from "./Waypoint"
 import Tool from "./Tool"
 import {Geometry, Shader, Model, GeometryUsage, Framebuffer, Texture, BlendMode} from "../../lib/GL"
 import {context} from "../GLContext"
+import WatercolorSettings from "../views/WatercolorSettings"
+import React = require("react")
 
 const sampleVertShader = `
   precision highp float;
@@ -134,6 +136,8 @@ class WatercolorTool extends Tool {
   blending = 0.5
   thickness = 0.5
 
+  name = "Watercolor"
+
   squareGeometry = new Geometry(context, new Float32Array([
     -1, -1,
     -1, 1,
@@ -247,5 +251,9 @@ class WatercolorTool extends Tool {
   }
 
   end() {
+  }
+
+  renderSettings() {
+    return React.createFactory(WatercolorSettings)({tool: this})
   }
 }
