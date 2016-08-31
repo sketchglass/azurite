@@ -41,7 +41,7 @@ const sampleFragShader = `
   }
 
   float calcOpacity(float r) {
-    return smoothstep(uBrushRadius, uBrushRadius - 1.0, r);
+    return smoothstep(uBrushRadius, uBrushRadius * 0.5, r);
   }
 
   void main(void) {
@@ -67,13 +67,17 @@ const brushVertShader = `
   uniform vec2 uLayerSize;
   uniform float uSampleSize;
   uniform vec2 uBrushPos;
-  attribute vec2 aPosition;
-
+  uniform float uBrushRadius;
+  uniform mediump float uPressure;
+  uniform mediump float uOpacity;
   uniform sampler2D uSampleShape;
   uniform sampler2D uSampleClip;
 
+  attribute vec2 aPosition;
+
   varying vec4 vMixColor;
   varying vec2 vTexCoord;
+  varying mediump float vOpacity;
 
   void main(void) {
     vTexCoord = aPosition * 0.5 + 0.5;
@@ -83,6 +87,8 @@ const brushVertShader = `
 
     float topLevel = log2(uSampleSize);
     vMixColor = texture2DLod(uSampleClip, vec2(0.5), topLevel) / vec4(texture2DLod(uSampleShape, vec2(0.5),  topLevel).a);
+
+    vOpacity = uOpacity * uPressure;
   }
 `
 
@@ -98,9 +104,10 @@ const brushFragShader = `
 
   varying vec4 vMixColor;
   varying vec2 vTexCoord;
+  varying float vOpacity;
 
   void main(void) {
-    float opacity = texture2D(uSampleShape, vTexCoord).a;
+    float opacity = texture2D(uSampleShape, vTexCoord).a * vOpacity;
     if (opacity == 0.0) {
       discard;
     }
@@ -123,6 +130,7 @@ class WatercolorTool extends Tool {
 
   width = 10
   color = new Vec4(0, 0, 0, 1)
+  opacity = 1.0
   blending = 0.5
   thickness = 0.5
 
@@ -183,6 +191,7 @@ class WatercolorTool extends Tool {
       shader.setUniform('uBlending', this.blending)
       shader.setUniform('uThickness', this.thickness)
       shader.setUniform('uColor', this.color)
+      shader.setUniform("uOpacity", this.opacity)
       shader.setUniform("uBrushRadius", this.width * 0.5)
     }
 
@@ -201,11 +210,10 @@ class WatercolorTool extends Tool {
         return
       }
 
-      const vertices = new Float32Array(waypoints.length * 3)
-
-      for (let i = 0; i < waypoints.length; ++i) {
+      for (const [i, waypoint] of waypoints.entries()) {
         for (const shader of this.shaders) {
-          shader.setUniform("uBrushPos", waypoints[i].pos)
+          shader.setUniform("uBrushPos", waypoint.pos)
+          shader.setUniform("uPressure", waypoint.pressure)
         }
 
         context.textureUnits.set(0, this.layer.texture)
