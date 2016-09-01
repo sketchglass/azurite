@@ -24,9 +24,20 @@ class Context {
     this.drawBuffersExt = gl.getExtension("WEBGL_draw_buffers")
 
     gl.enable(gl.BLEND)
-    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 
     this.resize()
+  }
+
+  setScissor(rect: Vec4) {
+    const {gl} = this
+    gl.enable(gl.SCISSOR_TEST)
+    console.log("scissor", rect)
+    gl.scissor(rect.x, rect.y, rect.width, rect.height)
+  }
+
+  clearScissor() {
+    const {gl} = this
+    gl.disable(gl.SCISSOR_TEST)
   }
 
   resize() {
