@@ -10,13 +10,13 @@ class Context {
 
   constructor(public element: HTMLCanvasElement) {
     const glOpts = {
-      preserveDrawingBuffer: false,
+      preserveDrawingBuffer: true,
       alpha: false,
       depth: false,
       stencil: false,
       antialias: true,
       premultipliedAlpha: true,
-    };
+    }
     const gl = this.gl = element.getContext("webgl", glOpts)! as WebGLRenderingContext
     this.halfFloatExt = gl.getExtension("OES_texture_half_float")
     gl.getExtension("OES_texture_half_float_linear")
