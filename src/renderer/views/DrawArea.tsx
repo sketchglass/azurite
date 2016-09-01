@@ -20,7 +20,6 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   element: HTMLElement|undefined
   isPressed = false
   renderer: Renderer;
-  drawAreaToPicture = Transform.identity
   tool: Tool
 
   constructor(props: DrawAreaProps) {
@@ -78,9 +77,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     }
     const size = new Vec2(roundRect.width, roundRect.height).mul(window.devicePixelRatio)
     this.renderer.resize(size)
-    this.drawAreaToPicture = Transform.translate(
-      size.sub(this.props.picture.size).mul(-0.5)
-    )
+
     ipcRenderer.send("tablet.install", roundRect)
   }
 
@@ -96,11 +93,10 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
 
   mousePos(ev: {clientX: number, clientY: number}) {
-    const dpr = window.devicePixelRatio
     const rect = this.element!.getBoundingClientRect()
     const x = ev.clientX - rect.left
     const y = ev.clientY - rect.top
-    return this.drawAreaToPicture.transform(new Vec2(x * dpr, y * dpr))
+    return this.renderer.rendererToPicture.transform(new Vec2(x, y).mul(window.devicePixelRatio))
   }
 
   onMouseDown(ev: MouseEvent) {

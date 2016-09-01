@@ -42,6 +42,7 @@ class Renderer {
   backgroundModel: Model
   size = new Vec2(100, 100)
   transform = Transform.identity
+  rendererToPicture = Transform.identity
 
   constructor(public picture: Picture) {
     const {width, height} = picture.size
@@ -63,6 +64,9 @@ class Renderer {
   }
 
   resize(size: Vec2) {
+    this.rendererToPicture = Transform.translate(
+      size.sub(this.picture.size).mul(-0.5)
+    )
     this.size = size
     canvas.width = size.width
     canvas.height = size.height
