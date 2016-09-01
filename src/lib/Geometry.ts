@@ -86,6 +86,12 @@ class Vec4 {
   get size() {
     return new Vec2(this.z, this.w)
   }
+  get width() {
+    return this.z
+  }
+  get height() {
+    return this.w
+  }
 
   add(a: Vec4) {
     return new Vec4(this.x + a.x, this.y + a.y, this.z + a.z, this.w + a.w)
@@ -164,5 +170,22 @@ class Transform {
     const x = this.m11 * v.x + this.m21 * v.y + this.dx
     const y = this.m12 * v.x + this.m22 * v.y + this.dy
     return new Vec2(x, y)
+  }
+
+  transformRect(r: Vec4) {
+    const points = [
+      r.xy,
+      new Vec2(r.x + r.width, r.y),
+      new Vec2(r.x, r.y + r.height),
+      r.xy.add(r.size),
+    ]
+    const mapped = points.map(p => this.transform(p))
+    const xs = mapped.map(p => p.x)
+    const ys = mapped.map(p => p.y)
+    const left = Math.min(...xs)
+    const right = Math.max(...xs)
+    const top = Math.min(...ys)
+    const bottom = Math.min(...ys)
+    return new Vec4(left, top, right - left, bottom - top)
   }
 }
