@@ -50,14 +50,28 @@ class Texture {
   texture: WebGLTexture
 
   constructor(public context: Context, public size: Vec2) {
-    const {gl, halfFloatExt} = context
+    const {gl} = context
     this.texture = gl.createTexture()!
     gl.bindTexture(gl.TEXTURE_2D, this.texture)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
+    this.resize(size)
+  }
+
+  resize(size: Vec2) {
+    const {gl, halfFloatExt} = this.context
+    this.size = size
+    gl.bindTexture(gl.TEXTURE_2D, this.texture)
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size.width, size.height, 0, gl.RGBA, halfFloatExt.HALF_FLOAT_OES, null as any)
+  }
+
+  generateMipmap() {
+    const {gl} = this.context
+    gl.bindTexture(gl.TEXTURE_2D, this.texture)
+    gl.generateMipmap(gl.TEXTURE_2D)
+    gl.bindTexture(gl.TEXTURE_2D, null)
   }
 }
 
@@ -88,6 +102,10 @@ export
 class Geometry {
   buffer: WebGLBuffer
   attributesStride = this.attributes.reduce((sum, {size}) => sum + size, 0)
+
+  get vertexCount() {
+    return this.data.length / this.attributesStride
+  }
 
   constructor(public context: Context, public data: Float32Array, public attributes: {attribute: string, size: number}[], public usage: GeometryUsage) {
     const {gl, vertexArrayExt} = context
@@ -162,8 +180,16 @@ class Shader {
 }
 
 export
+enum BlendMode {
+  Src,
+  SrcOver,
+  // TODO
+}
+
+export
 class Model {
   vertexArray: any
+  blendFuncs: [number, number]
   constructor(public context: Context, public geometry: Geometry, public shader: Shader) {
     const {gl, vertexArrayExt} = context
     this.vertexArray = vertexArrayExt.createVertexArrayOES()
@@ -178,21 +204,37 @@ class Model {
       offset += size
     }
     vertexArrayExt.bindVertexArrayOES(null)
+
+    this.setBlendMode(BlendMode.SrcOver)
   }
 
-  render() {
+  setBlendMode(mode: BlendMode) {
+    const {gl} = this.context
+    switch (mode) {
+      case BlendMode.Src:
+        this.blendFuncs = [gl.ONE, gl.ZERO]
+        break
+      case BlendMode.SrcOver:
+        this.blendFuncs = [gl.ONE, gl.ONE_MINUS_SRC_ALPHA]
+        break
+    }
+  }
+
+  render(first = 0, count = this.geometry.vertexCount) {
     const {gl, vertexArrayExt} = this.context
+    gl.blendFunc(this.blendFuncs[0], this.blendFuncs[1])
     gl.useProgram(this.shader.program)
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
-    gl.drawArrays(gl.TRIANGLE_STRIP, 0, this.geometry.data.length / this.geometry.attributesStride)
+    gl.drawArrays(gl.TRIANGLE_STRIP, first, count)
     vertexArrayExt.bindVertexArrayOES(null)
   }
 
-  renderPoints() {
+  renderPoints(first = 0, count = this.geometry.vertexCount) {
     const {gl, vertexArrayExt} = this.context
+    gl.blendFunc(this.blendFuncs[0], this.blendFuncs[1])
     gl.useProgram(this.shader.program)
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
-    gl.drawArrays(gl.POINTS, 0, this.geometry.data.length / this.geometry.attributesStride)
+    gl.drawArrays(gl.POINTS, first, count)
     vertexArrayExt.bindVertexArrayOES(null)
   }
 }
@@ -200,24 +242,31 @@ class Model {
 export
 class Framebuffer {
   framebuffer: WebGLFramebuffer
-  constructor(public context: Context, public size: Vec2) {
+  constructor(public context: Context, public texture?: Texture) {
     const {gl, drawBuffersExt} = context
     this.framebuffer = gl.createFramebuffer()!
+    if (texture) {
+      this.setTexture(texture)
+    }
   }
 
   setTexture(texture: Texture) {
-    const {gl, drawBuffersExt} = this.context
+    const {gl} = this.context
+    this.texture = texture
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture.texture, 0)
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
   }
 
   use(render: () => void) {
-    const {gl} = this.context
-    gl.viewport(0, 0, this.size.width, this.size.height)
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
-    render()
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+    if (this.texture) {
+      const {gl} = this.context
+      const {width, height} = this.texture.size
+      gl.viewport(0, 0, width, height)
+      gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
+      render()
+      gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+    }
   }
 }
 

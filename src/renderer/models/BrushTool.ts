@@ -3,6 +3,8 @@ import Waypoint from "./Waypoint"
 import Tool from "./Tool"
 import {Geometry, Shader, Model, GeometryUsage, Framebuffer} from "../../lib/GL"
 import {context} from "../GLContext"
+import BrushSettings from "../views/BrushSettings"
+import React = require("react")
 
 const brushVertShader = `
   precision mediump float;
@@ -57,15 +59,15 @@ class BrushTool extends Tool {
     {attribute: "aPosition", size: 2},
     {attribute: "aPressure", size: 1},
   ], GeometryUsage.Stream)
-  framebuffer = new Framebuffer(context, new Vec2(0))
+  framebuffer = new Framebuffer(context)
   shader = new Shader(context, brushVertShader, brushFragShader)
   model = new Model(context, this.dabsGeometry, this.shader)
+  name = "Brush"
 
   start(waypoint: Waypoint) {
     this.lastWaypoint = waypoint
     this.nextDabOffset = 0
 
-    this.framebuffer.size = this.layer.size
     this.framebuffer.setTexture(this.layer.texture)
 
     const layerSize = this.layer.size
@@ -103,5 +105,9 @@ class BrushTool extends Tool {
   }
 
   end() {
+  }
+
+  renderSettings() {
+    return React.createFactory(BrushSettings)({tool: this})
   }
 }
