@@ -57,10 +57,14 @@ class Renderer {
       0, height, 0, 1,
       width, height, 1, 1
     ])
+    const indices = new Uint16Array([
+      0, 1, 2,
+      1, 2, 3
+    ])
     const geom = new Geometry(context, vertices, [
       {attribute: "aPosition", size: 2},
       {attribute: "aUVPosition", size: 2},
-    ], GeometryUsage.Static)
+    ], indices, GeometryUsage.Static)
     this.layerShader = new Shader(context, rendererVertShader, layerFragShader)
     this.layerModel = new Model(context, geom, this.layerShader)
     context.setClearColor(new Vec4(0.9, 0.9, 0.9, 1))

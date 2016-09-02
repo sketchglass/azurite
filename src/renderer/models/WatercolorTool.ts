@@ -146,7 +146,10 @@ class WatercolorTool extends Tool {
     1, 1,
   ]), [
     {attribute: "aPosition", size: 2}
-  ], GeometryUsage.Static)
+  ], new Uint16Array([
+    0, 1, 2,
+    1, 2, 3
+  ]), GeometryUsage.Static)
 
   framebuffer = new Framebuffer(context)
   shader = new Shader(context, brushVertShader, brushFragShader)
