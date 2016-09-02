@@ -55,6 +55,7 @@ class BrushTool extends Tool {
   color = new Vec4(0, 0, 0, 1)
   opacity = 1
   minWidthRatio = 0.5
+  spacingRatio = 0.1
   dabsGeometry = new Geometry(context, new Float32Array(0), [
     {attribute: "aPosition", size: 2},
     {attribute: "aPressure", size: 1},
@@ -88,7 +89,11 @@ class BrushTool extends Tool {
       return new Vec4(0)
     }
 
-    const {waypoints, nextOffset} = Waypoint.interpolate(this.lastWaypoint, waypoint, this.nextDabOffset)
+    const getNextSpacing = (waypoint: Waypoint) => {
+      const brushSize = this.width * (this.minWidthRatio + (1 - this.minWidthRatio) * waypoint.pressure)
+      return brushSize * this.spacingRatio
+    }
+    const {waypoints, nextOffset} = Waypoint.interpolate(this.lastWaypoint, waypoint, getNextSpacing, this.nextDabOffset)
     this.lastWaypoint = waypoint
     this.nextDabOffset = nextOffset
 

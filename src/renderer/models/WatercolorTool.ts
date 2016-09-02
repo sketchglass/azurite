@@ -135,6 +135,7 @@ class WatercolorTool extends Tool {
   opacity = 1.0
   blending = 0.5
   thickness = 0.5
+  spacingRatio = 0.1
 
   name = "Watercolor"
 
@@ -211,7 +212,11 @@ class WatercolorTool extends Tool {
       return new Vec4(0)
     }
 
-    const {waypoints, nextOffset} = Waypoint.interpolate(this.lastWaypoint, waypoint, this.nextDabOffset)
+    const getNextSpacing = (waypoint: Waypoint) => {
+      return this.width * this.spacingRatio
+    }
+
+    const {waypoints, nextOffset} = Waypoint.interpolate(this.lastWaypoint, waypoint, getNextSpacing, this.nextDabOffset)
     this.lastWaypoint = waypoint
     this.nextDabOffset = nextOffset
 
