@@ -18,6 +18,7 @@ class Context {
     }
     const gl = this.gl = element.getContext("webgl", glOpts)! as WebGLRenderingContext
     this.halfFloatExt = gl.getExtension("OES_texture_half_float")
+    gl.getExtension("OES_texture_half_float_linear")
     this.vertexArrayExt = gl.getExtension("OES_vertex_array_object")
 
     gl.enable(gl.BLEND)
