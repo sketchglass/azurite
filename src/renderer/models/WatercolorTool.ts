@@ -175,7 +175,7 @@ class WatercolorTool extends Tool {
     const {gl} = context
     for (const texture of [this.sampleShapeTexture, this.sampleClipTexture]) {
       gl.bindTexture(gl.TEXTURE_2D, texture.texture)
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR)
+      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_NEAREST)
     }
 
     this.shader.setUniformInt("uSampleOriginal", 0)
