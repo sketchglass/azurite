@@ -109,37 +109,38 @@ const enum GeometryUsage {
   Static, Stream, Dynamic
 }
 
+function glUsage(gl: WebGLRenderingContext, usage: GeometryUsage) {
+  switch (usage) {
+    case GeometryUsage.Static:
+      return gl.STATIC_DRAW
+    case GeometryUsage.Stream:
+      return gl.STREAM_DRAW
+    case GeometryUsage.Dynamic:
+    default:
+      return gl.DYNAMIC_DRAW
+  }
+}
+
 export
 class Geometry {
-  buffer: WebGLBuffer
+  vertexBuffer: WebGLBuffer
+  indexBuffer: WebGLBuffer
   attributesStride = this.attributes.reduce((sum, {size}) => sum + size, 0)
 
-  get vertexCount() {
-    return this.data.length / this.attributesStride
-  }
-
-  constructor(public context: Context, public data: Float32Array, public attributes: {attribute: string, size: number}[], public usage: GeometryUsage) {
+  constructor(public context: Context, public vertexData: Float32Array, public attributes: {attribute: string, size: number}[], public indexData: Uint16Array, public usage: GeometryUsage) {
     const {gl, vertexArrayExt} = context
-    this.buffer = gl.createBuffer()!
+    this.vertexBuffer = gl.createBuffer()!
+    this.indexBuffer = gl.createBuffer()!
     this.updateBuffer()
   }
   updateBuffer() {
     const {gl} = this.context
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.buffer)
-    gl.bufferData(gl.ARRAY_BUFFER, this.data, this.glUsage())
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer)
+    gl.bufferData(gl.ARRAY_BUFFER, this.vertexData, glUsage(gl, this.usage))
     gl.bindBuffer(gl.ARRAY_BUFFER, null)
-  }
-  glUsage() {
-    const {gl} = this.context
-    switch (this.usage) {
-      case GeometryUsage.Static:
-        return gl.STATIC_DRAW
-      case GeometryUsage.Stream:
-        return gl.STREAM_DRAW
-      case GeometryUsage.Dynamic:
-      default:
-        return gl.DYNAMIC_DRAW
-    }
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
+    gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indexData, glUsage(gl, this.usage))
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null)
   }
 }
 
@@ -206,7 +207,8 @@ class Model {
     this.vertexArray = vertexArrayExt.createVertexArrayOES()
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
     gl.useProgram(shader.program)
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.geometry.buffer)
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.geometry.vertexBuffer)
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.geometry.indexBuffer)
     let offset = 0
     for (const {attribute, size} of this.geometry.attributes) {
       const pos = gl.getAttribLocation(shader.program, attribute)!
@@ -231,21 +233,12 @@ class Model {
     }
   }
 
-  render(first = 0, count = this.geometry.vertexCount) {
+  render(first = 0, count = this.geometry.indexData.length) {
     const {gl, vertexArrayExt} = this.context
     gl.blendFunc(this.blendFuncs[0], this.blendFuncs[1])
     gl.useProgram(this.shader.program)
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
-    gl.drawArrays(gl.TRIANGLE_STRIP, first, count)
-    vertexArrayExt.bindVertexArrayOES(null)
-  }
-
-  renderPoints(first = 0, count = this.geometry.vertexCount) {
-    const {gl, vertexArrayExt} = this.context
-    gl.blendFunc(this.blendFuncs[0], this.blendFuncs[1])
-    gl.useProgram(this.shader.program)
-    vertexArrayExt.bindVertexArrayOES(this.vertexArray)
-    gl.drawArrays(gl.POINTS, first, count)
+    gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_SHORT, first * 2)
     vertexArrayExt.bindVertexArrayOES(null)
   }
 }

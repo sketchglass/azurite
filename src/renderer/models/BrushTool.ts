@@ -14,16 +14,18 @@ const brushVertShader = `
   uniform mat3 uTransform;
   uniform float uOpacity;
 
-  attribute vec2 aPosition;
+  attribute vec2 aCenter;
+  attribute vec2 aOffset;
   attribute float aPressure;
 
   varying float vRadius;
   varying lowp float vOpacity;
+  varying vec2 vOffset;
 
   void main(void) {
-    vec3 pos = uTransform * vec3(aPosition, 1.0);
+    vOffset = aOffset;
+    vec3 pos = uTransform * vec3(aOffset * (uBrushSize + 2.0) + aCenter, 1.0);
     gl_Position = vec4(pos.xy, 0.0, 1.0);
-    gl_PointSize = uBrushSize + 2.0;
     float radius = uBrushSize * 0.5 * (uMinWidthRatio + (1.0 - uMinWidthRatio) * aPressure);
     vRadius = radius;
     // transparency = (overlap count) √ (final transparency)
@@ -39,9 +41,10 @@ const brushFragShader = `
 
   varying float vRadius;
   varying lowp float vOpacity;
+  varying vec2 vOffset;
 
   void main(void) {
-    float r = distance(gl_PointCoord, vec2(0.5)) * (uBrushSize + 2.0);
+    float r = length(vOffset) * (uBrushSize + 2.0);
     lowp float opacity = smoothstep(vRadius, vRadius- 1.0, r);
     gl_FragColor = uColor * opacity * vOpacity;
   }
@@ -57,9 +60,10 @@ class BrushTool extends Tool {
   minWidthRatio = 0.5
   spacingRatio = 0.1
   dabsGeometry = new Geometry(context, new Float32Array(0), [
-    {attribute: "aPosition", size: 2},
+    {attribute: "aOffset", size: 2},
+    {attribute: "aCenter", size: 2},
     {attribute: "aPressure", size: 1},
-  ], GeometryUsage.Stream)
+  ], new Uint16Array(0), GeometryUsage.Stream)
   framebuffer = new Framebuffer(context)
   shader = new Shader(context, brushVertShader, brushFragShader)
   model = new Model(context, this.dabsGeometry, this.shader)
@@ -102,15 +106,30 @@ class BrushTool extends Tool {
     }
     const rectWidth = this.width + 2
 
-    const vertices = new Float32Array(waypoints.length * 3)
+    const offsets = [
+      new Vec2(-1,-1),
+      new Vec2(-1,1),
+      new Vec2(1,-1),
+      new Vec2(1,1)
+    ]
+    const relIndices = [
+      0, 1, 2,
+      1, 2, 3
+    ]
+    const vertices = new Float32Array(waypoints.length * 20)
+    const indices = new Uint16Array(waypoints.length * 6)
     for (const [i, {pos, pressure}] of waypoints.entries()) {
-      vertices.set([pos.x, pos.y, pressure], i * 3)
+      for (const [j, offset] of offsets.entries()) {
+        vertices.set([offset.x, offset.y, pos.x, pos.y, pressure], i * 20 + j * 5)
+      }
+      indices.set(relIndices.map(j => j + i * 4), i * 6)
     }
-    this.dabsGeometry.data = vertices
+    this.dabsGeometry.vertexData = vertices
+    this.dabsGeometry.indexData = indices
     this.dabsGeometry.updateBuffer()
 
     this.framebuffer.use(() => {
-      this.model.renderPoints()
+      this.model.render()
     })
 
     const rects = waypoints.map(w => new Vec4(w.pos.x - rectWidth * 0.5, w.pos.y - rectWidth * 0.5, rectWidth, rectWidth))
