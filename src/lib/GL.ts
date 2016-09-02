@@ -1,4 +1,4 @@
-import {Vec2, Vec4, Transform} from "./Geometry"
+import {Vec2, Vec4, Transform, intBoundingRect, intersectionRect} from "./Geometry"
 
 export
 class Context {
@@ -10,13 +10,13 @@ class Context {
 
   constructor(public element: HTMLCanvasElement) {
     const glOpts = {
-      preserveDrawingBuffer: false,
+      preserveDrawingBuffer: true,
       alpha: false,
       depth: false,
       stencil: false,
       antialias: true,
       premultipliedAlpha: true,
-    };
+    }
     const gl = this.gl = element.getContext("webgl", glOpts)! as WebGLRenderingContext
     this.halfFloatExt = gl.getExtension("OES_texture_half_float")
     gl.getExtension("OES_texture_half_float_linear")
@@ -24,9 +24,20 @@ class Context {
     this.drawBuffersExt = gl.getExtension("WEBGL_draw_buffers")
 
     gl.enable(gl.BLEND)
-    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA)
 
     this.resize()
+  }
+
+  setScissor(rect: Vec4) {
+    const {gl} = this
+    gl.enable(gl.SCISSOR_TEST)
+    const intRect = intersectionRect(intBoundingRect(rect), new Vec4(0, 0, this.element.width, this.element.height))
+    gl.scissor(intRect.x, intRect.y, intRect.width, intRect.height)
+  }
+
+  clearScissor() {
+    const {gl} = this
+    gl.disable(gl.SCISSOR_TEST)
   }
 
   resize() {
