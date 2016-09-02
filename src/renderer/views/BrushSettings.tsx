@@ -30,10 +30,6 @@ class BrushSettings extends React.Component<BrushSettingsProps, void> {
       tool.minWidthRatio = parseInt((ev.target as HTMLInputElement).value) / 100
       this.forceUpdate()
     }
-    const onSpacingChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      tool.spacingRatio = parseInt((ev.target as HTMLInputElement).value) / 100
-      this.forceUpdate()
-    }
     return (
       <table className="brush-settings">
         <tbody>
@@ -52,10 +48,6 @@ class BrushSettings extends React.Component<BrushSettingsProps, void> {
           <tr>
             <td>Min Width</td>
             <td><input type="range" onChange={onMinWidthChange} value={Math.round(tool.minWidthRatio * 100)} /> {Math.round(tool.minWidthRatio * 100)}%</td>
-          </tr>
-          <tr>
-            <td>Spacing</td>
-            <td><input type="range" onChange={onSpacingChange} value={Math.round(tool.spacingRatio * 100)} /> {Math.round(tool.spacingRatio * 100)}%</td>
           </tr>
         </tbody>
       </table>

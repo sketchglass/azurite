@@ -71,8 +71,6 @@ class BrushTool extends Tool {
 
     this.framebuffer.setTexture(this.layer.texture)
 
-    const opacityCorrection = 1 - Math.pow(1 / 255, this.spacingRatio)
-
     const layerSize = this.layer.size
     const transform =
       Transform.scale(new Vec2(2 / layerSize.width, 2 / layerSize.height))
