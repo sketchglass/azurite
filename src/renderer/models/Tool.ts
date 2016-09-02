@@ -1,11 +1,15 @@
 import Layer from "./Layer"
 import Waypoint from "./Waypoint"
+import {Vec4} from "../../lib/Geometry"
+import React = require("react")
 
-export default
-class Tool {
+abstract class Tool {
   layer: Layer
-  start(waypoint: Waypoint) {}
-  move(waypoint: Waypoint) {}
-  end() {}
+  abstract name: string
+  abstract start(waypoint: Waypoint): Vec4
+  abstract move(waypoint: Waypoint): Vec4
+  abstract end(): Vec4
   cursorMove(waypoint: Waypoint) {}
+  renderSettings(): JSX.Element { return React.createElement("div") }
 }
+export default Tool

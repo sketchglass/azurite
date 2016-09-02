@@ -86,6 +86,12 @@ class Vec4 {
   get size() {
     return new Vec2(this.z, this.w)
   }
+  get width() {
+    return this.z
+  }
+  get height() {
+    return this.w
+  }
 
   add(a: Vec4) {
     return new Vec4(this.x + a.x, this.y + a.y, this.z + a.z, this.w + a.w)
@@ -165,4 +171,43 @@ class Transform {
     const y = this.m12 * v.x + this.m22 * v.y + this.dy
     return new Vec2(x, y)
   }
+
+  transformRect(r: Vec4) {
+    const points = [
+      r.xy,
+      new Vec2(r.x + r.width, r.y),
+      new Vec2(r.x, r.y + r.height),
+      r.xy.add(r.size),
+    ]
+    const mapped = points.map(p => this.transform(p))
+    const xs = mapped.map(p => p.x)
+    const ys = mapped.map(p => p.y)
+    const left = Math.min(...xs)
+    const right = Math.max(...xs)
+    const top = Math.min(...ys)
+    const bottom = Math.max(...ys)
+    return new Vec4(left, top, right - left, bottom - top)
+  }
+}
+
+export function unionRect(...rects: Vec4[]) {
+  const left = Math.min(...rects.map(r => r.x))
+  const top = Math.min(...rects.map(r => r.y))
+  const right = Math.max(...rects.map(r => r.x + r.width))
+  const bottom = Math.max(...rects.map(r => r.y + r.height))
+  return new Vec4(left, top, right - left, bottom - top)
+}
+
+export function intersectionRect(...rects: Vec4[]) {
+  const left = Math.max(...rects.map(r => r.x))
+  const top = Math.max(...rects.map(r => r.y))
+  const right = Math.min(...rects.map(r => r.x + r.width))
+  const bottom = Math.min(...rects.map(r => r.y + r.height))
+  return new Vec4(left, top, Math.max(right - left, 0), Math.max(bottom - top, 0))
+}
+
+export function intBoundingRect(rect: Vec4) {
+  const topLeft = rect.xy.floor()
+  const bottomRight = rect.xy.add(rect.size).ceil()
+  return Vec4.fromVec2(topLeft, bottomRight.sub(topLeft))
 }
