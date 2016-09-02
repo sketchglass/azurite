@@ -241,15 +241,6 @@ class Model {
     gl.drawElements(gl.TRIANGLES, count, gl.UNSIGNED_SHORT, first * 2)
     vertexArrayExt.bindVertexArrayOES(null)
   }
-
-  renderPoints(first = 0, count = this.geometry.vertexData.length / this.geometry.attributesStride) {
-    const {gl, vertexArrayExt} = this.context
-    gl.blendFunc(this.blendFuncs[0], this.blendFuncs[1])
-    gl.useProgram(this.shader.program)
-    vertexArrayExt.bindVertexArrayOES(this.vertexArray)
-    gl.drawArrays(gl.POINTS, first, count)
-    vertexArrayExt.bindVertexArrayOES(null)
-  }
 }
 
 export
