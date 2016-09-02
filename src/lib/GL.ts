@@ -5,7 +5,6 @@ class Context {
   gl: WebGLRenderingContext
   halfFloatExt: any
   vertexArrayExt: any
-  drawBuffersExt: any
   textureUnits = new TextureUnits(this)
 
   constructor(public element: HTMLCanvasElement) {
@@ -19,9 +18,7 @@ class Context {
     }
     const gl = this.gl = element.getContext("webgl", glOpts)! as WebGLRenderingContext
     this.halfFloatExt = gl.getExtension("OES_texture_half_float")
-    gl.getExtension("OES_texture_half_float_linear")
     this.vertexArrayExt = gl.getExtension("OES_vertex_array_object")
-    this.drawBuffersExt = gl.getExtension("WEBGL_draw_buffers")
 
     gl.enable(gl.BLEND)
 
@@ -247,7 +244,7 @@ export
 class Framebuffer {
   framebuffer: WebGLFramebuffer
   constructor(public context: Context, public texture?: Texture) {
-    const {gl, drawBuffersExt} = context
+    const {gl} = context
     this.framebuffer = gl.createFramebuffer()!
     if (texture) {
       this.setTexture(texture)
