@@ -20,11 +20,12 @@ const brushVertShader = `
 
   varying float vRadius;
   varying lowp float vOpacity;
+  varying vec2 vOffset;
 
   void main(void) {
-    vec3 pos = uTransform * vec3(aOffset * vRadius + aCenter, 1.0);
+    vOffset = aOffset;
+    vec3 pos = uTransform * vec3(aOffset * (uBrushSize + 2.0) + aCenter, 1.0);
     gl_Position = vec4(pos.xy, 0.0, 1.0);
-    gl_PointSize = uBrushSize + 2.0;
     float radius = uBrushSize * 0.5 * (uMinWidthRatio + (1.0 - uMinWidthRatio) * aPressure);
     vRadius = radius;
     // transparency = (overlap count) √ (final transparency)
@@ -40,9 +41,10 @@ const brushFragShader = `
 
   varying float vRadius;
   varying lowp float vOpacity;
+  varying vec2 vOffset;
 
   void main(void) {
-    float r = distance(gl_PointCoord, vec2(0.5)) * (uBrushSize + 2.0);
+    float r = length(vOffset) * (uBrushSize + 2.0);
     lowp float opacity = smoothstep(vRadius, vRadius- 1.0, r);
     gl_FragColor = uColor * opacity * vOpacity;
   }
@@ -120,14 +122,14 @@ class BrushTool extends Tool {
       for (const [j, offset] of offsets.entries()) {
         vertices.set([offset.x, offset.y, pos.x, pos.y, pressure], i * 20 + j * 5)
       }
-      indices.set(relIndices.map(j => j + i * 20), i * 6)
+      indices.set(relIndices.map(j => j + i * 4), i * 6)
     }
     this.dabsGeometry.vertexData = vertices
     this.dabsGeometry.indexData = indices
     this.dabsGeometry.updateBuffer()
 
     this.framebuffer.use(() => {
-      this.model.renderPoints()
+      this.model.render()
     })
 
     const rects = waypoints.map(w => new Vec4(w.pos.x - rectWidth * 0.5, w.pos.y - rectWidth * 0.5, rectWidth, rectWidth))
