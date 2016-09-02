@@ -1,6 +1,6 @@
 import {Vec2, Vec4, Transform, unionRect} from "../../lib/Geometry"
 import Waypoint from "./Waypoint"
-import Tool from "./Tool"
+import BaseBrushTool from "./BaseBrushTool"
 import {Geometry, Shader, Model, GeometryUsage, Framebuffer, Texture, BlendMode} from "../../lib/GL"
 import {context} from "../GLContext"
 import WatercolorSettings from "../views/WatercolorSettings"
@@ -126,16 +126,10 @@ const brushFragShader = `
 `
 
 export default
-class WatercolorTool extends Tool {
-  private lastWaypoint: Waypoint|undefined
-  private nextDabOffset = 0
-
-  width = 10
-  color = new Vec4(0, 0, 0, 1)
-  opacity = 1.0
+class WatercolorTool extends BaseBrushTool {
+  minWidthRatio = 1
   blending = 0.5
   thickness = 0.5
-  spacingRatio = 0.1
 
   name = "Watercolor"
 
@@ -151,7 +145,6 @@ class WatercolorTool extends Tool {
     1, 2, 3
   ]), GeometryUsage.Static)
 
-  framebuffer = new Framebuffer(context)
   shader = new Shader(context, brushVertShader, brushFragShader)
   model = new Model(context, this.squareGeometry, this.shader)
 
@@ -166,6 +159,7 @@ class WatercolorTool extends Tool {
   sampleClipFramebuffer = new Framebuffer(context, this.sampleClipTexture)
 
   shaders = [this.shader, this.sampleShader]
+
 
   constructor() {
     super()
@@ -185,11 +179,6 @@ class WatercolorTool extends Tool {
   }
 
   start(waypoint: Waypoint) {
-    this.lastWaypoint = waypoint
-    this.nextDabOffset = 0
-
-    this.framebuffer.setTexture(this.layer.texture)
-
     const layerSize = this.layer.size
     const sampleSize = Math.pow(2, Math.ceil(Math.log2(this.width + 2)))
 
@@ -207,26 +196,10 @@ class WatercolorTool extends Tool {
     this.sampleShapeTexture.resize(new Vec2(sampleSize))
     this.sampleClipTexture.resize(new Vec2(sampleSize))
 
-    return new Vec4(0)
+    return super.start(waypoint)
   }
 
-  move(waypoint: Waypoint) {
-    if (!this.lastWaypoint) {
-      return new Vec4(0)
-    }
-
-    const getNextSpacing = (waypoint: Waypoint) => {
-      return this.width * this.spacingRatio
-    }
-
-    const {waypoints, nextOffset} = Waypoint.interpolate(this.lastWaypoint, waypoint, getNextSpacing, this.nextDabOffset)
-    this.lastWaypoint = waypoint
-    this.nextDabOffset = nextOffset
-
-    if (waypoints.length == 0) {
-      return new Vec4(0)
-    }
-
+  renderWaypoints(waypoints: Waypoint[]) {
     for (const [i, waypoint] of waypoints.entries()) {
       for (const shader of this.shaders) {
         shader.setUniform("uBrushPos", waypoint.pos)
@@ -263,10 +236,6 @@ class WatercolorTool extends Tool {
     const rectWidth = this.width + 2
     const rects = waypoints.map(w => new Vec4(w.pos.x - rectWidth * 0.5, w.pos.y - rectWidth * 0.5, rectWidth, rectWidth))
     return unionRect(...rects)
-  }
-
-  end() {
-    return new Vec4(0)
   }
 
   renderSettings() {

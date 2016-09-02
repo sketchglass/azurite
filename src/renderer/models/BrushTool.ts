@@ -1,6 +1,6 @@
 import {Vec2, Vec4, Transform, unionRect} from "../../lib/Geometry"
 import Waypoint from "./Waypoint"
-import Tool from "./Tool"
+import BaseBrushTool from "./BaseBrushTool";
 import {Geometry, Shader, Model, GeometryUsage, Framebuffer} from "../../lib/GL"
 import {context} from "../GLContext"
 import BrushSettings from "../views/BrushSettings"
@@ -51,30 +51,17 @@ const brushFragShader = `
 `
 
 export default
-class BrushTool extends Tool {
-  private lastWaypoint: Waypoint|undefined
-  private nextDabOffset = 0
-  width = 10
-  color = new Vec4(0, 0, 0, 1)
-  opacity = 1
-  minWidthRatio = 0.5
-  spacingRatio = 0.1
+class BrushTool extends BaseBrushTool {
   dabsGeometry = new Geometry(context, new Float32Array(0), [
     {attribute: "aOffset", size: 2},
     {attribute: "aCenter", size: 2},
     {attribute: "aPressure", size: 1},
   ], new Uint16Array(0), GeometryUsage.Stream)
-  framebuffer = new Framebuffer(context)
   shader = new Shader(context, brushVertShader, brushFragShader)
   model = new Model(context, this.dabsGeometry, this.shader)
   name = "Brush"
 
   start(waypoint: Waypoint) {
-    this.lastWaypoint = waypoint
-    this.nextDabOffset = 0
-
-    this.framebuffer.setTexture(this.layer.texture)
-
     const layerSize = this.layer.size
     const transform =
       Transform.scale(new Vec2(2 / layerSize.width, 2 / layerSize.height))
@@ -85,25 +72,10 @@ class BrushTool extends Tool {
     this.shader.setUniform('uOpacity', this.opacity)
     this.shader.setUniform('uMinWidthRatio', this.minWidthRatio)
 
-    return new Vec4(0)
+    return super.start(waypoint)
   }
 
-  move(waypoint: Waypoint) {
-    if (!this.lastWaypoint) {
-      return new Vec4(0)
-    }
-
-    const getNextSpacing = (waypoint: Waypoint) => {
-      const brushSize = this.width * (this.minWidthRatio + (1 - this.minWidthRatio) * waypoint.pressure)
-      return brushSize * this.spacingRatio
-    }
-    const {waypoints, nextOffset} = Waypoint.interpolate(this.lastWaypoint, waypoint, getNextSpacing, this.nextDabOffset)
-    this.lastWaypoint = waypoint
-    this.nextDabOffset = nextOffset
-
-    if (waypoints.length == 0) {
-      return new Vec4(0)
-    }
+  renderWaypoints(waypoints: Waypoint[]) {
     const rectWidth = this.width + 2
 
     const offsets = [
@@ -134,10 +106,6 @@ class BrushTool extends Tool {
 
     const rects = waypoints.map(w => new Vec4(w.pos.x - rectWidth * 0.5, w.pos.y - rectWidth * 0.5, rectWidth, rectWidth))
     return unionRect(...rects)
-  }
-
-  end() {
-    return new Vec4(0)
   }
 
   renderSettings() {
