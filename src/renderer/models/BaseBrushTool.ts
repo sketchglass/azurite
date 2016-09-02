@@ -39,7 +39,8 @@ abstract class BaseBrushTool extends Tool {
     if (waypoints.length == 0) {
       return new Vec4(0)
     } else {
-      return this.renderWaypoints(waypoints)
+      this.renderWaypoints(waypoints)
+      return this._rectForWaypoints(waypoints)
     }
   }
 
@@ -47,7 +48,13 @@ abstract class BaseBrushTool extends Tool {
     return new Vec4(0)
   }
 
-  abstract renderWaypoints(waypoints: Waypoint[]): Vec4
+  private _rectForWaypoints(waypoints: Waypoint[]) {
+    const rectWidth = this.width + 2
+    const rects = waypoints.map(w => new Vec4(w.pos.x - rectWidth * 0.5, w.pos.y - rectWidth * 0.5, rectWidth, rectWidth))
+    return unionRect(...rects)
+  }
+
+  abstract renderWaypoints(waypoints: Waypoint[]): void
 }
 
 export default BaseBrushTool

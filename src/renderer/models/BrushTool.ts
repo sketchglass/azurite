@@ -76,8 +76,6 @@ class BrushTool extends BaseBrushTool {
   }
 
   renderWaypoints(waypoints: Waypoint[]) {
-    const rectWidth = this.width + 2
-
     const offsets = [
       new Vec2(-1,-1),
       new Vec2(-1,1),
@@ -103,9 +101,6 @@ class BrushTool extends BaseBrushTool {
     this.framebuffer.use(() => {
       this.model.render()
     })
-
-    const rects = waypoints.map(w => new Vec4(w.pos.x - rectWidth * 0.5, w.pos.y - rectWidth * 0.5, rectWidth, rectWidth))
-    return unionRect(...rects)
   }
 
   renderSettings() {

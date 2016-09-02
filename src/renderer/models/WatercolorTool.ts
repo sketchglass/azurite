@@ -233,9 +233,6 @@ class WatercolorTool extends BaseBrushTool {
       context.textureUnits.delete(1)
       context.textureUnits.delete(2)
     }
-    const rectWidth = this.width + 2
-    const rects = waypoints.map(w => new Vec4(w.pos.x - rectWidth * 0.5, w.pos.y - rectWidth * 0.5, rectWidth, rectWidth))
-    return unionRect(...rects)
   }
 
   renderSettings() {
