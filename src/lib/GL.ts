@@ -1,4 +1,4 @@
-import {Vec2, Vec4, Transform} from "./Geometry"
+import {Vec2, Vec4, Transform, intBoundingRect, intersectionRect} from "./Geometry"
 
 export
 class Context {
@@ -31,8 +31,8 @@ class Context {
   setScissor(rect: Vec4) {
     const {gl} = this
     gl.enable(gl.SCISSOR_TEST)
-    console.log("scissor", rect)
-    gl.scissor(rect.x, rect.y, rect.width, rect.height)
+    const intRect = intersectionRect(intBoundingRect(rect), new Vec4(0, 0, this.element.width, this.element.height))
+    gl.scissor(intRect.x, intRect.y, intRect.width, intRect.height)
   }
 
   clearScissor() {

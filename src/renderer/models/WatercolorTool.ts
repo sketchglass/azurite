@@ -1,4 +1,4 @@
-import {Vec2, Vec4, Transform} from "../../lib/Geometry"
+import {Vec2, Vec4, Transform, unionRect} from "../../lib/Geometry"
 import Waypoint from "./Waypoint"
 import Tool from "./Tool"
 import {Geometry, Shader, Model, GeometryUsage, Framebuffer, Texture, BlendMode} from "../../lib/GL"
@@ -202,55 +202,63 @@ class WatercolorTool extends Tool {
     this.sampleOriginalTexture.resize(new Vec2(sampleSize))
     this.sampleShapeTexture.resize(new Vec2(sampleSize))
     this.sampleClipTexture.resize(new Vec2(sampleSize))
+
+    return new Vec4(0)
   }
 
   move(waypoint: Waypoint) {
-    if (this.lastWaypoint) {
-      const {waypoints, nextOffset} = Waypoint.interpolate(this.lastWaypoint, waypoint, this.nextDabOffset)
-      this.lastWaypoint = waypoint
-      this.nextDabOffset = nextOffset
-
-      if (waypoints.length == 0) {
-        return
-      }
-
-      for (const [i, waypoint] of waypoints.entries()) {
-        for (const shader of this.shaders) {
-          shader.setUniform("uBrushPos", waypoint.pos)
-          shader.setUniform("uPressure", waypoint.pressure)
-        }
-
-        context.textureUnits.set(0, this.layer.texture)
-        this.sampleShader.setUniformInt("uMode", SampleModes.Original)
-        this.sampleOrigianlFramebuffer.use(() => {
-          this.sampleModel.render()
-        })
-        this.sampleShader.setUniformInt("uMode", SampleModes.Shape)
-        this.sampleShapeFramebuffer.use(() => {
-          this.sampleModel.render()
-        })
-        this.sampleShader.setUniformInt("uMode", SampleModes.Clip)
-        this.sampleClipFramebuffer.use(() => {
-          this.sampleModel.render()
-        })
-
-        this.sampleShapeTexture.generateMipmap()
-        this.sampleClipTexture.generateMipmap()
-
-        context.textureUnits.set(0, this.sampleOriginalTexture)
-        context.textureUnits.set(1, this.sampleShapeTexture)
-        context.textureUnits.set(2, this.sampleClipTexture)
-        this.framebuffer.use(() => {
-          this.model.render()
-        })
-        context.textureUnits.delete(0)
-        context.textureUnits.delete(1)
-        context.textureUnits.delete(2)
-      }
+    if (!this.lastWaypoint) {
+      return new Vec4(0)
     }
+
+    const {waypoints, nextOffset} = Waypoint.interpolate(this.lastWaypoint, waypoint, this.nextDabOffset)
+    this.lastWaypoint = waypoint
+    this.nextDabOffset = nextOffset
+
+    if (waypoints.length == 0) {
+      return new Vec4(0)
+    }
+
+    for (const [i, waypoint] of waypoints.entries()) {
+      for (const shader of this.shaders) {
+        shader.setUniform("uBrushPos", waypoint.pos)
+        shader.setUniform("uPressure", waypoint.pressure)
+      }
+
+      context.textureUnits.set(0, this.layer.texture)
+      this.sampleShader.setUniformInt("uMode", SampleModes.Original)
+      this.sampleOrigianlFramebuffer.use(() => {
+        this.sampleModel.render()
+      })
+      this.sampleShader.setUniformInt("uMode", SampleModes.Shape)
+      this.sampleShapeFramebuffer.use(() => {
+        this.sampleModel.render()
+      })
+      this.sampleShader.setUniformInt("uMode", SampleModes.Clip)
+      this.sampleClipFramebuffer.use(() => {
+        this.sampleModel.render()
+      })
+
+      this.sampleShapeTexture.generateMipmap()
+      this.sampleClipTexture.generateMipmap()
+
+      context.textureUnits.set(0, this.sampleOriginalTexture)
+      context.textureUnits.set(1, this.sampleShapeTexture)
+      context.textureUnits.set(2, this.sampleClipTexture)
+      this.framebuffer.use(() => {
+        this.model.render()
+      })
+      context.textureUnits.delete(0)
+      context.textureUnits.delete(1)
+      context.textureUnits.delete(2)
+    }
+    const rectWidth = this.width + 2
+    const rects = waypoints.map(w => new Vec4(w.pos.x - rectWidth * 0.5, w.pos.y - rectWidth * 0.5, rectWidth, rectWidth))
+    return unionRect(...rects)
   }
 
   end() {
+    return new Vec4(0)
   }
 
   renderSettings() {

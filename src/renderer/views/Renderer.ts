@@ -42,15 +42,20 @@ class Renderer {
   backgroundModel: Model
   size = new Vec2(100, 100)
   transform = Transform.identity
-  rendererToPicture = Transform.identity
+  transforms = {
+    pictureToDOM: Transform.identity,
+    pictureToGLViewport: Transform.identity,
+    pictureToGLUnit: Transform.identity,
+    domToPicture: Transform.identity,
+  }
 
   constructor(public picture: Picture) {
     const {width, height} = picture.size
     const vertices = new Float32Array([
-      -width * 0.5, -height * 0.5, 0, 0,
-      width * 0.5, -height * 0.5, 1, 0,
-      -width * 0.5, height * 0.5, 0, 1,
-      width * 0.5, height * 0.5, 1, 1
+      0, 0, 0, 0,
+      width, 0, 1, 0,
+      0, height, 0, 1,
+      width, height, 1, 1
     ])
     const geom = new Geometry(context, vertices, [
       {attribute: "aPosition", size: 2},
@@ -63,31 +68,44 @@ class Renderer {
     this.backgroundModel = new Model(context, geom, this.backgroundShader)
   }
 
+  updateTransforms() {
+    this.transforms.pictureToDOM = Transform.translate(this.picture.size.mul(-0.5))
+      .merge(this.transform)
+      .merge(Transform.translate(this.size.mul(0.5)))
+    this.transforms.pictureToGLViewport = this.transforms.pictureToDOM
+      .merge(Transform.scale(new Vec2(1, -1)))
+      .merge(Transform.translate(new Vec2(0, this.size.height)))
+    this.transforms.pictureToGLUnit = this.transforms.pictureToDOM
+      .merge(Transform.translate(this.size.mul(-0.5)))
+      .merge(Transform.scale(new Vec2(2 / this.size.width, -2 / this.size.height)))
+    this.transforms.domToPicture = this.transforms.pictureToDOM.invert()
+  }
+
   resize(size: Vec2) {
-    this.rendererToPicture = Transform.translate(
-      size.sub(this.picture.size).mul(-0.5)
-    )
     this.size = size
     canvas.width = size.width
     canvas.height = size.height
     context.resize()
+    this.updateTransforms()
     this.render()
   }
 
-  render() {
+  render(rectInPicture?: Vec4) {
     new DefaultFramebuffer(context).use(() => {
+      if (rectInPicture) {
+        context.setScissor(this.transforms.pictureToGLViewport.transformRect(rectInPicture))
+      }
       context.clear()
-      const sceneToUnit = Transform.scale(new Vec2(2 / canvas.width, -2 / canvas.height)) // invert y
-      const transform = this.transform.merge(sceneToUnit)
-      this.backgroundShader.setUniform("uTransform", transform)
+      this.backgroundShader.setUniform("uTransform", this.transforms.pictureToGLUnit)
       this.backgroundModel.render()
-      this.layerShader.setUniform("uTransform", transform)
+      this.layerShader.setUniform("uTransform", this.transforms.pictureToGLUnit)
       this.layerShader.setUniformInt("uTexture", 0)
       for (const layer of this.picture.layers) {
         context.textureUnits.set(0, layer.texture)
         this.layerModel.render()
       }
       context.textureUnits.delete(0)
+      context.clearScissor()
     })
   }
 }

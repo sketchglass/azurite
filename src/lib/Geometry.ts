@@ -185,7 +185,29 @@ class Transform {
     const left = Math.min(...xs)
     const right = Math.max(...xs)
     const top = Math.min(...ys)
-    const bottom = Math.min(...ys)
+    const bottom = Math.max(...ys)
     return new Vec4(left, top, right - left, bottom - top)
   }
+}
+
+export function unionRect(...rects: Vec4[]) {
+  const left = Math.min(...rects.map(r => r.x))
+  const top = Math.min(...rects.map(r => r.y))
+  const right = Math.max(...rects.map(r => r.x + r.width))
+  const bottom = Math.max(...rects.map(r => r.y + r.height))
+  return new Vec4(left, top, right - left, bottom - top)
+}
+
+export function intersectionRect(...rects: Vec4[]) {
+  const left = Math.max(...rects.map(r => r.x))
+  const top = Math.max(...rects.map(r => r.y))
+  const right = Math.min(...rects.map(r => r.x + r.width))
+  const bottom = Math.min(...rects.map(r => r.y + r.height))
+  return new Vec4(left, top, Math.max(right - left, 0), Math.max(bottom - top, 0))
+}
+
+export function intBoundingRect(rect: Vec4) {
+  const topLeft = rect.xy.floor()
+  const bottomRight = rect.xy.add(rect.size).ceil()
+  return Vec4.fromVec2(topLeft, bottomRight.sub(topLeft))
 }

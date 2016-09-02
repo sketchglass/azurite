@@ -42,21 +42,21 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
     ipcRenderer.on("tablet.down", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       const pos = this.mousePos(ev)
-      this.tool.start(new Waypoint(pos, ev.pressure))
-      this.renderer.render()
+      const rect = this.tool.start(new Waypoint(pos, ev.pressure))
+      this.renderer.render(rect)
       this.isPressed = true
     })
     ipcRenderer.on("tablet.move", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       if (this.isPressed) {
         const pos = this.mousePos(ev)
-        this.tool.move(new Waypoint(pos, ev.pressure))
-        this.renderer.render()
+        const rect = this.tool.move(new Waypoint(pos, ev.pressure))
+        this.renderer.render(rect)
       }
     })
     ipcRenderer.on("tablet.up", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       if (this.isPressed) {
-        this.tool.end()
-        this.renderer.render()
+        const rect = this.tool.end()
+        this.renderer.render(rect)
         this.isPressed = false
       }
     })
@@ -96,13 +96,13 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const rect = this.element!.getBoundingClientRect()
     const x = ev.clientX - rect.left
     const y = ev.clientY - rect.top
-    return this.renderer.rendererToPicture.transform(new Vec2(x, y).mul(window.devicePixelRatio))
+    return this.renderer.transforms.domToPicture.transform(new Vec2(x, y).mul(window.devicePixelRatio))
   }
 
   onMouseDown(ev: MouseEvent) {
     const pos = this.mousePos(ev)
-    this.tool.start(new Waypoint(pos, 1))
-    this.renderer.render()
+    const rect = this.tool.start(new Waypoint(pos, 1))
+    this.renderer.render(rect)
     this.isPressed = true
     ev.preventDefault()
   }
@@ -110,15 +110,15 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const pos = this.mousePos(ev)
 
     if (this.isPressed) {
-      this.tool.move(new Waypoint(pos, 1))
-      this.renderer.render()
+      const rect = this.tool.move(new Waypoint(pos, 1))
+      this.renderer.render(rect)
       ev.preventDefault()
     }
   }
   onMouseUp(ev: MouseEvent) {
     if (this.isPressed) {
-      this.tool.end()
-      this.renderer.render()
+      const rect = this.tool.end()
+      this.renderer.render(rect)
       this.isPressed = false
       ev.preventDefault()
     }
