@@ -48,10 +48,6 @@ const sampleFragShader = `
 
   void main(void) {
     float r = distance(fract(uBrushPos), vOffset);
-    if (r >= uBrushRadius) {
-      gl_FragColor = vec4(0.0);
-      return;
-    }
 
     if (uMode == ${SampleModes.Original}) {
       gl_FragColor = fetchOriginal();
@@ -110,9 +106,6 @@ const brushFragShader = `
 
   void main(void) {
     float opacity = texture2D(uSampleShape, vTexCoord).a * vOpacity;
-    if (opacity == 0.0) {
-      discard;
-    }
     vec4 orig = texture2D(uSampleOriginal, vTexCoord);
 
     float mixRate = opacity * uBlending;
