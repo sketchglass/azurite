@@ -15,12 +15,13 @@ abstract class BaseBrushTool extends Tool {
   framebuffer = new Framebuffer(context)
 
   start(waypoint: Waypoint) {
-    this.lastWaypoint = waypoint
-    this.nextDabOffset = 0
-
     this.framebuffer.setTexture(this.layer.texture)
 
-    return new Vec4(0)
+    this.lastWaypoint = waypoint
+    this.nextDabOffset = this.brushSpacing(waypoint)
+    this.renderWaypoints([waypoint])
+
+    return this._rectForWaypoints([waypoint])
   }
 
   move(waypoint: Waypoint) {
@@ -28,11 +29,7 @@ abstract class BaseBrushTool extends Tool {
       return new Vec4(0)
     }
 
-    const getNextSpacing = (waypoint: Waypoint) => {
-      const brushSize = this.width * (this.minWidthRatio + (1 - this.minWidthRatio) * waypoint.pressure)
-      return brushSize * this.spacingRatio
-    }
-    const {waypoints, nextOffset} = Waypoint.interpolate(this.lastWaypoint, waypoint, getNextSpacing, this.nextDabOffset)
+    const {waypoints, nextOffset} = Waypoint.interpolate(this.lastWaypoint, waypoint, this.brushSpacing.bind(this), this.nextDabOffset)
     this.lastWaypoint = waypoint
     this.nextDabOffset = nextOffset
 
@@ -46,6 +43,13 @@ abstract class BaseBrushTool extends Tool {
 
   end() {
     return new Vec4(0)
+  }
+
+  brushSize(waypoint: Waypoint) {
+    return this.width * (this.minWidthRatio + (1 - this.minWidthRatio) * waypoint.pressure)
+  }
+  brushSpacing(waypoint: Waypoint) {
+    return this.brushSize(waypoint) * this.spacingRatio
   }
 
   private _rectForWaypoints(waypoints: Waypoint[]) {
