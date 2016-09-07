@@ -193,7 +193,8 @@ class WatercolorTool extends BaseBrushTool {
   }
 
   renderWaypoints(waypoints: Waypoint[]) {
-    for (const [i, waypoint] of waypoints.entries()) {
+    for (let i = 0; i < waypoints.length; ++i) {
+      const waypoint = waypoints[i]
       for (const shader of this.shaders) {
         shader.setUniform("uBrushPos", waypoint.pos)
         shader.setUniform("uPressure", waypoint.pressure)

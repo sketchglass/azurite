@@ -88,8 +88,10 @@ class BrushTool extends BaseBrushTool {
     ]
     const vertices = new Float32Array(waypoints.length * 20)
     const indices = new Uint16Array(waypoints.length * 6)
-    for (const [i, {pos, pressure}] of waypoints.entries()) {
-      for (const [j, offset] of offsets.entries()) {
+    for (let i = 0; i < waypoints.length; ++i) {
+      const {pos, pressure} = waypoints[i]
+      for (let j = 0; j < 4; ++j) {
+        const offset = offsets[j]
         vertices.set([offset.x, offset.y, pos.x, pos.y, pressure], i * 20 + j * 5)
       }
       indices.set(relIndices.map(j => j + i * 4), i * 6)
