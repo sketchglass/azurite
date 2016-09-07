@@ -46,7 +46,7 @@ class App extends React.Component<void, AppState> {
     return (
       <div className="app">
         <aside className="sidebar">
-          <ColorPicker color={this.state.brushColor} onChange={()=>{}} />
+          <ColorPicker color={this.state.brushColor} onChange={(color: Color)=>{this.setState({brushColor: color})}} />
           <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} />
           {currentTool.renderSettings()}
         </aside>
