@@ -37,9 +37,9 @@ abstract class BaseBrushTool extends Tool {
     const getSpacing = this.brushSpacing.bind(this)
     const {waypoints, nextOffset} = (() => {
       if (lastWaypoints.length == 3) {
-        return Waypoint.interpolateCurve(lastWaypoints[0], lastWaypoints[0], lastWaypoints[1], lastWaypoints[2], getSpacing, this.nextDabOffset)
+        return Waypoint.subdivideCurve(lastWaypoints[0], lastWaypoints[0], lastWaypoints[1], lastWaypoints[2], getSpacing, this.nextDabOffset)
       } else {
-        return Waypoint.interpolateCurve(lastWaypoints[0], lastWaypoints[1], lastWaypoints[2], lastWaypoints[3], getSpacing, this.nextDabOffset)
+        return Waypoint.subdivideCurve(lastWaypoints[0], lastWaypoints[1], lastWaypoints[2], lastWaypoints[3], getSpacing, this.nextDabOffset)
       }
     })()
 
@@ -57,15 +57,15 @@ abstract class BaseBrushTool extends Tool {
     const getSpacing = this.brushSpacing.bind(this)
     const {lastWaypoints} = this
     if (lastWaypoints.length < 2) {
-      return
+      return new Vec4(0)
     }
     const {waypoints} = (() => {
       if (lastWaypoints.length == 2) {
-        return Waypoint.interpolate(lastWaypoints[0], lastWaypoints[1], getSpacing, this.nextDabOffset)
+        return Waypoint.subdivide(lastWaypoints[0], lastWaypoints[1], getSpacing, this.nextDabOffset)
       } else if (lastWaypoints.length == 3) {
-        return Waypoint.interpolateCurve(lastWaypoints[0], lastWaypoints[1], lastWaypoints[2], lastWaypoints[2], getSpacing, this.nextDabOffset)
+        return Waypoint.subdivideCurve(lastWaypoints[0], lastWaypoints[1], lastWaypoints[2], lastWaypoints[2], getSpacing, this.nextDabOffset)
       } else {
-        return Waypoint.interpolateCurve(lastWaypoints[1], lastWaypoints[2], lastWaypoints[3], lastWaypoints[3], getSpacing, this.nextDabOffset)
+        return Waypoint.subdivideCurve(lastWaypoints[1], lastWaypoints[2], lastWaypoints[3], lastWaypoints[3], getSpacing, this.nextDabOffset)
       }
     })()
 

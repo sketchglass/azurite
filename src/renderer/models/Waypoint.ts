@@ -5,8 +5,8 @@ class Waypoint {
   constructor(public pos: Vec2, public pressure: number) {
   }
 
-  // interpolate between start and end with catmull-rom curve
-  static interpolateCurve(prev: Waypoint, start: Waypoint, end: Waypoint, next: Waypoint, getNextSpacing: (waypoint: Waypoint) => number, offset: number) {
+  // interpolate between start and end with catmull-rom curve and subdivide
+  static subdivideCurve(prev: Waypoint, start: Waypoint, end: Waypoint, next: Waypoint, getNextSpacing: (waypoint: Waypoint) => number, offset: number) {
     const [cx, cy] = centripetalCatmullRom(prev.pos, start.pos, end.pos, next.pos)
     const cp = catmullRom(prev.pressure, start.pressure, end.pressure, next.pressure)
 
@@ -23,7 +23,7 @@ class Waypoint {
       const p = cp.eval(t)
 
       const wp = new Waypoint(new Vec2(x, y), p)
-      const result = this.interpolate(last, wp, getNextSpacing, nextOffset)
+      const result = this.subdivide(last, wp, getNextSpacing, nextOffset)
       nextOffset = result.nextOffset
       waypoints.push(...result.waypoints)
       last = wp
@@ -31,7 +31,8 @@ class Waypoint {
     return {waypoints, nextOffset}
   }
 
-  static interpolate(start: Waypoint, end: Waypoint, getNextSpacing: (waypoint: Waypoint) => number, offset: number) {
+  // subdivide segment into waypoints
+  static subdivide(start: Waypoint, end: Waypoint, getNextSpacing: (waypoint: Waypoint) => number, offset: number) {
     const diff = end.pos.sub(start.pos)
     const len = diff.length()
     if (len == 0) {
