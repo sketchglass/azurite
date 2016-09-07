@@ -6,6 +6,8 @@ import WatercolorTool from "../models/WatercolorTool"
 import BrushSettings from "./BrushSettings"
 import WatercolorSettings from "./WatercolorSettings"
 import DrawArea from "./DrawArea"
+import ColorPicker from "./ColorPicker"
+import {Color} from "../../lib/Color"
 
 function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool: Tool) => void}) {
   return (
@@ -18,11 +20,22 @@ function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool
   )
 }
 
+interface AppState {
+  brushColor: Color
+}
+
 export default
-class App extends React.Component<void, void> {
+class App extends React.Component<void, AppState> {
   picture = new Picture()
   tools: Tool[] = [new BrushTool(), new WatercolorTool()]
   currentTool = this.tools[0]
+
+  constructor () {
+    super()
+    this.state = {
+      brushColor: new Color(0, 0, 0, 0)
+    }
+  }
 
   render() {
     const {picture, tools, currentTool} = this
@@ -33,6 +46,7 @@ class App extends React.Component<void, void> {
     return (
       <div className="app">
         <aside className="sidebar">
+          <ColorPicker color={this.state.brushColor} onChange={()=>{}} />
           <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} />
           {currentTool.renderSettings()}
         </aside>

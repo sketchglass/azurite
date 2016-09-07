@@ -1,6 +1,6 @@
 import Electron = require('electron')
 type BrowserWindow = Electron.BrowserWindow
-const {app, BrowserWindow, ipcMain} = Electron
+const {app, BrowserWindow, ipcMain, Menu} = Electron
 
 import {TabletEventReceiver} from "receive-tablet-event"
 
@@ -11,6 +11,28 @@ function createWindow () {
 
   win.loadURL(`file://${__dirname}/../index.html`)
   win.webContents.openDevTools()
+
+  const menuTemplate: Electron.MenuItemOptions[] = [
+    {
+      label: "Edit",
+      submenu: [
+        {
+          label: "Save As…",
+          click: (item, focusedWindow) => {
+            focusedWindow.webContents.send("document.save")
+          }
+        },
+        {
+          type: "separator"
+        },
+        {
+          role: "quit"
+        }
+      ]
+    }
+  ]
+  const menu = Menu.buildFromTemplate(menuTemplate)
+  Menu.setApplicationMenu(menu)
 
   const receiver = new TabletEventReceiver(win)
 
