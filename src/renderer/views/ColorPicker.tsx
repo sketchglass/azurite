@@ -1,5 +1,5 @@
 import React = require("react")
-import Point from "../../lib/Point"
+import {Vec2} from "../../lib/Geometry"
 import {Color} from "../../lib/Color"
 import {mouseOffsetPos} from "./util"
 
@@ -54,7 +54,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
   }
 
   onMouseDown(event: MouseEvent) {
-    const center = new Point(wheelSize / 2, wheelSize / 2)
+    const center = new Vec2(wheelSize / 2, wheelSize / 2)
     const pos = mouseOffsetPos(event, this.canvas).sub(center)
     const r = pos.length()
     if (wheelSize / 2 - wheelWidth <= r && r <= wheelSize / 2) {
@@ -70,7 +70,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
     }
   }
   onMouseMove(event: MouseEvent) {
-    const center = new Point(wheelSize / 2, wheelSize / 2)
+    const center = new Vec2(wheelSize / 2, wheelSize / 2)
     const pos = mouseOffsetPos(event, this.canvas).sub(center)
     if (this.draggingWheel) {
       this.onHueChanged(this.posToHue(pos))
@@ -94,10 +94,10 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
     this.props.onChange(Color.hsv(h, s, v))
   }
 
-  posToHue(pos: Point) {
+  posToHue(pos: Vec2) {
     return atan2ToHue(pos.atan2());
   }
-  posToSV(pos: Point) {
+  posToSV(pos: Vec2) {
     const s = clamp(pos.x / squareSize + 0.5, 0, 1)
     const v = 1 - clamp(pos.y / squareSize + 0.5, 0, 1)
     return {s, v}
@@ -105,11 +105,11 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
 
   drawSquare() {
     const image = this.squareGradient
-    const center = new Point(squareSize / 2, squareSize / 2)
+    const center = new Vec2(squareSize / 2, squareSize / 2)
 
     for (let y = 0; y < squareSize; ++y) {
       for (let x = 0; x < squareSize; ++x) {
-        const pos = new Point(x + 0.5, y + 0.5).sub(center)
+        const pos = new Vec2(x + 0.5, y + 0.5).sub(center)
         const {s, v} = this.posToSV(pos)
         const color = Color.hsv(this.props.color.h, s, v).toRgb()
         setPixel(image, x, y, color)
@@ -122,11 +122,11 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
   createWheelGradient() {
     const {context} = this
     const image = context.createImageData(wheelSize, wheelSize)
-    const center = new Point(wheelSize / 2, wheelSize / 2)
+    const center = new Vec2(wheelSize / 2, wheelSize / 2)
 
     for (let y = 0; y < wheelSize; ++y) {
       for (let x = 0; x < wheelSize; ++x) {
-        const pos = new Point(x + 0.5, y + 0.5).sub(center)
+        const pos = new Vec2(x + 0.5, y + 0.5).sub(center)
         const hue = this.posToHue(pos)
         const color = Color.hsv(hue, 1, 1).toRgb()
         setPixel(image, x, y, color)
