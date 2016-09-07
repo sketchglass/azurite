@@ -211,3 +211,40 @@ export function intBoundingRect(rect: Vec4) {
   const bottomRight = rect.xy.add(rect.size).ceil()
   return Vec4.fromVec2(topLeft, bottomRight.sub(topLeft))
 }
+
+export
+class CubicPolynomial {
+  // x(t) = c0 + c1 * x + c2 * x^2 + c3 * x ^ 3
+  constructor(public c0: number, public c1: number, public c2: number, public c3: number) {
+  }
+  // Calc x(t)
+  eval(t: number) {
+    const {c0, c1, c2, c3} = this
+    const t2 = t * t
+    const t3 = t2 * t
+    return c0 + c1 * t + c2 * t2 + c3 * t3
+  }
+  // Return x(t) such that x(0) = x0, x(1) = x1, x'(0) = t0, x'(1) = t1
+  static fromSlopes(x0: number, x1: number, t0: number, t1: number) {
+    return new CubicPolynomial(
+      x0,
+      t0,
+      -3 * x0 + 3 * x1 - 2 * t0 - t1,
+      2 * x0 - 2 * x1 + t0 + t1
+    )
+  }
+
+  // Return polynomial for catmull rom interpolation between x1 and x2
+  static fromCatmullRom(x0: number, x1: number, x2: number, x3: number) {
+    return this.fromSlopes(x1, x2, (x2 - x0) * 0.5, (x3 - x1) * 0.5)
+  }
+
+  // Return polynomial for non-uniform catmull rom interpolation
+  static fromNonUniformCatmullRom(x0: number, x1: number, x2: number, x3: number, dt0: number, dt1: number, dt2: number) {
+    let t1 = (x1 - x0) / dt0 - (x2 - x0) / (dt0 + dt1) + (x2 - x1) / dt1;
+    let t2 = (x2 - x1) / dt1 - (x3 - x1) / (dt1 + dt2) + (x3 - x2) / dt2;
+    t1 *= dt1;
+    t2 *= dt1;
+    return this.fromSlopes(x1, x2, t1, t2)
+  }
+}
