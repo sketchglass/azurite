@@ -95,21 +95,20 @@ class Renderer {
   }
 
   render(rectInPicture?: Vec4) {
-    new DefaultFramebuffer(context).use(() => {
-      if (rectInPicture) {
-        context.setScissor(this.transforms.pictureToGLViewport.transformRect(rectInPicture))
-      }
-      context.clear()
-      this.backgroundShader.setUniform("uTransform", this.transforms.pictureToGLUnit)
-      this.backgroundModel.render()
-      this.layerShader.setUniform("uTransform", this.transforms.pictureToGLUnit)
-      this.layerShader.setUniformInt("uTexture", 0)
-      for (const layer of this.picture.layers) {
-        context.textureUnits.set(0, layer.texture)
-        this.layerModel.render()
-      }
-      context.textureUnits.delete(0)
-      context.clearScissor()
-    })
+    context.defaultFramebuffer.use()
+    if (rectInPicture) {
+      context.setScissor(this.transforms.pictureToGLViewport.transformRect(rectInPicture))
+    }
+    context.clear()
+    this.backgroundShader.uniform("uTransform").setTransform(this.transforms.pictureToGLUnit)
+    this.backgroundModel.render()
+    this.layerShader.uniform("uTransform").setTransform(this.transforms.pictureToGLUnit)
+    this.layerShader.uniform("uTexture").setInt(0)
+    for (const layer of this.picture.layers) {
+      context.textureUnits.set(0, layer.texture)
+      this.layerModel.render()
+    }
+    context.textureUnits.delete(0)
+    context.clearScissor()
   }
 }
