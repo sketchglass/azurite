@@ -100,10 +100,10 @@ class Renderer {
       context.setScissor(this.transforms.pictureToGLViewport.transformRect(rectInPicture))
     }
     context.clear()
-    this.backgroundShader.setUniform("uTransform", this.transforms.pictureToGLUnit)
+    this.backgroundShader.uniform("uTransform").setTransform(this.transforms.pictureToGLUnit)
     this.backgroundModel.render()
-    this.layerShader.setUniform("uTransform", this.transforms.pictureToGLUnit)
-    this.layerShader.setUniformInt("uTexture", 0)
+    this.layerShader.uniform("uTransform").setTransform(this.transforms.pictureToGLUnit)
+    this.layerShader.uniform("uTexture").setInt(0)
     for (const layer of this.picture.layers) {
       context.textureUnits.set(0, layer.texture)
       this.layerModel.render()

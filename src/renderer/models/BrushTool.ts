@@ -66,11 +66,11 @@ class BrushTool extends BaseBrushTool {
     const transform =
       Transform.scale(new Vec2(2 / layerSize.width, 2 / layerSize.height))
         .merge(Transform.translate(new Vec2(-1, -1)))
-    this.shader.setUniform('uTransform', transform)
-    this.shader.setUniform('uBrushSize', this.width)
-    this.shader.setUniform('uColor', this.color)
-    this.shader.setUniform('uOpacity', this.opacity)
-    this.shader.setUniform('uMinWidthRatio', this.minWidthRatio)
+    this.shader.uniform('uTransform').setTransform(transform)
+    this.shader.uniform('uBrushSize').setFloat(this.width)
+    this.shader.uniform('uColor').setVec4(this.color)
+    this.shader.uniform('uOpacity').setFloat(this.opacity)
+    this.shader.uniform('uMinWidthRatio').setFloat(this.minWidthRatio)
 
     return super.start(waypoint)
   }

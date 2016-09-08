@@ -144,6 +144,46 @@ class Geometry {
 }
 
 export
+class Uniform {
+  location: WebGLUniformLocation
+
+  constructor(public context: Context, public shader: Shader, public name: string) {
+    const {gl} = context
+    this.location = gl.getUniformLocation(shader.program, name)!
+  }
+
+  setInt(value: number) {
+    const {gl} = this.context
+    gl.useProgram(this.shader.program)
+    gl.uniform1i(this.location, value)
+  }
+
+  setFloat(value: number) {
+    const {gl} = this.context
+    gl.useProgram(this.shader.program)
+    gl.uniform1f(this.location, value)
+  }
+
+  setVec2(value: Vec2) {
+    const {gl} = this.context
+    gl.useProgram(this.shader.program)
+    gl.uniform2fv(this.location, value.toGLData())
+  }
+
+  setVec4(value: Vec4) {
+    const {gl} = this.context
+    gl.useProgram(this.shader.program)
+    gl.uniform4fv(this.location, value.toGLData())
+  }
+
+  setTransform(value: Transform) {
+    const {gl} = this.context
+    gl.useProgram(this.shader.program)
+    gl.uniformMatrix3fv(this.location, false, value.toGLData())
+  }
+}
+
+export
 class Shader {
   program: WebGLProgram
 
@@ -169,24 +209,8 @@ class Shader {
     gl.attachShader(this.program, shader)
   }
 
-  setUniformInt(name: string, value: number) {
-    const {gl} = this.context
-    gl.useProgram(this.program)
-    gl.uniform1i(gl.getUniformLocation(this.program, name)!, value)
-  }
-
-  setUniform(name: string, value: number|Vec2|Vec4|Transform) {
-    const {gl} = this.context
-    gl.useProgram(this.program)
-    if (value instanceof Vec2) {
-      gl.uniform2fv(gl.getUniformLocation(this.program, name)!, value.toGLData())
-    } else if (value instanceof Vec4) {
-      gl.uniform4fv(gl.getUniformLocation(this.program, name)!, value.toGLData())
-    } else if (value instanceof Transform) {
-      gl.uniformMatrix3fv(gl.getUniformLocation(this.program, name)!, false, value.toGLData())
-    } else {
-      gl.uniform1f(gl.getUniformLocation(this.program, name)!, value)
-    }
+  uniform(name: string) {
+    return new Uniform(this.context, this, name)
   }
 }
 

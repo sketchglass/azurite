@@ -165,10 +165,10 @@ class WatercolorTool extends BaseBrushTool {
       gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_NEAREST)
     }
 
-    this.shader.setUniformInt("uSampleOriginal", 0)
-    this.shader.setUniformInt("uSampleShape", 1)
-    this.shader.setUniformInt("uSampleClip", 2)
-    this.sampleShader.setUniformInt("uLayer", 0)
+    this.shader.uniform("uSampleOriginal").setInt(0)
+    this.shader.uniform("uSampleShape").setInt(1)
+    this.shader.uniform("uSampleClip").setInt(2)
+    this.sampleShader.uniform("uLayer").setInt(0)
   }
 
   start(waypoint: Waypoint) {
@@ -176,13 +176,13 @@ class WatercolorTool extends BaseBrushTool {
     const sampleSize = Math.pow(2, Math.ceil(Math.log2(this.width + 2)))
 
     for (const shader of this.shaders) {
-      shader.setUniform('uLayerSize', layerSize)
-      shader.setUniform("uSampleSize", sampleSize)
-      shader.setUniform('uBlending', this.blending)
-      shader.setUniform('uThickness', this.thickness)
-      shader.setUniform('uColor', this.color)
-      shader.setUniform("uOpacity", this.opacity)
-      shader.setUniform("uBrushRadius", this.width * 0.5)
+      shader.uniform('uLayerSize').setVec2(layerSize)
+      shader.uniform("uSampleSize").setFloat(sampleSize)
+      shader.uniform('uBlending').setFloat(this.blending)
+      shader.uniform('uThickness').setFloat(this.thickness)
+      shader.uniform('uColor').setVec4(this.color)
+      shader.uniform("uOpacity").setFloat(this.opacity)
+      shader.uniform("uBrushRadius").setFloat(this.width * 0.5)
     }
 
     this.sampleOriginalTexture.resize(new Vec2(sampleSize))
@@ -193,24 +193,28 @@ class WatercolorTool extends BaseBrushTool {
   }
 
   renderWaypoints(waypoints: Waypoint[]) {
+    const uMode = this.sampleShader.uniform("uMode")
+    const uBrushPos = this.shader.uniform("uBrushPos")
+    const uPressure = this.shader.uniform("uPressure")
+    const uBrushPosSample = this.sampleShader.uniform("uBrushPos")
+    const uPressureSample = this.sampleShader.uniform("uPressure")
+
     for (let i = 0; i < waypoints.length; ++i) {
       const waypoint = waypoints[i]
-      for (const shader of this.shaders) {
-        shader.setUniform("uBrushPos", waypoint.pos)
-        shader.setUniform("uPressure", waypoint.pressure)
-      }
+      uBrushPosSample.setVec2(waypoint.pos)
+      uPressureSample.setFloat(waypoint.pressure)
 
       context.textureUnits.set(0, this.layer.texture)
 
-      this.sampleShader.setUniformInt("uMode", SampleModes.Original)
+      uMode.setInt(SampleModes.Original)
       this.sampleOrigianlFramebuffer.use()
       this.sampleModel.render()
 
-      this.sampleShader.setUniformInt("uMode", SampleModes.Shape)
+      uMode.setInt(SampleModes.Shape)
       this.sampleShapeFramebuffer.use()
       this.sampleModel.render()
 
-      this.sampleShader.setUniformInt("uMode", SampleModes.Clip)
+      uMode.setInt(SampleModes.Clip)
       this.sampleClipFramebuffer.use()
       this.sampleModel.render()
 
@@ -220,6 +224,8 @@ class WatercolorTool extends BaseBrushTool {
       context.textureUnits.set(0, this.sampleOriginalTexture)
       context.textureUnits.set(1, this.sampleShapeTexture)
       context.textureUnits.set(2, this.sampleClipTexture)
+      uBrushPos.setVec2(waypoint.pos)
+      uPressure.setFloat(waypoint.pressure)
       this.framebuffer.use()
       this.model.render()
 
