@@ -201,18 +201,18 @@ class WatercolorTool extends BaseBrushTool {
       }
 
       context.textureUnits.set(0, this.layer.texture)
+
       this.sampleShader.setUniformInt("uMode", SampleModes.Original)
-      this.sampleOrigianlFramebuffer.use(() => {
-        this.sampleModel.render()
-      })
+      this.sampleOrigianlFramebuffer.use()
+      this.sampleModel.render()
+
       this.sampleShader.setUniformInt("uMode", SampleModes.Shape)
-      this.sampleShapeFramebuffer.use(() => {
-        this.sampleModel.render()
-      })
+      this.sampleShapeFramebuffer.use()
+      this.sampleModel.render()
+
       this.sampleShader.setUniformInt("uMode", SampleModes.Clip)
-      this.sampleClipFramebuffer.use(() => {
-        this.sampleModel.render()
-      })
+      this.sampleClipFramebuffer.use()
+      this.sampleModel.render()
 
       this.sampleShapeTexture.generateMipmap()
       this.sampleClipTexture.generateMipmap()
@@ -220,9 +220,9 @@ class WatercolorTool extends BaseBrushTool {
       context.textureUnits.set(0, this.sampleOriginalTexture)
       context.textureUnits.set(1, this.sampleShapeTexture)
       context.textureUnits.set(2, this.sampleClipTexture)
-      this.framebuffer.use(() => {
-        this.model.render()
-      })
+      this.framebuffer.use()
+      this.model.render()
+
       context.textureUnits.delete(0)
       context.textureUnits.delete(1)
       context.textureUnits.delete(2)

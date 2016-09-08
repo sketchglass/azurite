@@ -6,6 +6,7 @@ class Context {
   halfFloatExt: any
   vertexArrayExt: any
   textureUnits = new TextureUnits(this)
+  defaultFramebuffer = new DefaultFramebuffer(this)
 
   constructor(public element: HTMLCanvasElement) {
     const glOpts = {
@@ -260,14 +261,12 @@ class Framebuffer {
     gl.bindFramebuffer(gl.FRAMEBUFFER, null)
   }
 
-  use(render: () => void) {
+  use() {
     if (this.texture) {
       const {gl} = this.context
       const {width, height} = this.texture.size
-      gl.viewport(0, 0, width, height)
       gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
-      render()
-      gl.bindFramebuffer(gl.FRAMEBUFFER, null)
+      gl.viewport(0, 0, width, height)
     }
   }
 }
@@ -276,9 +275,9 @@ export
 class DefaultFramebuffer {
   constructor(public context: Context) {
   }
-  use(render: () => void) {
+  use() {
     const {gl, element} = this.context
+    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
     gl.viewport(0, 0, element.width, element.height)
-    render()
   }
 }

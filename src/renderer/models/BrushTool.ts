@@ -100,9 +100,8 @@ class BrushTool extends BaseBrushTool {
     this.dabsGeometry.indexData = indices
     this.dabsGeometry.updateBuffer()
 
-    this.framebuffer.use(() => {
-      this.model.render()
-    })
+    this.framebuffer.use()
+    this.model.render()
   }
 
   renderSettings() {
