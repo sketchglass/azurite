@@ -255,7 +255,7 @@ export function nonUniformCatmullRom(x0: number, x1: number, x2: number, x3: num
 // Return centripetal catmull rom interpolation between points
 // http://stackoverflow.com/questions/9489736/catmull-rom-curve-with-no-cusps-and-no-self-intersections/23980479#23980479
 export function centripetalCatmullRom(p0: Vec2, p1: Vec2, p2: Vec2, p3: Vec2): [CubicPolynomial, CubicPolynomial] {
-  let dt0 = Math.pow(p1.sub(p2).squaredLength(), 0.25)
+  let dt0 = Math.pow(p1.sub(p0).squaredLength(), 0.25)
   let dt1 = Math.pow(p2.sub(p1).squaredLength(), 0.25)
   let dt2 = Math.pow(p3.sub(p2).squaredLength(), 0.25)
 
