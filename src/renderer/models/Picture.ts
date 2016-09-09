@@ -21,6 +21,6 @@ class Picture {
       return
     }
     this.layers.splice(this.currentLayerIndex, 1)
-    this.currentLayerIndex = Math.min(this.currentLayerIndex, this.layers.length)
+    this.currentLayerIndex = Math.min(this.currentLayerIndex, this.layers.length - 1)
   }
 }
