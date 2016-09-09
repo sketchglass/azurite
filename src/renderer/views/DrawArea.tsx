@@ -19,22 +19,19 @@ export default
 class DrawArea extends React.Component<DrawAreaProps, void> {
   element: HTMLElement|undefined
   isPressed = false
-  renderer: Renderer;
-  tool: Tool
+  renderer: Renderer
 
   constructor(props: DrawAreaProps) {
     super(props)
-    this.tool = props.tool
-    this.tool.picture = props.picture
+    this.componentWillReceiveProps(props)
+  }
+
+  componentWillReceiveProps(props: DrawAreaProps) {
+    this.props.tool.picture = props.picture
     this.renderer = new Renderer(props.picture)
     props.picture.changed.forEach(() => {
       this.forceUpdate()
     })
-  }
-
-  componentWillReceiveProps(props: DrawAreaProps) {
-    this.tool = props.tool
-    this.tool.picture = props.picture
   }
 
   componentDidMount() {
@@ -45,20 +42,20 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
     ipcRenderer.on("tablet.down", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       const pos = this.mousePos(ev)
-      const rect = this.tool.start(new Waypoint(pos, ev.pressure))
+      const rect = this.props.tool.start(new Waypoint(pos, ev.pressure))
       this.renderer.render(rect)
       this.isPressed = true
     })
     ipcRenderer.on("tablet.move", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       if (this.isPressed) {
         const pos = this.mousePos(ev)
-        const rect = this.tool.move(new Waypoint(pos, ev.pressure))
+        const rect = this.props.tool.move(new Waypoint(pos, ev.pressure))
         this.renderer.render(rect)
       }
     })
     ipcRenderer.on("tablet.up", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       if (this.isPressed) {
-        const rect = this.tool.end()
+        const rect = this.props.tool.end()
         this.renderer.render(rect)
         this.isPressed = false
       }
@@ -104,7 +101,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   onMouseDown(ev: MouseEvent) {
     const pos = this.mousePos(ev)
-    const rect = this.tool.start(new Waypoint(pos, 1))
+    const rect = this.props.tool.start(new Waypoint(pos, 1))
     this.renderer.render(rect)
     this.isPressed = true
     ev.preventDefault()
@@ -113,14 +110,14 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const pos = this.mousePos(ev)
 
     if (this.isPressed) {
-      const rect = this.tool.move(new Waypoint(pos, 1))
+      const rect = this.props.tool.move(new Waypoint(pos, 1))
       this.renderer.render(rect)
       ev.preventDefault()
     }
   }
   onMouseUp(ev: MouseEvent) {
     if (this.isPressed) {
-      const rect = this.tool.end()
+      const rect = this.props.tool.end()
       this.renderer.render(rect)
       this.isPressed = false
       ev.preventDefault()
