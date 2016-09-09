@@ -1,6 +1,7 @@
 import React = require("react")
 import Picture from "../models/Picture"
 import Layer from "../models/Layer"
+const classNames = require("classnames")
 
 interface LayerListProps {
   picture: Picture
@@ -13,13 +14,21 @@ class LayerList extends React.Component<LayerListProps, void> {
     props.picture.layersChanged.forEach(() => {
       this.forceUpdate()
     })
+    props.picture.currentLayerChanged.forEach(() => {
+      this.forceUpdate()
+    })
   }
 
   render() {
     const {picture} = this.props
     const elems = picture.layers.map((layer, i) => {
+      const current = picture.currentLayerIndex == i
+      const onClick = () => {
+        picture.currentLayerIndex = i
+        picture.currentLayerChanged.next()
+      }
       return (
-        <div className="LayerList_layer" key={i}>
+        <div className={classNames("LayerList_layer", {"LayerList_layer-current": current})} key={i} onClick={onClick}>
           {layer.name}
         </div>
       )
