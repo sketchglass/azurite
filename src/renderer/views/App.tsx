@@ -6,6 +6,7 @@ import WatercolorTool from "../models/WatercolorTool"
 import BrushSettings from "./BrushSettings"
 import WatercolorSettings from "./WatercolorSettings"
 import DrawArea from "./DrawArea"
+import LayerList from "./LayerList"
 
 function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool: Tool) => void}) {
   return (
@@ -37,6 +38,9 @@ class App extends React.Component<void, void> {
           {currentTool.renderSettings()}
         </aside>
         <DrawArea tool={currentTool} picture={picture} />
+        <aside className="LeftSidebar">
+          <LayerList picture={picture} />
+        </aside>
       </div>
     )
   }

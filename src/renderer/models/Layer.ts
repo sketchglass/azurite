@@ -4,6 +4,7 @@ import {context} from "../GLContext"
 
 export default
 class Layer {
+  name = "Layer"
   texture = new Texture(context, this.size)
 
   constructor(public size: Vec2) {
