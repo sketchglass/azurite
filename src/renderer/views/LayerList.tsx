@@ -31,7 +31,7 @@ class LayerList extends React.Component<LayerListProps, void> {
       }
       return (
         <div className={classNames("LayerList_layer", {"LayerList_layer-current": current})} key={i} onClick={onClick}>
-          <ClickToEdit text={layer.name} onChange={onRename} />
+          <ClickToEdit text={layer.name} onChange={onRename} editable={current} />
         </div>
       )
     })
