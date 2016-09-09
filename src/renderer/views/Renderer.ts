@@ -104,8 +104,9 @@ class Renderer {
     this.backgroundModel.render()
     this.layerShader.uniform("uTransform").setTransform(this.transforms.pictureToGLUnit)
     this.layerShader.uniform("uTexture").setInt(0)
-    for (const layer of this.picture.layers) {
-      context.textureUnits.set(0, layer.texture)
+    const {layers} = this.picture
+    for (let i = layers.length - 1; i >= 0; --i) {
+      context.textureUnits.set(0, layers[i].texture)
       this.layerModel.render()
     }
     context.textureUnits.delete(0)
