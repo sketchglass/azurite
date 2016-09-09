@@ -12,10 +12,6 @@ export default
 class LayerList extends React.Component<LayerListProps, void> {
   constructor(props: LayerListProps) {
     super(props)
-    this.componentWillReceiveProps(props)
-  }
-
-  componentWillReceiveProps(props: LayerListProps) {
     props.picture.changed.forEach(() => {
       this.forceUpdate()
     })
