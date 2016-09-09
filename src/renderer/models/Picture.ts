@@ -14,7 +14,7 @@ class Picture {
   }
 
   addLayer() {
-    this.layers.splice(this.currentLayerIndex + 1, 0, new Layer(this.size))
+    this.layers.splice(this.currentLayerIndex, 0, new Layer(this.size))
   }
   removeLayer() {
     if (this.layers.length < 2) {
