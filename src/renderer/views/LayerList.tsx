@@ -10,6 +10,9 @@ export default
 class LayerList extends React.Component<LayerListProps, void> {
   constructor(props: LayerListProps) {
     super(props)
+    props.picture.layersChanged.forEach(() => {
+      this.forceUpdate()
+    })
   }
 
   render() {
@@ -32,7 +35,6 @@ class LayerList extends React.Component<LayerListProps, void> {
   addLayer() {
     const {picture} = this.props
     picture.layers.push(new Layer(picture.size))
-    // TODO: implement notification
-    this.forceUpdate()
+    picture.layersChanged.next()
   }
 }
