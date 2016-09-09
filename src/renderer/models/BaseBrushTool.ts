@@ -15,7 +15,7 @@ abstract class BaseBrushTool extends Tool {
   framebuffer = new Framebuffer(context)
 
   start(waypoint: Waypoint) {
-    this.framebuffer.setTexture(this.layer.texture)
+    this.framebuffer.setTexture(this.picture.currentLayer.texture)
 
     this.lastWaypoints = [waypoint]
     this.nextDabOffset = this.brushSpacing(waypoint)

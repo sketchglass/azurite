@@ -25,13 +25,13 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   constructor(props: DrawAreaProps) {
     super(props)
     this.tool = props.tool
-    this.tool.layer = props.picture.layers[0]
+    this.tool.picture = props.picture
     this.renderer = new Renderer(props.picture)
   }
 
   componentWillReceiveProps(props: DrawAreaProps) {
     this.tool = props.tool
-    this.tool.layer = props.picture.layers[0]
+    this.tool.picture = props.picture
   }
 
   componentDidMount() {

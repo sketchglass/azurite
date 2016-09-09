@@ -62,7 +62,7 @@ class BrushTool extends BaseBrushTool {
   name = "Brush"
 
   start(waypoint: Waypoint) {
-    const layerSize = this.layer.size
+    const layerSize = this.picture.currentLayer.size
     const transform =
       Transform.scale(new Vec2(2 / layerSize.width, 2 / layerSize.height))
         .merge(Transform.translate(new Vec2(-1, -1)))

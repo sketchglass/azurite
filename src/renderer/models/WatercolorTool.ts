@@ -172,7 +172,7 @@ class WatercolorTool extends BaseBrushTool {
   }
 
   start(waypoint: Waypoint) {
-    const layerSize = this.layer.size
+    const layerSize = this.picture.currentLayer.size
     const sampleSize = Math.pow(2, Math.ceil(Math.log2(this.width + 2)))
 
     for (const shader of this.shaders) {
@@ -198,13 +198,14 @@ class WatercolorTool extends BaseBrushTool {
     const uPressure = this.shader.uniform("uPressure")
     const uBrushPosSample = this.sampleShader.uniform("uBrushPos")
     const uPressureSample = this.sampleShader.uniform("uPressure")
+    const layerTexture = this.picture.currentLayer.texture
 
     for (let i = 0; i < waypoints.length; ++i) {
       const waypoint = waypoints[i]
       uBrushPosSample.setVec2(waypoint.pos)
       uPressureSample.setFloat(waypoint.pressure)
 
-      context.textureUnits.set(0, this.layer.texture)
+      context.textureUnits.set(0, layerTexture)
 
       uMode.setInt(SampleModes.Original)
       this.sampleOrigianlFramebuffer.use()
