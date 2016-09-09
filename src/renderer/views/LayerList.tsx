@@ -1,6 +1,7 @@
 import React = require("react")
 import Picture from "../models/Picture"
 import Layer from "../models/Layer"
+import ClickToEdit from "./ClickToEdit"
 const classNames = require("classnames")
 
 interface LayerListProps {
@@ -28,9 +29,13 @@ class LayerList extends React.Component<LayerListProps, void> {
         picture.currentLayerIndex = i
         picture.changed.next()
       }
+      const onRename = (name: string) => {
+        layer.name = name
+        picture.changed.next()
+      }
       return (
         <div className={classNames("LayerList_layer", {"LayerList_layer-current": current})} key={i} onClick={onClick}>
-          {layer.name}
+          <ClickToEdit text={layer.name} onChange={onRename} />
         </div>
       )
     })
