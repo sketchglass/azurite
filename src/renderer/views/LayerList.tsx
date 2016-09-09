@@ -11,10 +11,7 @@ export default
 class LayerList extends React.Component<LayerListProps, void> {
   constructor(props: LayerListProps) {
     super(props)
-    props.picture.layersChanged.forEach(() => {
-      this.forceUpdate()
-    })
-    props.picture.currentLayerChanged.forEach(() => {
+    props.picture.changed.forEach(() => {
       this.forceUpdate()
     })
   }
@@ -25,7 +22,7 @@ class LayerList extends React.Component<LayerListProps, void> {
       const current = picture.currentLayerIndex == i
       const onClick = () => {
         picture.currentLayerIndex = i
-        picture.currentLayerChanged.next()
+        picture.changed.next()
       }
       return (
         <div className={classNames("LayerList_layer", {"LayerList_layer-current": current})} key={i} onClick={onClick}>
@@ -36,6 +33,7 @@ class LayerList extends React.Component<LayerListProps, void> {
     return (
       <div className="LayerList">
         <button onClick={this.addLayer.bind(this)}>Add</button>
+        <button onClick={this.removeLayer.bind(this)}>Remove</button>
         {elems}
       </div>
     )
@@ -43,7 +41,13 @@ class LayerList extends React.Component<LayerListProps, void> {
 
   addLayer() {
     const {picture} = this.props
-    picture.layers.push(new Layer(picture.size))
-    picture.layersChanged.next()
+    picture.addLayer()
+    picture.changed.next()
+  }
+
+  removeLayer() {
+    const {picture} = this.props
+    picture.removeLayer()
+    picture.changed.next()
   }
 }
