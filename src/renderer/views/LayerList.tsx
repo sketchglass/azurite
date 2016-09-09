@@ -1,5 +1,6 @@
 import React = require("react")
 import Picture from "../models/Picture"
+import Layer from "../models/Layer"
 
 interface LayerListProps {
   picture: Picture
@@ -22,8 +23,16 @@ class LayerList extends React.Component<LayerListProps, void> {
     })
     return (
       <div className="LayerList">
+        <button onClick={this.addLayer.bind(this)}>Add</button>
         {elems}
       </div>
     )
+  }
+
+  addLayer() {
+    const {picture} = this.props
+    picture.layers.push(new Layer(picture.size))
+    // TODO: implement notification
+    this.forceUpdate()
   }
 }
