@@ -1,6 +1,6 @@
 import Layer from "./Layer"
 import {Vec2} from "../../lib/Geometry"
-import {Subject} from "@reactivex/rxjs"
+import {Subject} from "@reactivex/rxjs/dist/cjs/Subject"
 
 export default
 class Picture {
