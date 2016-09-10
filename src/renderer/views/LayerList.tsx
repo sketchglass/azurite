@@ -10,14 +10,34 @@ interface LayerListProps {
 
 interface LayerListState {
   layers: Layer[]
-  current: number
+  currentIndex: number
 }
 
 function pictureToState(picture: Picture) {
   return {
     layers: picture.layers,
-    current: picture.currentLayerIndex,
+    currentIndex: picture.currentLayerIndex,
   }
+}
+
+function LayerListItem(props: {layer: Layer, current: boolean, index: number}) {
+  const {layer, current, index} = props
+  const select = () => {
+    const {picture} = layer
+    picture.currentLayerIndex = index
+    picture.changed.next()
+  }
+
+  const rename = (name: string) => {
+    const {picture} = layer
+    picture.layers[index].name = name
+    picture.changed.next()
+  }
+  return (
+    <div className={classNames("LayerList_layer", {"LayerList_layer-current": current})} onClick={select}>
+      <ClickToEdit text={layer.name} onChange={rename} editable={current} />
+    </div>
+  )
 }
 
 export default
@@ -32,22 +52,13 @@ class LayerList extends React.Component<LayerListProps, LayerListState> {
   }
 
   render() {
-    const {layers, current} = this.state
+    const {layers, currentIndex} = this.state
     const {picture} = this.props
-    const elems = layers.map((layer, i) => {
-      const onClick = () => { this.selectLayer(i) }
-      const onRename = (name: string) => { this.renameLayer(i, name) }
-      return (
-        <div className={classNames("LayerList_layer", {"LayerList_layer-current": current == i})} key={i} onClick={onClick}>
-          <ClickToEdit text={layer.name} onChange={onRename} editable={current == i} />
-        </div>
-      )
-    })
     return (
       <div className="LayerList">
         <button onClick={this.addLayer.bind(this)}>Add</button>
         <button onClick={this.removeLayer.bind(this)}>Remove</button>
-        {elems}
+        {layers.map((layer, i) => <LayerListItem key={i} layer={layer} index={i} current={currentIndex == i} />)}
       </div>
     )
   }

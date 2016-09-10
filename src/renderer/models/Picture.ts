@@ -5,7 +5,7 @@ import {Subject} from "@reactivex/rxjs"
 export default
 class Picture {
   size = new Vec2(1024, 768)
-  layers: Layer[] = [new Layer(this.size)]
+  layers: Layer[] = [new Layer(this, this.size)]
   currentLayerIndex = 0
   changed = new Subject<void>()
 
@@ -14,7 +14,7 @@ class Picture {
   }
 
   addLayer() {
-    this.layers.splice(this.currentLayerIndex, 0, new Layer(this.size))
+    this.layers.splice(this.currentLayerIndex, 0, new Layer(this, this.size))
   }
   removeLayer() {
     if (this.layers.length < 2) {
