@@ -6,16 +6,27 @@ interface ClickToEditProps {
   editable: boolean
 }
 
+interface ClickToEditState {
+  isEditing: boolean
+}
+
 export default
-class ClickToEdit extends React.Component<ClickToEditProps, void> {
-  isEditing = false
+class ClickToEdit extends React.Component<ClickToEditProps, ClickToEditState> {
+  state = {
+    isEditing: false
+  }
+
+  componentWillReceiveProps(props: ClickToEditProps) {
+    if (!props.editable) {
+      this.setState({
+        isEditing: false
+      })
+    }
+  }
 
   render() {
     const {text, onChange, editable} = this.props
-    if (!editable) {
-      this.isEditing = false
-    }
-    const {isEditing} = this
+    const {isEditing} = this.state
     return (
       <div className="ClickToEdit">
         <div hidden={isEditing} className="ClickToEdit-text" onClick={this.onTextClick.bind(this)}>{text}</div>
@@ -35,14 +46,16 @@ class ClickToEdit extends React.Component<ClickToEditProps, void> {
     if (!this.props.editable) {
       return
     }
-    this.isEditing = true
-    this.forceUpdate()
+    this.setState({
+      isEditing: true
+    })
     this.inputElem.setSelectionRange(0, this.inputElem.value.length);
   }
 
   onEditFinish(text: string) {
-    this.isEditing = false
-    this.forceUpdate()
+    this.setState({
+      isEditing: false
+    })
     this.props.onChange(text)
   }
   onInputBlur(event: React.FocusEvent<HTMLInputElement>) {
