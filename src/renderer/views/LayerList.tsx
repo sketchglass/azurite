@@ -65,8 +65,10 @@ class LayerList extends React.Component<LayerListProps, LayerListState> {
     const {picture} = this.props
     return (
       <div className="LayerList" onDragOver={this.onDragOver.bind(this)} onDrop={this.onDrop.bind(this)}>
-        <button onClick={this.addLayer.bind(this)}>Add</button>
-        <button onClick={this.removeLayer.bind(this)}>Remove</button>
+        <div className="LayerList_buttons">
+          <button onClick={this.addLayer.bind(this)}>Add</button>
+          <button onClick={this.removeLayer.bind(this)}>Remove</button>
+        </div>
         <div ref="scroll" className="LayerList_scroll">
           {layers.map((layer, i) => <LayerListItem key={i} layer={layer} index={i} current={currentIndex == i} />)}
         </div>

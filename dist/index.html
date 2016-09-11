@@ -34,8 +34,17 @@
       }
       .LeftSidebar {
         width: 256px;
+        display: flex;
+        flex-direction: column;
       }
       .LayerList {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+      .LayerList_scroll {
+        flex: 1;
+        overflow-y: scroll;
       }
       .LayerList_layer {
         height: 48px;
@@ -46,6 +55,7 @@
       .LayerList_layer-current {
         background-color: grey;
       }
+
     </style>
   </head>
   <body>
