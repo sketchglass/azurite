@@ -99,6 +99,7 @@ class LayerList extends React.Component<LayerListProps, LayerListState> {
       to -= 1
     }
     picture.layers.splice(to, 0, layer)
+    picture.currentLayerIndex = to
     picture.changed.next()
   }
 
