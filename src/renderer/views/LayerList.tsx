@@ -21,7 +21,7 @@ function pictureToState(picture: Picture) {
   }
 }
 
-const CELL_HEIGHT = 80
+const CELL_HEIGHT = 64
 const LAYER_DRAG_MIME = "x-azurite-layer-drag"
 
 function LayerListItem(props: {layer: Layer, current: boolean, index: number}) {
@@ -43,11 +43,11 @@ function LayerListItem(props: {layer: Layer, current: boolean, index: number}) {
   }
   return (
     <div className={classNames("LayerList_layer", {"LayerList_layer-current": current})} onClick={select} draggable={true} onDragStart={onDragStart}>
+      <img src={layer.thumbnail} />
       <ClickToEdit text={layer.name} onChange={rename} editable={current} />
     </div>
   )
 }
-
 
 export default
 class LayerList extends React.Component<LayerListProps, LayerListState> {

@@ -1,13 +1,15 @@
 import Layer from "./Layer"
 import {Vec2} from "../../lib/Geometry"
 import {Subject} from "@reactivex/rxjs/dist/cjs/Subject"
+import ThumbnailGenerator from "./ThumbnailGenerator"
 
 export default
 class Picture {
   size = new Vec2(1024, 768)
-  layers: Layer[] = [new Layer(this, this.size)]
   currentLayerIndex = 0
   changed = new Subject<void>()
+  thumbnailGenerator = new ThumbnailGenerator(this.size)
+  layers: Layer[] = [new Layer(this, this.size)]
 
   get currentLayer() {
     return this.layers[this.currentLayerIndex]

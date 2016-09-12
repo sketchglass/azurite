@@ -73,6 +73,8 @@ abstract class BaseBrushTool extends Tool {
       return new Vec4(0)
     } else {
       this.renderWaypoints(waypoints)
+      this.picture.currentLayer.updateThumbnail()
+      this.picture.changed.next()
       return this._rectForWaypoints(waypoints)
     }
   }

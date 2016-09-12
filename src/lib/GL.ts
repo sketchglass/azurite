@@ -53,13 +53,34 @@ class Context {
     const {gl} = this
     gl.clear(gl.COLOR_BUFFER_BIT)
   }
+
+  readPixels(rect: Vec4, data: Uint8Array) {
+    const {gl} = this
+    gl.readPixels(rect.x, rect.y, rect.z, rect.w, gl.RGBA, gl.UNSIGNED_BYTE, data)
+  }
+}
+
+export
+enum DataType {
+  Byte,
+  HalfFloat
+}
+
+function glType(context: Context, type: DataType) {
+  switch (type) {
+  case DataType.Byte:
+  default:
+    return context.gl.UNSIGNED_BYTE
+  case DataType.HalfFloat:
+    return context.halfFloatExt.HALF_FLOAT_OES
+  }
 }
 
 export
 class Texture {
   texture: WebGLTexture
 
-  constructor(public context: Context, public size: Vec2) {
+  constructor(public context: Context, public size: Vec2, public dataType: DataType = DataType.HalfFloat) {
     const {gl} = context
     this.texture = gl.createTexture()!
     gl.bindTexture(gl.TEXTURE_2D, this.texture)
@@ -74,7 +95,7 @@ class Texture {
     const {gl, halfFloatExt} = this.context
     this.size = size
     gl.bindTexture(gl.TEXTURE_2D, this.texture)
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size.width, size.height, 0, gl.RGBA, halfFloatExt.HALF_FLOAT_OES, null as any)
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size.width, size.height, 0, gl.RGBA, glType(this.context, this.dataType), null as any)
   }
 
   generateMipmap() {

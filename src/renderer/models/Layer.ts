@@ -7,7 +7,13 @@ export default
 class Layer {
   name = "Layer"
   texture = new Texture(context, this.size)
+  thumbnail = ""
 
   constructor(public picture: Picture, public size: Vec2) {
+    this.updateThumbnail()
+  }
+
+  updateThumbnail() {
+    this.thumbnail = this.picture.thumbnailGenerator.generate(this)
   }
 }
