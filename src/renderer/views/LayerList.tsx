@@ -21,7 +21,7 @@ function pictureToState(picture: Picture) {
   }
 }
 
-const CELL_HEIGHT = 64
+const CELL_HEIGHT = 72
 const LAYER_DRAG_MIME = "x-azurite-layer-drag"
 
 function LayerListItem(props: {layer: Layer, current: boolean, index: number}) {
