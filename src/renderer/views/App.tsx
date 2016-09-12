@@ -7,6 +7,7 @@ import WatercolorTool from "../models/WatercolorTool"
 import BrushSettings from "./BrushSettings"
 import WatercolorSettings from "./WatercolorSettings"
 import DrawArea from "./DrawArea"
+import LayerList from "./LayerList"
 import ColorPicker from "./ColorPicker"
 import {Color} from "../../lib/Color"
 import {Vec4} from "../../lib/Geometry"
@@ -31,6 +32,9 @@ class App extends React.Component<void, void> {
 
   constructor() {
     super()
+    for (const tool of this.tools) {
+      tool.picture = this.picture
+    }
     if(this.currentTool instanceof BaseBrushTool) {
       const tool = this.currentTool as BaseBrushTool
       const {r, g, b, a} = tool.color
@@ -65,6 +69,9 @@ class App extends React.Component<void, void> {
           {currentTool.renderSettings()}
         </aside>
         <DrawArea tool={currentTool} picture={picture} />
+        <aside className="LeftSidebar">
+          <LayerList picture={picture} />
+        </aside>
       </div>
     )
   }

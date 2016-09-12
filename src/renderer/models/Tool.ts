@@ -1,10 +1,10 @@
-import Layer from "./Layer"
+import Picture from "./Picture"
 import Waypoint from "./Waypoint"
 import {Vec4} from "../../lib/Geometry"
 import React = require("react")
 
 abstract class Tool {
-  layer: Layer
+  picture: Picture
   abstract name: string
   abstract start(waypoint: Waypoint): Vec4
   abstract move(waypoint: Waypoint): Vec4

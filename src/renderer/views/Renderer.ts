@@ -67,7 +67,6 @@ class Renderer {
     ], indices, GeometryUsage.Static)
     this.layerShader = new Shader(context, rendererVertShader, layerFragShader)
     this.layerModel = new Model(context, geom, this.layerShader)
-    context.setClearColor(new Vec4(0.9, 0.9, 0.9, 1))
     this.backgroundShader = new Shader(context, rendererVertShader, backgroundFragShader)
     this.backgroundModel = new Model(context, geom, this.backgroundShader)
   }
@@ -99,13 +98,15 @@ class Renderer {
     if (rectInPicture) {
       context.setScissor(this.transforms.pictureToGLViewport.transformRect(rectInPicture))
     }
+    context.setClearColor(new Vec4(0.9, 0.9, 0.9, 1))
     context.clear()
     this.backgroundShader.uniform("uTransform").setTransform(this.transforms.pictureToGLUnit)
     this.backgroundModel.render()
     this.layerShader.uniform("uTransform").setTransform(this.transforms.pictureToGLUnit)
     this.layerShader.uniform("uTexture").setInt(0)
-    for (const layer of this.picture.layers) {
-      context.textureUnits.set(0, layer.texture)
+    const {layers} = this.picture
+    for (let i = layers.length - 1; i >= 0; --i) {
+      context.textureUnits.set(0, layers[i].texture)
       this.layerModel.render()
     }
     context.textureUnits.delete(0)

@@ -32,6 +32,36 @@
         display: flex;
         flex-direction: column;
       }
+      .LeftSidebar {
+        width: 256px;
+        display: flex;
+        flex-direction: column;
+      }
+      .LayerList {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+      .LayerList_scroll {
+        flex: 1;
+        overflow-y: scroll;
+      }
+      .LayerList_layer {
+        height: 48px;
+        padding: 12px;
+        display: flex;
+        align-items: center;
+      }
+      .LayerList_layer img {
+        margin-right: 12px;
+        box-shadow: 0 0 4px rgba(0,0,0,0.25);
+        max-width: 64px;
+        max-height: 48px;
+      }
+      .LayerList_layer-current {
+        background-color: grey;
+      }
+
     </style>
   </head>
   <body>
