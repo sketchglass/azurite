@@ -13,7 +13,7 @@ function calcThumbnailSize(layerSize: Vec2, maxSize: Vec2) {
     return new Vec2(Math.round(maxSize.height * ratio), maxSize.height)
   }
 }
-const thumbnailSizeMax = new Vec2(64, 48)
+const thumbnailSizeMax = new Vec2(64, 48).mul(window.devicePixelRatio)
 
 export default
 class ThumbnailGenerator {
