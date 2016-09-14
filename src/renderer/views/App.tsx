@@ -12,7 +12,7 @@ import ColorPicker from "./ColorPicker"
 import Palette from "./Palette"
 import {Color} from "../../lib/Color"
 import {Vec4} from "../../lib/Geometry"
-// stylesheets
+import "./Menu"
 import "../../styles/palette.sass"
 
 function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool: Tool) => void}) {
@@ -52,6 +52,7 @@ class App extends React.Component<void, void> {
     for (const tool of this.tools) {
       tool.picture = this.picture
     }
+    Picture.current = this.picture
     if(this.currentTool instanceof BaseBrushTool) {
       const tool = this.currentTool as BaseBrushTool
       tool.color = this.brushColor.toRgb()
