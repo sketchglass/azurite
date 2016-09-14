@@ -52,17 +52,17 @@ function hsv2rgb(h: number, s: number, v: number) {
   }
 
   return {
-    r: Math.round(255 * (rgb[0] + m)),
-    g: Math.round(255 * (rgb[1] + m)),
-    b: Math.round(255 * (rgb[2] + m)),
+    r: rgb[0] + m,
+    g: rgb[1] + m,
+    b: rgb[2] + m,
   }
 }
 
 // http://www.rapidtables.com/convert/color/rgb-to-hsv.htm
 function rgb2hsv(r: number, g: number, b: number) {
-  const rr = r / 255
-  const gg = g / 255
-  const bb = b / 255
+  const rr = r
+  const gg = g
+  const bb = b
   const max = Math.max(rr, gg, bb)
   const min = Math.min(rr, gg, bb)
   const delta = max - min
@@ -85,18 +85,21 @@ function rgb2hsv(r: number, g: number, b: number) {
 }
 
 export
-class Color {
-  constructor(
-    public h: number,
-    public s: number,
-    public v: number,
-    public a: number,
-  ) {
+class Color extends Vec4{
+
+  get h() {
+    return this.x
+  }
+  get s() {
+    return this.y
+  }
+  get v() {
+    return this.z
   }
 
-  // r: 0 ... 255
-  // g: 0 ... 255
-  // b: 0 ... 255
+  // r: 0 ... 1
+  // g: 0 ... 1
+  // b: 0 ... 1
   // a: 0 ... 1
   static rgb(r: number, g: number, b: number, a = 1) {
     const hsv = rgb2hsv(r, g, b)
@@ -113,12 +116,15 @@ class Color {
 
   toString() {
     const {r, g, b, a} = this.toRgb()
-    return `rgba(${r},${g},${b},${a})`
+    const rr = Math.round(r * 255)
+    const gg = Math.round(g * 255)
+    const bb = Math.round(b * 255)
+    return `rgba(${rr},${gg},${bb},${a})`
   }
 
   toRgb() {
     const {h, s, v, a} = this
     const {r, g, b} = hsv2rgb(h, s, v)
-    return {r, g, b, a}
+    return new Vec4(r, g, b, a)
   }
 }

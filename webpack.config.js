@@ -26,6 +26,18 @@ module.exports = {
         test: /\.tsx?$/,
         loader: "ts-loader",
       },
+      {
+        test: /\.(scss|sass)$/,
+        loader: "style-loader!css-loader!sass-loader"
+      },
+      {
+        test: /\.css$/,
+        loader: "style-loader!css-loader"
+      },
+      {
+        test: /\.(jpg|png|woff|woff2|eot|ttf|svg)/,
+        loader: 'url-loader?limit=10000'
+      }
     ],
   },
   devtool: "inline-source-map",
