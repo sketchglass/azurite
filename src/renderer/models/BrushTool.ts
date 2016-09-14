@@ -1,7 +1,7 @@
 import {Vec2, Vec4, Transform, unionRect} from "../../lib/Geometry"
 import Waypoint from "./Waypoint"
 import BaseBrushTool from "./BaseBrushTool";
-import {Context, Geometry, Shader, Model, GeometryUsage, Framebuffer} from "../../lib/GL"
+import {Geometry, Shader, Model, GeometryUsage, Framebuffer} from "../../lib/GL"
 import {context} from "../GLContext"
 import BrushSettings from "../views/BrushSettings"
 import React = require("react")
