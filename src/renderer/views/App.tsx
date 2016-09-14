@@ -36,6 +36,7 @@ class App extends React.Component<void, void> {
     for (const tool of this.tools) {
       tool.picture = this.picture
     }
+    Picture.current = this.picture
     if(this.currentTool instanceof BaseBrushTool) {
       const tool = this.currentTool as BaseBrushTool
       const {r, g, b, a} = tool.color

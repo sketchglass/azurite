@@ -3,12 +3,19 @@ const {Menu, app} = remote
 type MenuItem = Electron.MenuItem
 type BrowserWindow = Electron.BrowserWindow
 type MenuItemOptions = Electron.MenuItemOptions
+import Picture from "../models/Picture"
 
 const fileMenu: MenuItemOptions = {
   label: "File",
   submenu: [
     {
-      label: "Export..."
+      label: "Export...",
+      click: () => {
+        const picture = Picture.current
+        if (picture) {
+          picture.pictureExport.showExportDialog()
+        }
+      }
     }
   ]
 }
