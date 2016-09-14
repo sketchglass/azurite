@@ -2,37 +2,11 @@ import Picture from "./Picture"
 import {Vec2, Vec4} from '../../lib/Geometry'
 import {Texture, Framebuffer, Shader, Model, Geometry, GeometryUsage, DefaultFramebuffer} from "../../lib/GL"
 import {context} from "../GLContext"
+import {ColorShader, TextureShader} from "../GLUtil"
 
-const vert = `
-  precision highp float;
-  attribute vec2 aPosition;
-  attribute vec2 aTexCoord;
-  varying vec2 vTexCoord;
-  void main(void) {
-    vTexCoord = aTexCoord;
-    gl_Position = vec4(aPosition, 0.0, 1.0);
-  }
-`
-
-const layerFrag = `
-  precision mediump float;
-  varying highp vec2 vTexCoord;
-  uniform sampler2D uTexture;
-  void main(void) {
-    gl_FragColor = texture2D(uTexture, vTexCoord);
-  }
-`
-
-const backgroundFrag = `
-  precision mediump float;
-  void main(void) {
-    gl_FragColor = vec4(1.0);
-  }
-`
-
-const layerShader = new Shader(context, vert, layerFrag)
-layerShader.uniform("uTexture").setInt(0)
-const backgroundShader = new Shader(context, vert, backgroundFrag)
+const layerShader = new TextureShader(context)
+const backgroundShader = new ColorShader(context)
+backgroundShader.uColor.setVec4(new Vec4(1))
 
 const geom = new Geometry(context, new Float32Array([
   -1, -1, 0, 0,

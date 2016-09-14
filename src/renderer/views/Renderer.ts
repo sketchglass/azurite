@@ -1,34 +1,10 @@
-import {Shader, Model, Geometry, GeometryUsage, DefaultFramebuffer} from "../../lib/GL"
+import {Context, Shader, Model, Geometry, GeometryUsage, DefaultFramebuffer} from "../../lib/GL"
 import {context, canvas} from "../GLContext"
 import Picture from "../models/Picture"
 import {Vec2, Vec4, Transform} from "../../lib/Geometry"
+import {TextureShader} from "../GLUtil"
 
-const vert = `
-  precision highp float;
-
-  uniform mat3 uTransform;
-  attribute vec2 aPosition;
-  attribute vec2 aUVPosition;
-  varying vec2 vUVPosition;
-
-  void main(void) {
-    vUVPosition = aUVPosition;
-    vec3 pos = uTransform * vec3(aPosition, 1.0);
-    gl_Position = vec4(pos.xy, 0.0, 1.0);
-  }
-`
-
-const frag = `
-  precision mediump float;
-  varying highp vec2 vUVPosition;
-  uniform sampler2D uTexture;
-  void main(void) {
-    gl_FragColor = texture2D(uTexture, vUVPosition);
-  }
-`
-
-const shader = new Shader(context, vert, frag)
-shader.uniform("uTexture").setInt(0)
+const shader = new TextureShader(context)
 
 export default
 class Renderer {
@@ -56,7 +32,7 @@ class Renderer {
     ])
     const geom = new Geometry(context, vertices, [
       {attribute: "aPosition", size: 2},
-      {attribute: "aUVPosition", size: 2},
+      {attribute: "aTexCoord", size: 2},
     ], indices, GeometryUsage.Static)
     this.model = new Model(context, geom, shader)
   }
@@ -91,7 +67,7 @@ class Renderer {
     }
     context.setClearColor(new Vec4(0.9, 0.9, 0.9, 1))
     context.clear()
-    shader.uniform("uTransform").setTransform(this.transforms.pictureToGLUnit)
+    shader.uTransform.setTransform(this.transforms.pictureToGLUnit)
     context.textureUnits.set(0, this.picture.layerBlender.blendedTexture)
     this.model.render()
     context.textureUnits.delete(0)

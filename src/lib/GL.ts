@@ -205,10 +205,13 @@ class Uniform {
 }
 
 export
-class Shader {
+abstract class Shader {
   program: WebGLProgram
 
-  constructor(public context: Context, public vertexShader: string, public fragmentShader: string) {
+  abstract get vertexShader(): string
+  abstract get fragmentShader(): string
+
+  constructor(public context: Context) {
     const {gl} = context
     this.program = gl.createProgram()!
     this._addShader(gl.VERTEX_SHADER, this.vertexShader)

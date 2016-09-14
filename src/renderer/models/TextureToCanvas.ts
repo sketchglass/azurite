@@ -1,33 +1,27 @@
 import {Vec2, Vec4} from "../../lib/Geometry"
 import {Texture, Shader, Geometry, Model, DataType, GeometryUsage, Framebuffer, BlendMode} from "../../lib/GL"
 import {context} from "../GLContext"
+import {TextureShader} from "../GLUtil"
 
-const vert = `
-  precision highp float;
-  attribute vec2 aPosition;
-  attribute vec2 aTexCoord;
-  varying vec2 vTexCoord;
-  void main(void) {
-    vTexCoord = aTexCoord;
-    gl_Position = vec4(aPosition, 0.0, 1.0);
+class TextureToCanvasShader extends TextureShader {
+  get fragmentShader() {
+    return `
+      precision mediump float;
+      varying highp vec2 vTexCoord;
+      uniform sampler2D uTexture;
+      uniform vec4 uBackground;
+      void main(void) {
+        vec4 texColor = texture2D(uTexture, vTexCoord);
+        vec4 color = texColor + uBackground * (1.0 - texColor.a);
+        vec4 nonPremultColor = vec4(color.rgb / color.a, color.a);
+        gl_FragColor = nonPremultColor;
+      }
+    `
   }
-`
+  uBackground = this.uniform("uBackground")
+}
 
-const frag = `
-  precision mediump float;
-  varying highp vec2 vTexCoord;
-  uniform sampler2D uTexture;
-  uniform vec4 uBackground;
-  void main(void) {
-    vec4 texColor = texture2D(uTexture, vTexCoord);
-    vec4 color = texColor + uBackground * (1.0 - texColor.a);
-    vec4 nonPremultColor = vec4(color.rgb / color.a, color.a);
-    gl_FragColor = nonPremultColor;
-  }
-`
-
-const shader = new Shader(context, vert, frag)
-shader.uniform("uTexture").setInt(0)
+const shader = new TextureToCanvasShader(context)
 
 const geom = new Geometry(context, new Float32Array([
   -1, -1, 0, 0,
@@ -63,7 +57,7 @@ class TextureToCanvas {
   loadTexture(texture: Texture) {
     this.framebuffer.use()
     context.textureUnits.set(0, texture)
-    shader.uniform("uBackground").setVec4(this.backgroundColor)
+    shader.uBackground.setVec4(this.backgroundColor)
     model.render()
     context.textureUnits.delete(0)
     context.readPixels(Vec4.fromVec2(new Vec2(0), this.size), new Uint8Array(this.imageData.data.buffer))
