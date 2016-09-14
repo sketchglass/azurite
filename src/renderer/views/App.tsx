@@ -11,6 +11,7 @@ import LayerList from "./LayerList"
 import ColorPicker from "./ColorPicker"
 import {Color} from "../../lib/Color"
 import {Vec4} from "../../lib/Geometry"
+import "./Menu"
 
 function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool: Tool) => void}) {
   return (
