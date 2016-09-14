@@ -203,8 +203,8 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
 
 function setPixel(image: ImageData, x: number, y: number, color: {r: number, g: number, b: number, a: number}) {
   const offset = (x + image.width * y) * 4
-  image.data[offset] = color.r
-  image.data[offset + 1] = color.g
-  image.data[offset + 2] = color.b
+  image.data[offset] = color.r * 255
+  image.data[offset + 1] = color.g * 255
+  image.data[offset + 2] = color.b * 255
   image.data[offset + 3] = color.a * 255
 }
