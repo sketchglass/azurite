@@ -41,7 +41,7 @@ class PictureExport {
   }
 
   async export(fileName: string) {
-    this.textureToCanvas.loadTexture(this.picture.mergedTexture)
+    this.textureToCanvas.loadTexture(this.picture.layerBlender.blendedTexture)
     const blob = await this.getBlob("image/png")
     if (!blob) {
       throw new Error("Failed to generate image data")

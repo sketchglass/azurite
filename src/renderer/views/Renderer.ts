@@ -3,8 +3,8 @@ import {context, canvas} from "../GLContext"
 import Picture from "../models/Picture"
 import {Vec2, Vec4, Transform} from "../../lib/Geometry"
 
-const rendererVertShader = `
-  precision mediump float;
+const vert = `
+  precision highp float;
 
   uniform mat3 uTransform;
   attribute vec2 aPosition;
@@ -17,29 +17,22 @@ const rendererVertShader = `
     gl_Position = vec4(pos.xy, 0.0, 1.0);
   }
 `
-const backgroundFragShader = `
-  precision lowp float;
-  varying mediump vec2 vUVPosition;
-  void main(void) {
-    gl_FragColor = vec4(1.0);
-  }
-`
 
-const layerFragShader = `
-  precision lowp float;
-  varying mediump vec2 vUVPosition;
+const frag = `
+  precision mediump float;
+  varying highp vec2 vUVPosition;
   uniform sampler2D uTexture;
   void main(void) {
     gl_FragColor = texture2D(uTexture, vUVPosition);
   }
 `
 
+const shader = new Shader(context, vert, frag)
+shader.uniform("uTexture").setInt(0)
+
 export default
 class Renderer {
-  layerShader: Shader
-  layerModel: Model
-  backgroundShader: Shader
-  backgroundModel: Model
+  model: Model
   size = new Vec2(100, 100)
   transform = Transform.identity
   transforms = {
@@ -65,10 +58,7 @@ class Renderer {
       {attribute: "aPosition", size: 2},
       {attribute: "aUVPosition", size: 2},
     ], indices, GeometryUsage.Static)
-    this.layerShader = new Shader(context, rendererVertShader, layerFragShader)
-    this.layerModel = new Model(context, geom, this.layerShader)
-    this.backgroundShader = new Shader(context, rendererVertShader, backgroundFragShader)
-    this.backgroundModel = new Model(context, geom, this.backgroundShader)
+    this.model = new Model(context, geom, shader)
   }
 
   updateTransforms() {
@@ -94,21 +84,16 @@ class Renderer {
   }
 
   render(rectInPicture?: Vec4) {
+    this.picture.layerBlender.render(rectInPicture)
     context.defaultFramebuffer.use()
     if (rectInPicture) {
       context.setScissor(this.transforms.pictureToGLViewport.transformRect(rectInPicture))
     }
     context.setClearColor(new Vec4(0.9, 0.9, 0.9, 1))
     context.clear()
-    this.backgroundShader.uniform("uTransform").setTransform(this.transforms.pictureToGLUnit)
-    this.backgroundModel.render()
-    this.layerShader.uniform("uTransform").setTransform(this.transforms.pictureToGLUnit)
-    this.layerShader.uniform("uTexture").setInt(0)
-    const {layers} = this.picture
-    for (let i = layers.length - 1; i >= 0; --i) {
-      context.textureUnits.set(0, layers[i].texture)
-      this.layerModel.render()
-    }
+    shader.uniform("uTransform").setTransform(this.transforms.pictureToGLUnit)
+    context.textureUnits.set(0, this.picture.layerBlender.blendedTexture)
+    this.model.render()
     context.textureUnits.delete(0)
     context.clearScissor()
   }

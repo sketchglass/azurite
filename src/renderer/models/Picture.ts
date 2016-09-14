@@ -1,10 +1,10 @@
 import Layer from "./Layer"
-import {Texture} from "../../lib/GL"
-import {Vec2} from "../../lib/Geometry"
+import {Texture, Framebuffer} from "../../lib/GL"
+import {Vec2, Vec4} from "../../lib/Geometry"
 import {Subject} from "@reactivex/rxjs/dist/cjs/Subject"
 import ThumbnailGenerator from "./ThumbnailGenerator"
 import PictureExport from "./PictureExport"
-import {context} from "../GLContext"
+import LayerBlender from "./LayerBlender"
 
 export default
 class Picture {
@@ -13,8 +13,8 @@ class Picture {
   changed = new Subject<void>()
   thumbnailGenerator = new ThumbnailGenerator(this.size)
   layers: Layer[] = [new Layer(this, this.size)]
-  mergedTexture = new Texture(context, this.size)
   pictureExport = new PictureExport(this)
+  layerBlender = new LayerBlender(this)
 
   get currentLayer() {
     return this.layers[this.currentLayerIndex]
