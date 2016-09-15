@@ -1,7 +1,6 @@
 import {Vec2, Vec4} from "../../lib/Geometry"
-import {Texture, Shader, Geometry, Model, DataType, GeometryUsage, Framebuffer, BlendMode} from "../../lib/GL"
+import {Texture, TextureShader, Geometry, Model, DataType, GeometryUsage, Framebuffer, BlendMode} from "../../lib/GL"
 import {context} from "../GLContext"
-import {TextureShader} from "../GLUtil"
 
 class TextureToCanvasShader extends TextureShader {
   get fragmentShader() {

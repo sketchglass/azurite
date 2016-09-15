@@ -1,8 +1,7 @@
 import Picture from "./Picture"
 import {Vec2, Vec4} from '../../lib/Geometry'
-import {Texture, Framebuffer, Shader, Model, Geometry, GeometryUsage, DefaultFramebuffer} from "../../lib/GL"
+import {Texture, Framebuffer, ColorShader, TextureShader, Model, Geometry, GeometryUsage, DefaultFramebuffer} from "../../lib/GL"
 import {context} from "../GLContext"
-import {ColorShader, TextureShader} from "../GLUtil"
 
 const layerShader = new TextureShader(context)
 const backgroundShader = new ColorShader(context)

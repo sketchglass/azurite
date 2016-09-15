@@ -1,8 +1,7 @@
-import {Shader, Model, Geometry, GeometryUsage, DefaultFramebuffer} from "../../lib/GL"
+import {TextureShader, Model, Geometry, GeometryUsage, DefaultFramebuffer} from "../../lib/GL"
 import {context, canvas} from "../GLContext"
 import Picture from "../models/Picture"
 import {Vec2, Vec4, Transform} from "../../lib/Geometry"
-import {TextureShader} from "../GLUtil"
 
 const shader = new TextureShader(context)
 
