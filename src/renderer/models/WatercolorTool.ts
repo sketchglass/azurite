@@ -143,19 +143,18 @@ class SquareGeometry extends Geometry {
       {attribute: "aPosition", size: 2}
     ]
   }
-  update() {
-    this.vertexData = new Float32Array([
-      -1, -1,
-      -1, 1,
-      1, -1,
-      1, 1,
-    ])
-    this.indexData = new Uint16Array([
-      0, 1, 2,
-      1, 2, 3,
-    ])
-    super.update()
-  }
+
+  vertexData = new Float32Array([
+    -1, -1,
+    -1, 1,
+    1, -1,
+    1, 1,
+  ])
+
+  indexData = new Uint16Array([
+    0, 1, 2,
+    1, 2, 3,
+  ])
 }
 
 export default
