@@ -142,18 +142,21 @@ function glUsage(gl: WebGLRenderingContext, usage: GeometryUsage) {
 }
 
 export
-class Geometry {
+abstract class Geometry {
   vertexBuffer: WebGLBuffer
   indexBuffer: WebGLBuffer
+  vertexData = new Float32Array(0)
+  indexData = new Uint16Array(0)
+  abstract get attributes(): {attribute: string, size: number}[]
   attributesStride = this.attributes.reduce((sum, {size}) => sum + size, 0)
 
-  constructor(public context: Context, public vertexData: Float32Array, public attributes: {attribute: string, size: number}[], public indexData: Uint16Array, public usage: GeometryUsage) {
+  constructor(public context: Context, public usage: GeometryUsage) {
     const {gl, vertexArrayExt} = context
     this.vertexBuffer = gl.createBuffer()!
     this.indexBuffer = gl.createBuffer()!
-    this.updateBuffer()
   }
-  updateBuffer() {
+
+  update() {
     const {gl} = this.context
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer)
     gl.bufferData(gl.ARRAY_BUFFER, this.vertexData, glUsage(gl, this.usage))
@@ -161,6 +164,47 @@ class Geometry {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indexData, glUsage(gl, this.usage))
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null)
+  }
+}
+
+export
+class SimpleGeometry extends Geometry {
+  get attributes() {
+    return [
+      {attribute: "aPosition", size: 2},
+      {attribute: "aTexCoord", size: 2},
+    ]
+  }
+  positions: Vec2[] = []
+  texCoords: Vec2[] = []
+
+  update() {
+    const vertexData = this.vertexData = new Float32Array(this.positions.length * 4)
+    for (let i = 0; i < this.positions.length; ++i) {
+      const position = this.positions[i]
+      const texCoord = this.texCoords[i]
+      vertexData.set([position.x, position.y, texCoord.x, texCoord.y], i * 4)
+    }
+    super.update()
+  }
+}
+
+export
+class RectGeometry extends SimpleGeometry {
+  rect = new Vec4(0)
+  texCoords = [new Vec2(0, 0), new Vec2(1, 0), new Vec2(0, 1), new Vec2(1, 1)]
+  indexData = new Uint16Array([0, 1, 2, 1, 2, 3])
+
+  update() {
+    const {x, y} = this.rect.xy
+    const {width, height} = this.rect.size
+    this.positions = [
+      new Vec2(x, y),
+      new Vec2(x + width, y),
+      new Vec2(x, y + height),
+      new Vec2(x + width, y + height)
+    ]
+    super.update()
   }
 }
 
@@ -311,6 +355,7 @@ class Model {
   blendFuncs: [number, number]
   constructor(public context: Context, public geometry: Geometry, public shader: Shader) {
     const {gl, vertexArrayExt} = context
+    this.geometry.update()
     this.vertexArray = vertexArrayExt.createVertexArrayOES()
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
     gl.useProgram(shader.program)

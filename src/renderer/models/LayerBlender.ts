@@ -1,24 +1,14 @@
 import Picture from "./Picture"
 import {Vec2, Vec4} from '../../lib/Geometry'
-import {Texture, Framebuffer, ColorShader, TextureShader, Model, Geometry, GeometryUsage, DefaultFramebuffer} from "../../lib/GL"
+import {Texture, Framebuffer, ColorShader, TextureShader, Model, RectGeometry, GeometryUsage, DefaultFramebuffer} from "../../lib/GL"
 import {context} from "../GLContext"
 
 const layerShader = new TextureShader(context)
 const backgroundShader = new ColorShader(context)
 backgroundShader.uColor.setVec4(new Vec4(1))
 
-const geom = new Geometry(context, new Float32Array([
-  -1, -1, 0, 0,
-  1, -1, 1, 0,
-  -1, 1, 0, 1,
-  1, 1, 1, 1
-]), [
-  {attribute: "aPosition", size: 2},
-  {attribute: "aTexCoord", size: 2},
-],  new Uint16Array([
-  0, 1, 2,
-  1, 2, 3
-]), GeometryUsage.Static)
+const geom = new RectGeometry(context, GeometryUsage.Static)
+geom.rect = new Vec4(-1, -1, 2, 2)
 
 const layerModel = new Model(context, geom, layerShader)
 const backgroundModel = new Model(context, geom, backgroundShader)

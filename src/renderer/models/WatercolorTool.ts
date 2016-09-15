@@ -137,6 +137,27 @@ class WatercolorShader extends Shader {
   uPressure = this.uniform("uPressure")
 }
 
+class SquareGeometry extends Geometry {
+  get attributes() {
+    return [
+      {attribute: "aPosition", size: 2}
+    ]
+  }
+  update() {
+    this.vertexData = new Float32Array([
+      -1, -1,
+      -1, 1,
+      1, -1,
+      1, 1,
+    ])
+    this.indexData = new Uint16Array([
+      0, 1, 2,
+      1, 2, 3,
+    ])
+    super.update()
+  }
+}
+
 export default
 class WatercolorTool extends BaseBrushTool {
   minWidthRatio = 1
@@ -145,17 +166,7 @@ class WatercolorTool extends BaseBrushTool {
 
   name = "Watercolor"
 
-  squareGeometry = new Geometry(context, new Float32Array([
-    -1, -1,
-    -1, 1,
-    1, -1,
-    1, 1,
-  ]), [
-    {attribute: "aPosition", size: 2}
-  ], new Uint16Array([
-    0, 1, 2,
-    1, 2, 3
-  ]), GeometryUsage.Static)
+  squareGeometry = new SquareGeometry(context, GeometryUsage.Static)
 
   shader = new WatercolorShader(context)
   model = new Model(context, this.squareGeometry, this.shader)

@@ -56,32 +56,19 @@ class BrushShader extends Shader {
   }
 }
 
-export default
-class BrushTool extends BaseBrushTool {
-  dabsGeometry = new Geometry(context, new Float32Array(0), [
-    {attribute: "aOffset", size: 2},
-    {attribute: "aCenter", size: 2},
-    {attribute: "aPressure", size: 1},
-  ], new Uint16Array(0), GeometryUsage.Stream)
-  shader = new BrushShader(context)
-  model = new Model(context, this.dabsGeometry, this.shader)
-  name = "Brush"
+class BrushGeometry extends Geometry {
+  waypoints: Waypoint[] = []
 
-  start(waypoint: Waypoint) {
-    const layerSize = this.picture.currentLayer.size
-    const transform =
-      Transform.scale(new Vec2(2 / layerSize.width, 2 / layerSize.height))
-        .merge(Transform.translate(new Vec2(-1, -1)))
-    this.shader.uniform('uTransform').setTransform(transform)
-    this.shader.uniform('uBrushSize').setFloat(this.width)
-    this.shader.uniform('uColor').setVec4(this.color)
-    this.shader.uniform('uOpacity').setFloat(this.opacity)
-    this.shader.uniform('uMinWidthRatio').setFloat(this.minWidthRatio)
-
-    return super.start(waypoint)
+  get attributes() {
+    return [
+      {attribute: "aOffset", size: 2},
+      {attribute: "aCenter", size: 2},
+      {attribute: "aPressure", size: 1},
+    ]
   }
 
-  renderWaypoints(waypoints: Waypoint[]) {
+  update() {
+    const {waypoints} = this
     const offsets = [
       new Vec2(-1,-1),
       new Vec2(-1,1),
@@ -102,10 +89,36 @@ class BrushTool extends BaseBrushTool {
       }
       indices.set(relIndices.map(j => j + i * 4), i * 6)
     }
-    this.dabsGeometry.vertexData = vertices
-    this.dabsGeometry.indexData = indices
-    this.dabsGeometry.updateBuffer()
+    this.vertexData = vertices
+    this.indexData = indices
+    super.update()
+  }
+}
 
+export default
+class BrushTool extends BaseBrushTool {
+  geometry = new BrushGeometry(context, GeometryUsage.Stream)
+  shader = new BrushShader(context)
+  model = new Model(context, this.geometry, this.shader)
+  name = "Brush"
+
+  start(waypoint: Waypoint) {
+    const layerSize = this.picture.currentLayer.size
+    const transform =
+      Transform.scale(new Vec2(2 / layerSize.width, 2 / layerSize.height))
+        .merge(Transform.translate(new Vec2(-1, -1)))
+    this.shader.uniform('uTransform').setTransform(transform)
+    this.shader.uniform('uBrushSize').setFloat(this.width)
+    this.shader.uniform('uColor').setVec4(this.color)
+    this.shader.uniform('uOpacity').setFloat(this.opacity)
+    this.shader.uniform('uMinWidthRatio').setFloat(this.minWidthRatio)
+
+    return super.start(waypoint)
+  }
+
+  renderWaypoints(waypoints: Waypoint[]) {
+    this.geometry.waypoints = waypoints
+    this.geometry.update()
     this.framebuffer.use()
     this.model.render()
   }

@@ -1,5 +1,5 @@
 import {Vec2, Vec4} from "../../lib/Geometry"
-import {Texture, TextureShader, Geometry, Model, DataType, GeometryUsage, Framebuffer, BlendMode} from "../../lib/GL"
+import {Texture, TextureShader, RectGeometry, Model, DataType, GeometryUsage, Framebuffer, BlendMode} from "../../lib/GL"
 import {context} from "../GLContext"
 
 class TextureToCanvasShader extends TextureShader {
@@ -22,18 +22,8 @@ class TextureToCanvasShader extends TextureShader {
 
 const shader = new TextureToCanvasShader(context)
 
-const geom = new Geometry(context, new Float32Array([
-  -1, -1, 0, 0,
-  1, -1, 1, 0,
-  -1, 1, 0, 1,
-  1, 1, 1, 1
-]), [
-  {attribute: "aPosition", size: 2},
-  {attribute: "aTexCoord", size: 2},
-],  new Uint16Array([
-  0, 1, 2,
-  1, 2, 3
-]), GeometryUsage.Static)
+const geom = new RectGeometry(context, GeometryUsage.Static)
+geom.rect = new Vec4(-1, -1, 2, 2)
 
 const model = new Model(context, geom, shader)
 model.setBlendMode(BlendMode.Src)
