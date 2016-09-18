@@ -6,156 +6,117 @@ import {context} from "../GLContext"
 import WatercolorSettings from "../views/WatercolorSettings"
 import React = require("react")
 
+const sampleVertShader = `
+  precision highp float;
+
+  uniform mediump float uSampleSize;
+  attribute vec2 aPosition;
+  varying mediump vec2 vOffset;
+  varying mediump vec2 vTexCoord;
+
+  void main(void) {
+    vOffset = aPosition * (uSampleSize * 0.5);
+    vTexCoord = aPosition * 0.5 + 0.5;
+    gl_Position = vec4(aPosition, 0.0, 1.0);
+  }
+`
+
 enum SampleModes {
   Original, Shape, Clip
 }
 
-class SampleShader extends Shader {
-  get vertexShader() {
-    return `
-      precision highp float;
+const sampleFragShader = `
+  precision mediump float;
 
-      uniform mediump float uSampleSize;
-      attribute vec2 aPosition;
-      varying mediump vec2 vOffset;
-      varying mediump vec2 vTexCoord;
+  uniform vec2 uLayerSize;
+  uniform float uBrushRadius;
+  uniform vec2 uBrushPos;
+  uniform sampler2D uLayer;
+  uniform int uMode;
 
-      void main(void) {
-        vOffset = aPosition * (uSampleSize * 0.5);
-        vTexCoord = aPosition * 0.5 + 0.5;
-        gl_Position = vec4(aPosition, 0.0, 1.0);
-      }
-    `
+  varying vec2 vOffset;
+
+  vec4 fetchOriginal() {
+    vec2 layerPos = floor(uBrushPos) + vOffset;
+    vec2 layerUV = layerPos / uLayerSize;
+    return texture2D(uLayer, layerUV);
   }
 
-  get fragmentShader() {
-    return `
-      precision mediump float;
-
-      uniform vec2 uLayerSize;
-      uniform float uBrushRadius;
-      uniform vec2 uBrushPos;
-      uniform sampler2D uLayer;
-      uniform int uMode;
-
-      varying vec2 vOffset;
-
-      vec4 fetchOriginal() {
-        vec2 layerPos = floor(uBrushPos) + vOffset;
-        vec2 layerUV = layerPos / uLayerSize;
-        return texture2D(uLayer, layerUV);
-      }
-
-      float calcOpacity(float r) {
-        return smoothstep(uBrushRadius, uBrushRadius * 0.5, r);
-      }
-
-      void main(void) {
-        float r = distance(fract(uBrushPos), vOffset);
-
-        if (uMode == ${SampleModes.Original}) {
-          gl_FragColor = fetchOriginal();
-        } else if (uMode == ${SampleModes.Shape}) {
-          gl_FragColor = vec4(calcOpacity(r));
-        } else {
-          gl_FragColor = fetchOriginal() * calcOpacity(r);
-        }
-      }
-    `
+  float calcOpacity(float r) {
+    return smoothstep(uBrushRadius, uBrushRadius * 0.5, r);
   }
 
-  uMode = this.uniform("uMode")
-  uBrushPos = this.uniform("uBrushPos")
-  uPressure = this.uniform("uPressure")
-}
+  void main(void) {
+    float r = distance(fract(uBrushPos), vOffset);
 
-class WatercolorShader extends Shader {
-  get vertexShader() {
-    return `
-      precision highp float;
-
-      uniform vec2 uLayerSize;
-      uniform float uSampleSize;
-      uniform vec2 uBrushPos;
-      uniform float uBrushRadius;
-      uniform mediump float uPressure;
-      uniform mediump float uOpacity;
-      uniform sampler2D uSampleShape;
-      uniform sampler2D uSampleClip;
-
-      attribute vec2 aPosition;
-
-      varying vec4 vMixColor;
-      varying vec2 vTexCoord;
-      varying mediump float vOpacity;
-
-      void main(void) {
-        vTexCoord = aPosition * 0.5 + 0.5;
-        vec2 layerPos = floor(uBrushPos) + aPosition * (uSampleSize * 0.5);
-        vec2 normalizedPos = layerPos / uLayerSize * 2.0 - 1.0;
-        gl_Position = vec4(normalizedPos, 0.0, 1.0);
-
-        float topLevel = log2(uSampleSize);
-        vMixColor = texture2DLod(uSampleClip, vec2(0.5), topLevel) / vec4(texture2DLod(uSampleShape, vec2(0.5),  topLevel).a);
-
-        vOpacity = uOpacity * uPressure;
-      }
-    `
+    if (uMode == ${SampleModes.Original}) {
+      gl_FragColor = fetchOriginal();
+    } else if (uMode == ${SampleModes.Shape}) {
+      gl_FragColor = vec4(calcOpacity(r));
+    } else {
+      gl_FragColor = fetchOriginal() * calcOpacity(r);
+    }
   }
+`
 
-  get fragmentShader() {
-    return `
-      precision mediump float;
+const brushVertShader = `
+  precision highp float;
 
-      uniform float uBlending;
-      uniform float uThickness;
-      uniform vec4 uColor;
+  uniform vec2 uLayerSize;
+  uniform float uSampleSize;
+  uniform vec2 uBrushPos;
+  uniform float uBrushRadius;
+  uniform mediump float uPressure;
+  uniform mediump float uOpacity;
+  uniform sampler2D uSampleShape;
+  uniform sampler2D uSampleClip;
 
-      uniform sampler2D uSampleOriginal;
-      uniform sampler2D uSampleShape;
+  attribute vec2 aPosition;
 
-      varying vec4 vMixColor;
-      varying vec2 vTexCoord;
-      varying float vOpacity;
+  varying vec4 vMixColor;
+  varying vec2 vTexCoord;
+  varying mediump float vOpacity;
 
-      void main(void) {
-        float opacity = texture2D(uSampleShape, vTexCoord).a * vOpacity;
-        vec4 orig = texture2D(uSampleOriginal, vTexCoord);
+  void main(void) {
+    vTexCoord = aPosition * 0.5 + 0.5;
+    vec2 layerPos = floor(uBrushPos) + aPosition * (uSampleSize * 0.5);
+    vec2 normalizedPos = layerPos / uLayerSize * 2.0 - 1.0;
+    gl_Position = vec4(normalizedPos, 0.0, 1.0);
 
-        float mixRate = opacity * uBlending;
-        // mix color
-        vec4 color = orig * (1.0 - mixRate) + vMixColor * mixRate;
-        // add color
-        vec4 addColor = uColor * (uThickness * opacity);
+    float topLevel = log2(uSampleSize);
+    vMixColor = texture2DLod(uSampleClip, vec2(0.5), topLevel) / vec4(texture2DLod(uSampleShape, vec2(0.5),  topLevel).a);
 
-        gl_FragColor = addColor + color * (1.0 - addColor.a);
-      }
-    `
+    vOpacity = uOpacity * uPressure;
   }
+`
 
-  uBrushPos = this.uniform("uBrushPos")
-  uPressure = this.uniform("uPressure")
-}
+const brushFragShader = `
+  precision mediump float;
 
-class SquareGeometry extends Geometry {
-  get attributes() {
-    return [
-      {attribute: "aPosition", size: 2}
-    ]
+  uniform float uBlending;
+  uniform float uThickness;
+  uniform vec4 uColor;
+
+  uniform sampler2D uSampleOriginal;
+  uniform sampler2D uSampleShape;
+
+  varying vec4 vMixColor;
+  varying vec2 vTexCoord;
+  varying float vOpacity;
+
+  void main(void) {
+    float opacity = texture2D(uSampleShape, vTexCoord).a * vOpacity;
+    vec4 orig = texture2D(uSampleOriginal, vTexCoord);
+
+    float mixRate = opacity * uBlending;
+    // mix color
+    vec4 color = orig * (1.0 - mixRate) + vMixColor * mixRate;
+    // add color
+    vec4 addColor = uColor * (uThickness * opacity);
+
+    gl_FragColor = addColor + color * (1.0 - addColor.a);
   }
-
-  vertexData = new Float32Array([
-    -1, -1,
-    -1, 1,
-    1, -1,
-    1, 1,
-  ])
-
-  indexData = new Uint16Array([
-    0, 1, 2,
-    1, 2, 3,
-  ])
-}
+`
 
 export default
 class WatercolorTool extends BaseBrushTool {
@@ -165,12 +126,22 @@ class WatercolorTool extends BaseBrushTool {
 
   name = "Watercolor"
 
-  squareGeometry = new SquareGeometry(context, GeometryUsage.Static)
+  squareGeometry = new Geometry(context, new Float32Array([
+    -1, -1,
+    -1, 1,
+    1, -1,
+    1, 1,
+  ]), [
+    {attribute: "aPosition", size: 2}
+  ], new Uint16Array([
+    0, 1, 2,
+    1, 2, 3
+  ]), GeometryUsage.Static)
 
-  shader = new WatercolorShader(context)
+  shader = new Shader(context, brushVertShader, brushFragShader)
   model = new Model(context, this.squareGeometry, this.shader)
 
-  sampleShader = new SampleShader(context)
+  sampleShader = new Shader(context, sampleVertShader, sampleFragShader)
   sampleModel = new Model(context, this.squareGeometry, this.sampleShader)
 
   sampleOriginalTexture = new Texture(context, new Vec2(0))
@@ -222,24 +193,29 @@ class WatercolorTool extends BaseBrushTool {
   }
 
   renderWaypoints(waypoints: Waypoint[]) {
+    const uMode = this.sampleShader.uniform("uMode")
+    const uBrushPos = this.shader.uniform("uBrushPos")
+    const uPressure = this.shader.uniform("uPressure")
+    const uBrushPosSample = this.sampleShader.uniform("uBrushPos")
+    const uPressureSample = this.sampleShader.uniform("uPressure")
     const layerTexture = this.picture.currentLayer.texture
 
     for (let i = 0; i < waypoints.length; ++i) {
       const waypoint = waypoints[i]
-      this.sampleShader.uBrushPos.setVec2(waypoint.pos)
-      this.sampleShader.uPressure.setFloat(waypoint.pressure)
+      uBrushPosSample.setVec2(waypoint.pos)
+      uPressureSample.setFloat(waypoint.pressure)
 
       context.textureUnits.set(0, layerTexture)
 
-      this.sampleShader.uMode.setInt(SampleModes.Original)
+      uMode.setInt(SampleModes.Original)
       this.sampleOrigianlFramebuffer.use()
       this.sampleModel.render()
 
-      this.sampleShader.uMode.setInt(SampleModes.Shape)
+      uMode.setInt(SampleModes.Shape)
       this.sampleShapeFramebuffer.use()
       this.sampleModel.render()
 
-      this.sampleShader.uMode.setInt(SampleModes.Clip)
+      uMode.setInt(SampleModes.Clip)
       this.sampleClipFramebuffer.use()
       this.sampleModel.render()
 
@@ -249,8 +225,8 @@ class WatercolorTool extends BaseBrushTool {
       context.textureUnits.set(0, this.sampleOriginalTexture)
       context.textureUnits.set(1, this.sampleShapeTexture)
       context.textureUnits.set(2, this.sampleClipTexture)
-      this.shader.uBrushPos.setVec2(waypoint.pos)
-      this.shader.uPressure.setFloat(waypoint.pressure)
+      uBrushPos.setVec2(waypoint.pos)
+      uPressure.setFloat(waypoint.pressure)
       this.framebuffer.use()
       this.model.render()
 
