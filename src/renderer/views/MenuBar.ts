@@ -53,10 +53,12 @@ class MenuBar {
       submenu: [
         {
           label: "Undo",
-          click: this.undo.bind(this)
+          click: this.undo.bind(this),
+          accelerator: "CmdOrCtrl+Z"
         },
         {
           label: "Redo",
+          accelerator: process.platform === 'darwin' ? 'Shift+Command+Z' : 'Ctrl+Y',
           click: this.redo.bind(this)
         },
         {
