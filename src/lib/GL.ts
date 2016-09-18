@@ -104,6 +104,11 @@ class Texture {
     gl.generateMipmap(gl.TEXTURE_2D)
     gl.bindTexture(gl.TEXTURE_2D, null)
   }
+
+  dispose() {
+    const {gl} = this.context
+    gl.deleteTexture(this.texture)
+  }
 }
 
 export
@@ -164,6 +169,12 @@ abstract class Geometry {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.indexBuffer)
     gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, this.indexData, glUsage(gl, this.usage))
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null)
+  }
+
+  dispose() {
+    const {gl} = this.context
+    gl.deleteBuffer(this.vertexBuffer)
+    gl.deleteBuffer(this.indexBuffer)
   }
 }
 
@@ -279,6 +290,11 @@ abstract class Shader {
 
   uniform(name: string) {
     return new Uniform(this.context, this, name)
+  }
+
+  dispose() {
+    const {gl} = this.context
+    gl.deleteProgram(this.program)
   }
 }
 
@@ -421,6 +437,11 @@ class Framebuffer {
       gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
       gl.viewport(0, 0, width, height)
     }
+  }
+
+  dispose() {
+    const {gl} = this.context
+    gl.deleteFramebuffer(this.framebuffer)
   }
 }
 
