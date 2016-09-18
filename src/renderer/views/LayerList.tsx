@@ -34,8 +34,9 @@ function LayerListItem(props: {layer: Layer, current: boolean, index: number}) {
 
   const rename = (name: string) => {
     const {picture} = layer
-    picture.layers[index].name = name
-    picture.changed.next()
+    if (layer.name != name) {
+      picture.undoStack.redoAndPush(new RenameLayerCommand(layer, name))
+    }
   }
 
   const onDragStart = (ev: React.DragEvent<HTMLElement>) => {
@@ -102,12 +103,6 @@ class LayerList extends React.Component<LayerListProps, LayerListState> {
     picture.changed.next()
   }
 
-  renameLayer(i: number, name: string) {
-    const {picture} = this.props
-    picture.layers[i].name = name
-    picture.changed.next()
-  }
-
   addLayer() {
     const {picture} = this.props
     picture.undoStack.redoAndPush(new AddLayerCommand(picture, picture.currentLayerIndex))
@@ -170,5 +165,19 @@ class RemoveLayerCommand {
     this.removedLayer = picture.layers.splice(this.index, 1)[0]
     picture.currentLayerIndex = Math.min(picture.currentLayerIndex, picture.layers.length - 1)
     picture.changed.next()
+  }
+}
+
+class RenameLayerCommand {
+  oldName = this.layer.name
+  constructor(public layer: Layer, public name: string) {
+  }
+  undo() {
+    this.layer.name = this.oldName
+    this.layer.picture.changed.next()
+  }
+  redo() {
+    this.layer.name = this.name
+    this.layer.picture.changed.next()
   }
 }
