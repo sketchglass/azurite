@@ -1,34 +1,9 @@
-import {Shader, Model, Geometry, GeometryUsage, DefaultFramebuffer} from "../../lib/GL"
+import {TextureShader, Model, RectGeometry, GeometryUsage, DefaultFramebuffer} from "../../lib/GL"
 import {context, canvas} from "../GLContext"
 import Picture from "../models/Picture"
 import {Vec2, Vec4, Transform} from "../../lib/Geometry"
 
-const vert = `
-  precision highp float;
-
-  uniform mat3 uTransform;
-  attribute vec2 aPosition;
-  attribute vec2 aUVPosition;
-  varying vec2 vUVPosition;
-
-  void main(void) {
-    vUVPosition = aUVPosition;
-    vec3 pos = uTransform * vec3(aPosition, 1.0);
-    gl_Position = vec4(pos.xy, 0.0, 1.0);
-  }
-`
-
-const frag = `
-  precision mediump float;
-  varying highp vec2 vUVPosition;
-  uniform sampler2D uTexture;
-  void main(void) {
-    gl_FragColor = texture2D(uTexture, vUVPosition);
-  }
-`
-
-const shader = new Shader(context, vert, frag)
-shader.uniform("uTexture").setInt(0)
+const shader = new TextureShader(context)
 
 export default
 class Renderer {
@@ -43,21 +18,8 @@ class Renderer {
   }
 
   constructor(public picture: Picture) {
-    const {width, height} = picture.size
-    const vertices = new Float32Array([
-      0, 0, 0, 0,
-      width, 0, 1, 0,
-      0, height, 0, 1,
-      width, height, 1, 1
-    ])
-    const indices = new Uint16Array([
-      0, 1, 2,
-      1, 2, 3
-    ])
-    const geom = new Geometry(context, vertices, [
-      {attribute: "aPosition", size: 2},
-      {attribute: "aUVPosition", size: 2},
-    ], indices, GeometryUsage.Static)
+    const geom = new RectGeometry(context, GeometryUsage.Static)
+    geom.rect = Vec4.fromVec2(new Vec2(0), picture.size)
     this.model = new Model(context, geom, shader)
   }
 
@@ -91,7 +53,7 @@ class Renderer {
     }
     context.setClearColor(new Vec4(0.9, 0.9, 0.9, 1))
     context.clear()
-    shader.uniform("uTransform").setTransform(this.transforms.pictureToGLUnit)
+    shader.uTransform.setTransform(this.transforms.pictureToGLUnit)
     context.textureUnits.set(0, this.picture.layerBlender.blendedTexture)
     this.model.render()
     context.textureUnits.delete(0)
