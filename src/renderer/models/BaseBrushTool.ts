@@ -1,4 +1,4 @@
-import {Vec2, Vec4, Transform, unionRect} from "../../lib/Geometry"
+import {Vec2, Vec4, Transform, unionRect, intBoundingRect} from "../../lib/Geometry"
 import Waypoint from "./Waypoint"
 import Tool from "./Tool"
 import Layer from "./Layer"
@@ -126,7 +126,7 @@ abstract class BaseBrushTool extends Tool {
   private _rectForWaypoints(waypoints: Waypoint[]) {
     const rectWidth = this.width + 2
     const rects = waypoints.map(w => new Vec4(w.pos.x - rectWidth * 0.5, w.pos.y - rectWidth * 0.5, rectWidth, rectWidth))
-    return unionRect(...rects)
+    return intBoundingRect(unionRect(...rects))
   }
 
   abstract renderWaypoints(waypoints: Waypoint[]): void
