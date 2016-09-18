@@ -1,8 +1,9 @@
 import {Vec2, Vec4, Transform, unionRect} from "../../lib/Geometry"
 import Waypoint from "./Waypoint"
 import Tool from "./Tool"
-import {Framebuffer} from "../../lib/GL"
+import {Framebuffer, Texture} from "../../lib/GL"
 import {context} from "../GLContext"
+import {copyTexture} from "../GLUtil"
 
 abstract class BaseBrushTool extends Tool {
   private lastWaypoints: Waypoint[] = []
@@ -13,9 +14,13 @@ abstract class BaseBrushTool extends Tool {
   minWidthRatio = 0.5
   spacingRatio = 0.1
   framebuffer = new Framebuffer(context)
+  originalTexture = new Texture(context, new Vec2(0))
 
   start(waypoint: Waypoint) {
-    this.framebuffer.setTexture(this.picture.currentLayer.texture)
+    const {texture} = this.picture.currentLayer
+    this.framebuffer.setTexture(texture)
+    this.originalTexture.resize(texture.size)
+    copyTexture(texture, this.originalTexture, new Vec2(0))
 
     this.lastWaypoints = [waypoint]
     this.nextDabOffset = this.brushSpacing(waypoint)
