@@ -5,10 +5,36 @@ type BrowserWindow = Electron.BrowserWindow
 type MenuItemOptions = Electron.MenuItemOptions
 import Picture from "../models/Picture"
 
+function isInput(elem: Element) {
+  return elem instanceof HTMLTextAreaElement || elem instanceof HTMLInputElement
+}
+
 class MenuBar {
   constructor() {
     const menu = Menu.buildFromTemplate(this.render())
     Menu.setApplicationMenu(menu)
+  }
+
+  undo() {
+    if (isInput(document.activeElement)) {
+      remote.getCurrentWebContents().undo()
+    } else if (Picture.current) {
+      Picture.current.undoStack.undo()
+    }
+  }
+
+  redo() {
+    if (isInput(document.activeElement)) {
+      remote.getCurrentWebContents().redo()
+    } else if (Picture.current) {
+      Picture.current.undoStack.redo()
+    }
+  }
+
+  export() {
+    if (Picture.current) {
+      Picture.current.pictureExport.showExportDialog()
+    }
   }
 
   render() {
@@ -17,12 +43,7 @@ class MenuBar {
       submenu: [
         {
           label: "Export...",
-          click: () => {
-            const picture = Picture.current
-            if (picture) {
-              picture.pictureExport.showExportDialog()
-            }
-          }
+          click: this.export.bind(this)
         }
       ]
     }
@@ -31,10 +52,12 @@ class MenuBar {
       label: 'Edit',
       submenu: [
         {
-          role: 'undo'
+          label: "Undo",
+          click: this.undo.bind(this)
         },
         {
-          role: 'redo'
+          label: "Redo",
+          click: this.redo.bind(this)
         },
         {
           type: 'separator'
