@@ -1,9 +1,11 @@
 import {Vec2, Vec4, Transform, unionRect} from "../../lib/Geometry"
 import Waypoint from "./Waypoint"
 import Tool from "./Tool"
+import Layer from "./Layer"
 import {Framebuffer, Texture, DataType} from "../../lib/GL"
 import {context} from "../GLContext"
-import {copyTexture, copyNewTexture, readTextureFloat, float32ArrayTo16} from "../GLUtil"
+import {copyTexture, copyNewTexture, readTextureFloat} from "../GLUtil"
+import {float32ArrayTo16} from "../../lib/Float"
 
 abstract class BaseBrushTool extends Tool {
   private lastWaypoints: Waypoint[] = []
@@ -15,6 +17,7 @@ abstract class BaseBrushTool extends Tool {
   spacingRatio = 0.1
   framebuffer = new Framebuffer(context)
   originalTexture = new Texture(context, new Vec2(0), DataType.HalfFloat)
+  editedRect = new Vec4(0)
 
   start(waypoint: Waypoint) {
     const {texture} = this.picture.currentLayer
@@ -26,7 +29,9 @@ abstract class BaseBrushTool extends Tool {
     this.nextDabOffset = this.brushSpacing(waypoint)
     this.renderWaypoints([waypoint])
 
-    return this._rectForWaypoints([waypoint])
+    const rect = this._rectForWaypoints([waypoint])
+    this.editedRect = rect
+    return rect
   }
 
   move(waypoint: Waypoint) {
@@ -54,7 +59,9 @@ abstract class BaseBrushTool extends Tool {
       return new Vec4(0)
     } else {
       this.renderWaypoints(waypoints)
-      return this._rectForWaypoints(waypoints)
+      const rect = this._rectForWaypoints(waypoints)
+      this.editedRect = unionRect(this.editedRect, rect)
+      return rect
     }
   }
 
@@ -81,7 +88,8 @@ abstract class BaseBrushTool extends Tool {
       this.picture.currentLayer.updateThumbnail()
       this.picture.changed.next()
       const rect = this._rectForWaypoints(waypoints)
-      this.pushUndoStack(rect)
+      const editedRect = unionRect(this.editedRect, rect)
+      this.pushUndoStack(editedRect)
       return rect
     }
   }
@@ -95,6 +103,8 @@ abstract class BaseBrushTool extends Tool {
     const newData = float32ArrayTo16(readTextureFloat(newTexture))
     oldTexture.dispose()
     newTexture.dispose()
+    const undoCommand = new BrushUndoCommand(this.picture.currentLayer, rect, oldData, newData)
+    this.picture.undoStack.push(undoCommand)
   }
 
   brushSize(waypoint: Waypoint) {
@@ -111,6 +121,23 @@ abstract class BaseBrushTool extends Tool {
   }
 
   abstract renderWaypoints(waypoints: Waypoint[]): void
+}
+
+class BrushUndoCommand {
+  constructor(public layer: Layer, public rect: Vec4, public oldData: Uint16Array, public newData: Uint16Array) {
+  }
+
+  replace(data: Uint16Array) {
+    const texture = new Texture(context, this.rect.size, DataType.HalfFloat, data)
+    copyTexture(texture, this.layer.texture, this.rect.xy.neg())
+  }
+
+  undo() {
+    this.replace(this.oldData)
+  }
+  redo() {
+    this.replace(this.newData)
+  }
 }
 
 export default BaseBrushTool
