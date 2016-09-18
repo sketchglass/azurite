@@ -66,7 +66,7 @@ class TextureToCanvas {
     shader.uniform("uBackground").setVec4(this.backgroundColor)
     model.render()
     context.textureUnits.delete(0)
-    context.readPixels(Vec4.fromVec2(new Vec2(0), this.size), new Uint8Array(this.imageData.data.buffer))
+    context.readPixelsByte(Vec4.fromVec2(new Vec2(0), this.size), new Uint8Array(this.imageData.data.buffer))
     this.context.putImageData(this.imageData, 0, 0)
   }
 }

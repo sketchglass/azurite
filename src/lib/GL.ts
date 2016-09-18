@@ -55,9 +55,20 @@ class Context {
     gl.clear(gl.COLOR_BUFFER_BIT)
   }
 
-  readPixels(rect: Vec4, data: Uint8Array) {
+  readPixelsByte(rect: Vec4, data: Uint8Array) {
     const {gl} = this
     gl.readPixels(rect.x, rect.y, rect.z, rect.w, gl.RGBA, gl.UNSIGNED_BYTE, data)
+  }
+
+  readPixelsFloat(rect: Vec4, data: Float32Array) {
+    const {gl} = this
+    gl.readPixels(rect.x, rect.y, rect.z, rect.w, gl.RGBA, gl.FLOAT, data)
+  }
+
+  // don't work in Windows (https://bugs.chromium.org/p/chromium/issues/detail?id=648007)
+  readPixelsHalfFloat(rect: Vec4, data: Float32Array) {
+    const {gl, halfFloatExt} = this
+    gl.readPixels(rect.x, rect.y, rect.z, rect.w, gl.RGBA, halfFloatExt.HALF_FLOAT_OES, data)
   }
 }
 
