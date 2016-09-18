@@ -1,4 +1,5 @@
-import {Geometry, GeometryUsage} from "../lib/GL"
+import {Vec2} from "../lib/Geometry"
+import {Texture, Geometry, GeometryUsage, Shader, Model, Framebuffer} from "../lib/GL"
 import {context} from "./GLContext"
 
 export
@@ -14,3 +15,46 @@ const unitGeometry = new Geometry(context, new Float32Array([
   0, 1, 2,
   1, 2, 3
 ]), GeometryUsage.Static)
+
+const copyTextureShader = new Shader(context,
+  `
+    precision highp float;
+    uniform vec2 uSrcSize;
+    uniform vec2 uDestSize;
+    uniform vec2 uOffset;
+    attribute vec2 aPosition;
+    attribute vec2 aTexCoord;
+    varying vec2 vTexCoord;
+    void main(void) {
+      vTexCoord = aTexCoord;
+      vec2 posSrc = (aPosition + vec2(1.0)) * 0.5 * uSrcSize;
+      vec2 posDest = posSrc - uOffset;
+      vec2 pos = posDest / uDestSize * 2.0 - vec2(1.0);
+      gl_Position = vec4(pos, 0.0, 1.0);
+    }
+  `,
+  `
+    precision mediump float;
+    varying highp vec2 vTexCoord;
+    uniform sampler2D uTexture;
+    void main(void) {
+      gl_FragColor = texture2D(uTexture, vTexCoord);
+    }
+  `
+)
+copyTextureShader.uniform("uTexture").setInt(0)
+
+const copyTextureModel = new Model(context, unitGeometry, copyTextureShader)
+const copyTextureFramebuffer = new Framebuffer(context)
+
+export
+function copyTexture(src: Texture, dest: Texture, offset: Vec2) {
+  copyTextureShader.uniform("uSrcSize").setVec2(src.size)
+  copyTextureShader.uniform("uDestSize").setVec2(dest.size)
+  copyTextureShader.uniform("uOffset").setVec2(offset)
+  context.textureUnits.set(0, src)
+  copyTextureFramebuffer.setTexture(dest)
+  copyTextureFramebuffer.use()
+  copyTextureModel.render()
+  context.textureUnits.delete(0)
+}
