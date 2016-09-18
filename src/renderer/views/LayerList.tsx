@@ -136,6 +136,7 @@ class MoveLayerCommand {
 }
 
 class AddLayerCommand {
+  layer = new Layer(this.picture, this.picture.size)
   constructor(public picture: Picture, public index: number) {
   }
   undo() {
@@ -146,7 +147,7 @@ class AddLayerCommand {
   }
   redo() {
     const {picture} = this
-    picture.layers.splice(this.index, 0, new Layer(picture, picture.size))
+    picture.layers.splice(this.index, 0, this.layer)
     picture.changed.next()
   }
 }
