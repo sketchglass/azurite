@@ -147,21 +147,18 @@ function glUsage(gl: WebGLRenderingContext, usage: GeometryUsage) {
 }
 
 export
-abstract class Geometry {
+class Geometry {
   vertexBuffer: WebGLBuffer
   indexBuffer: WebGLBuffer
-  vertexData = new Float32Array(0)
-  indexData = new Uint16Array(0)
-  abstract get attributes(): {attribute: string, size: number}[]
   attributesStride = this.attributes.reduce((sum, {size}) => sum + size, 0)
 
-  constructor(public context: Context, public usage: GeometryUsage) {
+  constructor(public context: Context, public vertexData: Float32Array, public attributes: {attribute: string, size: number}[], public indexData: Uint16Array, public usage: GeometryUsage) {
     const {gl, vertexArrayExt} = context
     this.vertexBuffer = gl.createBuffer()!
     this.indexBuffer = gl.createBuffer()!
+    this.updateBuffer()
   }
-
-  update() {
+  updateBuffer() {
     const {gl} = this.context
     gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer)
     gl.bufferData(gl.ARRAY_BUFFER, this.vertexData, glUsage(gl, this.usage))
@@ -175,47 +172,6 @@ abstract class Geometry {
     const {gl} = this.context
     gl.deleteBuffer(this.vertexBuffer)
     gl.deleteBuffer(this.indexBuffer)
-  }
-}
-
-export
-class SimpleGeometry extends Geometry {
-  get attributes() {
-    return [
-      {attribute: "aPosition", size: 2},
-      {attribute: "aTexCoord", size: 2},
-    ]
-  }
-  positions: Vec2[] = []
-  texCoords: Vec2[] = []
-
-  update() {
-    const vertexData = this.vertexData = new Float32Array(this.positions.length * 4)
-    for (let i = 0; i < this.positions.length; ++i) {
-      const position = this.positions[i]
-      const texCoord = this.texCoords[i]
-      vertexData.set([position.x, position.y, texCoord.x, texCoord.y], i * 4)
-    }
-    super.update()
-  }
-}
-
-export
-class RectGeometry extends SimpleGeometry {
-  rect = new Vec4(0)
-  texCoords = [new Vec2(0, 0), new Vec2(1, 0), new Vec2(0, 1), new Vec2(1, 1)]
-  indexData = new Uint16Array([0, 1, 2, 1, 2, 3])
-
-  update() {
-    const {x, y} = this.rect.xy
-    const {width, height} = this.rect.size
-    this.positions = [
-      new Vec2(x, y),
-      new Vec2(x + width, y),
-      new Vec2(x, y + height),
-      new Vec2(x + width, y + height)
-    ]
-    super.update()
   }
 }
 
@@ -260,13 +216,10 @@ class Uniform {
 }
 
 export
-abstract class Shader {
+class Shader {
   program: WebGLProgram
 
-  abstract get vertexShader(): string
-  abstract get fragmentShader(): string
-
-  constructor(public context: Context) {
+  constructor(public context: Context, public vertexShader: string, public fragmentShader: string) {
     const {gl} = context
     this.program = gl.createProgram()!
     this._addShader(gl.VERTEX_SHADER, this.vertexShader)
@@ -298,66 +251,6 @@ abstract class Shader {
   }
 }
 
-
-export
-abstract class SimpleShader extends Shader {
-  get vertexShader() {
-    return `
-      precision highp float;
-
-      uniform mat3 uTransform;
-      attribute vec2 aPosition;
-      attribute vec2 aTexCoord;
-      varying vec2 vTexCoord;
-
-      void main(void) {
-        vTexCoord = aTexCoord;
-        vec3 pos = uTransform * vec3(aPosition, 1.0);
-        gl_Position = vec4(pos.xy, 0.0, 1.0);
-      }
-    `
-  }
-  uTransform = this.uniform("uTransform")
-
-  constructor(context: Context) {
-    super(context)
-    this.uTransform.setTransform(Transform.identity)
-  }
-}
-
-export
-class ColorShader extends SimpleShader {
-  get fragmentShader() {
-    return `
-      precision mediump float;
-      uniform vec4 uColor;
-      void main(void) {
-        gl_FragColor = uColor;
-      }
-    `
-  }
-
-  uColor = this.uniform("uColor")
-}
-
-export
-class TextureShader extends SimpleShader {
-  get fragmentShader() {
-    return `
-      precision mediump float;
-      varying highp vec2 vTexCoord;
-      uniform sampler2D uTexture;
-      void main(void) {
-        gl_FragColor = texture2D(uTexture, vTexCoord);
-      }
-    `
-  }
-  constructor(context: Context) {
-    super(context)
-    this.uniform("uTexture").setInt(0)
-  }
-}
-
 export
 enum BlendMode {
   Src,
@@ -371,7 +264,6 @@ class Model {
   blendFuncs: [number, number]
   constructor(public context: Context, public geometry: Geometry, public shader: Shader) {
     const {gl, vertexArrayExt} = context
-    this.geometry.update()
     this.vertexArray = vertexArrayExt.createVertexArrayOES()
     vertexArrayExt.bindVertexArrayOES(this.vertexArray)
     gl.useProgram(shader.program)
