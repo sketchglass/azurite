@@ -131,6 +131,8 @@ class BrushUndoCommand {
     const texture = new Texture(context, this.rect.size, DataType.HalfFloat, data)
     copyTexture(texture, this.layer.texture, this.rect.xy.neg())
     texture.dispose()
+    this.layer.updateThumbnail()
+    this.layer.picture.changed.next()
   }
 
   undo() {

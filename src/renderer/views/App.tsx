@@ -57,9 +57,6 @@ class App extends React.Component<void, void> {
       const tool = this.currentTool as BaseBrushTool
       tool.color = this.brushColor.toRgb()
     }
-    this.picture.undoStack.changed.forEach(() => {
-      this.forceUpdate()
-    })
   }
   render() {
     const {picture, tools, currentTool} = this
