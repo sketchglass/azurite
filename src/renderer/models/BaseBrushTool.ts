@@ -17,7 +17,15 @@ abstract class BaseBrushTool extends Tool {
   spacingRatio = 0.1
   framebuffer = new Framebuffer(context)
   originalTexture = new Texture(context, new Vec2(0), DataType.HalfFloat)
-  editedRect = new Vec4(0)
+  editedRect: Vec4|undefined
+
+  addEditedRect(rect: Vec4) {
+    if (this.editedRect) {
+      this.editedRect = unionRect(this.editedRect, rect)
+    } else {
+      this.editedRect = rect
+    }
+  }
 
   start(waypoint: Waypoint) {
     const {texture} = this.picture.currentLayer
@@ -30,7 +38,7 @@ abstract class BaseBrushTool extends Tool {
     this.renderWaypoints([waypoint])
 
     const rect = this._rectForWaypoints([waypoint])
-    this.editedRect = rect
+    this.addEditedRect(rect)
     return rect
   }
 
@@ -60,7 +68,7 @@ abstract class BaseBrushTool extends Tool {
     } else {
       this.renderWaypoints(waypoints)
       const rect = this._rectForWaypoints(waypoints)
-      this.editedRect = unionRect(this.editedRect, rect)
+      this.addEditedRect(rect)
       return rect
     }
   }
@@ -88,8 +96,9 @@ abstract class BaseBrushTool extends Tool {
       this.picture.currentLayer.updateThumbnail()
       this.picture.changed.next()
       const rect = this._rectForWaypoints(waypoints)
-      const editedRect = unionRect(this.editedRect, rect)
-      this.pushUndoStack(editedRect)
+      this.addEditedRect(rect)
+      this.pushUndoStack(this.editedRect!)
+      this.editedRect = undefined
       return rect
     }
   }
