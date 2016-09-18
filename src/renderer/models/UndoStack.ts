@@ -39,6 +39,10 @@ class UndoStack {
     this.doneCount += 1
     this.changed.next()
   }
+  redoAndPush(command: UndoCommand) {
+    command.redo()
+    this.push(command)
+  }
 }
 
 export const undoStack = new UndoStack()

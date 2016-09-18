@@ -85,10 +85,15 @@ class LayerList extends React.Component<LayerListProps, LayerListState> {
       return
     }
     ev.preventDefault()
+    const {picture} = this.props
     const from = parseInt(data)
     const {y} = mouseOffsetPos(ev, this.refs["scroll"] as HTMLElement)
-    const to = Math.min(Math.floor((y + CELL_HEIGHT / 2) / CELL_HEIGHT), this.props.picture.layers.length)
-    this.moveLayer(from, to)
+    let to = Math.min(Math.floor((y + CELL_HEIGHT / 2) / CELL_HEIGHT), picture.layers.length)
+    if (from < to) {
+      to -= 1
+    }
+    const command = new MoveLayerCommand(picture, from, to)
+    picture.undoStack.redoAndPush(command)
   }
 
   moveLayer(from: number, to: number) {
@@ -125,5 +130,24 @@ class LayerList extends React.Component<LayerListProps, LayerListState> {
     const {picture} = this.props
     picture.removeLayer()
     picture.changed.next()
+  }
+}
+
+class MoveLayerCommand {
+  constructor(public picture: Picture, public from: number, public to: number) {
+  }
+  move(from: number, to: number) {
+    const {picture} = this
+    const layer = picture.layers[from]
+    picture.layers.splice(from, 1)
+    picture.layers.splice(to, 0, layer)
+    picture.currentLayerIndex = to
+    picture.changed.next()
+  }
+  undo() {
+    this.move(this.to, this.from)
+  }
+  redo() {
+    this.move(this.from, this.to)
   }
 }
