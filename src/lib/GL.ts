@@ -20,6 +20,7 @@ class Context {
     const gl = this.gl = element.getContext("webgl", glOpts)! as WebGLRenderingContext
     this.halfFloatExt = gl.getExtension("OES_texture_half_float")
     gl.getExtension("OES_texture_half_float_linear")
+    gl.getExtension("OES_texture_float")
     this.vertexArrayExt = gl.getExtension("OES_vertex_array_object")
 
     gl.enable(gl.BLEND)
@@ -63,7 +64,8 @@ class Context {
 export
 enum DataType {
   Byte,
-  HalfFloat
+  HalfFloat,
+  Float,
 }
 
 function glType(context: Context, type: DataType) {
@@ -73,6 +75,8 @@ function glType(context: Context, type: DataType) {
     return context.gl.UNSIGNED_BYTE
   case DataType.HalfFloat:
     return context.halfFloatExt.HALF_FLOAT_OES
+  case DataType.Float:
+    return context.gl.FLOAT
   }
 }
 
