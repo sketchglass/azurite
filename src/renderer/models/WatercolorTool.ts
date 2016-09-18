@@ -1,7 +1,7 @@
 import {Vec2, Vec4, Transform, unionRect} from "../../lib/Geometry"
 import Waypoint from "./Waypoint"
 import BaseBrushTool from "./BaseBrushTool"
-import {Geometry, Shader, Model, GeometryUsage, Framebuffer, Texture, BlendMode} from "../../lib/GL"
+import {Geometry, Shader, Model, GeometryUsage, Framebuffer, Texture, BlendMode, DataType} from "../../lib/GL"
 import {context} from "../GLContext"
 import WatercolorSettings from "../views/WatercolorSettings"
 import React = require("react")
@@ -144,11 +144,11 @@ class WatercolorTool extends BaseBrushTool {
   sampleShader = new Shader(context, sampleVertShader, sampleFragShader)
   sampleModel = new Model(context, this.squareGeometry, this.sampleShader)
 
-  sampleOriginalTexture = new Texture(context, new Vec2(0))
+  sampleOriginalTexture = new Texture(context, new Vec2(0), DataType.HalfFloat)
   sampleOrigianlFramebuffer = new Framebuffer(context, this.sampleOriginalTexture)
-  sampleShapeTexture = new Texture(context, new Vec2(0))
+  sampleShapeTexture = new Texture(context, new Vec2(0), DataType.HalfFloat)
   sampleShapeFramebuffer = new Framebuffer(context, this.sampleShapeTexture)
-  sampleClipTexture = new Texture(context, new Vec2(0))
+  sampleClipTexture = new Texture(context, new Vec2(0), DataType.HalfFloat)
   sampleClipFramebuffer = new Framebuffer(context, this.sampleClipTexture)
 
   shaders = [this.shader, this.sampleShader]
@@ -185,9 +185,9 @@ class WatercolorTool extends BaseBrushTool {
       shader.uniform("uBrushRadius").setFloat(this.width * 0.5)
     }
 
-    this.sampleOriginalTexture.resize(new Vec2(sampleSize))
-    this.sampleShapeTexture.resize(new Vec2(sampleSize))
-    this.sampleClipTexture.resize(new Vec2(sampleSize))
+    this.sampleOriginalTexture.reallocate(new Vec2(sampleSize))
+    this.sampleShapeTexture.reallocate(new Vec2(sampleSize))
+    this.sampleClipTexture.reallocate(new Vec2(sampleSize))
 
     return super.start(waypoint)
   }

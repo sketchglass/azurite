@@ -1,6 +1,6 @@
 import Picture from "./Picture"
 import {Vec2, Vec4} from '../../lib/Geometry'
-import {Texture, Framebuffer, Shader, Model, DefaultFramebuffer} from "../../lib/GL"
+import {Texture, Framebuffer, Shader, Model, DefaultFramebuffer, DataType} from "../../lib/GL"
 import {context} from "../GLContext"
 import {unitGeometry} from "../GLUtil"
 
@@ -40,7 +40,7 @@ const backgroundModel = new Model(context, unitGeometry, backgroundShader)
 
 export default
 class LayerBlender {
-  blendedTexture = new Texture(context, this.picture.size)
+  blendedTexture = new Texture(context, this.picture.size, DataType.HalfFloat)
   framebuffer = new Framebuffer(context, this.blendedTexture)
 
   constructor(public picture: Picture) {

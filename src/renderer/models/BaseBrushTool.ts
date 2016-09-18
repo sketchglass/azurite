@@ -14,12 +14,12 @@ abstract class BaseBrushTool extends Tool {
   minWidthRatio = 0.5
   spacingRatio = 0.1
   framebuffer = new Framebuffer(context)
-  originalTexture = new Texture(context, new Vec2(0))
+  originalTexture = new Texture(context, new Vec2(0), DataType.HalfFloat)
 
   start(waypoint: Waypoint) {
     const {texture} = this.picture.currentLayer
     this.framebuffer.setTexture(texture)
-    this.originalTexture.resize(texture.size)
+    this.originalTexture.reallocate(texture.size)
     copyTexture(texture, this.originalTexture, new Vec2(0))
 
     this.lastWaypoints = [waypoint]
