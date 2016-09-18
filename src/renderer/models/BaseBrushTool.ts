@@ -1,9 +1,9 @@
 import {Vec2, Vec4, Transform, unionRect} from "../../lib/Geometry"
 import Waypoint from "./Waypoint"
 import Tool from "./Tool"
-import {Framebuffer, Texture} from "../../lib/GL"
+import {Framebuffer, Texture, DataType} from "../../lib/GL"
 import {context} from "../GLContext"
-import {copyTexture} from "../GLUtil"
+import {copyTexture, copyNewTexture, readTextureFloat, float32ArrayTo16} from "../GLUtil"
 
 abstract class BaseBrushTool extends Tool {
   private lastWaypoints: Waypoint[] = []
@@ -80,8 +80,21 @@ abstract class BaseBrushTool extends Tool {
       this.renderWaypoints(waypoints)
       this.picture.currentLayer.updateThumbnail()
       this.picture.changed.next()
-      return this._rectForWaypoints(waypoints)
+      const rect = this._rectForWaypoints(waypoints)
+      this.pushUndoStack(rect)
+      return rect
     }
+  }
+
+  private pushUndoStack(rect: Vec4) {
+    const {texture} = this.picture.currentLayer
+    // can't read directly from half float texture so read it to float texture first
+    const oldTexture = copyNewTexture(this.originalTexture, rect, DataType.Float)
+    const newTexture = copyNewTexture(texture, rect, DataType.Float)
+    const oldData = float32ArrayTo16(readTextureFloat(oldTexture))
+    const newData = float32ArrayTo16(readTextureFloat(newTexture))
+    oldTexture.dispose()
+    newTexture.dispose()
   }
 
   brushSize(waypoint: Waypoint) {
