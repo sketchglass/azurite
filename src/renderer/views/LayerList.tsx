@@ -96,18 +96,6 @@ class LayerList extends React.Component<LayerListProps, LayerListState> {
     picture.undoStack.redoAndPush(command)
   }
 
-  moveLayer(from: number, to: number) {
-    const {picture} = this.props
-    const layer = picture.layers[from]
-    picture.layers.splice(from, 1)
-    if (from < to) {
-      to -= 1
-    }
-    picture.layers.splice(to, 0, layer)
-    picture.currentLayerIndex = to
-    picture.changed.next()
-  }
-
   selectLayer(i: number) {
     const {picture} = this.props
     picture.currentLayerIndex = i
@@ -122,14 +110,14 @@ class LayerList extends React.Component<LayerListProps, LayerListState> {
 
   addLayer() {
     const {picture} = this.props
-    picture.addLayer()
-    picture.changed.next()
+    picture.undoStack.redoAndPush(new AddLayerCommand(picture, picture.currentLayerIndex))
   }
 
   removeLayer() {
     const {picture} = this.props
-    picture.removeLayer()
-    picture.changed.next()
+    if (picture.layers.length > 1) {
+      picture.undoStack.redoAndPush(new RemoveLayerCommand(picture, picture.currentLayerIndex))
+    }
   }
 }
 
@@ -149,5 +137,38 @@ class MoveLayerCommand {
   }
   redo() {
     this.move(this.from, this.to)
+  }
+}
+
+class AddLayerCommand {
+  constructor(public picture: Picture, public index: number) {
+  }
+  undo() {
+    const {picture} = this
+    picture.layers.splice(this.index, 1)
+    picture.currentLayerIndex = Math.min(picture.currentLayerIndex, picture.layers.length - 1)
+    picture.changed.next()
+  }
+  redo() {
+    const {picture} = this
+    picture.layers.splice(this.index, 0, new Layer(picture, picture.size))
+    picture.changed.next()
+  }
+}
+
+class RemoveLayerCommand {
+  removedLayer: Layer
+  constructor(public picture: Picture, public index: number) {
+  }
+  undo() {
+    const {picture} = this
+    picture.layers.splice(this.index, 0, this.removedLayer)
+    picture.changed.next()
+  }
+  redo() {
+    const {picture} = this
+    this.removedLayer = picture.layers.splice(this.index, 1)[0]
+    picture.currentLayerIndex = Math.min(picture.currentLayerIndex, picture.layers.length - 1)
+    picture.changed.next()
   }
 }
