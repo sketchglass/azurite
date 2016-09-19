@@ -4,6 +4,7 @@ type MenuItem = Electron.MenuItem
 type BrowserWindow = Electron.BrowserWindow
 type MenuItemOptions = Electron.MenuItemOptions
 import Picture from "../models/Picture"
+import PictureExport from "../models/PictureExport"
 
 function isTextInput(elem: Element) {
   if (elem instanceof HTMLTextAreaElement) {
@@ -38,9 +39,11 @@ class MenuBar {
     }
   }
 
-  export() {
+  async export() {
     if (Picture.current) {
-      Picture.current.pictureExport.showExportDialog()
+      const pictureExport = new PictureExport(Picture.current)
+      await pictureExport.showExportDialog()
+      pictureExport.dispose()
     }
   }
 
