@@ -64,15 +64,15 @@ class MenuBar {
           label: "Export",
           submenu: [
             {
-              label: "PNG",
+              label: "PNG...",
               click: () => this.exportPng(),
             },
             {
-              label: "JPEG",
+              label: "JPEG...",
               click: () => this.exportJpeg(),
             },
             {
-              label: "BMP",
+              label: "BMP...",
               click: () => this.exportBmp(),
             },
           ],
