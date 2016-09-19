@@ -63,6 +63,13 @@ class TiledTexture {
     }
   }
 
+  dispose() {
+    for (const tile of this.tiles.values()) {
+      tile.dispose()
+    }
+    this.tiles.clear()
+  }
+
   static keysForRect(rect: Vec4) {
     const left = Math.floor(rect.x / this.tileSize)
     const right = Math.floor((rect.x + rect.z - 1) / this.tileSize)

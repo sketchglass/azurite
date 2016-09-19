@@ -30,6 +30,9 @@ abstract class BaseBrushTool extends Tool {
 
   start(waypoint: Waypoint) {
     const {tiledTexture} = this.picture.currentLayer
+    if (this.oldTiledTexture) {
+      this.oldTiledTexture.dispose()
+    }
     this.oldTiledTexture = tiledTexture.clone()
 
     this.lastWaypoints = [waypoint]
