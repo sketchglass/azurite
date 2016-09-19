@@ -28,9 +28,6 @@ abstract class BaseBrushTool extends Tool {
   }
 
   start(waypoint: Waypoint) {
-    if (this.editedRect) {
-      this.pushUndoStack()
-    }
     const {texture} = this.picture.currentLayer
     this.framebuffer.setTexture(texture)
     this.originalTexture.reallocate(texture.size)
