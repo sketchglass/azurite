@@ -33,6 +33,7 @@ class ThumbnailGenerator {
     for (const tileKey of layer.tiledTexture.keys()) {
       this.textureToCanvas.loadTexture(layer.tiledTexture.get(tileKey), tileKey.mul(TiledTexture.tileSize))
     }
+    this.textureToCanvas.updateCanvas()
     this.thumbnailContext.drawImage(this.textureToCanvas.canvas, 0, 0, this.thumbnail.width, this.thumbnail.height)
     return this.thumbnail.toDataURL()
   }
