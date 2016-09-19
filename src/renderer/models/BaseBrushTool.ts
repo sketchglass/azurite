@@ -2,6 +2,7 @@ import {Vec2, Vec4, Transform, unionRect, intBoundingRect} from "../../lib/Geome
 import Waypoint from "./Waypoint"
 import Tool from "./Tool"
 import Layer from "./Layer"
+import TiledTexture from "./TiledTexture"
 import {Framebuffer, Texture, DataType} from "../../lib/GL"
 import {context} from "../GLContext"
 import {copyTexture, copyNewTexture, readTextureFloat} from "../GLUtil"
@@ -15,7 +16,7 @@ abstract class BaseBrushTool extends Tool {
   opacity = 1
   minWidthRatio = 0.5
   spacingRatio = 0.1
-  framebuffer = new Framebuffer(context)
+  oldTiledTexture: TiledTexture|undefined
   originalTexture = new Texture(context, new Vec2(0), DataType.HalfFloat)
   editedRect: Vec4|undefined
 
@@ -28,16 +29,13 @@ abstract class BaseBrushTool extends Tool {
   }
 
   start(waypoint: Waypoint) {
-    const {texture} = this.picture.currentLayer
-    this.framebuffer.setTexture(texture)
-    this.originalTexture.reallocate(texture.size)
-    copyTexture(texture, this.originalTexture, new Vec2(0))
+    const {tiledTexture} = this.picture.currentLayer
+    this.oldTiledTexture = tiledTexture.clone()
 
     this.lastWaypoints = [waypoint]
     this.nextDabOffset = this.brushSpacing(waypoint)
-    this.renderWaypoints([waypoint])
-
     const rect = this._rectForWaypoints([waypoint])
+    this.renderWaypoints([waypoint], rect)
     this.addEditedRect(rect)
     return rect
   }
@@ -66,8 +64,8 @@ abstract class BaseBrushTool extends Tool {
     if (waypoints.length == 0) {
       return new Vec4(0)
     } else {
-      this.renderWaypoints(waypoints)
       const rect = this._rectForWaypoints(waypoints)
+      this.renderWaypoints(waypoints, rect)
       this.addEditedRect(rect)
       return rect
     }
@@ -93,8 +91,8 @@ abstract class BaseBrushTool extends Tool {
       if (waypoints.length == 0) {
         return new Vec4(0)
       } else {
-        this.renderWaypoints(waypoints)
         const rect = this._rectForWaypoints(waypoints)
+        this.renderWaypoints(waypoints, rect)
         this.addEditedRect(rect)
         return rect
       }
@@ -112,10 +110,12 @@ abstract class BaseBrushTool extends Tool {
       return
     }
     this.editedRect = undefined
-    const {texture} = this.picture.currentLayer
+    const {tiledTexture} = this.picture.currentLayer
     // can't read directly from half float texture so read it to float texture first
-    const oldTexture = copyNewTexture(this.originalTexture, rect, DataType.Float)
-    const newTexture = copyNewTexture(texture, rect, DataType.Float)
+    const oldTexture = new Texture(context, rect.size, DataType.Float)
+    const newTexture = new Texture(context, rect.size, DataType.Float)
+    this.oldTiledTexture!.readToTexture(oldTexture, rect.xy)
+    tiledTexture.readToTexture(newTexture, rect.xy)
     const oldData = float32ArrayTo16(readTextureFloat(oldTexture))
     const newData = float32ArrayTo16(readTextureFloat(newTexture))
     oldTexture.dispose()
@@ -137,7 +137,7 @@ abstract class BaseBrushTool extends Tool {
     return intBoundingRect(unionRect(...rects))
   }
 
-  abstract renderWaypoints(waypoints: Waypoint[]): void
+  abstract renderWaypoints(waypoints: Waypoint[], rect: Vec4): void
 }
 
 class BrushUndoCommand {
@@ -146,7 +146,7 @@ class BrushUndoCommand {
 
   replace(data: Uint16Array) {
     const texture = new Texture(context, this.rect.size, DataType.HalfFloat, data)
-    copyTexture(texture, this.layer.texture, this.rect.xy.neg())
+    this.layer.tiledTexture.writeTexture(texture, this.rect.xy)
     texture.dispose()
     this.layer.updateThumbnail()
     this.layer.picture.changed.next()

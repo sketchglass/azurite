@@ -4,6 +4,7 @@ import BaseBrushTool from "./BaseBrushTool";
 import {Geometry, Shader, Model, GeometryUsage, Framebuffer} from "../../lib/GL"
 import {context} from "../GLContext"
 import BrushSettings from "../views/BrushSettings"
+import TiledTexture from "./TiledTexture"
 import React = require("react")
 
 const brushVertShader = `
@@ -11,7 +12,7 @@ const brushVertShader = `
 
   uniform float uBrushSize;
   uniform float uMinWidthRatio;
-  uniform mat3 uTransform;
+  uniform vec2 uTileKey;
   uniform float uOpacity;
 
   attribute vec2 aCenter;
@@ -24,8 +25,11 @@ const brushVertShader = `
 
   void main(void) {
     vOffset = aOffset;
-    vec3 pos = uTransform * vec3(aOffset * (uBrushSize + 2.0) + aCenter, 1.0);
-    gl_Position = vec4(pos.xy, 0.0, 1.0);
+    vec2 pos = aOffset * (uBrushSize + 2.0) + aCenter;
+    vec2 posTile = pos - uTileKey * ${TiledTexture.tileSize}.0;
+    vec2 glPos = posTile / ${TiledTexture.tileSize}.0 * 2.0 - 1.0;
+    gl_Position = vec4(glPos, 0.0, 1.0);
+
     float radius = uBrushSize * 0.5 * (uMinWidthRatio + (1.0 - uMinWidthRatio) * aPressure);
     vRadius = radius;
     // transparency = (overlap count) √ (final transparency)
@@ -59,14 +63,11 @@ class BrushTool extends BaseBrushTool {
   ], new Uint16Array(0), GeometryUsage.Stream)
   shader = new Shader(context, brushVertShader, brushFragShader)
   model = new Model(context, this.dabsGeometry, this.shader)
+  framebuffer = new Framebuffer(context)
   name = "Brush"
 
   start(waypoint: Waypoint) {
     const layerSize = this.picture.currentLayer.size
-    const transform =
-      Transform.scale(new Vec2(2 / layerSize.width, 2 / layerSize.height))
-        .merge(Transform.translate(new Vec2(-1, -1)))
-    this.shader.uniform('uTransform').setTransform(transform)
     this.shader.uniform('uBrushSize').setFloat(this.width)
     this.shader.uniform('uColor').setVec4(this.color)
     this.shader.uniform('uOpacity').setFloat(this.opacity)
@@ -75,7 +76,7 @@ class BrushTool extends BaseBrushTool {
     return super.start(waypoint)
   }
 
-  renderWaypoints(waypoints: Waypoint[]) {
+  renderWaypoints(waypoints: Waypoint[], rect: Vec4) {
     const offsets = [
       new Vec2(-1,-1),
       new Vec2(-1,1),
@@ -100,8 +101,17 @@ class BrushTool extends BaseBrushTool {
     this.dabsGeometry.indexData = indices
     this.dabsGeometry.updateBuffer()
 
+    const uTileKey = this.shader.uniform("uTileKey")
+
     this.framebuffer.use()
-    this.model.render()
+    const {tiledTexture} = this.picture.currentLayer
+
+    for (const key of TiledTexture.keysForRect(rect)) {
+      this.framebuffer.setTexture(tiledTexture.get(key))
+      uTileKey.setVec2(key)
+      this.framebuffer.use()
+      this.model.render()
+    }
   }
 
   renderSettings() {

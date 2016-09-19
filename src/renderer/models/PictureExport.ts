@@ -1,3 +1,4 @@
+import {Vec2} from "../../lib/Geometry"
 import Picture from "./Picture"
 import TextureToCanvas from "./TextureToCanvas"
 import {remote} from "electron"
@@ -52,7 +53,7 @@ class PictureExport {
   }
 
   async export(fileName: string, format: Format) {
-    this.textureToCanvas.loadTexture(this.picture.layerBlender.blendedTexture)
+    this.textureToCanvas.loadTexture(this.picture.layerBlender.blendedTexture, new Vec2(0))
     const blob = await this.getBlob(`image/${format}`)
     if (!blob) {
       throw new Error("Failed to generate image data")

@@ -1,6 +1,7 @@
 import {Vec2} from "../../lib/Geometry"
 import TextureToCanvas from "./TextureToCanvas"
 import Layer from "./Layer"
+import TiledTexture from "./TiledTexture"
 
 function calcThumbnailSize(layerSize: Vec2, maxSize: Vec2) {
   const maxRatio = maxSize.width / maxSize.height
@@ -28,7 +29,10 @@ class ThumbnailGenerator {
   }
 
   generate(layer: Layer) {
-    this.textureToCanvas.loadTexture(layer.texture)
+    this.textureToCanvas.clear()
+    for (const tileKey of layer.tiledTexture.keys()) {
+      this.textureToCanvas.loadTexture(layer.tiledTexture.get(tileKey), tileKey.mul(TiledTexture.tileSize))
+    }
     this.thumbnailContext.drawImage(this.textureToCanvas.canvas, 0, 0, this.thumbnail.width, this.thumbnail.height)
     return this.thumbnail.toDataURL()
   }
