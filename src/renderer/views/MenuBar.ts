@@ -5,8 +5,15 @@ type BrowserWindow = Electron.BrowserWindow
 type MenuItemOptions = Electron.MenuItemOptions
 import Picture from "../models/Picture"
 
-function isInput(elem: Element) {
-  return elem instanceof HTMLTextAreaElement || elem instanceof HTMLInputElement
+function isTextInput(elem: Element) {
+  if (elem instanceof HTMLTextAreaElement) {
+    return true
+  }
+  if (elem instanceof HTMLInputElement) {
+    const inputTypes = ['text', 'password', 'number', 'email', 'url', 'search', 'date', 'datetime', 'datetime-local', 'time', 'month', 'week']
+    return inputTypes.indexOf(elem.type) >= 0
+  }
+  return false
 }
 
 class MenuBar {
@@ -16,7 +23,7 @@ class MenuBar {
   }
 
   undo() {
-    if (isInput(document.activeElement)) {
+    if (isTextInput(document.activeElement)) {
       remote.getCurrentWebContents().undo()
     } else if (Picture.current) {
       Picture.current.undoStack.undo()
@@ -24,7 +31,7 @@ class MenuBar {
   }
 
   redo() {
-    if (isInput(document.activeElement)) {
+    if (isTextInput(document.activeElement)) {
       remote.getCurrentWebContents().redo()
     } else if (Picture.current) {
       Picture.current.undoStack.redo()
