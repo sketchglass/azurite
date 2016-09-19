@@ -22,16 +22,5 @@ class Picture {
     return this.layers[this.currentLayerIndex]
   }
 
-  addLayer() {
-    this.layers.splice(this.currentLayerIndex, 0, new Layer(this, this.size))
-  }
-  removeLayer() {
-    if (this.layers.length < 2) {
-      return
-    }
-    this.layers.splice(this.currentLayerIndex, 1)
-    this.currentLayerIndex = Math.min(this.currentLayerIndex, this.layers.length - 1)
-  }
-
   static current: Picture|undefined
 }
