@@ -94,8 +94,6 @@ abstract class BaseBrushTool extends Tool {
         return new Vec4(0)
       } else {
         this.renderWaypoints(waypoints)
-        this.picture.currentLayer.updateThumbnail()
-        this.picture.changed.next()
         const rect = this._rectForWaypoints(waypoints)
         this.addEditedRect(rect)
         return rect
@@ -103,6 +101,8 @@ abstract class BaseBrushTool extends Tool {
     }
     const rect = drawLast()
     this.pushUndoStack()
+    this.picture.currentLayer.updateThumbnail()
+    this.picture.changed.next()
     return rect
   }
 
