@@ -109,7 +109,6 @@ class BrushTool extends BaseBrushTool {
     for (const key of TiledTexture.keysForRect(rect)) {
       this.framebuffer.setTexture(tiledTexture.get(key))
       uTileKey.setVec2(key)
-      this.framebuffer.use()
       this.model.render()
     }
   }

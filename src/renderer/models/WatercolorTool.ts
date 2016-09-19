@@ -227,10 +227,10 @@ class WatercolorTool extends BaseBrushTool {
       uBrushPos.setVec2(waypoint.pos)
       uPressure.setFloat(waypoint.pressure)
 
+      this.framebuffer.use()
       for (const key of TiledTexture.keysForRect(rect)) {
         uTileKey.setVec2(key)
         this.framebuffer.setTexture(tiledTexture.get(key))
-        this.framebuffer.use()
         this.model.render()
       }
 
