@@ -28,6 +28,9 @@ abstract class BaseBrushTool extends Tool {
   }
 
   start(waypoint: Waypoint) {
+    if (this.editedRect) {
+      this.pushUndoStack()
+    }
     const {texture} = this.picture.currentLayer
     this.framebuffer.setTexture(texture)
     this.originalTexture.reallocate(texture.size)
@@ -74,36 +77,44 @@ abstract class BaseBrushTool extends Tool {
   }
 
   end() {
-    const getSpacing = this.brushSpacing.bind(this)
-    const {lastWaypoints} = this
-    if (lastWaypoints.length < 2) {
-      return new Vec4(0)
-    }
-    const {waypoints} = (() => {
-      if (lastWaypoints.length == 2) {
-        return Waypoint.subdivide(lastWaypoints[0], lastWaypoints[1], getSpacing, this.nextDabOffset)
-      } else if (lastWaypoints.length == 3) {
-        return Waypoint.subdivideCurve(lastWaypoints[0], lastWaypoints[1], lastWaypoints[2], lastWaypoints[2], getSpacing, this.nextDabOffset)
-      } else {
-        return Waypoint.subdivideCurve(lastWaypoints[1], lastWaypoints[2], lastWaypoints[3], lastWaypoints[3], getSpacing, this.nextDabOffset)
+    const drawLast = () => {
+      const getSpacing = this.brushSpacing.bind(this)
+      const {lastWaypoints} = this
+      if (lastWaypoints.length < 2) {
+        return new Vec4(0)
       }
-    })()
+      const {waypoints} = (() => {
+        if (lastWaypoints.length == 2) {
+          return Waypoint.subdivide(lastWaypoints[0], lastWaypoints[1], getSpacing, this.nextDabOffset)
+        } else if (lastWaypoints.length == 3) {
+          return Waypoint.subdivideCurve(lastWaypoints[0], lastWaypoints[1], lastWaypoints[2], lastWaypoints[2], getSpacing, this.nextDabOffset)
+        } else {
+          return Waypoint.subdivideCurve(lastWaypoints[1], lastWaypoints[2], lastWaypoints[3], lastWaypoints[3], getSpacing, this.nextDabOffset)
+        }
+      })()
 
-    if (waypoints.length == 0) {
-      return new Vec4(0)
-    } else {
-      this.renderWaypoints(waypoints)
-      this.picture.currentLayer.updateThumbnail()
-      this.picture.changed.next()
-      const rect = this._rectForWaypoints(waypoints)
-      this.addEditedRect(rect)
-      this.pushUndoStack(this.editedRect!)
-      this.editedRect = undefined
-      return rect
+      if (waypoints.length == 0) {
+        return new Vec4(0)
+      } else {
+        this.renderWaypoints(waypoints)
+        this.picture.currentLayer.updateThumbnail()
+        this.picture.changed.next()
+        const rect = this._rectForWaypoints(waypoints)
+        this.addEditedRect(rect)
+        return rect
+      }
     }
+    const rect = drawLast()
+    this.pushUndoStack()
+    return rect
   }
 
-  private pushUndoStack(rect: Vec4) {
+  private pushUndoStack() {
+    const rect = this.editedRect
+    if (!rect) {
+      return
+    }
+    this.editedRect = undefined
     const {texture} = this.picture.currentLayer
     // can't read directly from half float texture so read it to float texture first
     const oldTexture = copyNewTexture(this.originalTexture, rect, DataType.Float)
