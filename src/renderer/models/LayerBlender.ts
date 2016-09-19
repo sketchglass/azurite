@@ -1,7 +1,8 @@
 import Picture from "./Picture"
 import {Vec2, Vec4} from '../../lib/Geometry'
-import {Texture, Framebuffer, Shader, Model, Geometry, GeometryUsage, DefaultFramebuffer} from "../../lib/GL"
+import {Texture, Framebuffer, Shader, Model, DefaultFramebuffer, DataType} from "../../lib/GL"
 import {context} from "../GLContext"
+import {unitGeometry} from "../GLUtil"
 
 const vert = `
   precision highp float;
@@ -34,25 +35,12 @@ const layerShader = new Shader(context, vert, layerFrag)
 layerShader.uniform("uTexture").setInt(0)
 const backgroundShader = new Shader(context, vert, backgroundFrag)
 
-const geom = new Geometry(context, new Float32Array([
-  -1, -1, 0, 0,
-  1, -1, 1, 0,
-  -1, 1, 0, 1,
-  1, 1, 1, 1
-]), [
-  {attribute: "aPosition", size: 2},
-  {attribute: "aTexCoord", size: 2},
-],  new Uint16Array([
-  0, 1, 2,
-  1, 2, 3
-]), GeometryUsage.Static)
-
-const layerModel = new Model(context, geom, layerShader)
-const backgroundModel = new Model(context, geom, backgroundShader)
+const layerModel = new Model(context, unitGeometry, layerShader)
+const backgroundModel = new Model(context, unitGeometry, backgroundShader)
 
 export default
 class LayerBlender {
-  blendedTexture = new Texture(context, this.picture.size)
+  blendedTexture = new Texture(context, this.picture.size, DataType.HalfFloat)
   framebuffer = new Framebuffer(context, this.blendedTexture)
 
   constructor(public picture: Picture) {

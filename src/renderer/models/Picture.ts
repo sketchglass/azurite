@@ -5,6 +5,7 @@ import {Subject} from "@reactivex/rxjs/dist/cjs/Subject"
 import ThumbnailGenerator from "./ThumbnailGenerator"
 import PictureExport from "./PictureExport"
 import LayerBlender from "./LayerBlender"
+import {UndoStack} from "./UndoStack"
 
 export default
 class Picture {
@@ -15,6 +16,7 @@ class Picture {
   layers: Layer[] = [new Layer(this, this.size)]
   pictureExport = new PictureExport(this)
   layerBlender = new LayerBlender(this)
+  undoStack = new UndoStack()
 
   get currentLayer() {
     return this.layers[this.currentLayerIndex]

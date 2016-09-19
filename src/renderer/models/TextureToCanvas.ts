@@ -1,6 +1,7 @@
 import {Vec2, Vec4} from "../../lib/Geometry"
-import {Texture, Shader, Geometry, Model, DataType, GeometryUsage, Framebuffer, BlendMode} from "../../lib/GL"
+import {Texture, Shader, Model, DataType, Framebuffer, BlendMode} from "../../lib/GL"
 import {context} from "../GLContext"
+import {unitGeometry} from "../GLUtil"
 
 const vert = `
   precision highp float;
@@ -29,20 +30,7 @@ const frag = `
 const shader = new Shader(context, vert, frag)
 shader.uniform("uTexture").setInt(0)
 
-const geom = new Geometry(context, new Float32Array([
-  -1, -1, 0, 0,
-  1, -1, 1, 0,
-  -1, 1, 0, 1,
-  1, 1, 1, 1
-]), [
-  {attribute: "aPosition", size: 2},
-  {attribute: "aTexCoord", size: 2},
-],  new Uint16Array([
-  0, 1, 2,
-  1, 2, 3
-]), GeometryUsage.Static)
-
-const model = new Model(context, geom, shader)
+const model = new Model(context, unitGeometry, shader)
 model.setBlendMode(BlendMode.Src)
 
 // render texture content to canvas element
@@ -66,7 +54,7 @@ class TextureToCanvas {
     shader.uniform("uBackground").setVec4(this.backgroundColor)
     model.render()
     context.textureUnits.delete(0)
-    context.readPixels(Vec4.fromVec2(new Vec2(0), this.size), new Uint8Array(this.imageData.data.buffer))
+    context.readPixelsByte(Vec4.fromVec2(new Vec2(0), this.size), new Uint8Array(this.imageData.data.buffer))
     this.context.putImageData(this.imageData, 0, 0)
   }
 }

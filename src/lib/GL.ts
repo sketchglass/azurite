@@ -20,6 +20,7 @@ class Context {
     const gl = this.gl = element.getContext("webgl", glOpts)! as WebGLRenderingContext
     this.halfFloatExt = gl.getExtension("OES_texture_half_float")
     gl.getExtension("OES_texture_half_float_linear")
+    gl.getExtension("OES_texture_float")
     this.vertexArrayExt = gl.getExtension("OES_vertex_array_object")
 
     gl.enable(gl.BLEND)
@@ -54,16 +55,28 @@ class Context {
     gl.clear(gl.COLOR_BUFFER_BIT)
   }
 
-  readPixels(rect: Vec4, data: Uint8Array) {
+  readPixelsByte(rect: Vec4, data: Uint8Array) {
     const {gl} = this
     gl.readPixels(rect.x, rect.y, rect.z, rect.w, gl.RGBA, gl.UNSIGNED_BYTE, data)
+  }
+
+  readPixelsFloat(rect: Vec4, data: Float32Array) {
+    const {gl} = this
+    gl.readPixels(rect.x, rect.y, rect.z, rect.w, gl.RGBA, gl.FLOAT, data)
+  }
+
+  // don't work in Windows (https://bugs.chromium.org/p/chromium/issues/detail?id=648007)
+  readPixelsHalfFloat(rect: Vec4, data: Float32Array) {
+    const {gl, halfFloatExt} = this
+    gl.readPixels(rect.x, rect.y, rect.z, rect.w, gl.RGBA, halfFloatExt.HALF_FLOAT_OES, data)
   }
 }
 
 export
 enum DataType {
   Byte,
-  HalfFloat
+  HalfFloat,
+  Float,
 }
 
 function glType(context: Context, type: DataType) {
@@ -73,6 +86,8 @@ function glType(context: Context, type: DataType) {
     return context.gl.UNSIGNED_BYTE
   case DataType.HalfFloat:
     return context.halfFloatExt.HALF_FLOAT_OES
+  case DataType.Float:
+    return context.gl.FLOAT
   }
 }
 
@@ -80,7 +95,7 @@ export
 class Texture {
   texture: WebGLTexture
 
-  constructor(public context: Context, public size: Vec2, public dataType: DataType = DataType.HalfFloat) {
+  constructor(public context: Context, public size: Vec2, public dataType: DataType, data?: ArrayBufferView) {
     const {gl} = context
     this.texture = gl.createTexture()!
     gl.bindTexture(gl.TEXTURE_2D, this.texture)
@@ -88,14 +103,14 @@ class Texture {
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE)
-    this.resize(size)
+    this.reallocate(size, data)
   }
 
-  resize(size: Vec2) {
+  reallocate(size: Vec2, data?: ArrayBufferView) {
     const {gl, halfFloatExt} = this.context
     this.size = size
     gl.bindTexture(gl.TEXTURE_2D, this.texture)
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size.width, size.height, 0, gl.RGBA, glType(this.context, this.dataType), null as any)
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size.width, size.height, 0, gl.RGBA, glType(this.context, this.dataType), data ? data : null as any)
   }
 
   generateMipmap() {

@@ -34,8 +34,9 @@ function LayerListItem(props: {layer: Layer, current: boolean, index: number}) {
 
   const rename = (name: string) => {
     const {picture} = layer
-    picture.layers[index].name = name
-    picture.changed.next()
+    if (layer.name != name) {
+      picture.undoStack.redoAndPush(new RenameLayerCommand(layer, name))
+    }
   }
 
   const onDragStart = (ev: React.DragEvent<HTMLElement>) => {
@@ -85,22 +86,15 @@ class LayerList extends React.Component<LayerListProps, LayerListState> {
       return
     }
     ev.preventDefault()
+    const {picture} = this.props
     const from = parseInt(data)
     const {y} = mouseOffsetPos(ev, this.refs["scroll"] as HTMLElement)
-    const to = Math.min(Math.floor((y + CELL_HEIGHT / 2) / CELL_HEIGHT), this.props.picture.layers.length)
-    this.moveLayer(from, to)
-  }
-
-  moveLayer(from: number, to: number) {
-    const {picture} = this.props
-    const layer = picture.layers[from]
-    picture.layers.splice(from, 1)
+    let to = Math.min(Math.floor((y + CELL_HEIGHT / 2) / CELL_HEIGHT), picture.layers.length)
     if (from < to) {
       to -= 1
     }
-    picture.layers.splice(to, 0, layer)
-    picture.currentLayerIndex = to
-    picture.changed.next()
+    const command = new MoveLayerCommand(picture, from, to)
+    picture.undoStack.redoAndPush(command)
   }
 
   selectLayer(i: number) {
@@ -109,21 +103,82 @@ class LayerList extends React.Component<LayerListProps, LayerListState> {
     picture.changed.next()
   }
 
-  renameLayer(i: number, name: string) {
-    const {picture} = this.props
-    picture.layers[i].name = name
-    picture.changed.next()
-  }
-
   addLayer() {
     const {picture} = this.props
-    picture.addLayer()
-    picture.changed.next()
+    picture.undoStack.redoAndPush(new AddLayerCommand(picture, picture.currentLayerIndex))
   }
 
   removeLayer() {
     const {picture} = this.props
-    picture.removeLayer()
+    if (picture.layers.length > 1) {
+      picture.undoStack.redoAndPush(new RemoveLayerCommand(picture, picture.currentLayerIndex))
+    }
+  }
+}
+
+class MoveLayerCommand {
+  constructor(public picture: Picture, public from: number, public to: number) {
+  }
+  move(from: number, to: number) {
+    const {picture} = this
+    const layer = picture.layers[from]
+    picture.layers.splice(from, 1)
+    picture.layers.splice(to, 0, layer)
+    picture.currentLayerIndex = to
     picture.changed.next()
+  }
+  undo() {
+    this.move(this.to, this.from)
+  }
+  redo() {
+    this.move(this.from, this.to)
+  }
+}
+
+class AddLayerCommand {
+  layer = new Layer(this.picture, this.picture.size)
+  constructor(public picture: Picture, public index: number) {
+  }
+  undo() {
+    const {picture} = this
+    picture.layers.splice(this.index, 1)
+    picture.currentLayerIndex = Math.min(picture.currentLayerIndex, picture.layers.length - 1)
+    picture.changed.next()
+  }
+  redo() {
+    const {picture} = this
+    picture.layers.splice(this.index, 0, this.layer)
+    picture.changed.next()
+  }
+}
+
+class RemoveLayerCommand {
+  removedLayer: Layer
+  constructor(public picture: Picture, public index: number) {
+  }
+  undo() {
+    const {picture} = this
+    picture.layers.splice(this.index, 0, this.removedLayer)
+    picture.changed.next()
+  }
+  redo() {
+    const {picture} = this
+    this.removedLayer = picture.layers.splice(this.index, 1)[0]
+    picture.currentLayerIndex = Math.min(picture.currentLayerIndex, picture.layers.length - 1)
+    picture.changed.next()
+  }
+}
+
+class RenameLayerCommand {
+  oldName = this.layer.name
+  constructor(public layer: Layer, public name: string) {
+  }
+  undo() {
+    this.layer.name = this.oldName
+    this.layer.picture.changed.next()
+  }
+  redo() {
+    this.layer.name = this.name
+    this.layer.picture.changed.next()
   }
 }
