@@ -39,12 +39,21 @@ class MenuBar {
     }
   }
 
-  async export() {
+  async export(format: "png"|"jpeg"|"bmp") {
     if (Picture.current) {
       const pictureExport = new PictureExport(Picture.current)
-      await pictureExport.showExportDialog()
+      await pictureExport.showExportDialog(format)
       pictureExport.dispose()
     }
+  }
+  exportPng() {
+    this.export("png")
+  }
+  exportJpeg() {
+    this.export("jpeg")
+  }
+  exportBmp() {
+    this.export("bmp")
   }
 
   render() {
@@ -52,10 +61,23 @@ class MenuBar {
       label: "File",
       submenu: [
         {
-          label: "Export...",
-          click: this.export.bind(this)
-        }
-      ]
+          label: "Export",
+          submenu: [
+            {
+              label: "PNG",
+              click: () => this.exportPng(),
+            },
+            {
+              label: "JPEG",
+              click: () => this.exportJpeg(),
+            },
+            {
+              label: "BMP",
+              click: () => this.exportBmp(),
+            },
+          ],
+        },
+      ],
     }
 
     const editMenu: MenuItemOptions = {

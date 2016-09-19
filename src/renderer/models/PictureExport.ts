@@ -19,6 +19,8 @@ async function blobToBuffer(blob: Blob) {
   })
 }
 
+type Format = "png"|"jpeg"|"bmp"
+
 export default
 class PictureExport {
   textureToCanvas = new TextureToCanvas(this.picture.size)
@@ -26,23 +28,32 @@ class PictureExport {
   constructor(public picture: Picture) {
   }
 
-  async showExportDialog() {
+  async showExportDialog(format: Format) {
+    const filter = (() => {
+      switch (format) {
+        default:
+        case "png":
+          return { name: "PNG", extensions: ["png"] }
+        case "jpeg":
+          return { name: "JPEG", extensions: ["jpg"] }
+        case "bmp":
+          return { name: "BMP", extensions: ["bmp"] }
+      }
+    })()
     const fileName = await new Promise<string|undefined>((resolve, reject) => {
       dialog.showSaveDialog({
         title: "Export...",
-        filters: [
-          { name: "PNG", extensions: ["png"] },
-        ]
+        filters: [filter]
       }, resolve)
     })
     if (fileName) {
-      await this.export(fileName)
+      await this.export(fileName, format)
     }
   }
 
-  async export(fileName: string) {
+  async export(fileName: string, format: Format) {
     this.textureToCanvas.loadTexture(this.picture.layerBlender.blendedTexture)
-    const blob = await this.getBlob("image/png")
+    const blob = await this.getBlob(`image/${format}`)
     if (!blob) {
       throw new Error("Failed to generate image data")
     }
