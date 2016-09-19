@@ -55,4 +55,8 @@ class PictureExport {
       this.textureToCanvas.canvas.toBlob(resolve, mimeType)
     })
   }
+
+  dispose() {
+    this.textureToCanvas.dispose()
+  }
 }

@@ -57,4 +57,9 @@ class TextureToCanvas {
     context.readPixelsByte(Vec4.fromVec2(new Vec2(0), this.size), new Uint8Array(this.imageData.data.buffer))
     this.context.putImageData(this.imageData, 0, 0)
   }
+
+  dispose() {
+    this.texture.dispose()
+    this.framebuffer.dispose()
+  }
 }

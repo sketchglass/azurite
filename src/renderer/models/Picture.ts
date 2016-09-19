@@ -3,7 +3,6 @@ import {Texture, Framebuffer} from "../../lib/GL"
 import {Vec2, Vec4} from "../../lib/Geometry"
 import {Subject} from "@reactivex/rxjs/dist/cjs/Subject"
 import ThumbnailGenerator from "./ThumbnailGenerator"
-import PictureExport from "./PictureExport"
 import LayerBlender from "./LayerBlender"
 import {UndoStack} from "./UndoStack"
 
@@ -14,7 +13,6 @@ class Picture {
   changed = new Subject<void>()
   thumbnailGenerator = new ThumbnailGenerator(this.size)
   layers: Layer[] = [new Layer(this, this.size)]
-  pictureExport = new PictureExport(this)
   layerBlender = new LayerBlender(this)
   undoStack = new UndoStack()
 
