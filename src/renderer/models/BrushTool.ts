@@ -44,6 +44,7 @@ const brushFragShader = `
   precision mediump float;
 
   uniform float uBrushSize;
+  uniform float uSoftness;
   uniform lowp vec4 uColor;
 
   varying float vRadius;
@@ -52,7 +53,7 @@ const brushFragShader = `
 
   void main(void) {
     float r = length(vOffset) * (uBrushSize + 2.0);
-    lowp float opacity = smoothstep(vRadius, vRadius- 1.0, r);
+    lowp float opacity = smoothstep(vRadius, vRadius - max(1.0, vRadius * uSoftness), r);
     gl_FragColor = uColor * opacity * vOpacity;
   }
 `
@@ -76,6 +77,7 @@ class BrushTool extends BaseBrushTool {
     this.shader.uniform('uOpacity').setFloat(this.opacity)
     this.shader.uniform('uMinWidthRatio').setFloat(this.minWidthRatio)
     this.shader.uniform('uSpacingRatio').setFloat(this.spacingRatio)
+    this.shader.uniform('uSoftness').setFloat(this.softness)
 
     return super.start(waypoint)
   }
