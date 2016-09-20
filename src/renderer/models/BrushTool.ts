@@ -11,6 +11,7 @@ const brushVertShader = `
   precision mediump float;
 
   uniform float uBrushSize;
+  uniform float uSpacingRatio;
   uniform float uMinWidthRatio;
   uniform vec2 uTileKey;
   uniform float uOpacity;
@@ -30,10 +31,12 @@ const brushVertShader = `
     vec2 glPos = posTile / ${TiledTexture.tileSize}.0 * 2.0 - 1.0;
     gl_Position = vec4(glPos, 0.0, 1.0);
 
-    float radius = uBrushSize * 0.5 * (uMinWidthRatio + (1.0 - uMinWidthRatio) * aPressure);
+    float brushSize = uBrushSize * (uMinWidthRatio + (1.0 - uMinWidthRatio) * aPressure);
+    float radius = brushSize * 0.5;
     vRadius = radius;
     // transparency = (overlap count) √ (final transparency)
-    vOpacity = 1.0 - pow(1.0 - min(uOpacity, 0.998), 1.0 / (radius * 2.0));
+    float spacing = max(brushSize * uSpacingRatio, 1.0);
+    vOpacity = 1.0 - pow(1.0 - min(uOpacity, 0.998), spacing / brushSize);
   }
 `
 
@@ -72,6 +75,7 @@ class BrushTool extends BaseBrushTool {
     this.shader.uniform('uColor').setVec4(this.color)
     this.shader.uniform('uOpacity').setFloat(this.opacity)
     this.shader.uniform('uMinWidthRatio').setFloat(this.minWidthRatio)
+    this.shader.uniform('uSpacingRatio').setFloat(this.spacingRatio)
 
     return super.start(waypoint)
   }
