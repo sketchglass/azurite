@@ -131,7 +131,7 @@ abstract class BaseBrushTool extends Tool {
     return this.width * (this.minWidthRatio + (1 - this.minWidthRatio) * waypoint.pressure)
   }
   brushSpacing(waypoint: Waypoint) {
-    return this.brushSize(waypoint) * this.spacingRatio
+    return Math.max(this.brushSize(waypoint) * this.spacingRatio, 1)
   }
 
   private _rectForWaypoints(waypoints: Waypoint[]) {
