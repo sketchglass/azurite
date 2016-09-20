@@ -45,11 +45,6 @@ class Context {
     gl.viewport(0, 0, element.width, element.height)
   }
 
-  flush() {
-    const {gl} = this
-    gl.flush()
-  }
-
   setClearColor(color: Vec4) {
     const {gl} = this
     gl.clearColor(color.r, color.g, color.b, color.a)
