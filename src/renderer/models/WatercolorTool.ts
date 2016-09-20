@@ -3,6 +3,7 @@ import Waypoint from "./Waypoint"
 import BaseBrushTool from "./BaseBrushTool"
 import {Geometry, Shader, Model, GeometryUsage, Framebuffer, Texture, BlendMode, DataType} from "../../lib/GL"
 import {context} from "../GLContext"
+import TiledTexture from "./TiledTexture"
 import WatercolorSettings from "../views/WatercolorSettings"
 import React = require("react")
 
@@ -22,24 +23,22 @@ const sampleVertShader = `
 `
 
 enum SampleModes {
-  Original, Shape, Clip
+  Shape, Clip
 }
 
 const sampleFragShader = `
   precision mediump float;
 
-  uniform vec2 uLayerSize;
   uniform float uBrushRadius;
   uniform vec2 uBrushPos;
-  uniform sampler2D uLayer;
+  uniform sampler2D uOriginal;
   uniform int uMode;
 
   varying vec2 vOffset;
+  varying vec2 vTexCoord;
 
   vec4 fetchOriginal() {
-    vec2 layerPos = floor(uBrushPos) + vOffset;
-    vec2 layerUV = layerPos / uLayerSize;
-    return texture2D(uLayer, layerUV);
+    return texture2D(uOriginal, vTexCoord);
   }
 
   float calcOpacity(float r) {
@@ -49,9 +48,7 @@ const sampleFragShader = `
   void main(void) {
     float r = distance(fract(uBrushPos), vOffset);
 
-    if (uMode == ${SampleModes.Original}) {
-      gl_FragColor = fetchOriginal();
-    } else if (uMode == ${SampleModes.Shape}) {
+    if (uMode == ${SampleModes.Shape}) {
       gl_FragColor = vec4(calcOpacity(r));
     } else {
       gl_FragColor = fetchOriginal() * calcOpacity(r);
@@ -62,10 +59,10 @@ const sampleFragShader = `
 const brushVertShader = `
   precision highp float;
 
-  uniform vec2 uLayerSize;
   uniform float uSampleSize;
   uniform vec2 uBrushPos;
   uniform float uBrushRadius;
+  uniform vec2 uTileKey;
   uniform mediump float uPressure;
   uniform mediump float uOpacity;
   uniform sampler2D uSampleShape;
@@ -80,8 +77,9 @@ const brushVertShader = `
   void main(void) {
     vTexCoord = aPosition * 0.5 + 0.5;
     vec2 layerPos = floor(uBrushPos) + aPosition * (uSampleSize * 0.5);
-    vec2 normalizedPos = layerPos / uLayerSize * 2.0 - 1.0;
-    gl_Position = vec4(normalizedPos, 0.0, 1.0);
+    vec2 tilePos = layerPos - uTileKey * ${TiledTexture.tileSize}.0;
+    vec2 glPos = tilePos / ${TiledTexture.tileSize}.0 * 2.0 - 1.0;
+    gl_Position = vec4(glPos, 0.0, 1.0);
 
     float topLevel = log2(uSampleSize);
     vMixColor = texture2DLod(uSampleClip, vec2(0.5), topLevel) / vec4(texture2DLod(uSampleShape, vec2(0.5),  topLevel).a);
@@ -140,12 +138,12 @@ class WatercolorTool extends BaseBrushTool {
 
   shader = new Shader(context, brushVertShader, brushFragShader)
   model = new Model(context, this.squareGeometry, this.shader)
+  framebuffer = new Framebuffer(context)
 
   sampleShader = new Shader(context, sampleVertShader, sampleFragShader)
   sampleModel = new Model(context, this.squareGeometry, this.sampleShader)
 
   sampleOriginalTexture = new Texture(context, new Vec2(0), DataType.HalfFloat)
-  sampleOrigianlFramebuffer = new Framebuffer(context, this.sampleOriginalTexture)
   sampleShapeTexture = new Texture(context, new Vec2(0), DataType.HalfFloat)
   sampleShapeFramebuffer = new Framebuffer(context, this.sampleShapeTexture)
   sampleClipTexture = new Texture(context, new Vec2(0), DataType.HalfFloat)
@@ -153,6 +151,7 @@ class WatercolorTool extends BaseBrushTool {
 
   shaders = [this.shader, this.sampleShader]
 
+  sampleSize = 0
 
   constructor() {
     super()
@@ -173,11 +172,11 @@ class WatercolorTool extends BaseBrushTool {
 
   start(waypoint: Waypoint) {
     const layerSize = this.picture.currentLayer.size
-    const sampleSize = Math.pow(2, Math.ceil(Math.log2(this.width + 2)))
+    this.sampleSize = Math.pow(2, Math.ceil(Math.log2(this.width + 2)))
 
     for (const shader of this.shaders) {
       shader.uniform('uLayerSize').setVec2(layerSize)
-      shader.uniform("uSampleSize").setFloat(sampleSize)
+      shader.uniform("uSampleSize").setFloat(this.sampleSize)
       shader.uniform('uBlending').setFloat(this.blending)
       shader.uniform('uThickness').setFloat(this.thickness)
       shader.uniform('uColor').setVec4(this.color)
@@ -185,31 +184,31 @@ class WatercolorTool extends BaseBrushTool {
       shader.uniform("uBrushRadius").setFloat(this.width * 0.5)
     }
 
-    this.sampleOriginalTexture.reallocate(new Vec2(sampleSize))
-    this.sampleShapeTexture.reallocate(new Vec2(sampleSize))
-    this.sampleClipTexture.reallocate(new Vec2(sampleSize))
+    this.sampleOriginalTexture.reallocate(new Vec2(this.sampleSize))
+    this.sampleShapeTexture.reallocate(new Vec2(this.sampleSize))
+    this.sampleClipTexture.reallocate(new Vec2(this.sampleSize))
 
     return super.start(waypoint)
   }
 
-  renderWaypoints(waypoints: Waypoint[]) {
+  renderWaypoints(waypoints: Waypoint[], rect: Vec4) {
     const uMode = this.sampleShader.uniform("uMode")
     const uBrushPos = this.shader.uniform("uBrushPos")
     const uPressure = this.shader.uniform("uPressure")
+    const uTileKey = this.shader.uniform("uTileKey")
     const uBrushPosSample = this.sampleShader.uniform("uBrushPos")
     const uPressureSample = this.sampleShader.uniform("uPressure")
-    const layerTexture = this.picture.currentLayer.texture
+    const {tiledTexture} = this.picture.currentLayer
 
     for (let i = 0; i < waypoints.length; ++i) {
       const waypoint = waypoints[i]
       uBrushPosSample.setVec2(waypoint.pos)
       uPressureSample.setFloat(waypoint.pressure)
+      const topLeft = waypoint.pos.floor().sub(new Vec2(this.sampleSize / 2))
 
-      context.textureUnits.set(0, layerTexture)
+      tiledTexture.readToTexture(this.sampleOriginalTexture, topLeft)
 
-      uMode.setInt(SampleModes.Original)
-      this.sampleOrigianlFramebuffer.use()
-      this.sampleModel.render()
+      context.textureUnits.set(0, this.sampleOriginalTexture)
 
       uMode.setInt(SampleModes.Shape)
       this.sampleShapeFramebuffer.use()
@@ -227,8 +226,13 @@ class WatercolorTool extends BaseBrushTool {
       context.textureUnits.set(2, this.sampleClipTexture)
       uBrushPos.setVec2(waypoint.pos)
       uPressure.setFloat(waypoint.pressure)
+
       this.framebuffer.use()
-      this.model.render()
+      for (const key of TiledTexture.keysForRect(rect)) {
+        uTileKey.setVec2(key)
+        this.framebuffer.setTexture(tiledTexture.get(key))
+        this.model.render()
+      }
 
       context.textureUnits.delete(0)
       context.textureUnits.delete(1)

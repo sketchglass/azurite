@@ -334,7 +334,6 @@ class Framebuffer {
     this.texture = texture
     gl.bindFramebuffer(gl.FRAMEBUFFER, this.framebuffer)
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, texture.texture, 0)
-    gl.bindFramebuffer(gl.FRAMEBUFFER, null)
   }
 
   use() {

@@ -43,6 +43,11 @@ const copyTextureShader = new Shader(context,
   `
 )
 copyTextureShader.uniform("uTexture").setInt(0)
+const copyTextureUniforms = {
+  uSrcSize: copyTextureShader.uniform("uSrcSize"),
+  uDestSize: copyTextureShader.uniform("uDestSize"),
+  uOffset: copyTextureShader.uniform("uOffset"),
+}
 
 const copyTextureModel = new Model(context, unitGeometry, copyTextureShader)
 copyTextureModel.setBlendMode(BlendMode.Src)
@@ -50,9 +55,9 @@ const workingFramebuffer = new Framebuffer(context)
 
 export
 function copyTexture(src: Texture, dest: Texture, offset: Vec2) {
-  copyTextureShader.uniform("uSrcSize").setVec2(src.size)
-  copyTextureShader.uniform("uDestSize").setVec2(dest.size)
-  copyTextureShader.uniform("uOffset").setVec2(offset)
+  copyTextureUniforms.uSrcSize.setVec2(src.size)
+  copyTextureUniforms.uDestSize.setVec2(dest.size)
+  copyTextureUniforms.uOffset.setVec2(offset)
   context.textureUnits.set(0, src)
   workingFramebuffer.setTexture(dest)
   workingFramebuffer.use()
