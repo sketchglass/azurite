@@ -30,6 +30,14 @@ class WatercolorSettings extends React.Component<WatercolorSettingsProps, void> 
       tool.thickness = parseInt((ev.target as HTMLInputElement).value) / 100
       this.forceUpdate()
     }
+    const onMinWidthChange = (ev: React.FormEvent<HTMLInputElement>) => {
+      tool.minWidthRatio = parseInt((ev.target as HTMLInputElement).value) / 100
+      this.forceUpdate()
+    }
+    const onSoftnessChange = (ev: React.FormEvent<HTMLInputElement>) => {
+      tool.softness = parseInt((ev.target as HTMLInputElement).value) / 100
+      this.forceUpdate()
+    }
     return (
       <table className="brush-settings">
         <tbody>
@@ -40,6 +48,14 @@ class WatercolorSettings extends React.Component<WatercolorSettingsProps, void> 
           <tr>
             <td>Width</td>
             <td><input type="range" onChange={onWidthChange} value={tool.width} /> {tool.width}px</td>
+          </tr>
+          <tr>
+            <td>Min Width</td>
+            <td><input type="range" onChange={onMinWidthChange} value={Math.round(tool.minWidthRatio * 100)} /> {Math.round(tool.minWidthRatio * 100)}%</td>
+          </tr>
+          <tr>
+            <td>Softness</td>
+            <td><input type="range" onChange={onSoftnessChange} value={Math.round(tool.softness * 100)} /> {Math.round(tool.softness * 100)}%</td>
           </tr>
           <tr>
             <td>Blending</td>
