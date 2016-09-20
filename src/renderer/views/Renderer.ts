@@ -96,5 +96,6 @@ class Renderer {
     this.model.render()
     context.textureUnits.delete(0)
     context.clearScissor()
+    context.flush()
   }
 }
