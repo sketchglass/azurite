@@ -10,12 +10,17 @@ import React = require("react")
 const sampleVertShader = `
   precision highp float;
 
-  uniform mediump float uSampleSize;
+  uniform float uSampleSize;
+  uniform float uPressure;
+  uniform float uMinWidthRatio;
+  uniform float uBrushRadius;
   attribute vec2 aPosition;
-  varying mediump vec2 vOffset;
-  varying mediump vec2 vTexCoord;
+  varying vec2 vOffset;
+  varying vec2 vTexCoord;
+  varying float vRadius;
 
   void main(void) {
+    vRadius = uBrushRadius * (uMinWidthRatio + (1.0 - uMinWidthRatio) * uPressure);
     vOffset = aPosition * (uSampleSize * 0.5);
     vTexCoord = aPosition * 0.5 + 0.5;
     gl_Position = vec4(aPosition, 0.0, 1.0);
@@ -29,20 +34,21 @@ enum SampleModes {
 const sampleFragShader = `
   precision mediump float;
 
-  uniform float uBrushRadius;
-  uniform vec2 uBrushPos;
+  uniform highp vec2 uBrushPos;
+  uniform float uSoftness;
   uniform sampler2D uOriginal;
   uniform int uMode;
 
-  varying vec2 vOffset;
-  varying vec2 vTexCoord;
+  varying highp vec2 vOffset;
+  varying highp vec2 vTexCoord;
+  varying highp float vRadius;
 
   vec4 fetchOriginal() {
     return texture2D(uOriginal, vTexCoord);
   }
 
   float calcOpacity(float r) {
-    return smoothstep(uBrushRadius, uBrushRadius * 0.5, r);
+    return smoothstep(vRadius, vRadius - max(1.0, vRadius * uSoftness), r);
   }
 
   void main(void) {
@@ -182,6 +188,8 @@ class WatercolorTool extends BaseBrushTool {
       shader.uniform('uColor').setVec4(this.color)
       shader.uniform("uOpacity").setFloat(this.opacity)
       shader.uniform("uBrushRadius").setFloat(this.width * 0.5)
+      shader.uniform("uSoftness").setFloat(this.softness)
+      shader.uniform("uMinWidthRatio").setFloat(this.minWidthRatio)
     }
 
     this.sampleOriginalTexture.reallocate(new Vec2(this.sampleSize))

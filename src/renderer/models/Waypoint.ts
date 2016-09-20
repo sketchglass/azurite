@@ -61,7 +61,7 @@ class Waypoint {
       const pressure = start.pressure + pressurePerLen * current
       const waypoint = {pos, pressure}
       waypoints.push(waypoint)
-      spacing = Math.max(getNextSpacing(waypoint), 1)
+      spacing = getNextSpacing(waypoint)
     }
   }
 }

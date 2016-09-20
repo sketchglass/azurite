@@ -11,11 +11,20 @@ import {float32ArrayTo16} from "../../lib/Float"
 abstract class BaseBrushTool extends Tool {
   private lastWaypoints: Waypoint[] = []
   private nextDabOffset = 0
+
+  // brush width (diameter)
   width = 10
+  // brush color RGBA
   color = new Vec4(0, 0, 0, 1)
+  // brush opacity
   opacity = 1
+  // distance used to soften edge, compared to brush radius
+  softness = 0.5
+  // width drawn in pressure 0, compared to brush width
   minWidthRatio = 0.5
+  // spacing between dabs, compared to brush width
   spacingRatio = 0.1
+
   oldTiledTexture: TiledTexture|undefined
   originalTexture = new Texture(context, new Vec2(0), DataType.HalfFloat)
   editedRect: Vec4|undefined
@@ -131,7 +140,7 @@ abstract class BaseBrushTool extends Tool {
     return this.width * (this.minWidthRatio + (1 - this.minWidthRatio) * waypoint.pressure)
   }
   brushSpacing(waypoint: Waypoint) {
-    return this.brushSize(waypoint) * this.spacingRatio
+    return Math.max(this.brushSize(waypoint) * this.spacingRatio, 1)
   }
 
   private _rectForWaypoints(waypoints: Waypoint[]) {
