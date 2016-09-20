@@ -19,7 +19,7 @@ abstract class BaseBrushTool extends Tool {
   // brush opacity
   opacity = 1
   // distance used to soften edge, compared to brush radius
-  softness = 1
+  softness = 0.5
   // width drawn in pressure 0, compared to brush width
   minWidthRatio = 0.5
   // spacing between dabs, compared to brush width
