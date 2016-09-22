@@ -175,6 +175,7 @@ class WatercolorTool extends BaseBrushTool {
     const {gl} = context
     gl.bindTexture(gl.TEXTURE_2D, this.sampleShapeTexture.texture)
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_NEAREST)
+    gl.bindTexture(gl.TEXTURE_2D, null)
 
     this.shader.uniform("uSampleOriginal").setInt(0)
     this.shader.uniform("uSampleShape").setInt(1)
