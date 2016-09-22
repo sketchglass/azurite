@@ -232,8 +232,6 @@ class WatercolorTool extends BaseBrushTool {
 
       this.sampleShapeTexture.generateMipmap()
 
-      context.textureUnits.set(0, this.sampleOriginalTexture)
-      context.textureUnits.set(1, this.sampleShapeTexture)
       uBrushPos.setVec2(waypoint.pos)
       uPressure.setFloat(waypoint.pressure)
 
@@ -241,9 +239,10 @@ class WatercolorTool extends BaseBrushTool {
       for (const key of TiledTexture.keysForRect(rect)) {
         uTileKey.setVec2(key)
         this.framebuffer.setTexture(tiledTexture.get(key))
+        context.textureUnits.set(0, this.sampleOriginalTexture)
+        context.textureUnits.set(1, this.sampleShapeTexture)
         this.model.render()
       }
-
       context.textureUnits.delete(0)
       context.textureUnits.delete(1)
     }
