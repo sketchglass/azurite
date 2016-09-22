@@ -111,6 +111,7 @@ class Texture {
     this.size = size
     gl.bindTexture(gl.TEXTURE_2D, this.texture)
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, size.width, size.height, 0, gl.RGBA, glType(this.context, this.dataType), data ? data : null as any)
+    gl.bindTexture(gl.TEXTURE_2D, null)
   }
 
   generateMipmap() {

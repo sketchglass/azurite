@@ -7,6 +7,10 @@ import TiledTexture from "./TiledTexture"
 import WatercolorSettings from "../views/WatercolorSettings"
 import React = require("react")
 
+enum SampleModes {
+  Shape, Clip
+}
+
 const sampleVertShader = `
   precision highp float;
 
@@ -14,6 +18,7 @@ const sampleVertShader = `
   uniform float uPressure;
   uniform float uMinWidthRatio;
   uniform float uBrushRadius;
+  uniform lowp int uMode;
   attribute vec2 aPosition;
   varying vec2 vOffset;
   varying vec2 vTexCoord;
@@ -23,13 +28,15 @@ const sampleVertShader = `
     vRadius = uBrushRadius * (uMinWidthRatio + (1.0 - uMinWidthRatio) * uPressure);
     vOffset = aPosition * (uSampleSize * 0.5);
     vTexCoord = aPosition * 0.5 + 0.5;
-    gl_Position = vec4(aPosition, 0.0, 1.0);
+    if (uMode == ${SampleModes.Shape}) {
+      // draw in left
+      gl_Position = vec4(aPosition.x * 0.5 - 0.5, aPosition.y, 0.0, 1.0);
+    } else {
+      // draw in right
+      gl_Position = vec4(aPosition.x * 0.5 + 0.5, aPosition.y, 0.0, 1.0);
+    }
   }
 `
-
-enum SampleModes {
-  Shape, Clip
-}
 
 const sampleFragShader = `
   precision mediump float;
@@ -37,7 +44,7 @@ const sampleFragShader = `
   uniform highp vec2 uBrushPos;
   uniform float uSoftness;
   uniform sampler2D uOriginal;
-  uniform int uMode;
+  uniform lowp int uMode;
 
   varying highp vec2 vOffset;
   varying highp vec2 vTexCoord;
@@ -72,7 +79,6 @@ const brushVertShader = `
   uniform mediump float uPressure;
   uniform mediump float uOpacity;
   uniform sampler2D uSampleShape;
-  uniform sampler2D uSampleClip;
 
   attribute vec2 aPosition;
 
@@ -80,16 +86,20 @@ const brushVertShader = `
   varying vec2 vTexCoord;
   varying mediump float vOpacity;
 
+  vec4 calcMixColor() {
+    float topLod = log2(uSampleSize);
+    vec4 sampleAverage = texture2DLod(uSampleShape, vec2(0.75, 0.5), topLod);
+    vec4 shapeAverage = texture2DLod(uSampleShape, vec2(0.25, 0.5),  topLod);
+    return sampleAverage / shapeAverage.a;
+  }
+
   void main(void) {
     vTexCoord = aPosition * 0.5 + 0.5;
     vec2 layerPos = floor(uBrushPos) + aPosition * (uSampleSize * 0.5);
     vec2 tilePos = layerPos - uTileKey * ${TiledTexture.tileSize}.0;
     vec2 glPos = tilePos / ${TiledTexture.tileSize}.0 * 2.0 - 1.0;
     gl_Position = vec4(glPos, 0.0, 1.0);
-
-    float topLevel = log2(uSampleSize);
-    vMixColor = texture2DLod(uSampleClip, vec2(0.5), topLevel) / vec4(texture2DLod(uSampleShape, vec2(0.5),  topLevel).a);
-
+    vMixColor = calcMixColor();
     vOpacity = uOpacity * uPressure;
   }
 `
@@ -109,7 +119,7 @@ const brushFragShader = `
   varying float vOpacity;
 
   void main(void) {
-    float opacity = texture2D(uSampleShape, vTexCoord).a * vOpacity;
+    float opacity = texture2D(uSampleShape, vTexCoord * vec2(0.5, 1.0)).a * vOpacity;
     vec4 orig = texture2D(uSampleOriginal, vTexCoord);
 
     float mixRate = opacity * uBlending;
@@ -152,8 +162,6 @@ class WatercolorTool extends BaseBrushTool {
   sampleOriginalTexture = new Texture(context, new Vec2(0), DataType.HalfFloat)
   sampleShapeTexture = new Texture(context, new Vec2(0), DataType.HalfFloat)
   sampleShapeFramebuffer = new Framebuffer(context, this.sampleShapeTexture)
-  sampleClipTexture = new Texture(context, new Vec2(0), DataType.HalfFloat)
-  sampleClipFramebuffer = new Framebuffer(context, this.sampleClipTexture)
 
   shaders = [this.shader, this.sampleShader]
 
@@ -165,10 +173,9 @@ class WatercolorTool extends BaseBrushTool {
     this.sampleModel.setBlendMode(BlendMode.Src)
 
     const {gl} = context
-    for (const texture of [this.sampleShapeTexture, this.sampleClipTexture]) {
-      gl.bindTexture(gl.TEXTURE_2D, texture.texture)
-      gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_NEAREST)
-    }
+    gl.bindTexture(gl.TEXTURE_2D, this.sampleShapeTexture.texture)
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST_MIPMAP_NEAREST)
+    gl.bindTexture(gl.TEXTURE_2D, null)
 
     this.shader.uniform("uSampleOriginal").setInt(0)
     this.shader.uniform("uSampleShape").setInt(1)
@@ -193,8 +200,7 @@ class WatercolorTool extends BaseBrushTool {
     }
 
     this.sampleOriginalTexture.reallocate(new Vec2(this.sampleSize))
-    this.sampleShapeTexture.reallocate(new Vec2(this.sampleSize))
-    this.sampleClipTexture.reallocate(new Vec2(this.sampleSize))
+    this.sampleShapeTexture.reallocate(new Vec2(this.sampleSize * 2, this.sampleSize))
 
     return super.start(waypoint)
   }
@@ -218,20 +224,14 @@ class WatercolorTool extends BaseBrushTool {
 
       context.textureUnits.set(0, this.sampleOriginalTexture)
 
-      uMode.setInt(SampleModes.Shape)
       this.sampleShapeFramebuffer.use()
+      uMode.setInt(SampleModes.Shape)
       this.sampleModel.render()
-
       uMode.setInt(SampleModes.Clip)
-      this.sampleClipFramebuffer.use()
       this.sampleModel.render()
 
       this.sampleShapeTexture.generateMipmap()
-      this.sampleClipTexture.generateMipmap()
 
-      context.textureUnits.set(0, this.sampleOriginalTexture)
-      context.textureUnits.set(1, this.sampleShapeTexture)
-      context.textureUnits.set(2, this.sampleClipTexture)
       uBrushPos.setVec2(waypoint.pos)
       uPressure.setFloat(waypoint.pressure)
 
@@ -239,12 +239,12 @@ class WatercolorTool extends BaseBrushTool {
       for (const key of TiledTexture.keysForRect(rect)) {
         uTileKey.setVec2(key)
         this.framebuffer.setTexture(tiledTexture.get(key))
+        context.textureUnits.set(0, this.sampleOriginalTexture)
+        context.textureUnits.set(1, this.sampleShapeTexture)
         this.model.render()
       }
-
       context.textureUnits.delete(0)
       context.textureUnits.delete(1)
-      context.textureUnits.delete(2)
     }
   }
 
