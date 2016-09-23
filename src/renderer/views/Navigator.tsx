@@ -24,7 +24,7 @@ function Navigator(props: NavigatorProps) {
   return (
     <div className="Navigator">
       <div>
-        Scale: <input type="number" max={1600} onChange={onScaleChange} value={scale * 100} />
+        Scale: <input type="number" max={1600} onChange={onScaleChange} value={Math.round(scale * 100)} />
       </div>
       <div>
         Rotation: <input type="number" min={-180} max={180} onChange={onRotationChange} value={rotationDeg} />
