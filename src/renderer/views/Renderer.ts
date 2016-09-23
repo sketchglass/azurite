@@ -84,7 +84,6 @@ class Renderer {
   }
 
   render(rectInPicture?: Vec4) {
-    this.picture.layerBlender.render(rectInPicture)
     context.defaultFramebuffer.use()
     if (rectInPicture) {
       context.setScissor(this.transforms.pictureToGLViewport.transformRect(rectInPicture))

@@ -16,6 +16,13 @@ class Picture {
   layerBlender = new LayerBlender(this)
   undoStack = new UndoStack()
 
+  constructor() {
+    this.changed.forEach(() => {
+      this.layerBlender.render()
+    })
+    this.layerBlender.render()
+  }
+
   get currentLayer() {
     return this.layers[this.currentLayerIndex]
   }

@@ -99,18 +99,21 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
   onPointerDown(ev: {clientX: number, clientY: number, pressure?: number}) {
     const rect = this.props.tool.start(this.eventToWaypoint(ev))
+    this.props.picture.layerBlender.render(rect)
     this.renderer.render(rect)
     this.isPressed = true
   }
   onPointerMove(ev: {clientX: number, clientY: number, pressure?: number}) {
     if (this.isPressed) {
       const rect = this.props.tool.move(this.eventToWaypoint(ev))
+      this.props.picture.layerBlender.render(rect)
       this.renderer.render(rect)
     }
   }
   onPointerUp() {
     if (this.isPressed) {
       const rect = this.props.tool.end()
+      this.props.picture.layerBlender.render(rect)
       this.renderer.render(rect)
       this.isPressed = false
     }
