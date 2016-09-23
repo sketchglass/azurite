@@ -15,6 +15,7 @@ import {Color} from "../../lib/Color"
 import {Vec2, Vec4} from "../../lib/Geometry"
 import Navigation from "../models/Navigation"
 import "./MenuBar"
+import "../../styles/Navigator.sass"
 import "../../styles/palette.sass"
 
 function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool: Tool) => void}) {
