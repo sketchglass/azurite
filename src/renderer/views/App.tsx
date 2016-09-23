@@ -101,7 +101,7 @@ class App extends React.Component<void, void> {
           <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} />
           {currentTool.renderSettings()}
         </aside>
-        <DrawArea tool={currentTool} picture={picture} />
+        <DrawArea tool={currentTool} picture={picture} navigation={this.navigation} />
         <aside className="LeftSidebar">
           <Navigator navigation={this.navigation} onNavigationChange={onNavigationChange} />
           <LayerList picture={picture} />

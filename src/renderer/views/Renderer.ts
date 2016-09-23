@@ -2,6 +2,7 @@ import {Shader, Model, Geometry, GeometryUsage, DefaultFramebuffer} from "../../
 import {context, canvas} from "../GLContext"
 import Picture from "../models/Picture"
 import {Vec2, Vec4, Transform} from "../../lib/Geometry"
+import Navigation from "../models/Navigation"
 
 const vert = `
   precision highp float;
@@ -34,7 +35,20 @@ export default
 class Renderer {
   model: Model
   size = new Vec2(100, 100)
-  transform = Transform.identity
+  _navigation = {
+    translation: new Vec2(0),
+    scale: 1,
+    rotation: 0,
+  }
+
+  get navigation() {
+    return this._navigation
+  }
+  set navigation(nav: Navigation) {
+    this._navigation = nav
+    this.updateTransforms()
+  }
+
   transforms = {
     pictureToDOM: Transform.identity,
     pictureToGLViewport: Transform.identity,
@@ -62,8 +76,11 @@ class Renderer {
   }
 
   updateTransforms() {
+    const transform = Transform.scale(new Vec2(this.navigation.scale))
+      .merge(Transform.rotate(this.navigation.rotation))
+      .merge(Transform.translate(this.navigation.translation))
     this.transforms.pictureToDOM = Transform.translate(this.picture.size.mul(-0.5))
-      .merge(this.transform)
+      .merge(transform)
       .merge(Transform.translate(this.size.mul(0.5)))
     this.transforms.pictureToGLViewport = this.transforms.pictureToDOM
       .merge(Transform.scale(new Vec2(1, -1)))

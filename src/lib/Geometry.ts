@@ -165,6 +165,12 @@ class Transform {
     return new Transform(scale.x, 0, 0, scale.y, 0, 0)
   }
 
+  static rotate(rotation: number) {
+    const c = Math.cos(rotation)
+    const s = Math.sin(rotation)
+    return new Transform(c, s, -s, c, 0, 0)
+  }
+
   static translate(translation: Vec2) {
     return new Transform(1, 0, 0, 1, translation.x, translation.y)
   }
