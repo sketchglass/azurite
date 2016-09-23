@@ -36,24 +36,13 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     }
 
     ipcRenderer.on("tablet.down", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
-      const pos = this.mousePos(ev)
-      const rect = this.props.tool.start(new Waypoint(pos, ev.pressure))
-      this.renderer.render(rect)
-      this.isPressed = true
+      this.onPointerDown(ev)
     })
     ipcRenderer.on("tablet.move", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
-      if (this.isPressed) {
-        const pos = this.mousePos(ev)
-        const rect = this.props.tool.move(new Waypoint(pos, ev.pressure))
-        this.renderer.render(rect)
-      }
+      this.onPointerMove(ev)
     })
     ipcRenderer.on("tablet.up", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
-      if (this.isPressed) {
-        const rect = this.props.tool.end()
-        this.renderer.render(rect)
-        this.isPressed = false
-      }
+      this.onPointerUp()
     })
 
     this.resize()
@@ -87,35 +76,43 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     )
   }
 
-  mousePos(ev: {clientX: number, clientY: number}) {
+  eventToWaypoint(ev: {clientX: number, clientY: number, pressure?: number}) {
     const rect = this.element!.getBoundingClientRect()
     const x = ev.clientX - rect.left
     const y = ev.clientY - rect.top
-    return this.renderer.transforms.domToPicture.transform(new Vec2(x, y).mul(window.devicePixelRatio))
+    const pressure = ev.pressure == undefined ? 1.0 : ev.pressure
+    const pos = this.renderer.transforms.domToPicture.transform(new Vec2(x, y).mul(window.devicePixelRatio))
+    return new Waypoint(pos, pressure)
   }
 
   onMouseDown(ev: MouseEvent) {
-    const pos = this.mousePos(ev)
-    const rect = this.props.tool.start(new Waypoint(pos, 1))
-    this.renderer.render(rect)
-    this.isPressed = true
+    this.onPointerDown(ev)
     ev.preventDefault()
   }
   onMouseMove(ev: MouseEvent) {
-    const pos = this.mousePos(ev)
-
-    if (this.isPressed) {
-      const rect = this.props.tool.move(new Waypoint(pos, 1))
-      this.renderer.render(rect)
-      ev.preventDefault()
-    }
+    this.onPointerMove(ev)
+    ev.preventDefault()
   }
   onMouseUp(ev: MouseEvent) {
+    this.onPointerUp()
+    ev.preventDefault()
+  }
+  onPointerDown(ev: {clientX: number, clientY: number, pressure?: number}) {
+    const rect = this.props.tool.start(this.eventToWaypoint(ev))
+    this.renderer.render(rect)
+    this.isPressed = true
+  }
+  onPointerMove(ev: {clientX: number, clientY: number, pressure?: number}) {
+    if (this.isPressed) {
+      const rect = this.props.tool.move(this.eventToWaypoint(ev))
+      this.renderer.render(rect)
+    }
+  }
+  onPointerUp() {
     if (this.isPressed) {
       const rect = this.props.tool.end()
       this.renderer.render(rect)
       this.isPressed = false
-      ev.preventDefault()
     }
   }
 }
