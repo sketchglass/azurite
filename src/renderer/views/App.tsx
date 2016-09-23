@@ -10,8 +10,10 @@ import DrawArea from "./DrawArea"
 import LayerList from "./LayerList"
 import ColorPicker from "./ColorPicker"
 import Palette from "./Palette"
+import Navigator from "./Navigator"
 import {Color} from "../../lib/Color"
-import {Vec4} from "../../lib/Geometry"
+import {Vec2, Vec4} from "../../lib/Geometry"
+import Navigation from "../models/Navigation"
 import "./MenuBar"
 import "../../styles/palette.sass"
 
@@ -45,6 +47,11 @@ class App extends React.Component<void, void> {
     Color.hsv(0, 0, 1),
     Color.hsv(0, 0, 1)
   ]
+  navigation = {
+    translation: new Vec2(0),
+    scale: 1,
+    rotation: 0,
+  }
 
   constructor() {
     super()
@@ -81,6 +88,10 @@ class App extends React.Component<void, void> {
       onBrushColorChange(this.palette[index])
       this.forceUpdate()
     }
+    const onNavigationChange = (nav: Navigation) => {
+      this.navigation = nav
+      this.forceUpdate()
+    }
     return (
       <div className="app">
         <aside className="sidebar">
@@ -91,6 +102,7 @@ class App extends React.Component<void, void> {
         </aside>
         <DrawArea tool={currentTool} picture={picture} />
         <aside className="LeftSidebar">
+          <Navigator navigation={this.navigation} onNavigationChange={onNavigationChange} />
           <LayerList picture={picture} />
         </aside>
       </div>
