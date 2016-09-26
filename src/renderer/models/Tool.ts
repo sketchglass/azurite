@@ -8,8 +8,8 @@ abstract class Tool {
   picture: Picture
   renderer: Renderer
   abstract name: string
-  abstract start(waypoint: Waypoint, eventPos: Vec2): void
-  abstract move(waypoint: Waypoint, eventPos: Vec2): void
+  abstract start(waypoint: Waypoint, rendererPos: Vec2): void
+  abstract move(waypoint: Waypoint, rendererPos: Vec2): void
   abstract end(): void
   cursorMove(waypoint: Waypoint) {}
   renderSettings(): JSX.Element { return React.createElement("div") }

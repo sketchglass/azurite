@@ -37,10 +37,10 @@ class Renderer {
   size = new Vec2(100, 100)
 
   transforms = {
-    pictureToDOM: Transform.identity,
+    pictureToRenderer: Transform.identity,
     pictureToGLViewport: Transform.identity,
     pictureToGLUnit: Transform.identity,
-    domToPicture: Transform.identity,
+    rendererToPicture: Transform.identity,
   }
 
   constructor(public picture: Picture) {
@@ -69,16 +69,16 @@ class Renderer {
     const transform = Transform.scale(new Vec2(navigation.scale))
       .merge(Transform.rotate(navigation.rotation))
       .merge(Transform.translate(navigation.translation))
-    this.transforms.pictureToDOM = Transform.translate(pictureCenter.neg())
+    this.transforms.pictureToRenderer = Transform.translate(pictureCenter.neg())
       .merge(transform)
       .merge(Transform.translate(viewportCenter))
-    this.transforms.pictureToGLViewport = this.transforms.pictureToDOM
+    this.transforms.pictureToGLViewport = this.transforms.pictureToRenderer
       .merge(Transform.scale(new Vec2(1, -1)))
       .merge(Transform.translate(new Vec2(0, this.size.height)))
-    this.transforms.pictureToGLUnit = this.transforms.pictureToDOM
+    this.transforms.pictureToGLUnit = this.transforms.pictureToRenderer
       .merge(Transform.translate(viewportCenter.neg()))
       .merge(Transform.scale(new Vec2(2 / this.size.width, -2 / this.size.height)))
-    this.transforms.domToPicture = this.transforms.pictureToDOM.invert()
+    this.transforms.rendererToPicture = this.transforms.pictureToRenderer.invert()
   }
 
   resize(size: Vec2) {
