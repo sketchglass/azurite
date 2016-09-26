@@ -41,14 +41,6 @@ class Renderer {
     rotation: 0,
   }
 
-  get navigation() {
-    return this._navigation
-  }
-  set navigation(nav: Navigation) {
-    this._navigation = nav
-    this.updateTransforms()
-  }
-
   transforms = {
     pictureToDOM: Transform.identity,
     pictureToGLViewport: Transform.identity,
@@ -76,9 +68,10 @@ class Renderer {
   }
 
   updateTransforms() {
-    const transform = Transform.scale(new Vec2(this.navigation.scale))
-      .merge(Transform.rotate(this.navigation.rotation))
-      .merge(Transform.translate(this.navigation.translation))
+    const {navigation} = this.picture
+    const transform = Transform.scale(new Vec2(navigation.scale))
+      .merge(Transform.rotate(navigation.rotation))
+      .merge(Transform.translate(navigation.translation))
     this.transforms.pictureToDOM = Transform.translate(this.picture.size.mul(-0.5))
       .merge(transform)
       .merge(Transform.translate(this.size.mul(0.5)))
@@ -101,6 +94,7 @@ class Renderer {
   }
 
   render(rectInPicture?: Vec4) {
+    this.updateTransforms()
     context.defaultFramebuffer.use()
     if (rectInPicture) {
       context.setScissor(this.transforms.pictureToGLViewport.transformRect(rectInPicture))

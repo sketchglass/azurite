@@ -14,7 +14,6 @@ const {ipcRenderer} = Electron
 interface DrawAreaProps {
   tool: Tool
   picture: Picture
-  navigation: Navigation
 }
 
 export default
@@ -68,7 +67,6 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
 
   render() {
-    this.renderer.navigation = this.props.navigation
     this.renderer.render()
     return (
       <div ref="root" className="draw-area"
