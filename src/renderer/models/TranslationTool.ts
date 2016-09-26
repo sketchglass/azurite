@@ -11,7 +11,6 @@ class TranslationTool extends Tool {
   start(waypoint: Waypoint) {
     this.startPos = waypoint.pos
     this.startTranslation = this.picture.navigation.translation
-    return new Vec4(0)
   }
 
   move(waypoint: Waypoint) {
@@ -20,10 +19,8 @@ class TranslationTool extends Tool {
     const {scale, rotation} = this.picture.navigation
     this.picture.navigation = {translation, scale, rotation}
     this.picture.changed.next()
-    return new Vec4(0)
   }
 
   end() {
-    return new Vec4(0)
   }
 }

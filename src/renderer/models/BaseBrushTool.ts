@@ -37,6 +37,11 @@ abstract class BaseBrushTool extends Tool {
     }
   }
 
+  renderRect(rect: Vec4) {
+    this.picture.layerBlender.render(rect)
+    this.renderer.render(rect)
+  }
+
   start(waypoint: Waypoint) {
     const {tiledTexture} = this.picture.currentLayer
     if (this.oldTiledTexture) {
@@ -49,7 +54,7 @@ abstract class BaseBrushTool extends Tool {
     const rect = this._rectForWaypoints([waypoint])
     this.renderWaypoints([waypoint], rect)
     this.addEditedRect(rect)
-    return rect
+    this.renderRect(rect)
   }
 
   move(waypoint: Waypoint) {
@@ -74,13 +79,12 @@ abstract class BaseBrushTool extends Tool {
     this.nextDabOffset = nextOffset
 
     if (waypoints.length == 0) {
-      return new Vec4(0)
-    } else {
-      const rect = this._rectForWaypoints(waypoints)
-      this.renderWaypoints(waypoints, rect)
-      this.addEditedRect(rect)
-      return rect
+      return
     }
+    const rect = this._rectForWaypoints(waypoints)
+    this.renderWaypoints(waypoints, rect)
+    this.addEditedRect(rect)
+    this.renderRect(rect)
   }
 
   end() {
@@ -100,13 +104,11 @@ abstract class BaseBrushTool extends Tool {
         }
       })()
 
-      if (waypoints.length == 0) {
-        return new Vec4(0)
-      } else {
+      if (waypoints.length != 0) {
         const rect = this._rectForWaypoints(waypoints)
         this.renderWaypoints(waypoints, rect)
         this.addEditedRect(rect)
-        return rect
+        this.renderRect(rect)
       }
     }
     const rect = drawLast()

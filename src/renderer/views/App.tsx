@@ -52,9 +52,6 @@ class App extends React.Component<void, void> {
   constructor() {
     super()
     this.brushColor = this.palette[this.paletteIndex]
-    for (const tool of this.tools) {
-      tool.picture = this.picture
-    }
     Picture.current = this.picture
     if(this.currentTool instanceof BaseBrushTool) {
       const tool = this.currentTool as BaseBrushTool
