@@ -1,6 +1,6 @@
 import React = require("react")
 import Picture from "../models/Picture"
-import {Vec2, Transform} from "../../lib/Geometry"
+import {Vec2, Vec4, Transform} from "../../lib/Geometry"
 import Tool from "../models/Tool"
 import Waypoint from "../models/Waypoint"
 import * as Electron from "electron"
@@ -100,23 +100,26 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
   onPointerDown(ev: {clientX: number, clientY: number, pressure?: number}) {
     const rect = this.props.tool.start(this.eventToWaypoint(ev))
-    this.props.picture.layerBlender.render(rect)
-    this.renderer.render(rect)
+    this.renderRect(rect)
     this.isPressed = true
   }
   onPointerMove(ev: {clientX: number, clientY: number, pressure?: number}) {
     if (this.isPressed) {
       const rect = this.props.tool.move(this.eventToWaypoint(ev))
-      this.props.picture.layerBlender.render(rect)
-      this.renderer.render(rect)
+      this.renderRect(rect)
     }
   }
   onPointerUp() {
     if (this.isPressed) {
       const rect = this.props.tool.end()
+      this.renderRect(rect)
+      this.isPressed = false
+    }
+  }
+  renderRect(rect: Vec4) {
+    if (rect.z > 0 && rect.w > 0) {
       this.props.picture.layerBlender.render(rect)
       this.renderer.render(rect)
-      this.isPressed = false
     }
   }
 }
