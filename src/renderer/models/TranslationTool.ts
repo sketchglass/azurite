@@ -1,21 +1,24 @@
-import {Vec2, Vec4} from "../../lib/Geometry"
+import {Vec2, Vec4, Transform} from "../../lib/Geometry"
 import Tool from './Tool'
 import Waypoint from "./Waypoint"
 
 export default
 class TranslationTool extends Tool {
   name = "Translation"
-  startPos = new Vec2(0)
-  startTranslation = new Vec2(0)
+  originalPos = new Vec2(0)
+  originalTranslation = new Vec2(0)
+  originalRendererToPicture = Transform.identity
 
-  start(waypoint: Waypoint) {
-    this.startPos = waypoint.pos
-    this.startTranslation = this.picture.navigation.translation
+  start(waypoint: Waypoint, rendererPos: Vec2) {
+    this.originalRendererToPicture = this.renderer.transforms.rendererToPicture
+    this.originalPos = this.originalRendererToPicture.transform(rendererPos)
+    this.originalTranslation = this.picture.navigation.translation
   }
 
-  move(waypoint: Waypoint) {
-    const offset = waypoint.pos.sub(this.startPos)
-    const translation = this.startTranslation.add(offset)
+  move(waypoint: Waypoint, rendererPos: Vec2) {
+    const pos = this.originalRendererToPicture.transform(rendererPos)
+    const offset = pos.sub(this.originalPos)
+    const translation = this.originalTranslation.add(offset)
     const {scale, rotation} = this.picture.navigation
     this.picture.navigation = {translation, scale, rotation}
     this.picture.changed.next()

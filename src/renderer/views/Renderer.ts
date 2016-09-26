@@ -66,9 +66,9 @@ class Renderer {
     const {navigation} = this.picture
     const pictureCenter = this.picture.size.mul(0.5).round()
     const viewportCenter = this.size.mul(0.5).round()
-    const transform = Transform.scale(new Vec2(navigation.scale))
+    const transform = Transform.translate(navigation.translation)
+      .merge(Transform.scale(new Vec2(navigation.scale)))
       .merge(Transform.rotate(navigation.rotation))
-      .merge(Transform.translate(navigation.translation))
     this.transforms.pictureToRenderer = Transform.translate(pictureCenter.neg())
       .merge(transform)
       .merge(Transform.translate(viewportCenter))
