@@ -49,6 +49,9 @@ class Vec2 {
   frac() {
     return this.sub(this.floor())
   }
+  round() {
+    return new Vec2(Math.round(this.x), Math.round(this.y))
+  }
 
   toGLData() {
     return new Float32Array([this.x, this.y])

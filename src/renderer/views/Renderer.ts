@@ -64,17 +64,19 @@ class Renderer {
 
   updateTransforms() {
     const {navigation} = this.picture
+    const pictureCenter = this.picture.size.mul(0.5).round()
+    const viewportCenter = this.size.mul(0.5).round()
     const transform = Transform.scale(new Vec2(navigation.scale))
       .merge(Transform.rotate(navigation.rotation))
       .merge(Transform.translate(navigation.translation))
-    this.transforms.pictureToDOM = Transform.translate(this.picture.size.mul(-0.5))
+    this.transforms.pictureToDOM = Transform.translate(pictureCenter.neg())
       .merge(transform)
-      .merge(Transform.translate(this.size.mul(0.5)))
+      .merge(Transform.translate(viewportCenter))
     this.transforms.pictureToGLViewport = this.transforms.pictureToDOM
       .merge(Transform.scale(new Vec2(1, -1)))
       .merge(Transform.translate(new Vec2(0, this.size.height)))
     this.transforms.pictureToGLUnit = this.transforms.pictureToDOM
-      .merge(Transform.translate(this.size.mul(-0.5)))
+      .merge(Transform.translate(viewportCenter.neg()))
       .merge(Transform.scale(new Vec2(2 / this.size.width, -2 / this.size.height)))
     this.transforms.domToPicture = this.transforms.pictureToDOM.invert()
   }
