@@ -3,8 +3,8 @@ import Tool from './Tool'
 import Waypoint from "./Waypoint"
 
 export default
-class TranslationTool extends Tool {
-  name = "Translation"
+class PanTool extends Tool {
+  name = "Pan"
   originalPos = new Vec2(0)
   originalTranslation = new Vec2(0)
   originalRendererToPicture = Transform.identity
