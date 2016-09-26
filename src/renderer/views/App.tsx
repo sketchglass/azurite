@@ -6,6 +6,7 @@ import BrushTool from "../models/BrushTool"
 import WatercolorTool from "../models/WatercolorTool"
 import PanTool from "../models/PanTool"
 import {ZoomInTool, ZoomOutTool} from "../models/ZoomTool"
+import RotateTool from "../models/RotateTool"
 import BrushSettings from "./BrushSettings"
 import WatercolorSettings from "./WatercolorSettings"
 import DrawArea from "./DrawArea"
@@ -33,7 +34,7 @@ function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool
 export default
 class App extends React.Component<void, void> {
   picture = new Picture()
-  tools: Tool[] = [new BrushTool(), new WatercolorTool(), new PanTool(), new ZoomInTool(), new ZoomOutTool()]
+  tools: Tool[] = [new BrushTool(), new WatercolorTool(), new PanTool(), new ZoomInTool(), new ZoomOutTool(), new RotateTool()]
   currentTool = this.tools[0]
   brushColor: Color
   paletteIndex: number = 0
