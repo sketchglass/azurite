@@ -35,11 +35,6 @@ export default
 class Renderer {
   model: Model
   size = new Vec2(100, 100)
-  _navigation = {
-    translation: new Vec2(0),
-    scale: 1,
-    rotation: 0,
-  }
 
   transforms = {
     pictureToDOM: Transform.identity,
