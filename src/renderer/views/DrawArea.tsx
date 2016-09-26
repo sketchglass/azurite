@@ -82,8 +82,10 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const x = ev.clientX - rect.left
     const y = ev.clientY - rect.top
     const pressure = ev.pressure == undefined ? 1.0 : ev.pressure
-    const pos = this.renderer.transforms.domToPicture.transform(new Vec2(x, y).mul(window.devicePixelRatio))
-    return new Waypoint(pos, pressure)
+    const eventPos = new Vec2(x, y).mul(window.devicePixelRatio)
+    const pos = this.renderer.transforms.domToPicture.transform(eventPos)
+    const waypoint = new Waypoint(pos, pressure)
+    return {waypoint, eventPos}
   }
 
   onMouseDown(ev: MouseEvent) {
@@ -102,12 +104,14 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const {tool, picture} = this.props
     tool.picture = picture
     tool.renderer = this.renderer
-    const rect = tool.start(this.eventToWaypoint(ev))
+    const {waypoint, eventPos} = this.eventToWaypoint(ev)
+    const rect = tool.start(waypoint, eventPos)
     this.isPressed = true
   }
   onPointerMove(ev: {clientX: number, clientY: number, pressure?: number}) {
     if (this.isPressed) {
-      const rect = this.props.tool.move(this.eventToWaypoint(ev))
+      const {waypoint, eventPos} = this.eventToWaypoint(ev)
+      const rect = this.props.tool.move(waypoint, eventPos)
     }
   }
   onPointerUp() {
