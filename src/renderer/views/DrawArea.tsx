@@ -21,6 +21,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   element: HTMLElement|undefined
   renderer: Renderer
   currentTool: Tool|undefined
+  usingTablet = false
 
   constructor(props: DrawAreaProps) {
     super(props)
@@ -42,12 +43,14 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     this.element.style.cursor = this.props.tool.cursor
 
     ipcRenderer.on("tablet.down", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
+      this.usingTablet = true
       this.onPointerDown(ev)
     })
     ipcRenderer.on("tablet.move", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       this.onPointerMove(ev)
     })
     ipcRenderer.on("tablet.up", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
+      this.usingTablet = true
       this.onPointerUp()
     })
 
@@ -93,15 +96,21 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
 
   onMouseDown(ev: MouseEvent) {
-    this.onPointerDown(ev)
+    if (!this.usingTablet) {
+      this.onPointerDown(ev)
+    }
     ev.preventDefault()
   }
   onMouseMove(ev: MouseEvent) {
-    this.onPointerMove(ev)
+    if (!this.usingTablet) {
+      this.onPointerMove(ev)
+    }
     ev.preventDefault()
   }
   onMouseUp(ev: MouseEvent) {
-    this.onPointerUp()
+    if (!this.usingTablet) {
+      this.onPointerUp()
+    }
     ev.preventDefault()
   }
   onPointerDown(ev: {clientX: number, clientY: number, pressure?: number}) {
