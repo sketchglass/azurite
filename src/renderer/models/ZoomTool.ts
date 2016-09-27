@@ -37,6 +37,7 @@ function prevScaleStep(scale: number) {
 export
 class ZoomInTool extends Tool {
   name = "Zoom In"
+  cursor = "zoom-in"
 
   start(waypoint: Waypoint, rendererPos: Vec2) {
     let {translation, rotation, scale} = this.picture.navigation
@@ -56,6 +57,7 @@ class ZoomInTool extends Tool {
 export
 class ZoomOutTool extends Tool {
   name = "Zoom Out"
+  cursor = "zoom-out"
 
   start(waypoint: Waypoint, rendererPos: Vec2) {
     let {translation, rotation, scale} = this.picture.navigation

@@ -30,11 +30,16 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     })
   }
 
+  componentWillReceiveProps(nextProps: DrawAreaProps) {
+    if (this.element) {
+      this.element.style.cursor = nextProps.tool.cursor
+    }
+  }
+
   componentDidMount() {
     this.element = this.refs["root"] as HTMLElement
-    if (this.element.childElementCount == 0) {
-      this.element.appendChild(canvas)
-    }
+    this.element.appendChild(canvas)
+    this.element.style.cursor = this.props.tool.cursor
 
     ipcRenderer.on("tablet.down", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
       this.onPointerDown(ev)

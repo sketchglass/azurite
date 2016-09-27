@@ -8,6 +8,7 @@ abstract class Tool {
   picture: Picture
   renderer: Renderer
   abstract name: string
+  cursor = "auto"
   abstract start(waypoint: Waypoint, rendererPos: Vec2): void
   abstract move(waypoint: Waypoint, rendererPos: Vec2): void
   abstract end(): void

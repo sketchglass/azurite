@@ -12,6 +12,8 @@ abstract class BaseBrushTool extends Tool {
   private lastWaypoints: Waypoint[] = []
   private nextDabOffset = 0
 
+  cursor = "crosshair"
+
   // brush width (diameter)
   width = 10
   // brush color RGBA
