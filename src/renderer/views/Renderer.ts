@@ -60,6 +60,7 @@ class Renderer {
       {attribute: "aUVPosition", size: 2},
     ], indices, GeometryUsage.Static)
     this.model = new Model(context, geom, shader)
+    this.picture.changed.forEach(() => this.render())
   }
 
   updateTransforms() {

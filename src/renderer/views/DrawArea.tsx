@@ -67,7 +67,6 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
 
   render() {
-    this.renderer.render()
     return (
       <div ref="root" className="draw-area"
         onMouseDown={this.onMouseDown.bind(this)}
