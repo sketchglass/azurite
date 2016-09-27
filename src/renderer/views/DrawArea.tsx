@@ -19,8 +19,8 @@ interface DrawAreaProps {
 export default
 class DrawArea extends React.Component<DrawAreaProps, void> {
   element: HTMLElement|undefined
-  isPressed = false
   renderer: Renderer
+  currentTool: Tool|undefined
 
   constructor(props: DrawAreaProps) {
     super(props)
@@ -110,18 +110,18 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     tool.renderer = this.renderer
     const {waypoint, rendererPos} = this.eventToWaypoint(ev)
     const rect = tool.start(waypoint, rendererPos)
-    this.isPressed = true
+    this.currentTool = tool
   }
   onPointerMove(ev: {clientX: number, clientY: number, pressure?: number}) {
-    if (this.isPressed) {
+    if (this.currentTool) {
       const {waypoint, rendererPos} = this.eventToWaypoint(ev)
-      const rect = this.props.tool.move(waypoint, rendererPos)
+      const rect = this.currentTool.move(waypoint, rendererPos)
     }
   }
   onPointerUp() {
-    if (this.isPressed) {
-      const rect = this.props.tool.end()
-      this.isPressed = false
+    if (this.currentTool) {
+      const rect = this.currentTool.end()
+      this.currentTool = undefined
     }
   }
 }
