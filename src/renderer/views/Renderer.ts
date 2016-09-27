@@ -97,7 +97,7 @@ class Renderer {
     if (rectInPicture) {
       context.setScissor(this.transforms.pictureToGLViewport.transformRect(rectInPicture))
     }
-    context.setClearColor(new Vec4(0.9, 0.9, 0.9, 1))
+    context.setClearColor(new Vec4(240/255, 240/255, 240/255, 1))
     context.clear()
     shader.uniform("uTransform").setTransform(this.transforms.pictureToGLUnit)
     context.textureUnits.set(0, this.picture.layerBlender.blendedTexture)
