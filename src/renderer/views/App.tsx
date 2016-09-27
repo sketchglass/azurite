@@ -16,6 +16,7 @@ import Palette from "./Palette"
 import Navigator from "./Navigator"
 import {Color} from "../../lib/Color"
 import {Vec2, Vec4} from "../../lib/Geometry"
+import NavigationKeyBinding from "./NavigationKeyBinding"
 import "./MenuBar"
 import "../../styles/Navigator.sass"
 import "../../styles/palette.sass"
@@ -36,6 +37,7 @@ class App extends React.Component<void, void> {
   picture = new Picture()
   tools: Tool[] = [new BrushTool(), new WatercolorTool(), new PanTool(), new ZoomInTool(), new ZoomOutTool(), new RotateTool()]
   currentTool = this.tools[0]
+  overrideTool: Tool|undefined
   brushColor: Color
   paletteIndex: number = 0
   palette: Color[] = [
@@ -59,9 +61,22 @@ class App extends React.Component<void, void> {
       const tool = this.currentTool as BaseBrushTool
       tool.color = this.brushColor.toRgb()
     }
+
+    new NavigationKeyBinding(klass => {
+      if (klass) {
+        for (const tool of this.tools) {
+          if (tool instanceof klass) {
+            this.overrideTool = tool
+          }
+        }
+      } else {
+        this.overrideTool = undefined
+      }
+      this.forceUpdate()
+    })
   }
   render() {
-    const {picture, tools, currentTool} = this
+    const {picture, tools, currentTool, overrideTool} = this
     const onToolChange = (tool: Tool) => {
       this.currentTool = tool
       if(this.currentTool instanceof BaseBrushTool) {
@@ -91,7 +106,7 @@ class App extends React.Component<void, void> {
           <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} />
           {currentTool.renderSettings()}
         </aside>
-        <DrawArea tool={currentTool} picture={picture} />
+        <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
         <aside className="LeftSidebar">
           <Navigator picture={picture} />
           <LayerList picture={picture} />
