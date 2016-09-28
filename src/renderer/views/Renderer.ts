@@ -2,6 +2,7 @@ import {Shader, Model, Geometry, GeometryUsage, DefaultFramebuffer} from "../../
 import {context, canvas} from "../GLContext"
 import Picture from "../models/Picture"
 import {Vec2, Vec4, Transform} from "../../lib/Geometry"
+import Navigation from "../models/Navigation"
 
 const vert = `
   precision highp float;
@@ -34,12 +35,12 @@ export default
 class Renderer {
   model: Model
   size = new Vec2(100, 100)
-  transform = Transform.identity
+
   transforms = {
-    pictureToDOM: Transform.identity,
+    pictureToRenderer: Transform.identity,
     pictureToGLViewport: Transform.identity,
     pictureToGLUnit: Transform.identity,
-    domToPicture: Transform.identity,
+    rendererToPicture: Transform.identity,
   }
 
   constructor(public picture: Picture) {
@@ -59,19 +60,26 @@ class Renderer {
       {attribute: "aUVPosition", size: 2},
     ], indices, GeometryUsage.Static)
     this.model = new Model(context, geom, shader)
+    this.picture.changed.forEach(() => this.render())
   }
 
   updateTransforms() {
-    this.transforms.pictureToDOM = Transform.translate(this.picture.size.mul(-0.5))
-      .merge(this.transform)
-      .merge(Transform.translate(this.size.mul(0.5)))
-    this.transforms.pictureToGLViewport = this.transforms.pictureToDOM
+    const {navigation} = this.picture
+    const pictureCenter = this.picture.size.mul(0.5).round()
+    const viewportCenter = this.size.mul(0.5).round()
+    const transform = Transform.translate(navigation.translation)
+      .merge(Transform.scale(new Vec2(navigation.scale)))
+      .merge(Transform.rotate(navigation.rotation))
+    this.transforms.pictureToRenderer = Transform.translate(pictureCenter.neg())
+      .merge(transform)
+      .merge(Transform.translate(viewportCenter))
+    this.transforms.pictureToGLViewport = this.transforms.pictureToRenderer
       .merge(Transform.scale(new Vec2(1, -1)))
       .merge(Transform.translate(new Vec2(0, this.size.height)))
-    this.transforms.pictureToGLUnit = this.transforms.pictureToDOM
-      .merge(Transform.translate(this.size.mul(-0.5)))
+    this.transforms.pictureToGLUnit = this.transforms.pictureToRenderer
+      .merge(Transform.translate(viewportCenter.neg()))
       .merge(Transform.scale(new Vec2(2 / this.size.width, -2 / this.size.height)))
-    this.transforms.domToPicture = this.transforms.pictureToDOM.invert()
+    this.transforms.rendererToPicture = this.transforms.pictureToRenderer.invert()
   }
 
   resize(size: Vec2) {
@@ -84,12 +92,12 @@ class Renderer {
   }
 
   render(rectInPicture?: Vec4) {
-    this.picture.layerBlender.render(rectInPicture)
+    this.updateTransforms()
     context.defaultFramebuffer.use()
     if (rectInPicture) {
       context.setScissor(this.transforms.pictureToGLViewport.transformRect(rectInPicture))
     }
-    context.setClearColor(new Vec4(0.9, 0.9, 0.9, 1))
+    context.setClearColor(new Vec4(240/255, 240/255, 240/255, 1))
     context.clear()
     shader.uniform("uTransform").setTransform(this.transforms.pictureToGLUnit)
     context.textureUnits.set(0, this.picture.layerBlender.blendedTexture)

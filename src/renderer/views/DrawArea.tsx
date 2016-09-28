@@ -1,12 +1,13 @@
 import React = require("react")
 import Picture from "../models/Picture"
-import {Vec2, Transform} from "../../lib/Geometry"
+import {Vec2, Vec4, Transform} from "../../lib/Geometry"
 import Tool from "../models/Tool"
 import Waypoint from "../models/Waypoint"
 import * as Electron from "electron"
 import {TabletEvent} from "receive-tablet-event"
 import {canvas} from "../GLContext"
 import Renderer from "./Renderer"
+import Navigation from "../models/Navigation"
 
 const {ipcRenderer} = Electron
 
@@ -18,8 +19,9 @@ interface DrawAreaProps {
 export default
 class DrawArea extends React.Component<DrawAreaProps, void> {
   element: HTMLElement|undefined
-  isPressed = false
   renderer: Renderer
+  currentTool: Tool|undefined
+  usingTablet = false
 
   constructor(props: DrawAreaProps) {
     super(props)
@@ -29,31 +31,27 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     })
   }
 
+  componentWillReceiveProps(nextProps: DrawAreaProps) {
+    if (this.element) {
+      this.element.style.cursor = nextProps.tool.cursor
+    }
+  }
+
   componentDidMount() {
     this.element = this.refs["root"] as HTMLElement
-    if (this.element.childElementCount == 0) {
-      this.element.appendChild(canvas)
-    }
+    this.element.appendChild(canvas)
+    this.element.style.cursor = this.props.tool.cursor
 
     ipcRenderer.on("tablet.down", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
-      const pos = this.mousePos(ev)
-      const rect = this.props.tool.start(new Waypoint(pos, ev.pressure))
-      this.renderer.render(rect)
-      this.isPressed = true
+      this.usingTablet = true
+      this.onPointerDown(ev)
     })
     ipcRenderer.on("tablet.move", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
-      if (this.isPressed) {
-        const pos = this.mousePos(ev)
-        const rect = this.props.tool.move(new Waypoint(pos, ev.pressure))
-        this.renderer.render(rect)
-      }
+      this.onPointerMove(ev)
     })
     ipcRenderer.on("tablet.up", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
-      if (this.isPressed) {
-        const rect = this.props.tool.end()
-        this.renderer.render(rect)
-        this.isPressed = false
-      }
+      this.usingTablet = true
+      this.onPointerUp()
     })
 
     this.resize()
@@ -77,7 +75,6 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
 
   render() {
-    this.renderer.render()
     return (
       <div ref="root" className="draw-area"
         onMouseDown={this.onMouseDown.bind(this)}
@@ -87,35 +84,53 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     )
   }
 
-  mousePos(ev: {clientX: number, clientY: number}) {
+  eventToWaypoint(ev: {clientX: number, clientY: number, pressure?: number}) {
     const rect = this.element!.getBoundingClientRect()
     const x = ev.clientX - rect.left
     const y = ev.clientY - rect.top
-    return this.renderer.transforms.domToPicture.transform(new Vec2(x, y).mul(window.devicePixelRatio))
+    const pressure = ev.pressure == undefined ? 1.0 : ev.pressure
+    const rendererPos = new Vec2(x, y).mul(window.devicePixelRatio)
+    const pos = this.renderer.transforms.rendererToPicture.transform(rendererPos)
+    const waypoint = new Waypoint(pos, pressure)
+    return {waypoint, rendererPos}
   }
 
   onMouseDown(ev: MouseEvent) {
-    const pos = this.mousePos(ev)
-    const rect = this.props.tool.start(new Waypoint(pos, 1))
-    this.renderer.render(rect)
-    this.isPressed = true
+    if (!this.usingTablet) {
+      this.onPointerDown(ev)
+    }
     ev.preventDefault()
   }
   onMouseMove(ev: MouseEvent) {
-    const pos = this.mousePos(ev)
-
-    if (this.isPressed) {
-      const rect = this.props.tool.move(new Waypoint(pos, 1))
-      this.renderer.render(rect)
-      ev.preventDefault()
+    if (!this.usingTablet) {
+      this.onPointerMove(ev)
     }
+    ev.preventDefault()
   }
   onMouseUp(ev: MouseEvent) {
-    if (this.isPressed) {
-      const rect = this.props.tool.end()
-      this.renderer.render(rect)
-      this.isPressed = false
-      ev.preventDefault()
+    if (!this.usingTablet) {
+      this.onPointerUp()
+    }
+    ev.preventDefault()
+  }
+  onPointerDown(ev: {clientX: number, clientY: number, pressure?: number}) {
+    const {tool, picture} = this.props
+    tool.picture = picture
+    tool.renderer = this.renderer
+    const {waypoint, rendererPos} = this.eventToWaypoint(ev)
+    const rect = tool.start(waypoint, rendererPos)
+    this.currentTool = tool
+  }
+  onPointerMove(ev: {clientX: number, clientY: number, pressure?: number}) {
+    if (this.currentTool) {
+      const {waypoint, rendererPos} = this.eventToWaypoint(ev)
+      const rect = this.currentTool.move(waypoint, rendererPos)
+    }
+  }
+  onPointerUp() {
+    if (this.currentTool) {
+      const rect = this.currentTool.end()
+      this.currentTool = undefined
     }
   }
 }

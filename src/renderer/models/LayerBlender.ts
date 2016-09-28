@@ -61,7 +61,7 @@ class LayerBlender {
   constructor(public picture: Picture) {
   }
 
-  render(rect: Vec4|undefined) {
+  render(rect?: Vec4) {
     const {layers} = this.picture
     this.framebuffer.use()
     if (rect) {

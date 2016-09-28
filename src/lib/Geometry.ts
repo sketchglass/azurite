@@ -49,6 +49,9 @@ class Vec2 {
   frac() {
     return this.sub(this.floor())
   }
+  round() {
+    return new Vec2(Math.round(this.x), Math.round(this.y))
+  }
 
   toGLData() {
     return new Float32Array([this.x, this.y])
@@ -163,6 +166,12 @@ class Transform {
 
   static scale(scale: Vec2) {
     return new Transform(scale.x, 0, 0, scale.y, 0, 0)
+  }
+
+  static rotate(rotation: number) {
+    const c = Math.cos(rotation)
+    const s = Math.sin(rotation)
+    return new Transform(c, s, -s, c, 0, 0)
   }
 
   static translate(translation: Vec2) {

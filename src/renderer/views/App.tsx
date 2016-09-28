@@ -4,15 +4,21 @@ import Tool from "../models/Tool"
 import BaseBrushTool from "../models/BaseBrushTool"
 import BrushTool from "../models/BrushTool"
 import WatercolorTool from "../models/WatercolorTool"
+import PanTool from "../models/PanTool"
+import {ZoomInTool, ZoomOutTool} from "../models/ZoomTool"
+import RotateTool from "../models/RotateTool"
 import BrushSettings from "./BrushSettings"
 import WatercolorSettings from "./WatercolorSettings"
 import DrawArea from "./DrawArea"
 import LayerList from "./LayerList"
 import ColorPicker from "./ColorPicker"
 import Palette from "./Palette"
+import Navigator from "./Navigator"
 import {Color} from "../../lib/Color"
-import {Vec4} from "../../lib/Geometry"
+import {Vec2, Vec4} from "../../lib/Geometry"
+import NavigationKeyBinding from "./NavigationKeyBinding"
 import "./MenuBar"
+import "../../styles/Navigator.sass"
 import "../../styles/palette.sass"
 
 function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool: Tool) => void}) {
@@ -29,8 +35,9 @@ function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool
 export default
 class App extends React.Component<void, void> {
   picture = new Picture()
-  tools: Tool[] = [new BrushTool(), new WatercolorTool()]
+  tools: Tool[] = [new BrushTool(), new WatercolorTool(), new PanTool(), new ZoomInTool(), new ZoomOutTool(), new RotateTool()]
   currentTool = this.tools[0]
+  overrideTool: Tool|undefined
   brushColor: Color
   paletteIndex: number = 0
   palette: Color[] = [
@@ -49,17 +56,27 @@ class App extends React.Component<void, void> {
   constructor() {
     super()
     this.brushColor = this.palette[this.paletteIndex]
-    for (const tool of this.tools) {
-      tool.picture = this.picture
-    }
     Picture.current = this.picture
     if(this.currentTool instanceof BaseBrushTool) {
       const tool = this.currentTool as BaseBrushTool
       tool.color = this.brushColor.toRgb()
     }
+
+    new NavigationKeyBinding(klass => {
+      if (klass) {
+        for (const tool of this.tools) {
+          if (tool instanceof klass) {
+            this.overrideTool = tool
+          }
+        }
+      } else {
+        this.overrideTool = undefined
+      }
+      this.forceUpdate()
+    })
   }
   render() {
-    const {picture, tools, currentTool} = this
+    const {picture, tools, currentTool, overrideTool} = this
     const onToolChange = (tool: Tool) => {
       this.currentTool = tool
       if(this.currentTool instanceof BaseBrushTool) {
@@ -89,8 +106,9 @@ class App extends React.Component<void, void> {
           <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} />
           {currentTool.renderSettings()}
         </aside>
-        <DrawArea tool={currentTool} picture={picture} />
+        <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
         <aside className="LeftSidebar">
+          <Navigator picture={picture} />
           <LayerList picture={picture} />
         </aside>
       </div>
