@@ -50,7 +50,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       this.onPointerMove(ev)
     })
     ipcRenderer.on("tablet.up", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
-      this.usingTablet = true
+      this.usingTablet = false
       this.onPointerUp()
     })
 
