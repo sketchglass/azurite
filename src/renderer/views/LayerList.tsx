@@ -4,6 +4,7 @@ import Layer from "../models/Layer"
 import ClickToEdit from "./ClickToEdit"
 const classNames = require("classnames")
 import {mouseOffsetPos} from "./util"
+import "../../styles/LayerList.sass"
 
 interface LayerListProps {
   picture: Picture
