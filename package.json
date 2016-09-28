@@ -44,6 +44,6 @@
     "classnames": "^2.2.5",
     "react": "^15.3.0",
     "react-dom": "^15.3.0",
-    "receive-tablet-event": "github:seanchas116/receive-tablet-event#2b7424774ba016d4ff84a003e6e4ebfafa8020f8"
+    "receive-tablet-event": "github:seanchas116/receive-tablet-event#b47eb6b856ee642b96f96b98dcf99517b781fb61"
   }
 }
