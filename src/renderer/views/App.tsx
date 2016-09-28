@@ -22,7 +22,7 @@ import "../../styles/App.sass"
 
 function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool: Tool) => void}) {
   return (
-    <div className="tool-selection">{
+    <div className="ToolSelection">{
       props.tools.map((tool, i) => {
         const onChange = () => props.onChange(tool)
         return <label key={i}><input type="radio" checked={tool == props.currentTool} onChange={onChange}/>{tool.name}</label>
@@ -98,8 +98,8 @@ class App extends React.Component<void, void> {
       this.forceUpdate()
     }
     return (
-      <div className="app">
-        <aside className="sidebar">
+      <div className="App">
+        <aside className="RightSidebar">
           <ColorPicker color={this.brushColor} onChange={onBrushColorChange} />
           <Palette palette={this.palette} paletteIndex={this.paletteIndex} onChange={onPaletteChange} />
           <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} />
