@@ -1,6 +1,7 @@
 import React = require("react")
 import Navigation from "../models/Navigation"
 import Picture from "../models/Picture"
+import "../../styles/Navigator.sass"
 
 interface NavigatorProps {
   picture: Picture

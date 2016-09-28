@@ -1,5 +1,6 @@
 import React = require("react")
 import {Color} from "../../lib/Color"
+import "../../styles/Palette.sass"
 
 interface PaletteProps {
   palette: Color[]
