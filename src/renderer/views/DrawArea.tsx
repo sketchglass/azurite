@@ -3,13 +3,11 @@ import Picture from "../models/Picture"
 import {Vec2, Vec4, Transform} from "../../lib/Geometry"
 import Tool from "../models/Tool"
 import Waypoint from "../models/Waypoint"
-import * as Electron from "electron"
 import {TabletEvent} from "receive-tablet-event"
 import {canvas} from "../GLContext"
 import Renderer from "./Renderer"
 import Navigation from "../models/Navigation"
-
-const {ipcRenderer} = Electron
+import * as IPCChannels from "../../common/IPCChannels"
 
 interface DrawAreaProps {
   tool: Tool
@@ -42,14 +40,14 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     this.element.appendChild(canvas)
     this.element.style.cursor = this.props.tool.cursor
 
-    ipcRenderer.on("tablet.down", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
+    IPCChannels.tabletDown.listen().forEach(ev => {
       this.usingTablet = true
       this.onPointerDown(ev)
     })
-    ipcRenderer.on("tablet.move", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
+    IPCChannels.tabletMove.listen().forEach(ev => {
       this.onPointerMove(ev)
     })
-    ipcRenderer.on("tablet.up", (event: Electron.IpcRendererEvent, ev: TabletEvent) => {
+    IPCChannels.tabletUp.listen().forEach(ev => {
       this.usingTablet = false
       this.onPointerUp()
     })
@@ -71,7 +69,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const size = new Vec2(roundRect.width, roundRect.height).mul(window.devicePixelRatio)
     this.renderer.resize(size)
 
-    ipcRenderer.send("tablet.install", roundRect)
+    IPCChannels.setTabletCaptureArea.send(roundRect)
   }
 
   render() {
