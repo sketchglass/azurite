@@ -9,7 +9,7 @@ import PictureParams from "../renderer/models/PictureParams"
 const windows = new Set<BrowserWindow>()
 
 async function openSizeDialog() {
-  const win = new BrowserWindow({width: 400, height: 300})
+  const win = new BrowserWindow({width: 400, height: 200})
   windows.add(win)
   win.loadURL(`file://${__dirname}/../sizeDialog.html`)
 
