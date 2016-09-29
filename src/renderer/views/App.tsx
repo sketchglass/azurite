@@ -17,6 +17,7 @@ import Navigator from "./Navigator"
 import {Color} from "../../lib/Color"
 import {Vec2, Vec4} from "../../lib/Geometry"
 import NavigationKeyBinding from "./NavigationKeyBinding"
+import PictureParams from "../models/PictureParams"
 import "./MenuBar"
 import "../../styles/App.sass"
 
@@ -31,9 +32,13 @@ function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool
   )
 }
 
+interface AppProps {
+  pictureParams: PictureParams
+}
+
 export default
-class App extends React.Component<void, void> {
-  picture = new Picture()
+class App extends React.Component<AppProps, {}> {
+  picture = new Picture(this.props.pictureParams)
   tools: Tool[] = [new BrushTool(), new WatercolorTool(), new PanTool(), new ZoomInTool(), new ZoomOutTool(), new RotateTool()]
   currentTool = this.tools[0]
   overrideTool: Tool|undefined
@@ -52,8 +57,8 @@ class App extends React.Component<void, void> {
     Color.hsv(0, 0, 1)
   ]
 
-  constructor() {
-    super()
+  constructor(props: AppProps) {
+    super(props)
     this.brushColor = this.palette[this.paletteIndex]
     Picture.current = this.picture
     if(this.currentTool instanceof BaseBrushTool) {

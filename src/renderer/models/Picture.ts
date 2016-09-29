@@ -6,10 +6,11 @@ import ThumbnailGenerator from "./ThumbnailGenerator"
 import LayerBlender from "./LayerBlender"
 import {UndoStack} from "./UndoStack"
 import Navigation from "./Navigation"
+import PictureParams from "./PictureParams"
 
 export default
 class Picture {
-  size = new Vec2(1024, 768)
+  size = new Vec2(this.params.width, this.params.height)
   currentLayerIndex = 0
   changed = new Subject<void>()
   thumbnailGenerator = new ThumbnailGenerator(this.size)
@@ -22,7 +23,7 @@ class Picture {
     rotation: 0,
   }
 
-  constructor() {
+  constructor(public params: PictureParams) {
     this.changed.forEach(() => {
       this.layerBlender.render()
     })

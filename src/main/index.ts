@@ -2,9 +2,9 @@ import Electron = require('electron')
 type BrowserWindow = Electron.BrowserWindow
 const {app, BrowserWindow, ipcMain} = Electron
 import qs = require('querystring')
-
 import {TabletEventReceiver} from "receive-tablet-event"
 import * as IPCChannels from "../common/IPCChannels"
+import PictureParams from "../renderer/models/PictureParams"
 
 const windows = new Set<BrowserWindow>()
 
@@ -24,11 +24,6 @@ async function openSizeDialog() {
 
   windows.delete(win)
   return size
-}
-
-interface PictureParams {
-  width: number
-  height: number
 }
 
 function openPictureWindow(params: PictureParams) {
