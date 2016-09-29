@@ -1,7 +1,7 @@
 import React = require("react")
 import ReactDOM = require("react-dom")
-import {ipcRenderer} from "electron"
 import {MAX_PICTURE_SIZE} from "../common/constants"
+import * as IPCChannels from "../common/IPCChannels"
 
 interface SizeDialogState {
   width: number
@@ -46,7 +46,7 @@ class SizeDialog extends React.Component<{}, SizeDialogState> {
   }
 
   onOK() {
-    ipcRenderer.send("ok", this.state)
+    IPCChannels.sizeDialogDone.send(this.state)
   }
 }
 

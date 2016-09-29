@@ -1,16 +1,43 @@
 import Electron = require('electron')
 type BrowserWindow = Electron.BrowserWindow
 const {app, BrowserWindow, ipcMain} = Electron
+import qs = require('querystring')
 
 import {TabletEventReceiver} from "receive-tablet-event"
 import * as IPCChannels from "../common/IPCChannels"
 
-let window: BrowserWindow|undefined
+const windows = new Set<BrowserWindow>()
 
-function createWindow () {
-  const win = window = new BrowserWindow({width: 1200, height: 768})
+async function openSizeDialog() {
+  const win = new BrowserWindow({width: 400, height: 300})
+  windows.add(win)
+  win.loadURL(`file://${__dirname}/../sizeDialog.html`)
 
-  win.loadURL(`file://${__dirname}/../index.html`)
+  const size = await new Promise<PictureParams|undefined>((resolve, reject) => {
+    IPCChannels.sizeDialogDone.listen(win.webContents).first().forEach(size => {
+      resolve(size)
+    })
+    win.once('closed', () => {
+      resolve(undefined)
+    })
+  })
+
+  windows.delete(win)
+  return size
+}
+
+interface PictureParams {
+  width: number
+  height: number
+}
+
+function openPictureWindow(params: PictureParams) {
+  const win = new BrowserWindow({width: 1200, height: 768})
+  windows.add(win)
+
+  const query = qs.stringify({params: JSON.stringify(params)})
+
+  win.loadURL(`file://${__dirname}/../index.html?${query}`)
   win.webContents.openDevTools()
 
   const receiver = new TabletEventReceiver(win)
@@ -30,12 +57,23 @@ function createWindow () {
   })
 
   win.on('closed', () => {
-    window = undefined
+    windows.delete(win)
     receiver.dispose()
   })
 }
 
-app.on('ready', createWindow)
+async function onStartup() {
+  const size = await openSizeDialog()
+  if (size) {
+    openPictureWindow(size)
+  } else {
+    if (process.platform !== 'darwin') {
+      app.quit()
+    }
+  }
+}
+
+app.on('ready', onStartup)
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
@@ -45,6 +83,6 @@ app.on('window-all-closed', () => {
 
 app.on('activate', () => {
   if (!window) {
-    createWindow()
+    onStartup()
   }
 })

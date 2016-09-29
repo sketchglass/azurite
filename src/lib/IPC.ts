@@ -1,7 +1,6 @@
 import Electron = require("electron")
 import assert = require("assert")
-import {Observable} from "@reactivex/rxjs/dist/cjs/Observable"
-import {Observer} from "@reactivex/rxjs/dist/cjs/Observer"
+import {Observable, Observer} from "@reactivex/rxjs"
 
 export
 class IPCToRenderer<T> {
