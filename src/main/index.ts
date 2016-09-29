@@ -3,6 +3,7 @@ type BrowserWindow = Electron.BrowserWindow
 const {app, BrowserWindow, ipcMain} = Electron
 
 import {TabletEventReceiver} from "receive-tablet-event"
+import * as IPCChannels from "../common/IPCChannels"
 
 let window: BrowserWindow|undefined
 
@@ -14,32 +15,24 @@ function createWindow () {
 
   const receiver = new TabletEventReceiver(win)
 
-  ipcMain.on("tablet.install", (ev, captureArea) => {
+  IPCChannels.setTabletCaptureArea.listen().forEach(captureArea => {
     receiver.captureArea = captureArea;
   })
 
-  receiver.on("enterProximity", (ev) => {
-    win.webContents.send("tablet.enterProximity", ev)
-  })
-  receiver.on("leaveProximity", (ev) => {
-    win.webContents.send("tablet.leaveProximity", ev)
-  })
   receiver.on("down", (ev) => {
-    win.webContents.send("tablet.down", ev)
+    IPCChannels.tabletDown.send(win.webContents, ev)
   })
   receiver.on("move", (ev) => {
-    win.webContents.send("tablet.move", ev)
+    IPCChannels.tabletMove.send(win.webContents, ev)
   })
   receiver.on("up", (ev) => {
-    win.webContents.send("tablet.up", ev)
+    IPCChannels.tabletUp.send(win.webContents, ev)
   })
 
   win.on('closed', () => {
     window = undefined
     receiver.dispose()
   })
-
-
 }
 
 app.on('ready', createWindow)
