@@ -1,25 +1,33 @@
-const sh = require("shelljs")
 const packager = require('electron-packager')
 const argv = require("yargs").argv
 
-sh.config.verbose = true
+function ignore(path: string) {
+  if (!path) {
+    return false
+  }
+  if (path.startsWith("/node_modules")) {
+    return false
+  }
+  if (path.startsWith("/dist")) {
+    if (path.endsWith(".map")) {
+      return true
+    }
+    return false
+  }
+  if (path == "/package.json") {
+    return false
+  }
+  return true
+}
 
 async function package(platform: string) {
-  sh.mkdir('-p', 'build')
-
-  const files = ['package.json', 'dist/index.html']
-  for (const file of files) {
-    sh.cp(file, 'build')
-  }
-
-  sh.cd("build")
-  sh.exec("npm install --production")
-
   const options = {
     dir: ".",
-    platform: "win32",
+    out: "build",
+    platform: platform,
     arch: "x64",
     overwrite: true,
+    ignore: ignore
   }
 
   await new Promise<string[]>((resolve, reject) => {
