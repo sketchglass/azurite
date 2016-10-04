@@ -1,5 +1,6 @@
 const sh = require("shelljs")
 const packager = require('electron-packager')
+const argv = require("yargs").argv
 
 sh.config.verbose = true
 
@@ -18,6 +19,7 @@ async function package(platform: string) {
     dir: ".",
     platform: "win32",
     arch: "x64",
+    overwrite: true,
   }
 
   await new Promise<string[]>((resolve, reject) => {
@@ -31,4 +33,4 @@ async function package(platform: string) {
   })
 }
 
-package("win32")
+package(argv.platform)
