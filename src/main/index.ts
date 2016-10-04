@@ -11,7 +11,10 @@ function createWindow () {
   const win = window = new BrowserWindow({width: 1200, height: 768})
 
   win.loadURL(`file://${__dirname}/../index.html`)
-  win.webContents.openDevTools()
+
+  if (process.env.NODE_ENV == "development") {
+    win.webContents.openDevTools()
+  }
 
   const receiver = new TabletEventReceiver(win)
 
