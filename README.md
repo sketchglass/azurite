@@ -22,3 +22,11 @@ npm run watch
 ```
 npm run app
 ```
+
+## Package app
+
+```
+npm run package
+```
+
+The packaged app will be in `/build`.

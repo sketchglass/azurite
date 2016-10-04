@@ -1,5 +1,4 @@
 const packager = require('electron-packager')
-const argv = require("yargs").argv
 const sh = require("shelljs")
 
 sh.config.verbose = true
@@ -26,14 +25,12 @@ function ignore(path: string) {
   return true
 }
 
-async function package(platform: string) {
+async function package() {
   sh.exec("webpack")
 
   const options = {
     dir: ".",
     out: "build",
-    platform: platform,
-    arch: "x64",
     overwrite: true,
     ignore: ignore
   }
@@ -49,4 +46,4 @@ async function package(platform: string) {
   })
 }
 
-package(argv.platform)
+package()

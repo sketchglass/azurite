@@ -10,7 +10,7 @@
     "start": "npm-run-all build --parallel watch app",
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "electron-rebuild -v 1.4.1 -e node_modules/electron -w receive-tablet-event",
-    "package:win": "ts-node scripts/package.ts"
+    "package": "ts-node scripts/package.ts"
   },
   "repository": {
     "type": "git",
@@ -41,8 +41,7 @@
     "ts-node": "^1.3.0",
     "typescript": "^2.0.3",
     "url-loader": "^0.5.7",
-    "webpack": "^1.13.2",
-    "yargs": "^6.0.0"
+    "webpack": "^1.13.2"
   },
   "dependencies": {
     "@reactivex/rxjs": "^5.0.0-beta.12",
