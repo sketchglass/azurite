@@ -1,5 +1,8 @@
 const packager = require('electron-packager')
 const argv = require("yargs").argv
+const sh = require("shelljs")
+
+sh.config.verbose = true
 
 function ignore(path: string) {
   if (!path) {
@@ -24,6 +27,8 @@ function ignore(path: string) {
 }
 
 async function package(platform: string) {
+  sh.exec("webpack")
+
   const options = {
     dir: ".",
     out: "build",
