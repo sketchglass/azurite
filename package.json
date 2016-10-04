@@ -1,5 +1,5 @@
 {
-  "name": "azurite",
+  "name": "Azurite",
   "version": "0.1.0",
   "description": "Casual Painting App in Electron",
   "main": "dist/assets/main.js",
