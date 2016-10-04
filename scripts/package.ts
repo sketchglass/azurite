@@ -5,7 +5,10 @@ function ignore(path: string) {
   if (!path) {
     return false
   }
-  if (path.startsWith("/node_modules")) {
+  if (path == "/node_modules") {
+    return false
+  }
+  if (path.startsWith("/node_modules/receive-tablet-event") || path.startsWith("/node_modules/bindings")) {
     return false
   }
   if (path.startsWith("/dist")) {
