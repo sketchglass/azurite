@@ -36,7 +36,6 @@ class BrushSettings extends React.Component<BrushSettingsProps, void> {
     }
     const onEraserModeChange = (ev: React.FormEvent<HTMLInputElement>) => {
       tool.eraser = !tool.eraser
-      console.log(tool.eraser)
       this.forceUpdate()
     }
     return (
@@ -64,7 +63,7 @@ class BrushSettings extends React.Component<BrushSettingsProps, void> {
           </tr>
           <tr>
             <td>Eraser</td>
-            <td><input type="checkbox" onChange={onEraserModeChange} checked={tool.eraser} /> Eraser Mode</td>
+            <td><label><input type="checkbox" onChange={onEraserModeChange} checked={tool.eraser} /> Eraser Mode</label></td>
           </tr>
         </tbody>
       </table>
