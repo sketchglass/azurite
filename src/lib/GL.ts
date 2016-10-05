@@ -271,6 +271,7 @@ export
 enum BlendMode {
   Src,
   SrcOver,
+  DstOut,
   // TODO
 }
 
@@ -305,6 +306,9 @@ class Model {
         break
       case BlendMode.SrcOver:
         this.blendFuncs = [gl.ONE, gl.ONE_MINUS_SRC_ALPHA]
+        break
+      case BlendMode.DstOut:
+        this.blendFuncs = [gl.ZERO, gl.ONE_MINUS_SRC_ALPHA]
         break
     }
   }

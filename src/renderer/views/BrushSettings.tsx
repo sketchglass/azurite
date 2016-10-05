@@ -34,6 +34,10 @@ class BrushSettings extends React.Component<BrushSettingsProps, void> {
       tool.softness = parseInt((ev.target as HTMLInputElement).value) / 100
       this.forceUpdate()
     }
+    const onEraserModeChange = (ev: React.FormEvent<HTMLInputElement>) => {
+      tool.eraser = !tool.eraser
+      this.forceUpdate()
+    }
     return (
       <table className="brush-settings">
         <tbody>
@@ -56,6 +60,10 @@ class BrushSettings extends React.Component<BrushSettingsProps, void> {
           <tr>
             <td>Softness</td>
             <td><input type="range" onChange={onSoftnessChange} value={Math.round(tool.softness * 100)} /> {Math.round(tool.softness * 100)}%</td>
+          </tr>
+          <tr>
+            <td>Eraser</td>
+            <td><label><input type="checkbox" onChange={onEraserModeChange} checked={tool.eraser} /> Eraser Mode</label></td>
           </tr>
         </tbody>
       </table>
