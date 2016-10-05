@@ -1,7 +1,7 @@
 import {Vec2, Vec4, Transform, unionRect} from "../../lib/Geometry"
 import Waypoint from "./Waypoint"
 import BaseBrushTool from "./BaseBrushTool";
-import {Geometry, Shader, Model, GeometryUsage, Framebuffer} from "../../lib/GL"
+import {Geometry, Shader, Model, GeometryUsage, Framebuffer, BlendMode} from "../../lib/GL"
 import {context} from "../GLContext"
 import BrushSettings from "../views/BrushSettings"
 import TiledTexture from "./TiledTexture"
@@ -69,6 +69,7 @@ class BrushTool extends BaseBrushTool {
   model = new Model(context, this.dabsGeometry, this.shader)
   framebuffer = new Framebuffer(context)
   name = "Brush"
+  eraser = false
 
   start(waypoint: Waypoint) {
     const layerSize = this.picture.currentLayer.size
@@ -111,6 +112,8 @@ class BrushTool extends BaseBrushTool {
 
     this.framebuffer.use()
     const {tiledTexture} = this.picture.currentLayer
+
+    this.model.setBlendMode(this.eraser ? BlendMode.DstOut : BlendMode.SrcOver)
 
     for (const key of TiledTexture.keysForRect(rect)) {
       this.framebuffer.setTexture(tiledTexture.get(key))
