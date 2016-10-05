@@ -17,15 +17,18 @@ import Navigator from "./Navigator"
 import {Color} from "../../lib/Color"
 import {Vec2, Vec4} from "../../lib/Geometry"
 import NavigationKeyBinding from "./NavigationKeyBinding"
+import {remote} from "electron"
+const {Menu, app} = remote
 import "./MenuBar"
 import "../../styles/App.sass"
 
-function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool: Tool) => void}) {
+function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool: Tool) => void, onContextMenu: (tool: Tool, e: React.MouseEvent<Element>) => void}) {
   return (
     <div className="ToolSelection">{
       props.tools.map((tool, i) => {
         const onChange = () => props.onChange(tool)
-        return <label key={i}><input type="radio" checked={tool == props.currentTool} onChange={onChange}/>{tool.name}</label>
+        const onContextMenu = (e: React.MouseEvent<Element>) => props.onContextMenu(tool, e)
+        return <label key={i} onContextMenu={onContextMenu}><input type="radio" checked={tool == props.currentTool} onChange={onChange}/>{tool.name}</label>
       })
     }</div>
   )
@@ -84,6 +87,31 @@ class App extends React.Component<void, void> {
       }
       this.forceUpdate()
     }
+    const onToolContextMenu = (selectedTool: Tool, e: React.MouseEvent<Element>) => {
+      e.preventDefault()
+      const removeTool = () => {
+        this.tools = this.tools.filter((tool) => {
+          return tool !== selectedTool
+        })
+        this.forceUpdate()
+      }
+      const appendTool = (item: Tool) => {
+        return () => {
+          const index = this.tools.indexOf(selectedTool) + 1
+          this.tools.splice(index, 0, item)
+          this.forceUpdate()
+        }
+      }
+      const menuTemplate = [
+        {label: '追加', submenu: [
+          {label: "BrushTool", click: appendTool(new BrushTool())},
+          {label: "WatercolorTool", click: appendTool(new WatercolorTool())}
+        ]},
+        {label: '削除', click: removeTool}
+      ]
+      const menu = Menu.buildFromTemplate(menuTemplate)
+      menu.popup(remote.getCurrentWindow())
+    }
     const onBrushColorChange = (color: Color) => {
       this.brushColor = this.palette[this.paletteIndex] = color
       if(this.currentTool instanceof BaseBrushTool) {
@@ -102,7 +130,7 @@ class App extends React.Component<void, void> {
         <aside className="RightSidebar">
           <ColorPicker color={this.brushColor} onChange={onBrushColorChange} />
           <Palette palette={this.palette} paletteIndex={this.paletteIndex} onChange={onPaletteChange} />
-          <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} />
+          <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
           {currentTool.renderSettings()}
         </aside>
         <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
