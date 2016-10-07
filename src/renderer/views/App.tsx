@@ -112,9 +112,6 @@ class App extends React.Component<void, void> {
     const onPaletteChange = (e: React.MouseEvent<Element>, index: number) => {
       this.paletteIndex = index
       if(e.shiftKey) {
-        if(this.currentTool instanceof BaseBrushTool) {
-          const brushTool = this.currentTool as BrushTool
-        }
         this.palette[index] = this.brushColor
       } else {
         onBrushColorChange(this.palette[index])
