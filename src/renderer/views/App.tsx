@@ -42,18 +42,7 @@ class App extends React.Component<void, void> {
   overrideTool: Tool|undefined
   brushColor: Color
   paletteIndex: number = 0
-  palette: Color[] = [
-    Color.hsv(0, 0.74, 0.95),
-    Color.hsv(54, 0.58, 0.97),
-    Color.hsv(79, 0.59, 0.81),
-    Color.hsv(182, 0.4, 0.73),
-    Color.hsv(199, 0.27, 0.33),
-    Color.hsv(0, 0, 1),
-    Color.hsv(0, 0, 1),
-    Color.hsv(0, 0, 1),
-    Color.hsv(0, 0, 1),
-    Color.hsv(0, 0, 1)
-  ]
+  palette: Color[] = new Array(100).fill(Color.hsv(0, 0, 1))
 
   constructor() {
     super()
@@ -113,16 +102,20 @@ class App extends React.Component<void, void> {
       menu.popup(remote.getCurrentWindow())
     }
     const onBrushColorChange = (color: Color) => {
-      this.brushColor = this.palette[this.paletteIndex] = color
+      this.brushColor = color
       if(this.currentTool instanceof BaseBrushTool) {
         const brushTool = this.currentTool as BrushTool
         brushTool.color = color.toRgb()
       }
       this.forceUpdate()
     }
-    const onPaletteChange = (index: number) => {
+    const onPaletteChange = (e: React.MouseEvent<Element>, index: number) => {
       this.paletteIndex = index
-      onBrushColorChange(this.palette[index])
+      if(e.shiftKey) {
+        this.palette[index] = this.brushColor
+      } else {
+        onBrushColorChange(this.palette[index])
+      }
       this.forceUpdate()
     }
     return (
