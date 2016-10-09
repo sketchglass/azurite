@@ -24,13 +24,25 @@ import "../../styles/App.sass"
 
 function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool: Tool) => void, onContextMenu: (tool: Tool, e: React.MouseEvent<Element>) => void}) {
   return (
-    <div className="ToolSelection">{
-      props.tools.map((tool, i) => {
-        const onChange = () => props.onChange(tool)
-        const onContextMenu = (e: React.MouseEvent<Element>) => props.onContextMenu(tool, e)
-        return <label key={i} onContextMenu={onContextMenu}><input type="radio" checked={tool == props.currentTool} onChange={onChange}/>{tool.name}</label>
-      })
-    }</div>
+    <div className="ToolSelection">
+      <div className="ToolSelection_subtools">{
+        props.tools.filter(tool => { return !(tool instanceof BaseBrushTool) }).map((tool, i) => {
+          const selected = tool === props.currentTool
+          const className = (selected) ? "ToolSelection_button ToolSelection_button-selected" : "ToolSelection_button"
+          const onClick = () => props.onChange(tool)
+          return <button key={i} onClick={onClick} className={className}>{tool.name}</button>
+        })
+      }</div>
+      <div className="ToolSelection_brushes">{
+        props.tools.filter(tool => { return tool instanceof BaseBrushTool }).map((tool, i) => {
+          const onContextMenu = (e: React.MouseEvent<Element>) => props.onContextMenu(tool, e)
+          const selected = tool === props.currentTool
+          const className = (selected) ? "ToolSelection_button ToolSelection_button-selected" : "ToolSelection_button"
+          const onClick = () => props.onChange(tool)
+          return <button key={i} onContextMenu={onContextMenu} onClick={onClick} className={className}>{tool.name}</button>
+        })
+      }</div>
+    </div>
   )
 }
 
@@ -120,14 +132,14 @@ class App extends React.Component<void, void> {
     }
     return (
       <div className="App">
-        <aside className="RightSidebar">
+        <aside className="LeftSidebar">
           <ColorPicker color={this.brushColor} onChange={onBrushColorChange} />
           <Palette palette={this.palette} paletteIndex={this.paletteIndex} onChange={onPaletteChange} />
           <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
           {currentTool.renderSettings()}
         </aside>
         <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
-        <aside className="LeftSidebar">
+        <aside className="RightSidebar">
           <Navigator picture={picture} />
           <LayerList picture={picture} />
         </aside>

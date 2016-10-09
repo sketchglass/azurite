@@ -39,7 +39,7 @@ class BrushSettings extends React.Component<BrushSettingsProps, void> {
       this.forceUpdate()
     }
     return (
-      <table className="brush-settings">
+      <table className="BrushSettings">
         <tbody>
           <tr>
             <td>Color</td>
@@ -47,19 +47,19 @@ class BrushSettings extends React.Component<BrushSettingsProps, void> {
           </tr>
           <tr>
             <td>Opacity</td>
-            <td><input type="range" onChange={onOpacityChange} value={Math.round(tool.opacity * 100)} /> {Math.round(tool.opacity * 100)}%</td>
+            <td><input type="range" onChange={onOpacityChange} value={Math.round(tool.opacity * 100)} /></td><td>{Math.round(tool.opacity * 100)}%</td>
           </tr>
           <tr>
             <td>Width</td>
-            <td><input type="range" onChange={onWidthChange} value={tool.width} /> {tool.width}px</td>
+            <td><input type="range" onChange={onWidthChange} value={tool.width} /></td><td>{tool.width}px</td>
           </tr>
           <tr>
             <td>Min Width</td>
-            <td><input type="range" onChange={onMinWidthChange} value={Math.round(tool.minWidthRatio * 100)} /> {Math.round(tool.minWidthRatio * 100)}%</td>
+            <td><input type="range" onChange={onMinWidthChange} value={Math.round(tool.minWidthRatio * 100)} /></td><td>{Math.round(tool.minWidthRatio * 100)}%</td>
           </tr>
           <tr>
             <td>Softness</td>
-            <td><input type="range" onChange={onSoftnessChange} value={Math.round(tool.softness * 100)} /> {Math.round(tool.softness * 100)}%</td>
+            <td><input type="range" onChange={onSoftnessChange} value={Math.round(tool.softness * 100)} /></td><td>{Math.round(tool.softness * 100)}%</td>
           </tr>
           <tr>
             <td>Eraser</td>
