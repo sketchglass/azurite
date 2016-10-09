@@ -14,7 +14,7 @@ import LayerList from "./LayerList"
 import ColorPicker from "./ColorPicker"
 import Palette from "./Palette"
 import Navigator from "./Navigator"
-import {Color} from "../../lib/Color"
+import {HSVColor} from "../../lib/Color"
 import {Vec2, Vec4} from "../../lib/Geometry"
 import NavigationKeyBinding from "./NavigationKeyBinding"
 import {remote} from "electron"
@@ -52,9 +52,9 @@ class App extends React.Component<void, void> {
   tools: Tool[] = [new BrushTool(), new WatercolorTool(), new PanTool(), new ZoomInTool(), new ZoomOutTool(), new RotateTool()]
   currentTool = this.tools[0]
   overrideTool: Tool|undefined
-  brushColor: Color
+  brushColor: HSVColor
   paletteIndex: number = 0
-  palette: Color[] = new Array(100).fill(Color.hsv(0, 0, 1))
+  palette: HSVColor[] = new Array(100).fill(new HSVColor(0, 0, 1))
 
   constructor() {
     super()
@@ -113,7 +113,7 @@ class App extends React.Component<void, void> {
       const menu = Menu.buildFromTemplate(menuTemplate)
       menu.popup(remote.getCurrentWindow())
     }
-    const onBrushColorChange = (color: Color) => {
+    const onBrushColorChange = (color: HSVColor) => {
       this.brushColor = color
       if(this.currentTool instanceof BaseBrushTool) {
         const brushTool = this.currentTool as BrushTool

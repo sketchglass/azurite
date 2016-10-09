@@ -85,16 +85,13 @@ function rgb2hsv(r: number, g: number, b: number) {
 }
 
 export
-class Color extends Vec4{
+class HSVColor {
+  // h: 0 ... 360
+  // s: 0 ... 1
+  // v: 0 ... 1
+  // a: 0 ... 1
+  constructor(public h: number, public s: number, public v: number, public a = 1) {
 
-  get h() {
-    return this.x
-  }
-  get s() {
-    return this.y
-  }
-  get v() {
-    return this.z
   }
 
   // r: 0 ... 1
@@ -103,15 +100,7 @@ class Color extends Vec4{
   // a: 0 ... 1
   static rgb(r: number, g: number, b: number, a = 1) {
     const hsv = rgb2hsv(r, g, b)
-    return new Color(hsv.h, hsv.s, hsv.v, a)
-  }
-
-  // h: 0 ... 360
-  // s: 0 ... 1
-  // v: 0 ... 1
-  // a: 0 ... 1
-  static hsv(h: number, s: number, v: number, a = 1) {
-    return new Color(h, s, v, a)
+    return new HSVColor(hsv.h, hsv.s, hsv.v, a)
   }
 
   toString() {

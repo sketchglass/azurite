@@ -1,9 +1,9 @@
 import React = require("react")
-import {Color} from "../../lib/Color"
+import {HSVColor} from "../../lib/Color"
 import "../../styles/Palette.sass"
 
 interface PaletteProps {
-  palette: Color[]
+  palette: HSVColor[]
   paletteIndex: number
   onChange: (event: React.MouseEvent<Element>, index: number) => void
 }
@@ -13,7 +13,7 @@ function Palette(props: PaletteProps) {
   const {palette, paletteIndex} = props
 
   const rowLength = 10
-  const rows: Color[][] = []
+  const rows: HSVColor[][] = []
   for (let i = 0; i < palette.length; i += rowLength) {
     rows.push(palette.slice(i, i + rowLength))
   }
