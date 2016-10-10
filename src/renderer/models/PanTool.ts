@@ -1,4 +1,4 @@
-import {Vec2, Vec4, Transform} from "../../lib/Geometry"
+import {Vec2, Transform} from "paintvec"
 import Tool from './Tool'
 import Waypoint from "./Waypoint"
 
@@ -8,16 +8,16 @@ class PanTool extends Tool {
   cursor = "all-scroll"
   originalPos = new Vec2(0)
   originalTranslation = new Vec2(0)
-  originalRendererToPicture = Transform.identity
+  originalRendererToPicture = new Transform()
 
   start(waypoint: Waypoint, rendererPos: Vec2) {
     this.originalRendererToPicture = this.renderer.transforms.rendererToPicture
-    this.originalPos = this.originalRendererToPicture.transform(rendererPos)
+    this.originalPos = rendererPos.transform(this.originalRendererToPicture)
     this.originalTranslation = this.picture.navigation.translation
   }
 
   move(waypoint: Waypoint, rendererPos: Vec2) {
-    const pos = this.originalRendererToPicture.transform(rendererPos)
+    const pos = rendererPos.transform(this.originalRendererToPicture)
     const offset = pos.sub(this.originalPos)
     const translation = this.originalTranslation.add(offset)
     const {scale, rotation} = this.picture.navigation

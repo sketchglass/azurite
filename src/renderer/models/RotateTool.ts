@@ -1,4 +1,4 @@
-import {Vec2, Vec4, Transform} from "../../lib/Geometry"
+import {Vec2} from "paintvec"
 import Tool from './Tool'
 import Waypoint from "./Waypoint"
 
@@ -20,14 +20,14 @@ class RotateTool extends Tool {
   originalRotation = 0
 
   start(waypoint: Waypoint, rendererPos: Vec2) {
-    const offset = rendererPos.sub(this.renderer.size.mul(0.5).round())
-    this.originalAngle = offset.atan2()
+    const offset = rendererPos.sub(this.renderer.size.mulScalar(0.5).round())
+    this.originalAngle = offset.angle()
     this.originalRotation = this.picture.navigation.rotation
   }
 
   move(waypoint: Waypoint, rendererPos: Vec2) {
-    const offset = rendererPos.sub(this.renderer.size.mul(0.5).round())
-    const angle = offset.atan2()
+    const offset = rendererPos.sub(this.renderer.size.mulScalar(0.5).round())
+    const angle = offset.angle()
     const {translation, scale} = this.picture.navigation
     const rotation = modRotation(angle - this.originalAngle + this.originalRotation)
     this.picture.navigation = {translation, scale, rotation}

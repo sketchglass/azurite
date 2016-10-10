@@ -1,4 +1,5 @@
-import {Vec2, catmullRom, centripetalCatmullRom} from "../../lib/Geometry"
+import {Vec2} from "paintvec"
+import {catmullRom, centripetalCatmullRom} from "../../lib/Geometry"
 
 export default
 class Waypoint {
@@ -43,7 +44,7 @@ class Waypoint {
     }
 
     const waypoints: Waypoint[] = []
-    const diffPerLen = diff.div(len)
+    const diffPerLen = diff.divScalar(len)
     const pressurePerLen = (end.pressure - start.pressure) / len
     let remaining = len
     let spacing = offset
@@ -57,7 +58,7 @@ class Waypoint {
       }
       remaining -= spacing
       const current = len - remaining
-      const pos = start.pos.add(diffPerLen.mul(current))
+      const pos = start.pos.add(diffPerLen.mulScalar(current))
       const pressure = start.pressure + pressurePerLen * current
       const waypoint = {pos, pressure}
       waypoints.push(waypoint)
