@@ -1,9 +1,9 @@
-import {Vec2, Vec4, Transform, unionRect, intBoundingRect} from "../../lib/Geometry"
+import {Vec2, Rect, Transform} from "paintvec"
+import {Texture, TextureDrawTarget, Color} from "paintgl"
 import Waypoint from "./Waypoint"
 import Tool from "./Tool"
 import Layer from "./Layer"
 import TiledTexture from "./TiledTexture"
-import {Framebuffer, Texture, DataType} from "../../lib/GL"
 import {context} from "../GLContext"
 import {copyTexture, copyNewTexture, readTextureFloat} from "../GLUtil"
 import {float32ArrayTo16} from "../../lib/Float"
@@ -17,7 +17,7 @@ abstract class BaseBrushTool extends Tool {
   // brush width (diameter)
   width = 10
   // brush color RGBA
-  color = new Vec4(0, 0, 0, 1)
+  color = new Color(0, 0, 0, 1)
   // brush opacity
   opacity = 1
   // distance used to soften edge, compared to brush radius
@@ -28,18 +28,18 @@ abstract class BaseBrushTool extends Tool {
   spacingRatio = 0.1
 
   oldTiledTexture: TiledTexture|undefined
-  originalTexture = new Texture(context, new Vec2(0), DataType.HalfFloat)
-  editedRect: Vec4|undefined
+  originalTexture = new Texture(context, {size: new Vec2(0), pixelType: "half-float"})
+  editedRect: Rect|undefined
 
-  addEditedRect(rect: Vec4) {
+  addEditedRect(rect: Rect) {
     if (this.editedRect) {
-      this.editedRect = unionRect(this.editedRect, rect)
+      this.editedRect = this.editedRect.union(rect)
     } else {
       this.editedRect = rect
     }
   }
 
-  renderRect(rect: Vec4) {
+  renderRect(rect: Rect) {
     this.picture.layerBlender.render(rect)
     this.renderer.render(rect)
   }
@@ -67,7 +67,7 @@ abstract class BaseBrushTool extends Tool {
     lastWaypoints.push(waypoint)
 
     if (lastWaypoints.length <= 2) {
-      return new Vec4(0)
+      return
     }
     const getSpacing = this.brushSpacing.bind(this)
     const {waypoints, nextOffset} = (() => {
@@ -94,7 +94,7 @@ abstract class BaseBrushTool extends Tool {
       const getSpacing = this.brushSpacing.bind(this)
       const {lastWaypoints} = this
       if (lastWaypoints.length < 2) {
-        return new Vec4(0)
+        return
       }
       const {waypoints} = (() => {
         if (lastWaypoints.length == 2) {
@@ -128,10 +128,10 @@ abstract class BaseBrushTool extends Tool {
     this.editedRect = undefined
     const {tiledTexture} = this.picture.currentLayer
     // can't read directly from half float texture so read it to float texture first
-    const oldTexture = new Texture(context, rect.size, DataType.Float)
-    const newTexture = new Texture(context, rect.size, DataType.Float)
-    this.oldTiledTexture!.readToTexture(oldTexture, rect.xy)
-    tiledTexture.readToTexture(newTexture, rect.xy)
+    const oldTexture = new Texture(context, {size: rect.size, pixelType: "float"})
+    const newTexture = new Texture(context, {size: rect.size, pixelType: "float"})
+    this.oldTiledTexture!.readToTexture(oldTexture, rect.topLeft)
+    tiledTexture.readToTexture(newTexture, rect.topLeft)
     const oldData = float32ArrayTo16(readTextureFloat(oldTexture))
     const newData = float32ArrayTo16(readTextureFloat(newTexture))
     oldTexture.dispose()
@@ -149,20 +149,28 @@ abstract class BaseBrushTool extends Tool {
 
   private _rectForWaypoints(waypoints: Waypoint[]) {
     const rectWidth = this.width + 2
-    const rects = waypoints.map(w => new Vec4(w.pos.x - rectWidth * 0.5, w.pos.y - rectWidth * 0.5, rectWidth, rectWidth))
-    return intBoundingRect(unionRect(...rects))
+    const rectSize = new Vec2(rectWidth)
+    const rects = waypoints.map(w => {
+      const topLeft = new Vec2(w.pos.x - rectWidth * 0.5, w.pos.y - rectWidth * 0.5)
+      return new Rect(topLeft, topLeft.add(rectSize))
+    })
+    return Rect.union(...rects).intBounding()
   }
 
-  abstract renderWaypoints(waypoints: Waypoint[], rect: Vec4): void
+  abstract renderWaypoints(waypoints: Waypoint[], rect: Rect): void
 }
 
 class BrushUndoCommand {
-  constructor(public layer: Layer, public rect: Vec4, public oldData: Uint16Array, public newData: Uint16Array) {
+  constructor(public layer: Layer, public rect: Rect, public oldData: Uint16Array, public newData: Uint16Array) {
   }
 
   replace(data: Uint16Array) {
-    const texture = new Texture(context, this.rect.size, DataType.HalfFloat, data)
-    this.layer.tiledTexture.writeTexture(texture, this.rect.xy)
+    const texture = new Texture(context, {
+      size: this.rect.size,
+      pixelType: "half-float",
+      data
+    })
+    this.layer.tiledTexture.writeTexture(texture, this.rect.topLeft)
     texture.dispose()
     this.layer.updateThumbnail()
     this.layer.picture.changed.next()
