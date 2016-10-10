@@ -5,7 +5,7 @@ import BaseBrushTool from "../models/BaseBrushTool"
 import BrushTool from "../models/BrushTool"
 import WatercolorTool from "../models/WatercolorTool"
 import PanTool from "../models/PanTool"
-import {ZoomInTool, ZoomOutTool} from "../models/ZoomTool"
+import {ZoomTool} from "../models/ZoomTool"
 import RotateTool from "../models/RotateTool"
 import BrushSettings from "./BrushSettings"
 import WatercolorSettings from "./WatercolorSettings"
@@ -49,7 +49,7 @@ function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool
 export default
 class App extends React.Component<void, void> {
   picture = new Picture()
-  tools: Tool[] = [new BrushTool(), new WatercolorTool(), new PanTool(), new ZoomInTool(), new ZoomOutTool(), new RotateTool()]
+  tools: Tool[] = [new BrushTool(), new WatercolorTool(), new PanTool(), new ZoomTool(),  new RotateTool()]
   currentTool = this.tools[0]
   overrideTool: Tool|undefined
   brushColor: HSVColor

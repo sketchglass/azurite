@@ -72,3 +72,33 @@ class ZoomOutTool extends Tool {
   end() {
   }
 }
+
+const modScale = (scale: number) => {
+  return (scale < 0.25) ? 0.25 : (scale > 32) ? 32 : scale
+}
+
+export
+class ZoomTool extends Tool {
+  name = "Zoom"
+  cursor = "zoom-in"
+  originalScale = 1.0
+  startPos: Vec2
+
+  start(waypoint: Waypoint, rendererPos: Vec2) {
+    const {scale} = this.picture.navigation
+    this.originalScale = scale
+    this.startPos = rendererPos
+  }
+
+  move(waypoint: Waypoint, rendererPos: Vec2) {
+    let {translation, rotation} = this.picture.navigation
+    const offset = rendererPos.sub(this.startPos)
+    const distance = Math.pow(2, offset.x / 100)
+    const scale = modScale(this.originalScale * distance)
+    this.picture.navigation = {translation, scale, rotation}
+    this.picture.changed.next()
+  }
+
+  end() {
+  }
+}

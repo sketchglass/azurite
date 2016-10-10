@@ -1,5 +1,5 @@
 import PanTool from "../models/PanTool"
-import {ZoomInTool, ZoomOutTool} from "../models/ZoomTool"
+import {ZoomTool} from "../models/ZoomTool"
 import RotateTool from "../models/RotateTool"
 
 const keys = [" ", "Control", "Meta", "Alt", "Shift"]
@@ -29,9 +29,7 @@ class NavigationKeyBinding {
       if (pressedKeys.has("Shift")) {
         onToolChange(RotateTool)
       } else if (pressedKeys.has("Meta") || pressedKeys.has("Control")) {
-        onToolChange(ZoomInTool)
-      } else if (pressedKeys.has("Alt")) {
-        onToolChange(ZoomOutTool)
+        onToolChange(ZoomTool)
       } else {
         onToolChange(PanTool)
       }
