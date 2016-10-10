@@ -93,8 +93,8 @@ class ZoomTool extends Tool {
   move(waypoint: Waypoint, rendererPos: Vec2) {
     let {translation, rotation} = this.picture.navigation
     const offset = rendererPos.sub(this.startPos)
-    const distance = offset.x
-    const scale = modScale(this.originalScale + distance*0.01)
+    const distance = Math.pow(2, offset.x / 100)
+    const scale = modScale(this.originalScale * distance)
     this.picture.navigation = {translation, scale, rotation}
     this.picture.changed.next()
   }
