@@ -96,6 +96,15 @@ class Color extends Vec4{
   get v() {
     return this.z
   }
+  set h(val) {
+    this.x = val
+  }
+  set s(val) {
+    this.y = val
+  }
+  set v(val) {
+    this.z = val
+  }
 
   // r: 0 ... 1
   // g: 0 ... 1
