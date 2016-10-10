@@ -88,7 +88,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const y = ev.clientY - rect.top
     const pressure = ev.pressure == undefined ? 1.0 : ev.pressure
     const rendererPos = new Vec2(x, y).mulScalar(window.devicePixelRatio)
-    const pos = this.renderer.transforms.rendererToPicture.transform(rendererPos)
+    const pos = rendererPos.transform(this.renderer.transforms.rendererToPicture)
     const waypoint = new Waypoint(pos, pressure)
     return {waypoint, rendererPos}
   }
