@@ -15,7 +15,7 @@ import ColorPicker from "./ColorPicker"
 import Palette from "./Palette"
 import Navigator from "./Navigator"
 import {HSVColor} from "../../lib/Color"
-import {Vec2, Vec4} from "../../lib/Geometry"
+import {Vec2} from "paintvec"
 import NavigationKeyBinding from "./NavigationKeyBinding"
 import {remote} from "electron"
 const {Menu, app} = remote

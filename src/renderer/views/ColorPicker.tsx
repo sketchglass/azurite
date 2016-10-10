@@ -1,5 +1,5 @@
 import React = require("react")
-import {Vec2} from "../../lib/Geometry"
+import {Vec2} from "paintvec"
 import {HSVColor} from "../../lib/Color"
 import {mouseOffsetPos} from "./util"
 
@@ -95,7 +95,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
   }
 
   posToHue(pos: Vec2) {
-    return atan2ToHue(pos.atan2());
+    return atan2ToHue(pos.angle());
   }
   posToSV(pos: Vec2) {
     const s = clamp(pos.x / squareSize + 0.5, 0, 1)
