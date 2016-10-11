@@ -154,7 +154,7 @@ abstract class BaseBrushTool extends Tool {
       const topLeft = new Vec2(w.pos.x - rectWidth * 0.5, w.pos.y - rectWidth * 0.5)
       return new Rect(topLeft, topLeft.add(rectSize))
     })
-    return Rect.union(...rects).intBounding()
+    return Rect.union(...rects)!.intBounding()
   }
 
   abstract renderWaypoints(waypoints: Waypoint[], rect: Rect): void
