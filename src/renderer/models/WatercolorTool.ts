@@ -23,7 +23,7 @@ class SampleShader extends Shader {
 
       void paintgl_additional() {
         vRadius = uBrushRadius * (uMinWidthRatio + (1.0 - uMinWidthRatio) * uPressure);
-        vOffset = aPosition - uSampleSize;
+        vOffset = aPosition - uSampleSize * 0.5;
       }
     `
   }
@@ -35,7 +35,7 @@ class SampleShader extends Shader {
       uniform highp vec2 uBrushPos;
       uniform float uSoftness;
       uniform sampler2D uOriginal;
-      uniform lowp int uMode;
+      uniform lowp float uMode;
 
       varying highp vec2 vOffset;
       varying highp vec2 vTexCoord;
@@ -52,7 +52,7 @@ class SampleShader extends Shader {
       void main(void) {
         float r = distance(fract(uBrushPos), vOffset);
 
-        if (uMode == ${SampleModes.Shape}) {
+        if (uMode == ${SampleModes.Shape}.0) {
           gl_FragColor = vec4(calcOpacity(r));
         } else {
           gl_FragColor = fetchOriginal() * calcOpacity(r);
@@ -152,6 +152,7 @@ class WatercolorTool extends BaseBrushTool {
 
     this.originalTexture.size = new Vec2(this.sampleSize)
     this.sampleTexture.size = new Vec2(this.sampleSize * 2, this.sampleSize)
+    this.shape.rect = new Rect(new Vec2(), new Vec2(this.sampleSize))
 
     return super.start(waypoint)
   }
@@ -171,16 +172,16 @@ class WatercolorTool extends BaseBrushTool {
 
       shape.shader = SampleShader
 
-      shape.uniforms["uSampleOriginal"] = this.originalTexture
+      shape.uniforms["uOriginal"] = this.originalTexture
 
       // draw brush shape in left of sample texture
       shape.uniforms["uMode"] = SampleModes.Shape
-      shape.transform = Transform.translate(topLeft.neg())
+      shape.transform = new Transform()
       this.sampleDrawTarget.draw(shape)
 
       // draw original colors clipped by brush shape in right of sample texture
       shape.uniforms["uMode"] = SampleModes.Clip
-      shape.transform = Transform.translate(topLeft.neg().add(new Vec2(this.sampleSize, 0)))
+      shape.transform = Transform.translate(new Vec2(this.sampleSize, 0))
       this.sampleDrawTarget.draw(shape)
 
       this.sampleTexture.generateMipmap()
@@ -191,7 +192,7 @@ class WatercolorTool extends BaseBrushTool {
 
       for (const key of TiledTexture.keysForRect(rect)) {
         this.drawTarget.texture = tiledTexture.get(key)
-        shape.transform = Transform.translate(key.mulScalar(-TiledTexture.tileSize))
+        shape.transform = Transform.translate(topLeft.sub(key.mulScalar(TiledTexture.tileSize)))
         this.drawTarget.draw(shape)
       }
     }
