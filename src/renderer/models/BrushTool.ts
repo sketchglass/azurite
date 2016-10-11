@@ -24,7 +24,7 @@ class BrushShader extends Shader {
       void paintgl_additional() {
         vOffset = aPosition - aCenter;
 
-        float brushSize = uBrushSize * (uMinWidthRatio + (1.0 - uMinWidthRatio) * aPressure);
+        float brushSize = uBrushSize * (uMinWidthRatio + (1.0 - uMinWidthRatio) * aTexCoord.x);
         float radius = brushSize * 0.5;
         vRadius = radius;
 
@@ -57,7 +57,7 @@ class BrushShader extends Shader {
 
 export default
 class BrushTool extends BaseBrushTool {
-  shape = new Shape(context, {positions: [], texCoords: []})
+  shape = new Shape(context, {positions: [], texCoords: [], shader: BrushShader})
   drawTarget = new TextureDrawTarget(context)
   name = "Brush"
   eraser = false
@@ -75,12 +75,6 @@ class BrushTool extends BaseBrushTool {
   }
 
   renderWaypoints(waypoints: Waypoint[], rect: Rect) {
-    const offsets = [
-      new Vec2(-1,-1),
-      new Vec2(-1,1),
-      new Vec2(1,-1),
-      new Vec2(1,1)
-    ]
     const relIndices = [
       0, 1, 2,
       1, 2, 3
@@ -109,6 +103,7 @@ class BrushTool extends BaseBrushTool {
     this.shape.positions = positions
     this.shape.texCoords = texCoords
     this.shape.setVec2Attributes("aCenter", centers)
+    this.shape.indices = indices
 
     const {tiledTexture} = this.picture.currentLayer
 
