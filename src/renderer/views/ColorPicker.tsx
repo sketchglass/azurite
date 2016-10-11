@@ -1,6 +1,6 @@
 import React = require("react")
-import {Vec2} from "../../lib/Geometry"
-import {Color} from "../../lib/Color"
+import {Vec2} from "paintvec"
+import {HSVColor} from "../../lib/Color"
 import {mouseOffsetPos} from "./util"
 
 const wheelWidth = 16
@@ -8,8 +8,8 @@ const squareSize = 96
 const wheelSize = squareSize * 1.5 + wheelWidth * 2
 
 interface ColorPickerProps {
-  color: Color
-  onChange: (color: Color) => void
+  color: HSVColor
+  onChange: (color: HSVColor) => void
 }
 
 function atan2ToHue(arg: number) { // atan2: -PI ... PI
@@ -85,17 +85,17 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
   onHueChanged(h: number) {
     const {s, v} = this.props.color
     this.update()
-    this.props.onChange(Color.hsv(h, s, v))
+    this.props.onChange(new HSVColor(h, s, v))
   }
   onSVChanged(sv: {s: number, v: number}) {
     const {s, v} = sv
     const {h} = this.props.color
     this.update()
-    this.props.onChange(Color.hsv(h, s, v))
+    this.props.onChange(new HSVColor(h, s, v))
   }
 
   posToHue(pos: Vec2) {
-    return atan2ToHue(pos.atan2());
+    return atan2ToHue(pos.angle());
   }
   posToSV(pos: Vec2) {
     const s = clamp(pos.x / squareSize + 0.5, 0, 1)
@@ -106,7 +106,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
   drawSquare() {
     const image = this.squareGradient
     const center = new Vec2(squareSize / 2, squareSize / 2)
-    const temporaryColor = new Color(0, 0, 0, 1)
+    const temporaryColor = new HSVColor(0, 0, 0, 1)
     for (let y = 0; y < squareSize; ++y) {
       for (let x = 0; x < squareSize; ++x) {
         const pos = new Vec2(x + 0.5, y + 0.5).sub(center)
@@ -131,7 +131,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
       for (let x = 0; x < wheelSize; ++x) {
         const pos = new Vec2(x + 0.5, y + 0.5).sub(center)
         const hue = this.posToHue(pos)
-        const color = Color.hsv(hue, 1, 1).toRgb()
+        const color = new HSVColor(hue, 1, 1).toRgb()
         setPixel(image, x, y, color)
       }
     }
@@ -196,7 +196,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
 
     context.lineWidth = 2
     context.strokeStyle = "white"
-    context.fillStyle = Color.hsv(h, 1, 1).toString()
+    context.fillStyle = new HSVColor(h, 1, 1).toString()
     context.beginPath()
     context.arc(x, y, 8, 0, 2 * Math.PI)
     context.fill()

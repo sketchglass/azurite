@@ -1,4 +1,4 @@
-import {Vec2} from "../../lib/Geometry"
+import {Vec2} from "paintvec"
 
 interface Navigation {
   translation: Vec2

@@ -1,7 +1,7 @@
 import Picture from "./Picture"
 import Renderer from "../views/Renderer"
 import Waypoint from "./Waypoint"
-import {Vec4, Vec2} from "../../lib/Geometry"
+import {Vec2} from "paintvec"
 import React = require("react")
 
 abstract class Tool {

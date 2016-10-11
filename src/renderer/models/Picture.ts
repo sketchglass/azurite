@@ -1,6 +1,6 @@
+import {Vec2} from "paintvec"
+import {Texture} from "paintgl"
 import Layer from "./Layer"
-import {Texture, Framebuffer} from "../../lib/GL"
-import {Vec2, Vec4} from "../../lib/Geometry"
 import {Subject} from "@reactivex/rxjs/dist/cjs/Subject"
 import ThumbnailGenerator from "./ThumbnailGenerator"
 import LayerBlender from "./LayerBlender"

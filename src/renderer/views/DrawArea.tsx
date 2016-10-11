@@ -1,6 +1,6 @@
 import React = require("react")
 import Picture from "../models/Picture"
-import {Vec2, Vec4, Transform} from "../../lib/Geometry"
+import {Vec2, Transform} from "paintvec"
 import Tool from "../models/Tool"
 import Waypoint from "../models/Waypoint"
 import {TabletEvent} from "receive-tablet-event"
@@ -66,7 +66,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       width: Math.round(rect.width),
       height: Math.round(rect.height),
     }
-    const size = new Vec2(roundRect.width, roundRect.height).mul(window.devicePixelRatio)
+    const size = new Vec2(roundRect.width, roundRect.height).mulScalar(window.devicePixelRatio)
     this.renderer.resize(size)
 
     IPCChannels.setTabletCaptureArea.send(roundRect)
@@ -87,8 +87,8 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const x = ev.clientX - rect.left
     const y = ev.clientY - rect.top
     const pressure = ev.pressure == undefined ? 1.0 : ev.pressure
-    const rendererPos = new Vec2(x, y).mul(window.devicePixelRatio)
-    const pos = this.renderer.transforms.rendererToPicture.transform(rendererPos)
+    const rendererPos = new Vec2(x, y).mulScalar(window.devicePixelRatio)
+    const pos = rendererPos.transform(this.renderer.transforms.rendererToPicture)
     const waypoint = new Waypoint(pos, pressure)
     return {waypoint, rendererPos}
   }

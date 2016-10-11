@@ -1,4 +1,4 @@
-import {Vec2} from "../../lib/Geometry"
+import {Vec2} from "paintvec"
 import Tool from './Tool'
 import Waypoint from "./Waypoint"
 

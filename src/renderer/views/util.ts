@@ -1,4 +1,4 @@
-import {Vec2} from "../../lib/Geometry"
+import {Vec2} from "paintvec"
 
 export
 function mouseOffsetPos(ev: {clientX: number, clientY: number}, element: Element) {

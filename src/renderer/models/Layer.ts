@@ -1,6 +1,6 @@
-import {Vec2, Transform} from "../../lib/Geometry"
+import {Vec2} from "paintvec"
+import {Texture} from "paintgl"
 import Picture from "./Picture"
-import {Texture, DataType} from "../../lib/GL"
 import {context} from "../GLContext"
 import TiledTexture from "./TiledTexture"
 
