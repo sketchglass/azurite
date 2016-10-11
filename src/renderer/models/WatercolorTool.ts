@@ -1,5 +1,5 @@
 import {Vec2, Rect, Transform} from "paintvec"
-import {Shader, RectShape, Texture, TextureDrawTarget} from "paintgl"
+import {Model, Shader, RectShape, Texture, TextureDrawTarget} from "paintgl"
 import Waypoint from "./Waypoint"
 import BaseBrushTool from "./BaseBrushTool"
 import {context} from "../GLContext"
@@ -126,11 +126,13 @@ class WatercolorTool extends BaseBrushTool {
 
   name = "Watercolor"
 
-  shape = new RectShape(context, {rect: new Rect(), blendMode: "src"})
+  shape = new RectShape(context, {rect: new Rect()})
+  model = new Model(context, {shape: this.shape, blendMode: "src", shader: WatercolorShader})
   drawTarget = new TextureDrawTarget(context)
   originalTexture = new Texture(context, {pixelType: "half-float"})
   shapeClipTexture = new Texture(context, {pixelType: "half-float", filter: "mipmap-nearest"})
   shapeClipDrawTarget = new TextureDrawTarget(context, this.shapeClipTexture)
+  shapeClipModel = new Model(context, {shape: this.shape, blendMode: "src", shader: ShapeClipShader})
 
   sampleSize = 0
 
@@ -138,13 +140,16 @@ class WatercolorTool extends BaseBrushTool {
     const layerSize = this.picture.currentLayer.size
     this.sampleSize = Math.pow(2, Math.ceil(Math.log2(this.width + 2)))
 
-    this.shape.uniforms = {
-      uLayerSize: layerSize,
+    this.model.uniforms = {
       uSampleSize: this.sampleSize,
       uBlending: this.blending,
       uThickness: this.thickness,
       uColor: this.color,
       uOpacity: this.opacity,
+    }
+
+    this.shapeClipModel.uniforms = {
+      uSampleSize: this.sampleSize,
       uBrushRadius: this.width * 0.5,
       uSoftness: this.softness,
       uMinWidthRatio: this.minWidthRatio,
@@ -160,39 +165,37 @@ class WatercolorTool extends BaseBrushTool {
   renderWaypoints(waypoints: Waypoint[], rect: Rect) {
     const {tiledTexture} = this.picture.currentLayer
 
-    const {shape} = this
-
     for (let i = 0; i < waypoints.length; ++i) {
       const waypoint = waypoints[i]
-      shape.uniforms["uBrushPos"] = waypoint.pos
-      shape.uniforms["uPressure"] = waypoint.pressure
+      this.shapeClipModel.uniforms["uBrushPos"] = waypoint.pos
+      this.shapeClipModel.uniforms["uPressure"] = waypoint.pressure
+      this.model.uniforms["uPressure"] = waypoint.pressure
+
       const topLeft = waypoint.pos.floor().sub(new Vec2(this.sampleSize / 2))
 
       tiledTexture.readToTexture(this.originalTexture, topLeft)
 
-      shape.shader = ShapeClipShader
-
-      shape.uniforms["uOriginalTexture"] = this.originalTexture
+      this.shapeClipModel.uniforms["uOriginalTexture"] = this.originalTexture
 
       // draw brush shape in left of sample texture
-      shape.uniforms["uMode"] = ShapeClipModes.Shape
-      shape.transform = new Transform()
-      this.shapeClipDrawTarget.draw(shape)
+      this.shapeClipModel.uniforms["uMode"] = ShapeClipModes.Shape
+      this.shapeClipModel.transform = new Transform()
+      this.shapeClipDrawTarget.draw(this.shapeClipModel)
 
       // draw original colors clipped by brush shape in right of sample texture
-      shape.uniforms["uMode"] = ShapeClipModes.Clip
-      shape.transform = Transform.translate(new Vec2(this.sampleSize, 0))
-      this.shapeClipDrawTarget.draw(shape)
+      this.shapeClipModel.uniforms["uMode"] = ShapeClipModes.Clip
+      this.shapeClipModel.transform = Transform.translate(new Vec2(this.sampleSize, 0))
+      this.shapeClipDrawTarget.draw(this.shapeClipModel)
 
       this.shapeClipTexture.generateMipmap()
 
-      shape.shader = WatercolorShader
-      shape.uniforms["uShapeClipTexture"] = this.shapeClipTexture
+      this.model.uniforms["uOriginalTexture"] = this.originalTexture
+      this.model.uniforms["uShapeClipTexture"] = this.shapeClipTexture
 
       for (const key of TiledTexture.keysForRect(rect)) {
         this.drawTarget.texture = tiledTexture.get(key)
-        shape.transform = Transform.translate(topLeft.sub(key.mulScalar(TiledTexture.tileSize)))
-        this.drawTarget.draw(shape)
+        this.model.transform = Transform.translate(topLeft.sub(key.mulScalar(TiledTexture.tileSize)))
+        this.drawTarget.draw(this.model)
       }
     }
   }

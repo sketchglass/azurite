@@ -1,5 +1,5 @@
 import {Vec2, Rect, Transform} from "paintvec"
-import {RectShape, TextureShader, CanvasDrawTarget, Color} from "paintgl"
+import {Model, RectShape, TextureShader, CanvasDrawTarget, Color} from "paintgl"
 import {context, canvas} from "../GLContext"
 import Picture from "../models/Picture"
 import Navigation from "../models/Navigation"
@@ -7,6 +7,7 @@ import Navigation from "../models/Navigation"
 export default
 class Renderer {
   shape: RectShape
+  model: Model
   size = new Vec2(100, 100)
 
   transforms = {
@@ -19,6 +20,9 @@ class Renderer {
     this.shape = new RectShape(context, {
       usage: "static",
       rect: new Rect(new Vec2(), picture.size),
+    })
+    this.model = new Model(context, {
+      shape: this.shape,
       shader: TextureShader,
       uniforms: {
         texture: picture.layerBlender.blendedTexture,
@@ -56,6 +60,6 @@ class Renderer {
     }
     drawTarget.clear(new Color(240/255, 240/255, 240/255, 1))
     drawTarget.transform = this.transforms.pictureToRenderer
-    drawTarget.draw(this.shape)
+    drawTarget.draw(this.model)
   }
 }

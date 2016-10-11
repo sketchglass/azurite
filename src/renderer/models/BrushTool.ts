@@ -1,5 +1,5 @@
 import {Vec2, Rect, Transform} from "paintvec"
-import {TextureDrawTarget, Shape, Shader}  from "paintgl"
+import {Model, TextureDrawTarget, Shape, Shader}  from "paintgl"
 import Waypoint from "./Waypoint"
 import BaseBrushTool from "./BaseBrushTool";
 import {context} from "../GLContext"
@@ -57,13 +57,21 @@ class BrushShader extends Shader {
 
 export default
 class BrushTool extends BaseBrushTool {
-  shape = new Shape(context, {positions: [], texCoords: [], shader: BrushShader})
+  shape: Shape
+  model: Model
   drawTarget = new TextureDrawTarget(context)
   name = "Brush"
   eraser = false
 
+  constructor() {
+    super()
+    this.shape = new Shape(context)
+    this.shape.setVec2Attributes("aCenter", [])
+    this.model = new Model(context, {shape: this.shape, shader: BrushShader})
+  }
+
   start(waypoint: Waypoint) {
-    this.shape.uniforms = {
+    this.model.uniforms = {
       uBrushSize: this.width,
       uColor: this.color,
       uOpacity: this.opacity,
@@ -107,12 +115,12 @@ class BrushTool extends BaseBrushTool {
 
     const {tiledTexture} = this.picture.currentLayer
 
-    this.shape.blendMode = this.eraser ? "dst-out" : "src-over"
+    this.model.blendMode = this.eraser ? "dst-out" : "src-over"
 
     for (const key of TiledTexture.keysForRect(rect)) {
       this.drawTarget.texture = tiledTexture.get(key)
-      this.shape.transform = Transform.translate(key.mulScalar(-TiledTexture.tileSize))
-      this.drawTarget.draw(this.shape)
+      this.model.transform = Transform.translate(key.mulScalar(-TiledTexture.tileSize))
+      this.drawTarget.draw(this.model)
     }
   }
 

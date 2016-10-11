@@ -1,5 +1,5 @@
 import {Vec2, Rect} from "paintvec"
-import {Texture, Shader, RectShape, TextureDrawTarget, Color} from "paintgl"
+import {Model, Texture, Shader, RectShape, TextureDrawTarget, Color} from "paintgl"
 import {context} from "../GLContext"
 
 class TextureToCanvasShader extends Shader {
@@ -31,6 +31,9 @@ class TextureToCanvas {
   shape = new RectShape(context, {
     usage: "static",
     rect: new Rect(new Vec2(), this.size),
+  })
+  model = new Model(context, {
+    shape: this.shape,
     shader: TextureToCanvasShader,
   })
 
@@ -45,8 +48,8 @@ class TextureToCanvas {
 
   loadTexture(texture: Texture, offset: Vec2) {
     this.shape.rect = new Rect(offset, offset.add(texture.size))
-    this.shape.uniforms["texture"] = texture
-    this.drawTarget.draw(this.shape)
+    this.model.uniforms = {texture}
+    this.drawTarget.draw(this.model)
   }
 
   updateCanvas() {

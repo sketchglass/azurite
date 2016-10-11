@@ -1,11 +1,14 @@
 import Picture from "./Picture"
 import {Vec2, Rect, Transform} from "paintvec"
-import {Texture, TextureDrawTarget, Shader, TextureShader, RectShape, PixelType, Color} from "paintgl"
+import {Model, Texture, TextureDrawTarget, Shader, TextureShader, RectShape, PixelType, Color} from "paintgl"
 import {context} from "../GLContext"
 import TiledTexture from "./TiledTexture"
 
 const rectShape = new RectShape(context, {
   rect: new Rect(new Vec2(), new Vec2(TiledTexture.tileSize)),
+})
+const rectModel = new Model(context, {
+  shape: rectShape,
   shader: TextureShader,
 })
 
@@ -30,9 +33,9 @@ class LayerBlender {
       for (const key of tileKeys) {
         if (layer.tiledTexture.has(key)) {
           const offset = key.mulScalar(TiledTexture.tileSize)
-          rectShape.transform = Transform.translate(offset)
-          rectShape.uniforms["texture"] = layer.tiledTexture.get(key)
-          this.drawTarget.draw(rectShape)
+          rectModel.transform = Transform.translate(offset)
+          rectModel.uniforms = {texture: layer.tiledTexture.get(key)}
+          this.drawTarget.draw(rectModel)
         }
       }
     }
