@@ -28,11 +28,13 @@ class TextureToCanvas {
   imageData = new ImageData(this.size.width, this.size.height)
   texture = new Texture(context, {size: this.size})
   drawTarget = new TextureDrawTarget(context, this.texture)
-  shape = new RectShape(context)
+  shape = new RectShape(context, {
+    usage: "static",
+    rect: new Rect(new Vec2(), this.size),
+    shader: TextureToCanvasShader,
+  })
 
   constructor(public size: Vec2) {
-    this.shape.rect = new Rect(new Vec2(), size)
-    this.shape.shader = TextureToCanvasShader
     this.canvas.width = size.width
     this.canvas.height = size.height
   }

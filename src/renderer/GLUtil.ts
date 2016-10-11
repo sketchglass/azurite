@@ -4,11 +4,14 @@ import {context} from "./GLContext"
 
 export
 function copyTexture(src: Texture, dest: Texture, offset: Vec2) {
-  const shape = new RectShape(context)
-  shape.rect = new Rect(offset.neg(), offset.neg().add(src.size))
-  shape.shader = TextureShader
-  shape.blendMode = "src"
-  shape.uniforms["texture"] = src
+  const shape = new RectShape(context, {
+    rect: new Rect(offset.neg(), offset.neg().add(src.size)),
+    shader: TextureShader,
+    blendMode: "src",
+    uniforms: {
+      texture: src,
+    },
+  })
 
   const target = new TextureDrawTarget(context, dest)
   target.draw(shape)

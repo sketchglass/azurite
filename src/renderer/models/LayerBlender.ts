@@ -4,9 +4,10 @@ import {Texture, TextureDrawTarget, Shader, TextureShader, RectShape, PixelType,
 import {context} from "../GLContext"
 import TiledTexture from "./TiledTexture"
 
-const rectShape = new RectShape(context)
-rectShape.rect = new Rect(new Vec2(), new Vec2(TiledTexture.tileSize))
-rectShape.shader = TextureShader
+const rectShape = new RectShape(context, {
+  rect: new Rect(new Vec2(), new Vec2(TiledTexture.tileSize)),
+  shader: TextureShader,
+})
 
 export default
 class LayerBlender {

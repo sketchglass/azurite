@@ -16,18 +16,11 @@ class Renderer {
 
   constructor(public picture: Picture) {
     const {width, height} = picture.size
-    const vertices = new Float32Array([
-      0, 0, 0, 0,
-      width, 0, 1, 0,
-      0, height, 0, 1,
-      width, height, 1, 1
-    ])
-    const indices = new Uint16Array([
-      0, 1, 2,
-      1, 2, 3
-    ])
-    this.shape = new RectShape(context)
-    this.shape.rect = new Rect(new Vec2(), picture.size)
+    this.shape = new RectShape(context, {
+      usage: "static",
+      rect: new Rect(new Vec2(), picture.size),
+      shader: TextureShader,
+    })
     this.picture.changed.forEach(() => this.render())
   }
 
