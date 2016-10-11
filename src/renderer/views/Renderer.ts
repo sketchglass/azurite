@@ -20,6 +20,9 @@ class Renderer {
       usage: "static",
       rect: new Rect(new Vec2(), picture.size),
       shader: TextureShader,
+      uniforms: {
+        texture: picture.layerBlender.blendedTexture,
+      },
     })
     this.picture.changed.forEach(() => this.render())
   }
