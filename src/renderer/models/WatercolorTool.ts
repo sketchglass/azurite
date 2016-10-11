@@ -186,11 +186,11 @@ class WatercolorTool extends BaseBrushTool {
       this.sampleTexture.generateMipmap()
 
       shape.shader = WatercolorShader
+      shape.uniforms["uSampleOriginal"] = this.originalTexture
+      shape.uniforms["uSampleShape"] = this.sampleTexture
 
       for (const key of TiledTexture.keysForRect(rect)) {
         this.drawTarget.texture = tiledTexture.get(key)
-        shape.uniforms["uSampleOriginal"] = this.originalTexture
-        shape.uniforms["uSampleShape"] = this.sampleTexture
         shape.transform = Transform.translate(key.mulScalar(-TiledTexture.tileSize))
         this.drawTarget.draw(shape)
       }
