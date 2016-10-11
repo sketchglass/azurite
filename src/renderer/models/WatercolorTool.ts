@@ -126,18 +126,13 @@ class WatercolorTool extends BaseBrushTool {
 
   name = "Watercolor"
 
-  shape = new RectShape(context, new Rect())
+  shape = new RectShape(context, {rect: new Rect(), blendMode: "src"})
   drawTarget = new TextureDrawTarget(context)
   originalTexture = new Texture(context, {pixelType: "half-float"})
   sampleTexture = new Texture(context, {pixelType: "half-float", filter: "mipmap-nearest"})
   sampleDrawTarget = new TextureDrawTarget(context, this.sampleTexture)
 
   sampleSize = 0
-
-  constructor() {
-    super()
-    this.shape.blendMode = "src"
-  }
 
   start(waypoint: Waypoint) {
     const layerSize = this.picture.currentLayer.size

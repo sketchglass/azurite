@@ -57,7 +57,7 @@ class BrushShader extends Shader {
 
 export default
 class BrushTool extends BaseBrushTool {
-  shape = new Shape(context, [], [])
+  shape = new Shape(context, {positions: [], texCoords: []})
   drawTarget = new TextureDrawTarget(context)
   name = "Brush"
   eraser = false
