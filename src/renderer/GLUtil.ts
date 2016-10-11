@@ -2,25 +2,20 @@ import {Vec2, Rect} from "paintvec"
 import {Model, Texture, RectShape, TextureShader, TextureDrawTarget, PixelType} from "paintgl"
 import {context} from "./GLContext"
 
+const copyTextureShape = new RectShape(context, {usage: "stream"})
+const copyTextureModel = new Model(context, {
+  shape: copyTextureShape,
+  shader: TextureShader,
+  blendMode: "src",
+})
+const copyTextureDrawTarget = new TextureDrawTarget(context)
+
 export
 function copyTexture(src: Texture, dest: Texture, offset: Vec2) {
-  const shape = new RectShape(context, {
-    rect: new Rect(offset.neg(), offset.neg().add(src.size)),
-  })
-  const model = new Model(context, {
-    shape,
-    shader: TextureShader,
-    uniforms: {
-      texture: src,
-    },
-    blendMode: "src",
-  })
-
-  const target = new TextureDrawTarget(context, dest)
-  target.draw(model)
-
-  shape.dispose()
-  target.dispose()
+  copyTextureShape.rect = new Rect(offset.neg(), offset.neg().add(src.size))
+  copyTextureModel.uniforms = {texture: src}
+  copyTextureDrawTarget.texture = dest
+  copyTextureDrawTarget.draw(copyTextureModel)
 }
 
 export
