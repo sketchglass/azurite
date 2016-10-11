@@ -7,11 +7,11 @@ import TiledTexture from "./TiledTexture"
 import WatercolorSettings from "../views/WatercolorSettings"
 import React = require("react")
 
-enum SampleModes {
+enum ShapeClipModes {
   Shape, Clip
 }
 
-class SampleShader extends Shader {
+class ShapeClipShader extends Shader {
   get additionalVertexShader() {
     return `
       uniform float uSampleSize;
@@ -34,7 +34,7 @@ class SampleShader extends Shader {
 
       uniform highp vec2 uBrushPos;
       uniform float uSoftness;
-      uniform sampler2D uOriginal;
+      uniform sampler2D uOriginalTexture;
       uniform lowp float uMode;
 
       varying highp vec2 vOffset;
@@ -42,7 +42,7 @@ class SampleShader extends Shader {
       varying highp float vRadius;
 
       vec4 fetchOriginal() {
-        return texture2D(uOriginal, vTexCoord);
+        return texture2D(uOriginalTexture, vTexCoord);
       }
 
       float calcOpacity(float r) {
@@ -52,7 +52,7 @@ class SampleShader extends Shader {
       void main(void) {
         float r = distance(fract(uBrushPos), vOffset);
 
-        if (uMode == ${SampleModes.Shape}.0) {
+        if (uMode == ${ShapeClipModes.Shape}.0) {
           gl_FragColor = vec4(calcOpacity(r));
         } else {
           gl_FragColor = fetchOriginal() * calcOpacity(r);
@@ -68,15 +68,15 @@ class WatercolorShader extends Shader {
       uniform float uSampleSize;
       uniform mediump float uPressure;
       uniform mediump float uOpacity;
-      uniform sampler2D uSampleShape;
+      uniform sampler2D uShapeClipTexture;
 
       varying vec4 vMixColor;
       varying mediump float vOpacity;
 
       vec4 calcMixColor() {
         float topLod = log2(uSampleSize);
-        vec4 sampleAverage = texture2DLod(uSampleShape, vec2(0.75, 0.5), topLod);
-        vec4 shapeAverage = texture2DLod(uSampleShape, vec2(0.25, 0.5),  topLod);
+        vec4 sampleAverage = texture2DLod(uShapeClipTexture, vec2(0.75, 0.5), topLod);
+        vec4 shapeAverage = texture2DLod(uShapeClipTexture, vec2(0.25, 0.5),  topLod);
         return sampleAverage / shapeAverage.a;
       }
 
@@ -95,16 +95,16 @@ class WatercolorShader extends Shader {
       uniform float uThickness;
       uniform vec4 uColor;
 
-      uniform sampler2D uSampleOriginal;
-      uniform sampler2D uSampleShape;
+      uniform sampler2D uOriginalTexture;
+      uniform sampler2D uShapeClipTexture;
 
       varying vec4 vMixColor;
       varying vec2 vTexCoord;
       varying float vOpacity;
 
       void main(void) {
-        float opacity = texture2D(uSampleShape, vTexCoord * vec2(0.5, 1.0)).a * vOpacity;
-        vec4 orig = texture2D(uSampleOriginal, vTexCoord);
+        float opacity = texture2D(uShapeClipTexture, vTexCoord * vec2(0.5, 1.0)).a * vOpacity;
+        vec4 orig = texture2D(uOriginalTexture, vTexCoord);
 
         float mixRate = opacity * uBlending;
         // mix color
@@ -129,8 +129,8 @@ class WatercolorTool extends BaseBrushTool {
   shape = new RectShape(context, {rect: new Rect(), blendMode: "src"})
   drawTarget = new TextureDrawTarget(context)
   originalTexture = new Texture(context, {pixelType: "half-float"})
-  sampleTexture = new Texture(context, {pixelType: "half-float", filter: "mipmap-nearest"})
-  sampleDrawTarget = new TextureDrawTarget(context, this.sampleTexture)
+  shapeClipTexture = new Texture(context, {pixelType: "half-float", filter: "mipmap-nearest"})
+  shapeClipDrawTarget = new TextureDrawTarget(context, this.shapeClipTexture)
 
   sampleSize = 0
 
@@ -151,7 +151,7 @@ class WatercolorTool extends BaseBrushTool {
     }
 
     this.originalTexture.size = new Vec2(this.sampleSize)
-    this.sampleTexture.size = new Vec2(this.sampleSize * 2, this.sampleSize)
+    this.shapeClipTexture.size = new Vec2(this.sampleSize * 2, this.sampleSize)
     this.shape.rect = new Rect(new Vec2(), new Vec2(this.sampleSize))
 
     return super.start(waypoint)
@@ -170,25 +170,24 @@ class WatercolorTool extends BaseBrushTool {
 
       tiledTexture.readToTexture(this.originalTexture, topLeft)
 
-      shape.shader = SampleShader
+      shape.shader = ShapeClipShader
 
-      shape.uniforms["uOriginal"] = this.originalTexture
+      shape.uniforms["uOriginalTexture"] = this.originalTexture
 
       // draw brush shape in left of sample texture
-      shape.uniforms["uMode"] = SampleModes.Shape
+      shape.uniforms["uMode"] = ShapeClipModes.Shape
       shape.transform = new Transform()
-      this.sampleDrawTarget.draw(shape)
+      this.shapeClipDrawTarget.draw(shape)
 
       // draw original colors clipped by brush shape in right of sample texture
-      shape.uniforms["uMode"] = SampleModes.Clip
+      shape.uniforms["uMode"] = ShapeClipModes.Clip
       shape.transform = Transform.translate(new Vec2(this.sampleSize, 0))
-      this.sampleDrawTarget.draw(shape)
+      this.shapeClipDrawTarget.draw(shape)
 
-      this.sampleTexture.generateMipmap()
+      this.shapeClipTexture.generateMipmap()
 
       shape.shader = WatercolorShader
-      shape.uniforms["uSampleOriginal"] = this.originalTexture
-      shape.uniforms["uSampleShape"] = this.sampleTexture
+      shape.uniforms["uShapeClipTexture"] = this.shapeClipTexture
 
       for (const key of TiledTexture.keysForRect(rect)) {
         this.drawTarget.texture = tiledTexture.get(key)
