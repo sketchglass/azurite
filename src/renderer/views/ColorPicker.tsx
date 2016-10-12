@@ -56,7 +56,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
   }
 
   onPointerDown(event: PointerEvent) {
-    console.log(event)
+    event.preventDefault()
     const center = new Vec2(wheelSize / 2, wheelSize / 2)
     const pos = mouseOffsetPos(event, this.canvas).sub(center)
     const r = pos.length()
@@ -75,6 +75,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
     }
   }
   onPointerMove(event: PointerEvent) {
+    event.preventDefault()
     const center = new Vec2(wheelSize / 2, wheelSize / 2)
     const pos = mouseOffsetPos(event, this.canvas).sub(center)
     if (this.draggingWheel) {
@@ -84,6 +85,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
     }
   }
   onPointerUp(event: PointerEvent) {
+    event.preventDefault()
     this.draggingWheel = false
     this.draggingSquare = false
   }
