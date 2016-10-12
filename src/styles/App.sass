@@ -48,7 +48,12 @@ body
   flex-direction: column
   background-color: $default-background-color
 .BrushSettings
+  width: 100%
   td
     min-width: 35px
+    &:nth-child(1)
+      width: 60px
+    &:nth-child(3)
+      width: 35px
 *:focus
   outline: none
