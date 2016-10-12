@@ -11,6 +11,7 @@ type RangeSliderProps = {
 }
 
 export default class RangeSlider extends React.Component<RangeSliderProps, void> {
+  clicking = false
   fillWidth = 0
   width: number
   slider: HTMLDivElement
@@ -28,7 +29,6 @@ export default class RangeSlider extends React.Component<RangeSliderProps, void>
   }
   update(value: number) {
     const {min, max} = this.props
-    const width = this.width
     this.fillWidth = (value - min) / (max - min) * 100
     this.forceUpdate()
   }
@@ -44,9 +44,20 @@ export default class RangeSlider extends React.Component<RangeSliderProps, void>
       const value = Math.max(Math.min(min + Math.floor((relativeX / width) * 100), max), min)
       this.props.onChange(value)
     }
+    const onMouseDown = () => {
+      this.clicking = true
+    }
+    const onMouseUp = () => {
+      this.clicking = false
+    }
+    const onMouseMove = (e: React.MouseEvent<Element>) => {
+      if(this.clicking) {
+        onChange(e)
+      }
+    }
     const className = this.props.disabled ? "RangeSlider RangeSlider-disabled" : "RangeSlider" // TODO: change behavior
     return (
-      <div className={className} onClick={onChange} ref={s => { this.slider = s }}>
+      <div className={className} onClick={onChange} onMouseUp={onMouseUp} onMouseDown={onMouseDown} onMouseMove={onMouseMove} ref={s => { this.slider = s }}>
         <div className="RangeSlider_fill" style={fillStyle} />
       </div>
     )
