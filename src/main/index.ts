@@ -7,6 +7,8 @@ import * as IPCChannels from "../common/IPCChannels"
 
 let window: BrowserWindow|undefined
 
+app.commandLine.appendSwitch("enable-pointer-events")
+
 function createWindow () {
   const win = window = new BrowserWindow({width: 1200, height: 768})
 
