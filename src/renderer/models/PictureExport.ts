@@ -1,4 +1,4 @@
-import {Vec2} from "../../lib/Geometry"
+import {Vec2} from "paintvec"
 import Picture from "./Picture"
 import TextureToCanvas from "./TextureToCanvas"
 import {remote} from "electron"

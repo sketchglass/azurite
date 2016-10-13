@@ -6,6 +6,8 @@ import {TabletEventReceiver} from "receive-tablet-event"
 import * as IPCChannels from "../common/IPCChannels"
 import PictureParams from "../renderer/models/PictureParams"
 
+app.commandLine.appendSwitch("enable-experimental-web-platform-features")
+
 const windows = new Set<BrowserWindow>()
 
 async function openSizeDialog() {
@@ -33,7 +35,9 @@ function openPictureWindow(params: PictureParams) {
   const query = qs.stringify({params: JSON.stringify(params)})
 
   win.loadURL(`file://${__dirname}/../index.html?${query}`)
-  win.webContents.openDevTools()
+  if (process.env.NODE_ENV == "development") {
+    win.webContents.openDevTools()
+  }
 
   const receiver = new TabletEventReceiver(win)
 
