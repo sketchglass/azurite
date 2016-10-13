@@ -22,10 +22,32 @@ export default class RangeSlider extends React.Component<RangeSliderProps, void>
     const {value} = this.props
     this.width = this.slider.clientWidth
     this.update(value)
+    this.slider.addEventListener("pointerup", this.onPointerUp.bind(this))
+    this.slider.addEventListener("pointerdown", this.onPointerDown.bind(this))
+    this.slider.addEventListener("pointermove", this.onPointerMove.bind(this))
   }
   componentWillReceiveProps(props: RangeSliderProps) {
     const {value} = props
     this.update(value)
+  }
+  onChange(e: PointerEvent) {
+    const {min, max} = this.props
+    const relativeX = e.pageX - this.slider.getBoundingClientRect().left
+    const width = this.width
+    const value = Math.max(Math.min(min + Math.floor((relativeX / width) * 100), max), min)
+    this.props.onChange(value)
+  }
+  onPointerDown(e: PointerEvent) {
+    this.clicking = true
+    this.onChange(e)
+  }
+  onPointerUp() {
+    this.clicking = false
+  }
+  onPointerMove(e: PointerEvent) {
+    if(this.clicking) {
+      this.onChange(e)
+    }
   }
   update(value: number) {
     const {min, max} = this.props
@@ -37,27 +59,9 @@ export default class RangeSlider extends React.Component<RangeSliderProps, void>
     const fillStyle = {
       width: `${this.fillWidth}%`
     }
-    const onChange = (e: React.MouseEvent<Element>) => {
-      const {min, max} = this.props
-      const relativeX = e.pageX - this.slider.getBoundingClientRect().left
-      const width = this.width
-      const value = Math.max(Math.min(min + Math.floor((relativeX / width) * 100), max), min)
-      this.props.onChange(value)
-    }
-    const onMouseDown = () => {
-      this.clicking = true
-    }
-    const onMouseUp = () => {
-      this.clicking = false
-    }
-    const onMouseMove = (e: React.MouseEvent<Element>) => {
-      if(this.clicking) {
-        onChange(e)
-      }
-    }
     const className = this.props.disabled ? "RangeSlider RangeSlider-disabled" : "RangeSlider" // TODO: change behavior
     return (
-      <div className={className} onClick={onChange} onMouseUp={onMouseUp} onMouseDown={onMouseDown} onMouseMove={onMouseMove} ref={s => { this.slider = s }}>
+      <div className={className} ref={s => { this.slider = s }}>
         <div className="RangeSlider_fill" style={fillStyle} />
       </div>
     )
