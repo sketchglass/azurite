@@ -1,6 +1,7 @@
 import React = require("react")
 import WatercolorTool from "../models/WatercolorTool"
 import {parseHexColor, toHexColor} from "../../lib/Color"
+import RangeSlider from "./components/RangeSlider"
 
 interface WatercolorSettingsProps {
   tool: WatercolorTool
@@ -14,56 +15,48 @@ class WatercolorSettings extends React.Component<WatercolorSettingsProps, void> 
 
   render() {
     const {tool} = this.props
-    const onColorChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      tool.color = parseHexColor((ev.target as HTMLInputElement).value)
+    const onWidthChange = (value: number) => {
+      tool.width = value
       this.forceUpdate()
     }
-    const onWidthChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      tool.width = parseInt((ev.target as HTMLInputElement).value)
+    const onBlendingChange = (value: number) => {
+      tool.blending = value / 100
       this.forceUpdate()
     }
-    const onBlendingChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      tool.blending = parseInt((ev.target as HTMLInputElement).value) / 100
+    const onThicknessChange = (value: number) => {
+      tool.thickness = value / 100
       this.forceUpdate()
     }
-    const onThicknessChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      tool.thickness = parseInt((ev.target as HTMLInputElement).value) / 100
+    const onMinWidthChange = (value: number) => {
+      tool.minWidthRatio = value / 100
       this.forceUpdate()
     }
-    const onMinWidthChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      tool.minWidthRatio = parseInt((ev.target as HTMLInputElement).value) / 100
-      this.forceUpdate()
-    }
-    const onSoftnessChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      tool.softness = parseInt((ev.target as HTMLInputElement).value) / 100
+    const onSoftnessChange = (value: number) => {
+      tool.softness = value / 100
       this.forceUpdate()
     }
     return (
-      <table className="brush-settings">
+      <table className="BrushSettings">
         <tbody>
           <tr>
-            <td>Color</td>
-            <td><input type="color" onChange={onColorChange} value={toHexColor(tool.color)} /></td>
-          </tr>
-          <tr>
             <td>Width</td>
-            <td><input type="range" onChange={onWidthChange} value={tool.width} /> {tool.width}px</td>
+            <td><RangeSlider onChange={onWidthChange} min={0} max={100} value={tool.width} /></td><td>{tool.width}px</td>
           </tr>
           <tr>
             <td>Min Width</td>
-            <td><input type="range" onChange={onMinWidthChange} value={Math.round(tool.minWidthRatio * 100)} /> {Math.round(tool.minWidthRatio * 100)}%</td>
+            <td><RangeSlider onChange={onMinWidthChange} min={0} max={100} value={Math.round(tool.minWidthRatio * 100)} /></td><td>{Math.round(tool.minWidthRatio * 100)}%</td>
           </tr>
           <tr>
             <td>Softness</td>
-            <td><input type="range" onChange={onSoftnessChange} value={Math.round(tool.softness * 100)} /> {Math.round(tool.softness * 100)}%</td>
+            <td><RangeSlider onChange={onSoftnessChange} min={0} max={100} value={Math.round(tool.softness * 100)} /></td><td>{Math.round(tool.softness * 100)}%</td>
           </tr>
           <tr>
             <td>Blending</td>
-            <td><input type="range" onChange={onBlendingChange} value={Math.round(tool.blending * 100)} /> {Math.round(tool.blending * 100)}%</td>
+            <td><RangeSlider onChange={onBlendingChange} min={0} max={100} value={Math.round(tool.blending * 100)} /></td><td>{Math.round(tool.blending * 100)}%</td>
           </tr>
           <tr>
             <td>Thickness</td>
-            <td><input type="range" onChange={onThicknessChange} value={Math.round(tool.thickness * 100)} /> {Math.round(tool.thickness * 100)}%</td>
+            <td><RangeSlider onChange={onThicknessChange} min={0} max={100} value={Math.round(tool.thickness * 100)} /></td><td>{Math.round(tool.thickness * 100)}%</td>
           </tr>
         </tbody>
       </table>
