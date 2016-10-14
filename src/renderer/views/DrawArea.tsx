@@ -153,7 +153,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     }
     ev.preventDefault()
   }
-  @action onPointerDown(ev: {clientX: number, clientY: number, pressure?: number}) {
+  onPointerDown(ev: {clientX: number, clientY: number, pressure?: number}) {
     const {tool, picture} = this.props
     tool.picture = picture
     tool.renderer = this.renderer
@@ -161,13 +161,13 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const rect = tool.start(waypoint, rendererPos)
     this.currentTool = tool
   }
-  @action onPointerMove(ev: {clientX: number, clientY: number, pressure?: number}) {
+  onPointerMove(ev: {clientX: number, clientY: number, pressure?: number}) {
     if (this.currentTool) {
       const {waypoint, rendererPos} = this.eventToWaypoint(ev)
       const rect = this.currentTool.move(waypoint, rendererPos)
     }
   }
-  @action onPointerUp(ev: {clientX: number, clientY: number, pressure?: number}) {
+  onPointerUp(ev: {clientX: number, clientY: number, pressure?: number}) {
     if (this.currentTool) {
       const rect = this.currentTool.end()
       this.currentTool = undefined
