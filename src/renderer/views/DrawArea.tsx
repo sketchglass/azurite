@@ -52,7 +52,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     })
     IPCChannels.tabletUp.listen().forEach(ev => {
       this.usingTablet = false
-      this.onPointerUp(ev)
+      this.onPointerUp()
     })
 
     this.resize()
@@ -149,7 +149,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
   onMouseUp(ev: MouseEvent) {
     if (!this.usingTablet) {
-      this.onPointerUp(ev)
+      this.onPointerUp()
     }
     ev.preventDefault()
   }
@@ -167,7 +167,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       const rect = this.currentTool.move(waypoint, rendererPos)
     }
   }
-  onPointerUp(ev: {clientX: number, clientY: number, pressure?: number}) {
+  onPointerUp() {
     if (this.currentTool) {
       const rect = this.currentTool.end()
       this.currentTool = undefined
