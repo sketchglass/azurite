@@ -63,6 +63,10 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   updateCursor() {
     const {cursor, cursorCanvasSize} = this.tool
     if (this.element) {
+      if (this.cursorCanvas) {
+        this.cursorCanvas.parentElement.removeChild(this.cursorCanvas)
+      }
+
       const {cursorCanvas} = this.tool
       if (cursorCanvas) {
         this.element.style.cursor = "none"
