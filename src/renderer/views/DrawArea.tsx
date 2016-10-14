@@ -24,9 +24,6 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   constructor(props: DrawAreaProps) {
     super(props)
     this.renderer = new Renderer(props.picture)
-    props.picture.changed.forEach(() => {
-      this.forceUpdate()
-    })
   }
 
   componentWillReceiveProps(nextProps: DrawAreaProps) {

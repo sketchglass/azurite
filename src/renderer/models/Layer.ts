@@ -1,3 +1,4 @@
+import {observable, action} from "mobx"
 import {Vec2} from "paintvec"
 import {Texture} from "paintgl"
 import Picture from "./Picture"
@@ -6,15 +7,15 @@ import TiledTexture from "./TiledTexture"
 
 export default
 class Layer {
-  name = "Layer"
+  @observable name = "Layer"
   tiledTexture = new TiledTexture()
-  thumbnail = ""
+  @observable thumbnail = ""
 
   constructor(public picture: Picture, public size: Vec2) {
     this.updateThumbnail()
   }
 
-  updateThumbnail() {
+  @action updateThumbnail() {
     this.thumbnail = this.picture.thumbnailGenerator.generate(this)
   }
 }

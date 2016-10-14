@@ -1,4 +1,4 @@
-import {Subject} from "@reactivex/rxjs/dist/cjs/Subject"
+import {observable, computed, action, IObservableArray} from "mobx"
 
 export
 interface UndoCommand {
@@ -8,38 +8,34 @@ interface UndoCommand {
 
 export
 class UndoStack {
-  commands: UndoCommand[] = []
-  doneCount = 0
-  changed = new Subject<void>()
+  readonly commands: IObservableArray<UndoCommand> = observable([])
+  @observable doneCount = 0
 
-  get isUndoable() {
+  @computed get isUndoable() {
     return 1 <= this.doneCount
   }
-  get isRedoable() {
+  @computed get isRedoable() {
     return this.doneCount < this.commands.length
   }
 
-  undo() {
+  @action undo() {
     if (this.isUndoable) {
       this.commands[this.doneCount - 1].undo()
       this.doneCount -= 1
-      this.changed.next()
     }
   }
-  redo() {
+  @action redo() {
     if (this.isRedoable) {
       this.commands[this.doneCount].redo()
       this.doneCount += 1
-      this.changed.next()
     }
   }
-  push(command: UndoCommand) {
+  @action push(command: UndoCommand) {
     this.commands.splice(this.doneCount)
     this.commands.push(command)
     this.doneCount += 1
-    this.changed.next()
   }
-  redoAndPush(command: UndoCommand) {
+  @action redoAndPush(command: UndoCommand) {
     command.redo()
     this.push(command)
   }
