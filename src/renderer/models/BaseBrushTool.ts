@@ -1,4 +1,4 @@
-import {observable, action} from "mobx"
+import {observable, action, observe} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Texture, TextureDrawTarget, Color} from "paintgl"
 import Waypoint from "./Waypoint"
@@ -31,6 +31,31 @@ abstract class BaseBrushTool extends Tool {
   oldTiledTexture: TiledTexture|undefined
   originalTexture = new Texture(context, {size: new Vec2(0), pixelType: "half-float"})
   editedRect: Rect|undefined
+
+  cursorCanvas = document.createElement("canvas")
+  cursorContext = this.cursorCanvas.getContext("2d")!
+
+  constructor() {
+    super()
+    observe(this, "width", () => this.updateCursor())
+  }
+
+  updateCursor() {
+    const canvasSize = this.width + 4 * window.devicePixelRatio
+    const center = canvasSize / 2
+    this.cursorCanvas.width = canvasSize
+    this.cursorCanvas.height = canvasSize
+    const context = this.cursorContext
+    context.lineWidth = window.devicePixelRatio
+    context.strokeStyle = "rgba(0,0,0,0.5)"
+    context.beginPath()
+    context.ellipse(center, center, this.width, this.width, 0, 0, 2 * Math.PI)
+    context.stroke()
+    context.beginPath()
+    context.ellipse(center, center, this.width + window.devicePixelRatio, this.width + window.devicePixelRatio, 0, 0, 2 * Math.PI)
+    context.stroke()
+    this.cursorCanvas = this.cursorCanvas // notify change
+  }
 
   addEditedRect(rect: Rect) {
     if (this.editedRect) {
