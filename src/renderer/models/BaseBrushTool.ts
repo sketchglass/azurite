@@ -1,4 +1,4 @@
-import {observable, action, observe} from "mobx"
+import {observable, action, autorun} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Texture, TextureDrawTarget, Color} from "paintgl"
 import Waypoint from "./Waypoint"
@@ -37,24 +37,31 @@ abstract class BaseBrushTool extends Tool {
 
   constructor() {
     super()
-    observe(this, "width", () => this.updateCursor())
+    autorun(() => this.updateCursor())
   }
 
   updateCursor() {
+    const radius = this.width / 2
     const canvasSize = this.width + 4 * window.devicePixelRatio
     const center = canvasSize / 2
     this.cursorCanvas.width = canvasSize
     this.cursorCanvas.height = canvasSize
+
     const context = this.cursorContext
+
     context.lineWidth = window.devicePixelRatio
     context.strokeStyle = "rgba(0,0,0,0.5)"
+
     context.beginPath()
-    context.ellipse(center, center, this.width, this.width, 0, 0, 2 * Math.PI)
+    context.ellipse(center, center, radius, radius, 0, 0, 2 * Math.PI)
     context.stroke()
+
+    context.strokeStyle = "rgba(255,255,255,0.5)"
     context.beginPath()
-    context.ellipse(center, center, this.width + window.devicePixelRatio, this.width + window.devicePixelRatio, 0, 0, 2 * Math.PI)
+    context.ellipse(center, center, radius + window.devicePixelRatio, radius + window.devicePixelRatio, 0, 0, 2 * Math.PI)
     context.stroke()
-    this.cursorCanvas = this.cursorCanvas // notify change
+
+    this.cursorCanvasSize = canvasSize
   }
 
   addEditedRect(rect: Rect) {

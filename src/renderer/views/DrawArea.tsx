@@ -1,4 +1,4 @@
-import {observable, autorun} from "mobx"
+import {observable, autorun, action, observe} from "mobx"
 import React = require("react")
 import Picture from "../models/Picture"
 import {Vec2, Transform} from "paintvec"
@@ -21,6 +21,8 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   renderer: Renderer
   @observable tool: Tool
   currentTool: Tool|undefined
+  cursorCanvas: HTMLCanvasElement|undefined
+  @observable cursorPosition = new Vec2()
   usingTablet = false
 
   constructor(props: DrawAreaProps) {
@@ -28,6 +30,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     this.renderer = new Renderer(props.picture)
     this.tool = props.tool
     autorun(() => this.updateCursor())
+    autorun(() => this.updateCursorGeometry())
   }
 
   componentWillReceiveProps(nextProps: DrawAreaProps) {
@@ -48,7 +51,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     })
     IPCChannels.tabletUp.listen().forEach(ev => {
       this.usingTablet = false
-      this.onPointerUp()
+      this.onPointerUp(ev)
     })
 
     this.resize()
@@ -58,8 +61,35 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
 
   updateCursor() {
+    const {cursor, cursorCanvasSize} = this.tool
     if (this.element) {
-      this.element.style.cursor = this.tool.cursor
+      const {cursorCanvas} = this.tool
+      if (cursorCanvas) {
+        this.element.style.cursor = "none"
+        const center = cursorCanvasSize / 2
+        const dpr = window.devicePixelRatio
+        const {style} = cursorCanvas
+        style.position = "absolute"
+        this.element.appendChild(cursorCanvas)
+        this.cursorCanvas = cursorCanvas
+        this.updateCursorGeometry()
+      } else {
+        this.element.style.cursor = cursor
+      }
+    }
+  }
+
+  updateCursorGeometry() {
+    const {x, y} = this.cursorPosition.floor()
+    const {cursorCanvasSize} = this.tool
+    if (this.cursorCanvas) {
+      const center = cursorCanvasSize / 2
+      const dpr = window.devicePixelRatio
+      const {style} = this.cursorCanvas
+      style.left = `${x - center/dpr}px`
+      style.top = `${y - center/dpr}px`
+      style.width = `${cursorCanvasSize/dpr}px`
+      style.height = `${cursorCanvasSize/dpr}px`
     }
   }
 
@@ -87,12 +117,16 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     )
   }
 
-  eventToWaypoint(ev: {clientX: number, clientY: number, pressure?: number}) {
+  offsetPos(ev: {clientX: number, clientY: number}) {
     const rect = this.element!.getBoundingClientRect()
     const x = ev.clientX - rect.left
     const y = ev.clientY - rect.top
+    return new Vec2(x, y)
+  }
+
+  eventToWaypoint(ev: {clientX: number, clientY: number, pressure?: number}) {
     const pressure = ev.pressure == undefined ? 1.0 : ev.pressure
-    const rendererPos = new Vec2(x, y).mulScalar(window.devicePixelRatio)
+    const rendererPos = this.offsetPos(ev).mulScalar(window.devicePixelRatio)
     const pos = rendererPos.transform(this.renderer.transforms.rendererToPicture)
     const waypoint = new Waypoint(pos, pressure)
     return {waypoint, rendererPos}
@@ -103,37 +137,43 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       this.onPointerDown(ev)
     }
     ev.preventDefault()
+    this.cursorPosition = this.offsetPos(ev)
   }
   onMouseMove(ev: MouseEvent) {
     if (!this.usingTablet) {
       this.onPointerMove(ev)
     }
     ev.preventDefault()
+    this.cursorPosition = this.offsetPos(ev)
   }
   onMouseUp(ev: MouseEvent) {
     if (!this.usingTablet) {
-      this.onPointerUp()
+      this.onPointerUp(ev)
     }
     ev.preventDefault()
+    this.cursorPosition = this.offsetPos(ev)
   }
-  onPointerDown(ev: {clientX: number, clientY: number, pressure?: number}) {
+  @action onPointerDown(ev: {clientX: number, clientY: number, pressure?: number}) {
     const {tool, picture} = this.props
     tool.picture = picture
     tool.renderer = this.renderer
     const {waypoint, rendererPos} = this.eventToWaypoint(ev)
     const rect = tool.start(waypoint, rendererPos)
     this.currentTool = tool
+    this.cursorPosition = this.offsetPos(ev)
   }
-  onPointerMove(ev: {clientX: number, clientY: number, pressure?: number}) {
+  @action onPointerMove(ev: {clientX: number, clientY: number, pressure?: number}) {
     if (this.currentTool) {
       const {waypoint, rendererPos} = this.eventToWaypoint(ev)
       const rect = this.currentTool.move(waypoint, rendererPos)
     }
+    this.cursorPosition = this.offsetPos(ev)
   }
-  onPointerUp() {
+  @action onPointerUp(ev: {clientX: number, clientY: number, pressure?: number}) {
     if (this.currentTool) {
       const rect = this.currentTool.end()
       this.currentTool = undefined
     }
+    this.cursorPosition = this.offsetPos(ev)
   }
 }
