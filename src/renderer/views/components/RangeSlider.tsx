@@ -22,13 +22,18 @@ export default class RangeSlider extends React.Component<RangeSliderProps, void>
     const {value} = this.props
     this.width = this.slider.clientWidth
     this.update(value)
-    this.slider.addEventListener("pointerup", this.onPointerUp.bind(this))
-    this.slider.addEventListener("pointerdown", this.onPointerDown.bind(this))
-    this.slider.addEventListener("pointermove", this.onPointerMove.bind(this))
+    this.slider.addEventListener("pointerup", this.onPointerUp)
+    this.slider.addEventListener("pointerdown", this.onPointerDown)
+    this.slider.addEventListener("pointermove", this.onPointerMove)
   }
   componentWillReceiveProps(props: RangeSliderProps) {
     const {value} = props
     this.update(value)
+  }
+  componentWillUnmount() {
+    this.slider.removeEventListener("pointerup", this.onPointerUp)
+    this.slider.removeEventListener("pointerdown", this.onPointerDown)
+    this.slider.removeEventListener("pointermove", this.onPointerMove)
   }
   onChange(e: PointerEvent) {
     const {min, max} = this.props
@@ -37,17 +42,17 @@ export default class RangeSlider extends React.Component<RangeSliderProps, void>
     const value = Math.max(Math.min(min + Math.floor((relativeX / width) * 100), max), min)
     this.props.onChange(value)
   }
-  onPointerDown(e: PointerEvent) {
+  onPointerDown = (e: PointerEvent) => {
     e.preventDefault()
     this.clicking = true
     this.onChange(e)
     this.slider.setPointerCapture(e.pointerId)
   }
-  onPointerUp(e: PointerEvent) {
+  onPointerUp = (e: PointerEvent) => {
     e.preventDefault()
     this.clicking = false
   }
-  onPointerMove(e: PointerEvent) {
+  onPointerMove = (e: PointerEvent) => {
     e.preventDefault()
     if(this.clicking) {
       this.onChange(e)
