@@ -32,8 +32,8 @@ abstract class BaseBrushTool extends Tool {
   originalTexture = new Texture(context, {size: new Vec2(0), pixelType: "half-float"})
   editedRect: Rect|undefined
 
-  cursorCanvas = document.createElement("canvas")
-  cursorContext = this.cursorCanvas.getContext("2d")!
+  cursorElement = document.createElement("canvas")
+  cursorContext = this.cursorElement.getContext("2d")!
 
   constructor() {
     super()
@@ -42,10 +42,13 @@ abstract class BaseBrushTool extends Tool {
 
   updateCursor() {
     const radius = this.width / 2
-    const canvasSize = this.width + 4 * window.devicePixelRatio
+    const dpr = window.devicePixelRatio
+    const canvasSize = this.width + 4 * dpr
     const center = canvasSize / 2
-    this.cursorCanvas.width = canvasSize
-    this.cursorCanvas.height = canvasSize
+    this.cursorElement.width = canvasSize
+    this.cursorElement.height = canvasSize
+    this.cursorElement.style.width = `${canvasSize/dpr}px`
+    this.cursorElement.style.height = `${canvasSize/dpr}px`
 
     const context = this.cursorContext
 
@@ -58,10 +61,10 @@ abstract class BaseBrushTool extends Tool {
 
     context.strokeStyle = "rgba(255,255,255,0.5)"
     context.beginPath()
-    context.ellipse(center, center, radius + window.devicePixelRatio, radius + window.devicePixelRatio, 0, 0, 2 * Math.PI)
+    context.ellipse(center, center, radius + dpr, radius + dpr, 0, 0, 2 * Math.PI)
     context.stroke()
 
-    this.cursorCanvasSize = canvasSize
+    this.cursorElementSize = canvasSize / dpr
   }
 
   addEditedRect(rect: Rect) {

@@ -21,7 +21,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   renderer: Renderer
   @observable tool: Tool
   currentTool: Tool|undefined
-  cursorCanvas: HTMLCanvasElement|undefined
+  cursorElement: HTMLElement|undefined
   @observable cursorPosition = new Vec2()
   usingTablet = false
 
@@ -61,21 +61,18 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
 
   updateCursor() {
-    const {cursor, cursorCanvasSize} = this.tool
+    const {cursor, cursorElementSize} = this.tool
     if (this.element) {
-      if (this.cursorCanvas) {
-        this.cursorCanvas.parentElement.removeChild(this.cursorCanvas)
+      if (this.cursorElement) {
+        this.cursorElement.parentElement.removeChild(this.cursorElement)
       }
 
-      const {cursorCanvas} = this.tool
-      if (cursorCanvas) {
+      const {cursorElement} = this.tool
+      if (cursorElement) {
         this.element.style.cursor = "none"
-        const center = cursorCanvasSize / 2
-        const dpr = window.devicePixelRatio
-        const {style} = cursorCanvas
-        style.position = "absolute"
-        this.element.appendChild(cursorCanvas)
-        this.cursorCanvas = cursorCanvas
+        cursorElement.style.position = "absolute"
+        this.element.appendChild(cursorElement)
+        this.cursorElement = cursorElement
         this.updateCursorGeometry()
       } else {
         this.element.style.cursor = cursor
@@ -85,15 +82,12 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   updateCursorGeometry() {
     const {x, y} = this.cursorPosition.floor()
-    const {cursorCanvasSize} = this.tool
-    if (this.cursorCanvas) {
-      const center = cursorCanvasSize / 2
-      const dpr = window.devicePixelRatio
-      const {style} = this.cursorCanvas
-      style.left = `${x - center/dpr}px`
-      style.top = `${y - center/dpr}px`
-      style.width = `${cursorCanvasSize/dpr}px`
-      style.height = `${cursorCanvasSize/dpr}px`
+    const {cursorElementSize} = this.tool
+    if (this.cursorElement) {
+      const center = cursorElementSize / 2
+      const {style} = this.cursorElement
+      style.left = `${x - center}px`
+      style.top = `${y - center}px`
     }
   }
 
