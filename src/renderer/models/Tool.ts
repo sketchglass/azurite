@@ -10,7 +10,7 @@ abstract class Tool {
   renderer: Renderer
   abstract name: string
   @observable cursor = "auto"
-  cursorElement: HTMLElement|undefined
+  @observable cursorElement: HTMLElement|undefined
   @observable cursorElementSize = 0
   abstract start(waypoint: Waypoint, rendererPos: Vec2): void
   abstract move(waypoint: Waypoint, rendererPos: Vec2): void
