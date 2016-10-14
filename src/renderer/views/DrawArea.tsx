@@ -48,6 +48,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     })
     IPCChannels.tabletMove.listen().forEach(ev => {
       this.onPointerMove(ev)
+      this.cursorPosition = this.offsetPos(ev)
     })
     IPCChannels.tabletUp.listen().forEach(ev => {
       this.usingTablet = false
@@ -57,6 +58,11 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     this.resize()
     window.addEventListener("resize", () => {
       this.resize()
+    })
+    document.addEventListener("mousemove", (ev) => {
+      if (!this.usingTablet) {
+        this.cursorPosition = this.offsetPos(ev)
+      }
     })
   }
 
@@ -135,21 +141,18 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       this.onPointerDown(ev)
     }
     ev.preventDefault()
-    this.cursorPosition = this.offsetPos(ev)
   }
   onMouseMove(ev: MouseEvent) {
     if (!this.usingTablet) {
       this.onPointerMove(ev)
     }
     ev.preventDefault()
-    this.cursorPosition = this.offsetPos(ev)
   }
   onMouseUp(ev: MouseEvent) {
     if (!this.usingTablet) {
       this.onPointerUp(ev)
     }
     ev.preventDefault()
-    this.cursorPosition = this.offsetPos(ev)
   }
   @action onPointerDown(ev: {clientX: number, clientY: number, pressure?: number}) {
     const {tool, picture} = this.props
@@ -158,20 +161,17 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const {waypoint, rendererPos} = this.eventToWaypoint(ev)
     const rect = tool.start(waypoint, rendererPos)
     this.currentTool = tool
-    this.cursorPosition = this.offsetPos(ev)
   }
   @action onPointerMove(ev: {clientX: number, clientY: number, pressure?: number}) {
     if (this.currentTool) {
       const {waypoint, rendererPos} = this.eventToWaypoint(ev)
       const rect = this.currentTool.move(waypoint, rendererPos)
     }
-    this.cursorPosition = this.offsetPos(ev)
   }
   @action onPointerUp(ev: {clientX: number, clientY: number, pressure?: number}) {
     if (this.currentTool) {
       const rect = this.currentTool.end()
       this.currentTool = undefined
     }
-    this.cursorPosition = this.offsetPos(ev)
   }
 }
