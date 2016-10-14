@@ -20,9 +20,7 @@ class PanTool extends Tool {
     const pos = rendererPos.transform(this.originalRendererToPicture)
     const offset = pos.sub(this.originalPos)
     const translation = this.originalTranslation.add(offset)
-    const {scale, rotation} = this.picture.navigation
-    this.picture.navigation = {translation, scale, rotation}
-    this.picture.changed.next()
+    this.picture.navigation.translation = translation
   }
 
   end() {

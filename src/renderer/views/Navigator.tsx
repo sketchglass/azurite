@@ -1,3 +1,4 @@
+import {observer} from "mobx-react"
 import React = require("react")
 import Navigation from "../models/Navigation"
 import Picture from "../models/Picture"
@@ -7,38 +8,16 @@ interface NavigatorProps {
   picture: Picture
 }
 
-interface NavigatorState {
-  navigation: Navigation
-}
-
-export default
-class Navigator extends React.Component<NavigatorProps, NavigatorState> {
-  constructor(props: NavigatorProps) {
-    super(props)
-    this.state = {
-      navigation: props.picture.navigation
-    }
-    this.props.picture.changed.forEach(() => {
-      this.setState({
-        navigation: props.picture.navigation
-      })
-    })
-  }
-
+@observer export default
+class Navigator extends React.Component<NavigatorProps, {}> {
   render() {
-    const {navigation} = this.state
     const {picture} = this.props
+    const {navigation} = picture
     const onScaleChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      const {rotation, translation} = navigation
-      const scale = parseFloat((ev.target as HTMLInputElement).value) / 100
-      picture.navigation = {translation, scale, rotation}
-      picture.changed.next()
+      navigation.scale = parseFloat((ev.target as HTMLInputElement).value) / 100
     }
     const onRotationChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      const {scale, translation} = navigation
-      const rotation = parseInt((ev.target as HTMLInputElement).value) / 180 * Math.PI
-      picture.navigation = {translation, scale, rotation}
-      picture.changed.next()
+      navigation.rotation = parseInt((ev.target as HTMLInputElement).value) / 180 * Math.PI
     }
     const {rotation, scale} = picture.navigation
     const rotationDeg = Math.round(rotation / Math.PI * 180)

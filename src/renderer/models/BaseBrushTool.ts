@@ -1,3 +1,4 @@
+import {observable, action} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Texture, TextureDrawTarget, Color} from "paintgl"
 import Waypoint from "./Waypoint"
@@ -15,17 +16,17 @@ abstract class BaseBrushTool extends Tool {
   cursor = "crosshair"
 
   // brush width (diameter)
-  width = 10
+  @observable width = 10
   // brush color RGBA
   color = new Color(0, 0, 0, 1)
   // brush opacity
-  opacity = 1
+  @observable opacity = 1
   // distance used to soften edge, compared to brush radius
-  softness = 0.5
+  @observable softness = 0.5
   // width drawn in pressure 0, compared to brush width
-  minWidthRatio = 0.5
+  @observable minWidthRatio = 0.5
   // spacing between dabs, compared to brush width
-  spacingRatio = 0.1
+  @observable spacingRatio = 0.1
 
   oldTiledTexture: TiledTexture|undefined
   originalTexture = new Texture(context, {size: new Vec2(0), pixelType: "half-float"})
@@ -89,7 +90,7 @@ abstract class BaseBrushTool extends Tool {
     this.renderRect(rect)
   }
 
-  end() {
+  @action end() {
     const drawLast = () => {
       const getSpacing = this.brushSpacing.bind(this)
       const {lastWaypoints} = this
@@ -116,7 +117,6 @@ abstract class BaseBrushTool extends Tool {
     const rect = drawLast()
     this.pushUndoStack()
     this.picture.currentLayer.updateThumbnail()
-    this.picture.changed.next()
     return rect
   }
 
@@ -164,7 +164,7 @@ class BrushUndoCommand {
   constructor(public layer: Layer, public rect: Rect, public oldData: Uint16Array, public newData: Uint16Array) {
   }
 
-  replace(data: Uint16Array) {
+  @action replace(data: Uint16Array) {
     const texture = new Texture(context, {
       size: this.rect.size,
       pixelType: "half-float",
@@ -173,7 +173,6 @@ class BrushUndoCommand {
     this.layer.tiledTexture.writeTexture(texture, this.rect.topLeft)
     texture.dispose()
     this.layer.updateThumbnail()
-    this.layer.picture.changed.next()
   }
 
   undo() {
