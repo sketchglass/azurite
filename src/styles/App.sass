@@ -5,11 +5,13 @@ body
   background-color: white
   font-family: 'Open Sans', "Hiragino Kaku Gothic ProN", メイリオ, sans-serif
   font-size: 11px
+aside
+  z-index: 100
 .App
   display: flex
   width: 100vw
   height: 100vh
-.DrawArea canvas
+.DrawArea_GLCanvas
   position: absolute
   left: 0
   top: 0
@@ -19,6 +21,9 @@ body
   position: relative
   flex: 1
   border: 2px solid $default-border-color
+.DrawArea_Cursor
+  position: absolute
+  will-change: left, top, width, height
 .LeftSidebar
   display: flex
   flex-direction: column
