@@ -18,6 +18,7 @@ interface WindowProps extends DraggableWindowProps {
   top: number
   left: number
   onDrag: (x: number, y: number) => void
+  onDrop: (x: number, y: number) => void
 }
 class Window extends React.Component<WindowProps, void> {
   dragging = false
@@ -54,6 +55,11 @@ class Window extends React.Component<WindowProps, void> {
   onPointerUp = (e: PointerEvent) => {
     e.preventDefault()
     this.dragging = false
+    const {pageX, pageY} = e
+    const {offsetX, offsetY} = this
+    const x = pageX - offsetX
+    const y = pageY - offsetY
+    this.props.onDrop(x, y)
   }
   onPointerDown = (e: PointerEvent) => {
     e.preventDefault()
@@ -86,36 +92,56 @@ interface ChildrenState {
   height: number
   left: number
   top: number
+  initialTop: number
+  initialLeft: number
+  order: number
 }
 const labelHeight = 28
 const offsetTop = 30
 export class DraggableWindowContainer extends React.Component<void, void> {
   childrenState: ChildrenState[] = []
-  render() {
-    let i = 0
-    const children = React.Children.map(this.props.children!, (_child) => {
+  componentWillMount() {
+    React.Children.forEach(this.props.children!, (_child, i) => {
       if(_child["props"] && _child["props"]["label"]) {
         const child = _child as any as DraggableWindow
-        const top = (this.childrenState.length) ? this.childrenState.slice(0, i + 1).map(x => { return x.height }).reduce((a, b) => {
-          return a + b
-        }) + offsetTop : offsetTop
-        this.childrenState[i] = this.childrenState[i] ? this.childrenState[i] : {
-          top: top,
+        const order = i
+        this.childrenState[i] = {
+          order: order,
+          initialTop: 0,
+          initialLeft: 18,
+          top: 0,
           left: 18,
           height: child.props.height + labelHeight
         }
+      }
+    })
+    for(let s of this.childrenState) {
+      const top = this.childrenState.filter(x => { return x.order < s.order }).map(x => { return x.height }).reduce((a, b) => {
+        return a + b
+      }, offsetTop)
+      s.top = s.initialTop = top
+    }
+  }
+  render() {
+    const children = React.Children.map(this.props.children!, (_child, i) => {
+      if(_child["props"] && _child["props"]["label"]) {
+        const child = _child as any as DraggableWindow
         const currentIndex = i
         const onDrag = (x: number, y: number) => {
           this.childrenState[currentIndex].left = x
           this.childrenState[currentIndex].top = y
           this.forceUpdate()
         }
+        const onDrop = (x: number, y: number) => {
+          this.childrenState[currentIndex].left = this.childrenState[currentIndex].initialLeft
+          this.childrenState[currentIndex].top = this.childrenState[currentIndex].initialTop
+          this.forceUpdate()
+        }
         const result = (
-          <Window height={child.props.height} label={child.props.label} top={this.childrenState[i].top} left={this.childrenState[i].left} onDrag={onDrag}>
+          <Window height={child.props.height} label={child.props.label} top={this.childrenState[i].top} left={this.childrenState[i].left} onDrag={onDrag} onDrop={onDrop}>
             {child.props.children}
           </Window>
         )
-        i++
         return result
       }
     })
