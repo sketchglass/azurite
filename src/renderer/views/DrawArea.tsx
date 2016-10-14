@@ -1,3 +1,4 @@
+import {observable, autorun} from "mobx"
 import React = require("react")
 import Picture from "../models/Picture"
 import {Vec2, Transform} from "paintvec"
@@ -18,24 +19,25 @@ export default
 class DrawArea extends React.Component<DrawAreaProps, void> {
   element: HTMLElement|undefined
   renderer: Renderer
+  @observable tool: Tool
   currentTool: Tool|undefined
   usingTablet = false
 
   constructor(props: DrawAreaProps) {
     super(props)
     this.renderer = new Renderer(props.picture)
+    this.tool = props.tool
+    autorun(() => this.updateCursor())
   }
 
   componentWillReceiveProps(nextProps: DrawAreaProps) {
-    if (this.element) {
-      this.element.style.cursor = nextProps.tool.cursor
-    }
+    this.tool = nextProps.tool
   }
 
   componentDidMount() {
     this.element = this.refs["root"] as HTMLElement
     this.element.appendChild(canvas)
-    this.element.style.cursor = this.props.tool.cursor
+    this.updateCursor()
 
     IPCChannels.tabletDown.listen().forEach(ev => {
       this.usingTablet = true
@@ -53,6 +55,12 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     window.addEventListener("resize", () => {
       this.resize()
     })
+  }
+
+  updateCursor() {
+    if (this.element) {
+      this.element.style.cursor = this.tool.cursor
+    }
   }
 
   resize() {
