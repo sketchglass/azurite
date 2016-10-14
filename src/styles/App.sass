@@ -11,7 +11,7 @@ aside
   display: flex
   width: 100vw
   height: 100vh
-.DrawArea .GLCanvas
+.DrawArea_GLCanvas
   position: absolute
   left: 0
   top: 0
@@ -21,6 +21,9 @@ aside
   position: relative
   flex: 1
   border: 2px solid $default-border-color
+.DrawArea_Cursor
+  position: absolute
+  will-change: left, top, width, height
 .LeftSidebar
   display: flex
   flex-direction: column

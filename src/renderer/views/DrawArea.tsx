@@ -75,7 +75,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
       if (cursorElement) {
         this.element.style.cursor = "none"
-        cursorElement.style.position = "absolute"
+        cursorElement.className = "DrawArea_Cursor"
         this.element.appendChild(cursorElement)
         this.cursorElement = cursorElement
         this.updateCursorGeometry()
