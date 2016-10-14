@@ -1,4 +1,4 @@
-import {reaction} from "mobx"
+import {observe} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Model, RectShape, TextureShader, CanvasDrawTarget, Color} from "paintgl"
 import {context, canvas} from "../GLContext"
@@ -32,7 +32,9 @@ class Renderer {
     this.picture.updated.forEach(rect => {
       this.render(rect)
     })
-    this.render()
+    observe(this.picture.navigation, () => {
+      this.render()
+    })
   }
 
   updateTransforms() {
