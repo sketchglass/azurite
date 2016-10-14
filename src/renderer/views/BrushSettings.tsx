@@ -1,3 +1,4 @@
+import {observer} from "mobx-react"
 import React = require("react")
 import BrushTool from "../models/BrushTool"
 import {parseHexColor, toHexColor} from "../../lib/Color"
@@ -7,33 +8,24 @@ interface BrushSettingsProps {
   tool: BrushTool
 }
 
-export default
+@observer export default
 class BrushSettings extends React.Component<BrushSettingsProps, void> {
-  constructor() {
-    super();
-  }
-
   render() {
     const {tool} = this.props
     const onOpacityChange = (value: number) => {
       tool.opacity = value / 100
-      this.forceUpdate()
     }
     const onWidthChange = (value: number) => {
       tool.width = value
-      this.forceUpdate()
     }
     const onMinWidthChange = (value: number) => {
       tool.minWidthRatio = value / 100
-      this.forceUpdate()
     }
     const onSoftnessChange = (value: number) => {
       tool.softness = value / 100
-      this.forceUpdate()
     }
     const onEraserModeChange = (ev: React.FormEvent<HTMLInputElement>) => {
       tool.eraser = !tool.eraser
-      this.forceUpdate()
     }
     return (
       <table className="BrushSettings">

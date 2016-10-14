@@ -1,3 +1,4 @@
+import {observable} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Model, TextureDrawTarget, Shape, Shader}  from "paintgl"
 import Waypoint from "./Waypoint"
@@ -61,7 +62,7 @@ class BrushTool extends BaseBrushTool {
   model: Model
   drawTarget = new TextureDrawTarget(context)
   name = "Brush"
-  eraser = false
+  @observable eraser = false
 
   constructor() {
     super()

@@ -1,4 +1,4 @@
-import {action} from "mobx"
+import {observable, action} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Texture, TextureDrawTarget, Color} from "paintgl"
 import Waypoint from "./Waypoint"
@@ -16,17 +16,17 @@ abstract class BaseBrushTool extends Tool {
   cursor = "crosshair"
 
   // brush width (diameter)
-  width = 10
+  @observable width = 10
   // brush color RGBA
   color = new Color(0, 0, 0, 1)
   // brush opacity
-  opacity = 1
+  @observable opacity = 1
   // distance used to soften edge, compared to brush radius
-  softness = 0.5
+  @observable softness = 0.5
   // width drawn in pressure 0, compared to brush width
-  minWidthRatio = 0.5
+  @observable minWidthRatio = 0.5
   // spacing between dabs, compared to brush width
-  spacingRatio = 0.1
+  @observable spacingRatio = 0.1
 
   oldTiledTexture: TiledTexture|undefined
   originalTexture = new Texture(context, {size: new Vec2(0), pixelType: "half-float"})

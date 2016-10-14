@@ -1,3 +1,4 @@
+import {observable} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Model, Shader, RectShape, Texture, TextureDrawTarget} from "paintgl"
 import Waypoint from "./Waypoint"
@@ -121,8 +122,8 @@ class WatercolorShader extends Shader {
 export default
 class WatercolorTool extends BaseBrushTool {
   minWidthRatio = 1
-  blending = 0.5
-  thickness = 0.5
+  @observable blending = 0.5
+  @observable thickness = 0.5
 
   name = "Watercolor"
 

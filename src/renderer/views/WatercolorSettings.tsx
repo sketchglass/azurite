@@ -1,3 +1,4 @@
+import {observer} from "mobx-react"
 import React = require("react")
 import WatercolorTool from "../models/WatercolorTool"
 import {parseHexColor, toHexColor} from "../../lib/Color"
@@ -7,33 +8,24 @@ interface WatercolorSettingsProps {
   tool: WatercolorTool
 }
 
-export default
+@observer export default
 class WatercolorSettings extends React.Component<WatercolorSettingsProps, void> {
-  constructor() {
-    super();
-  }
-
   render() {
     const {tool} = this.props
     const onWidthChange = (value: number) => {
       tool.width = value
-      this.forceUpdate()
     }
     const onBlendingChange = (value: number) => {
       tool.blending = value / 100
-      this.forceUpdate()
     }
     const onThicknessChange = (value: number) => {
       tool.thickness = value / 100
-      this.forceUpdate()
     }
     const onMinWidthChange = (value: number) => {
       tool.minWidthRatio = value / 100
-      this.forceUpdate()
     }
     const onSoftnessChange = (value: number) => {
       tool.softness = value / 100
-      this.forceUpdate()
     }
     return (
       <table className="BrushSettings">
