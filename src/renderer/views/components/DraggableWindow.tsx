@@ -117,10 +117,13 @@ interface ChildState {
   initialLeft: number
   order: number
 }
-const labelHeight = 20
-const margin = 14
-const offsetTop = 30
-export class DraggableWindowContainer extends React.Component<void, void> {
+interface DraggableWindowContainerProps {
+  labelHeight: number
+  margin: number
+  top: number
+  left: number
+}
+export class DraggableWindowContainer extends React.Component<DraggableWindowContainerProps, void> {
   childrenState: ChildState[] = []
   previewState: PreviewState
   componentWillMount() {
@@ -131,9 +134,9 @@ export class DraggableWindowContainer extends React.Component<void, void> {
         this.childrenState[i] = {
           order: order,
           initialTop: 0,
-          initialLeft: 18,
+          initialLeft: 0,
           top: 0,
-          left: 18,
+          left: 0,
           height: child.props.height,
           width:  child.props.width
         }
@@ -151,9 +154,11 @@ export class DraggableWindowContainer extends React.Component<void, void> {
   onChildrenOrderUpdate = () => {
     for(let s of this.childrenState) {
       const top = this.childrenState.filter(x => { return x.order < s.order }).map(x => { return x.height }).reduce((a, b) => {
-        return a + b + labelHeight + margin
-      }, offsetTop)
+        return a + b + this.props.labelHeight + this.props.margin
+      }, this.props.top)
+      const left = this.props.left
       s.top = s.initialTop = top
+      s.left = s.initialLeft = left
     }
   }
   render() {
@@ -166,13 +171,13 @@ export class DraggableWindowContainer extends React.Component<void, void> {
           this.childrenState[currentIndex].left = x
           this.childrenState[currentIndex].top = y
           const insideSwapArea = (childState: ChildState) => {
-            return childState.top <= y && y <= childState.top + labelHeight
+            return childState.top <= y && y <= childState.top + this.props.labelHeight
           }
           const swapTargets = this.childrenState.filter(x => { return x.order !== childState.order && insideSwapArea(x) })
           if(swapTargets.length) {
             this.previewState.top = swapTargets[0].top
             this.previewState.left = swapTargets[0].left
-            this.previewState.height = swapTargets[0].height + labelHeight
+            this.previewState.height = swapTargets[0].height + this.props.labelHeight
             this.previewState.width = swapTargets[0].width
             this.previewState.visibility = true
           } else {
@@ -182,7 +187,7 @@ export class DraggableWindowContainer extends React.Component<void, void> {
         }
         const onDrop = (x: number, y: number) => {
           const insideSwapArea = (childState: ChildState) => {
-            return childState.top <= y && y <= childState.top + labelHeight
+            return childState.top <= y && y <= childState.top + this.props.labelHeight
           }
           const swapTargets = this.childrenState.filter(x => { return x.order !== childState.order && insideSwapArea(x) })
           const swap = (a: ChildState, b: ChildState) => {
@@ -202,7 +207,7 @@ export class DraggableWindowContainer extends React.Component<void, void> {
           this.forceUpdate()
         }
         const result = (
-          <Window height={child.props.height + labelHeight} width={child.props.width} label={child.props.label} top={this.childrenState[i].top} left={this.childrenState[i].left} onDrag={onDrag} onDrop={onDrop}>
+          <Window height={child.props.height + this.props.labelHeight} width={child.props.width} label={child.props.label} top={this.childrenState[i].top} left={this.childrenState[i].left} onDrag={onDrag} onDrop={onDrop}>
             {child.props.children}
           </Window>
         )

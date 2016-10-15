@@ -134,7 +134,7 @@ class App extends React.Component<void, void> {
     return (
       <div className="App">
         <aside className="LeftSidebar">
-          <DraggableWindowContainer>
+          <DraggableWindowContainer top={20} left={18} margin={14} labelHeight={20}>
             <DraggableWindow label="Color" width={200} height={200}>
               <ColorPicker color={this.brushColor} onChange={onBrushColorChange} />
             </DraggableWindow>
