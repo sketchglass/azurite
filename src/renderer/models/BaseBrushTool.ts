@@ -87,7 +87,9 @@ abstract class BaseBrushTool extends Tool {
     }
     this.oldTiledTexture = tiledTexture.clone()
 
-    this.strokeStart(waypoint)
+    this.lastWaypoints = []
+
+    this.strokeMove(waypoint)
   }
 
   move(waypoint: Waypoint) {
@@ -100,15 +102,6 @@ abstract class BaseBrushTool extends Tool {
     this.picture.currentLayer.updateThumbnail()
   }
 
-  strokeStart(waypoint: Waypoint) {
-    this.lastWaypoints = [waypoint]
-    this.nextDabOffset = this.brushSpacing(waypoint)
-    const rect = this._rectForWaypoints([waypoint])
-    this.renderWaypoints([waypoint], rect)
-    this.addEditedRect(rect)
-    this.renderRect(rect)
-  }
-
   strokeMove(waypoint: Waypoint) {
     const {lastWaypoints} = this
     if (lastWaypoints.length == 4) {
@@ -116,15 +109,17 @@ abstract class BaseBrushTool extends Tool {
     }
     lastWaypoints.push(waypoint)
 
-    if (lastWaypoints.length <= 2) {
-      return
-    }
     const getSpacing = this.brushSpacing.bind(this)
     const {waypoints, nextOffset} = (() => {
-      if (lastWaypoints.length == 3) {
-        return Waypoint.subdivideCurve(lastWaypoints[0], lastWaypoints[0], lastWaypoints[1], lastWaypoints[2], getSpacing, this.nextDabOffset)
-      } else {
-        return Waypoint.subdivideCurve(lastWaypoints[0], lastWaypoints[1], lastWaypoints[2], lastWaypoints[3], getSpacing, this.nextDabOffset)
+      switch (lastWaypoints.length) {
+        case 1:
+          return {waypoints: [waypoint], nextOffset: this.brushSpacing(waypoint)}
+        case 2:
+          return {waypoints: [], nextOffset: this.nextDabOffset}
+        case 3:
+          return Waypoint.subdivideCurve(lastWaypoints[0], lastWaypoints[0], lastWaypoints[1], lastWaypoints[2], getSpacing, this.nextDabOffset)
+        default:
+          return Waypoint.subdivideCurve(lastWaypoints[0], lastWaypoints[1], lastWaypoints[2], lastWaypoints[3], getSpacing, this.nextDabOffset)
       }
     })()
 
