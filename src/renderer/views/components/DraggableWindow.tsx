@@ -1,5 +1,5 @@
 import * as React from "react"
-import "../../styles/DraggableWindow.sass"
+import "../../../styles/components/DraggableWindow.sass"
 
 interface DraggableWindowProps {
   label: string
