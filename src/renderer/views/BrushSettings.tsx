@@ -50,6 +50,10 @@ class BrushSettings extends React.Component<BrushSettingsProps, void> {
             <td>Eraser</td>
             <td><label><input type="checkbox" onChange={onEraserModeChange} checked={tool.eraser} /> Eraser Mode</label></td>
           </tr>
+          <tr>
+            <td>Stabilizing</td>
+            <td><RangeSlider onChange={value => tool.stabilizingLevel = value} min={0} max={10} value={tool.stabilizingLevel} /></td><td>{tool.stabilizingLevel}</td>
+          </tr>
         </tbody>
       </table>
     )

@@ -13,14 +13,12 @@ type RangeSliderProps = {
 export default class RangeSlider extends React.Component<RangeSliderProps, void> {
   clicking = false
   fillWidth = 0
-  width: number
   slider: HTMLDivElement
   constructor() {
     super()
   }
   componentDidMount() {
     const {value} = this.props
-    this.width = this.slider.clientWidth
     this.update(value)
     this.slider.addEventListener("pointerup", this.onPointerUp)
     this.slider.addEventListener("pointerdown", this.onPointerDown)
@@ -37,9 +35,10 @@ export default class RangeSlider extends React.Component<RangeSliderProps, void>
   }
   onChange(e: PointerEvent) {
     const {min, max} = this.props
-    const relativeX = e.pageX - this.slider.getBoundingClientRect().left
-    const width = this.width
-    const value = Math.max(Math.min(min + Math.floor((relativeX / width) * 100), max), min)
+    const rect = this.slider.getBoundingClientRect()
+    const offsetX = e.clientX - rect.left
+    const rate = Math.max(0, Math.min(offsetX / rect.width, 1))
+    const value = Math.round(rate * (max - min) + min)
     this.props.onChange(value)
   }
   onPointerDown = (e: PointerEvent) => {
