@@ -9,9 +9,25 @@ import {context} from "../GLContext"
 import {copyTexture, copyNewTexture, readTextureFloat} from "../GLUtil"
 import {float32ArrayTo16} from "../../lib/Float"
 
+function stabilizeWaypoint(waypoints: Waypoint[], level: number, index: number) {
+  const nWaypoints = waypoints.length
+  let sumX = 0
+  let sumY = 0
+  let sumPressure = 0
+  for (let i = index - level; i <= index + level; ++i) {
+    const {pos: {x, y}, pressure} = waypoints[Math.max(0, Math.min(i, nWaypoints - 1))]
+    sumX += x
+    sumY += y
+    sumPressure += pressure
+  }
+  const sumCount = level * 2 + 1
+  const pos = new Vec2(sumX / sumCount, sumY / sumCount)
+  const pressure = sumPressure / sumCount
+  return new Waypoint(pos, pressure)
+}
+
 abstract class BaseBrushTool extends Tool {
   private lastStabilizeWaypoints: Waypoint[] = []
-  private lastStabilizedWaypointIndex = 0
   private lastInterpolateWaypoints: Waypoint[] = []
   private nextDabOffset = 0
 
@@ -30,6 +46,7 @@ abstract class BaseBrushTool extends Tool {
   // spacing between dabs, compared to brush width
   @observable spacingRatio = 0.1
 
+  // how many neighbor event positions used to stabilize stroke
   @observable stabilizingLevel = 5
 
   oldTiledTexture: TiledTexture|undefined
@@ -92,7 +109,6 @@ abstract class BaseBrushTool extends Tool {
     this.oldTiledTexture = tiledTexture.clone()
 
     this.lastStabilizeWaypoints = []
-    this.lastStabilizedWaypointIndex = -1
     this.lastInterpolateWaypoints = []
 
     this.stabilizeMove(waypoint)
@@ -108,25 +124,6 @@ abstract class BaseBrushTool extends Tool {
     this.picture.currentLayer.updateThumbnail()
   }
 
-  stabilizeAt(index: number) {
-    const waypoints = this.lastStabilizeWaypoints
-    const nWaypoints = waypoints.length
-    const level = this.stabilizingLevel
-    let sumX = 0
-    let sumY = 0
-    let sumPressure = 0
-    for (let i = index - level; i <= index + level; ++i) {
-      const {pos: {x, y}, pressure} = waypoints[Math.max(0, Math.min(i, nWaypoints - 1))]
-      sumX += x
-      sumY += y
-      sumPressure += pressure
-    }
-    const sumCount = level * 2 + 1
-    const pos = new Vec2(sumX / sumCount, sumY / sumCount)
-    const pressure = sumPressure / sumCount
-    return new Waypoint(pos, pressure)
-  }
-
   stabilizeMove(waypoint: Waypoint) {
     const waypoints = this.lastStabilizeWaypoints
     waypoints.push(waypoint)
@@ -134,20 +131,24 @@ abstract class BaseBrushTool extends Tool {
     const sumCount = level * 2 + 1
     if (sumCount == waypoints.length) {
       for (let i = 0; i < level; ++i) {
-        this.interpolateMove(this.stabilizeAt(i))
+        this.interpolateMove(stabilizeWaypoint(waypoints, level, i))
       }
     }
     if (sumCount <= waypoints.length) {
       const i = waypoints.length - 1 - level
-      this.interpolateMove(this.stabilizeAt(i))
-      this.lastStabilizedWaypointIndex = i
+      this.interpolateMove(stabilizeWaypoint(waypoints, level, i))
     }
   }
 
   stabilizeEnd() {
     const waypoints = this.lastStabilizeWaypoints
-    for (let i = this.lastStabilizedWaypointIndex + 1; i < waypoints.length; ++i) {
-      this.interpolateMove(this.stabilizeAt(i))
+    const level = this.stabilizingLevel
+    let firstUndrawnIndex = 0
+    if (level * 2 + 1 <= waypoints.length) {
+      firstUndrawnIndex = waypoints.length - level
+    }
+    for (let i = firstUndrawnIndex; i < waypoints.length; ++i) {
+      this.interpolateMove(stabilizeWaypoint(waypoints, level, i))
     }
     this.interpolateEnd()
   }
