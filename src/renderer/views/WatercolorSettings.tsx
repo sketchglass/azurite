@@ -50,6 +50,10 @@ class WatercolorSettings extends React.Component<WatercolorSettingsProps, void> 
             <td>Thickness</td>
             <td><RangeSlider onChange={onThicknessChange} min={0} max={100} value={Math.round(tool.thickness * 100)} /></td><td>{Math.round(tool.thickness * 100)}%</td>
           </tr>
+          <tr>
+            <td>Stabilizing</td>
+            <td><RangeSlider onChange={value => tool.stabilizingLevel = value} min={0} max={10} value={tool.stabilizingLevel} /></td><td>{tool.stabilizingLevel}</td>
+          </tr>
         </tbody>
       </table>
     )
