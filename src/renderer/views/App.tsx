@@ -135,16 +135,16 @@ class App extends React.Component<void, void> {
       <div className="App">
         <aside className="LeftSidebar">
           <DraggableWindowContainer>
-            <DraggableWindow label="Color" height={200}>
+            <DraggableWindow label="Color" width={200} height={200}>
               <ColorPicker color={this.brushColor} onChange={onBrushColorChange} />
             </DraggableWindow>
-            <DraggableWindow label="Palette" height={80}>
+            <DraggableWindow label="Palette" width={200} height={80}>
               <Palette palette={this.palette} paletteIndex={this.paletteIndex} onChange={onPaletteChange} />
             </DraggableWindow>
-            <DraggableWindow label="Tools" height={80}>
+            <DraggableWindow label="Tools" width={200} height={80}>
               <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
             </DraggableWindow>
-            <DraggableWindow label="Settings" height={200}>
+            <DraggableWindow label="Settings" width={200} height={200}>
               {currentTool.renderSettings()}
             </DraggableWindow>
           </DraggableWindowContainer>

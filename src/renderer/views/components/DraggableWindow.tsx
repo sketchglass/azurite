@@ -4,15 +4,14 @@ import "../../../styles/components/DraggableWindow.sass"
 interface DraggableWindowProps {
   label: string
   height: number
+  width: number
 }
-export class DraggableWindow extends React.Component<DraggableWindowProps, void> {
-  render() {
-    return (
-      <div>
-        {this.props.children}
-      </div>
-    )
-  }
+export const DraggableWindow = (props: DraggableWindowProps & { children?: React.ReactNode }) => {
+  return (
+    <div>
+      {props.children}
+    </div>
+  )
 }
 interface WindowProps extends DraggableWindowProps {
   top: number
@@ -30,8 +29,9 @@ class Window extends React.Component<WindowProps, void> {
     super()
   }
   componentDidMount() {
-    const {left, top, height} = this.props
+    const {left, top, height, width} = this.props
     this.window.style.height = `${height}px`
+    this.window.style.width = `${width}px`
     this.label.addEventListener('pointerup', this.onPointerUp)
     this.label.addEventListener('pointerdown', this.onPointerDown)
     this.label.addEventListener('pointermove', this.onPointerMove)
@@ -88,22 +88,45 @@ class Window extends React.Component<WindowProps, void> {
     )
   }
 }
+interface PreviewState {
+  top: number
+  left: number
+  height: number
+  width: number
+  visibility: boolean
+}
+const PreviewWindow = (props: PreviewState) => {
+  const style = {
+    top: `${props.top}px`,
+    left: `${props.left}px`,
+    width: `${props.width}px`,
+    height: `${props.height}px`,
+    visibility: props.visibility ? "visible" : "hidden"
+  }
+  return (
+    <div style={style} className="PreviewWindow">
+    </div>
+  )
+}
 interface ChildState {
   height: number
+  width: number
   left: number
   top: number
   initialTop: number
   initialLeft: number
   order: number
 }
-const labelHeight = 28
+const labelHeight = 20
+const margin = 14
 const offsetTop = 30
 export class DraggableWindowContainer extends React.Component<void, void> {
   childrenState: ChildState[] = []
+  previewState: PreviewState
   componentWillMount() {
     React.Children.forEach(this.props.children!, (_child, i) => {
       if(_child["props"] && _child["props"]["label"]) {
-        const child = _child as any as DraggableWindow
+        const child = _child as any as React.ReactElement<DraggableWindowProps & { children?: React.ReactNode }>
         const order = i
         this.childrenState[i] = {
           order: order,
@@ -111,7 +134,15 @@ export class DraggableWindowContainer extends React.Component<void, void> {
           initialLeft: 18,
           top: 0,
           left: 18,
-          height: child.props.height + labelHeight
+          height: child.props.height,
+          width:  child.props.width
+        }
+        this.previewState = {
+          visibility: false,
+          top: 0,
+          left: 0,
+          width: 0,
+          height: 0
         }
       }
     })
@@ -120,7 +151,7 @@ export class DraggableWindowContainer extends React.Component<void, void> {
   onChildrenOrderUpdate = () => {
     for(let s of this.childrenState) {
       const top = this.childrenState.filter(x => { return x.order < s.order }).map(x => { return x.height }).reduce((a, b) => {
-        return a + b
+        return a + b + labelHeight + margin
       }, offsetTop)
       s.top = s.initialTop = top
     }
@@ -128,17 +159,29 @@ export class DraggableWindowContainer extends React.Component<void, void> {
   render() {
     const children = React.Children.map(this.props.children!, (_child, i) => {
       if(_child["props"] && _child["props"]["label"]) {
-        const child = _child as any as DraggableWindow
+        const child = _child as any as React.ReactElement<DraggableWindowProps & { children?: React.ReactNode }>
         const currentIndex = i
         let childState = this.childrenState[currentIndex]
         const onDrag = (x: number, y: number) => {
           this.childrenState[currentIndex].left = x
           this.childrenState[currentIndex].top = y
+          const insideSwapArea = (childState: ChildState) => {
+            return childState.top <= y && y <= childState.top + labelHeight
+          }
+          const swapTargets = this.childrenState.filter(x => { return x.order !== childState.order && insideSwapArea(x) })
+          if(swapTargets.length) {
+            this.previewState.top = swapTargets[0].top
+            this.previewState.left = swapTargets[0].left
+            this.previewState.height = swapTargets[0].height + labelHeight
+            this.previewState.width = swapTargets[0].width
+            this.previewState.visibility = true
+          } else {
+            this.previewState.visibility = false
+          }
           this.forceUpdate()
         }
         const onDrop = (x: number, y: number) => {
           const insideSwapArea = (childState: ChildState) => {
-            console.log(childState.top <= y && y <= childState.top + labelHeight)
             return childState.top <= y && y <= childState.top + labelHeight
           }
           const swapTargets = this.childrenState.filter(x => { return x.order !== childState.order && insideSwapArea(x) })
@@ -155,10 +198,11 @@ export class DraggableWindowContainer extends React.Component<void, void> {
             childState.left = childState.initialLeft
             childState.top = childState.initialTop
           }
+          this.previewState.visibility = false
           this.forceUpdate()
         }
         const result = (
-          <Window height={child.props.height} label={child.props.label} top={this.childrenState[i].top} left={this.childrenState[i].left} onDrag={onDrag} onDrop={onDrop}>
+          <Window height={child.props.height + labelHeight} width={child.props.width} label={child.props.label} top={this.childrenState[i].top} left={this.childrenState[i].left} onDrag={onDrag} onDrop={onDrop}>
             {child.props.children}
           </Window>
         )
@@ -168,6 +212,8 @@ export class DraggableWindowContainer extends React.Component<void, void> {
     return (
       <div className="DraggableWindowContainer">
         {children}
+        <PreviewWindow top={this.previewState.top} left={this.previewState.left}
+          visibility={this.previewState.visibility} width={this.previewState.width} height={this.previewState.height} />
       </div>
     )
   }
