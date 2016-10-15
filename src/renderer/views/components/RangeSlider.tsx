@@ -1,13 +1,15 @@
 import React = require("react")
 import "../../../styles/components/RangeSlider.sass"
 
-type RangeSliderProps = {
+export interface RangeSliderProps {
   min: number
   max: number
   value: number
   step?: number
   onChange: (value: number) => void
   disabled?: boolean
+  backgroundComponent?: React.ComponentClass<any> | React.StatelessComponent<any>
+  backgroundComponentProps?: any
 }
 
 export default class RangeSlider extends React.Component<RangeSliderProps, void> {
@@ -63,14 +65,17 @@ export default class RangeSlider extends React.Component<RangeSliderProps, void>
     this.forceUpdate()
   }
   render() {
-    const {value, min, max} = this.props
+    const {value, min, max, backgroundComponentProps} = this.props
+    const BackgroundComponent = this.props.backgroundComponent
     const fillStyle = {
       width: `${this.fillWidth}%`
     }
     const className = this.props.disabled ? "RangeSlider RangeSlider-disabled" : "RangeSlider" // TODO: change behavior
+    const background = BackgroundComponent ? <BackgroundComponent {...backgroundComponentProps} /> : null
     return (
       <div className={className} ref={s => { this.slider = s }}>
         <div className="RangeSlider_fill" style={fillStyle} />
+        { background }
       </div>
     )
   }

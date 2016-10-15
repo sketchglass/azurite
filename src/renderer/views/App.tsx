@@ -14,6 +14,7 @@ import LayerList from "./LayerList"
 import ColorPicker from "./ColorPicker"
 import Palette from "./Palette"
 import Navigator from "./Navigator"
+import RGBRangeSliders from "./components/RGBRangeSliders"
 import {HSVColor} from "../../lib/Color"
 import {Vec2} from "paintvec"
 import NavigationKeyBinding from "./NavigationKeyBinding"
@@ -134,6 +135,7 @@ class App extends React.Component<void, void> {
       <div className="App">
         <aside className="LeftSidebar">
           <ColorPicker color={this.brushColor} onChange={onBrushColorChange} />
+          <RGBRangeSliders color={this.brushColor} onChange={onBrushColorChange} />
           <Palette palette={this.palette} paletteIndex={this.paletteIndex} onChange={onPaletteChange} />
           <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
           {currentTool.renderSettings()}
