@@ -88,7 +88,7 @@ class Window extends React.Component<WindowProps, void> {
     )
   }
 }
-interface ChildrenState {
+interface ChildState {
   height: number
   left: number
   top: number
@@ -99,7 +99,7 @@ interface ChildrenState {
 const labelHeight = 28
 const offsetTop = 30
 export class DraggableWindowContainer extends React.Component<void, void> {
-  childrenState: ChildrenState[] = []
+  childrenState: ChildState[] = []
   componentWillMount() {
     React.Children.forEach(this.props.children!, (_child, i) => {
       if(_child["props"] && _child["props"]["label"]) {
@@ -115,6 +115,9 @@ export class DraggableWindowContainer extends React.Component<void, void> {
         }
       }
     })
+    this.onChildrenOrderUpdate()
+  }
+  onChildrenOrderUpdate = () => {
     for(let s of this.childrenState) {
       const top = this.childrenState.filter(x => { return x.order < s.order }).map(x => { return x.height }).reduce((a, b) => {
         return a + b
@@ -127,14 +130,31 @@ export class DraggableWindowContainer extends React.Component<void, void> {
       if(_child["props"] && _child["props"]["label"]) {
         const child = _child as any as DraggableWindow
         const currentIndex = i
+        let childState = this.childrenState[currentIndex]
         const onDrag = (x: number, y: number) => {
           this.childrenState[currentIndex].left = x
           this.childrenState[currentIndex].top = y
           this.forceUpdate()
         }
         const onDrop = (x: number, y: number) => {
-          this.childrenState[currentIndex].left = this.childrenState[currentIndex].initialLeft
-          this.childrenState[currentIndex].top = this.childrenState[currentIndex].initialTop
+          const insideSwapArea = (childState: ChildState) => {
+            console.log(childState.top <= y && y <= childState.top + labelHeight)
+            return childState.top <= y && y <= childState.top + labelHeight
+          }
+          const swapTargets = this.childrenState.filter(x => { return x.order !== childState.order && insideSwapArea(x) })
+          const swap = (a: ChildState, b: ChildState) => {
+            const tmp = a.order
+            a.order = b.order
+            b.order = tmp
+          }
+          if(swapTargets.length) {
+            swap(childState, swapTargets[0])
+            childState.left = childState.initialLeft
+            this.onChildrenOrderUpdate()
+          } else {
+            childState.left = childState.initialLeft
+            childState.top = childState.initialTop
+          }
           this.forceUpdate()
         }
         const result = (
