@@ -87,6 +87,20 @@ abstract class BaseBrushTool extends Tool {
     }
     this.oldTiledTexture = tiledTexture.clone()
 
+    this.strokeStart(waypoint)
+  }
+
+  move(waypoint: Waypoint) {
+    this.strokeMove(waypoint)
+  }
+
+  @action end() {
+    this.strokeEnd()
+    this.pushUndoStack()
+    this.picture.currentLayer.updateThumbnail()
+  }
+
+  strokeStart(waypoint: Waypoint) {
     this.lastWaypoints = [waypoint]
     this.nextDabOffset = this.brushSpacing(waypoint)
     const rect = this._rectForWaypoints([waypoint])
@@ -95,7 +109,7 @@ abstract class BaseBrushTool extends Tool {
     this.renderRect(rect)
   }
 
-  move(waypoint: Waypoint) {
+  strokeMove(waypoint: Waypoint) {
     const {lastWaypoints} = this
     if (lastWaypoints.length == 4) {
       lastWaypoints.shift()
@@ -125,34 +139,28 @@ abstract class BaseBrushTool extends Tool {
     this.renderRect(rect)
   }
 
-  @action end() {
-    const drawLast = () => {
-      const getSpacing = this.brushSpacing.bind(this)
-      const {lastWaypoints} = this
-      if (lastWaypoints.length < 2) {
-        return
-      }
-      const {waypoints} = (() => {
-        if (lastWaypoints.length == 2) {
-          return Waypoint.subdivide(lastWaypoints[0], lastWaypoints[1], getSpacing, this.nextDabOffset)
-        } else if (lastWaypoints.length == 3) {
-          return Waypoint.subdivideCurve(lastWaypoints[0], lastWaypoints[1], lastWaypoints[2], lastWaypoints[2], getSpacing, this.nextDabOffset)
-        } else {
-          return Waypoint.subdivideCurve(lastWaypoints[1], lastWaypoints[2], lastWaypoints[3], lastWaypoints[3], getSpacing, this.nextDabOffset)
-        }
-      })()
-
-      if (waypoints.length != 0) {
-        const rect = this._rectForWaypoints(waypoints)
-        this.renderWaypoints(waypoints, rect)
-        this.addEditedRect(rect)
-        this.renderRect(rect)
-      }
+  strokeEnd() {
+    const getSpacing = this.brushSpacing.bind(this)
+    const {lastWaypoints} = this
+    if (lastWaypoints.length < 2) {
+      return
     }
-    const rect = drawLast()
-    this.pushUndoStack()
-    this.picture.currentLayer.updateThumbnail()
-    return rect
+    const {waypoints} = (() => {
+      if (lastWaypoints.length == 2) {
+        return Waypoint.subdivide(lastWaypoints[0], lastWaypoints[1], getSpacing, this.nextDabOffset)
+      } else if (lastWaypoints.length == 3) {
+        return Waypoint.subdivideCurve(lastWaypoints[0], lastWaypoints[1], lastWaypoints[2], lastWaypoints[2], getSpacing, this.nextDabOffset)
+      } else {
+        return Waypoint.subdivideCurve(lastWaypoints[1], lastWaypoints[2], lastWaypoints[3], lastWaypoints[3], getSpacing, this.nextDabOffset)
+      }
+    })()
+
+    if (waypoints.length != 0) {
+      const rect = this._rectForWaypoints(waypoints)
+      this.renderWaypoints(waypoints, rect)
+      this.addEditedRect(rect)
+      this.renderRect(rect)
+    }
   }
 
   private pushUndoStack() {
