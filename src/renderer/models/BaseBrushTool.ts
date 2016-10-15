@@ -47,7 +47,7 @@ abstract class BaseBrushTool extends Tool {
   @observable spacingRatio = 0.1
 
   // how many neighbor event positions used to stabilize stroke
-  @observable stabilizingLevel = 5
+  @observable stabilizingLevel = 2
 
   oldTiledTexture: TiledTexture|undefined
   originalTexture = new Texture(context, {size: new Vec2(0), pixelType: "half-float"})
