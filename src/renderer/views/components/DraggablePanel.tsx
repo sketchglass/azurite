@@ -1,25 +1,26 @@
 import * as React from "react"
-import "../../../styles/components/DraggableWindow.sass"
+import "../../../styles/components/DraggablePanel.sass"
 
-interface DraggableWindowProps {
+interface DraggablePanelProps {
   label: string
   height: number
   width: number
 }
-export const DraggableWindow = (props: DraggableWindowProps & { children?: React.ReactNode }) => {
+export const DraggablePanel = (props: DraggablePanelProps & { children?: React.ReactNode }) => {
   return (
     <div>
       {props.children}
     </div>
   )
 }
-interface WindowProps extends DraggableWindowProps {
+interface PanelProps extends DraggablePanelProps {
   top: number
   left: number
   onDrag: (x: number, y: number) => void
   onDrop: (x: number, y: number) => void
+  zIndex?: number
 }
-class Window extends React.Component<WindowProps, void> {
+class Panel extends React.Component<PanelProps, void> {
   dragging = false
   window: HTMLDivElement
   label: HTMLDivElement
@@ -29,21 +30,26 @@ class Window extends React.Component<WindowProps, void> {
     super()
   }
   componentDidMount() {
-    const {left, top, height, width} = this.props
-    this.window.style.height = `${height}px`
-    this.window.style.width = `${width}px`
     this.label.addEventListener('pointerup', this.onPointerUp)
     this.label.addEventListener('pointerdown', this.onPointerDown)
     this.label.addEventListener('pointermove', this.onPointerMove)
-    this.update(left, top)
+    this.update(this.props)
   }
-  componentWillReceiveProps(props: WindowProps) {
-    const {left, top} = props
-    this.update(left, top)
+  componentWillReceiveProps(props: PanelProps) {
+    this.update(props)
   }
-  update(left: number, top: number) {
+  componentWillUnmount() {
+    this.label.removeEventListener('pointerup')
+    this.label.removeEventListener('pointerdown')
+    this.label.removeEventListener('pointermove')
+  }
+  update(props: PanelProps) {
+    const {height, width, left, top, zIndex} = props
+    this.window.style.height = `${height}px`
+    this.window.style.width = `${width}px`
     this.window.style.left = `${left}px`
     this.window.style.top = `${top}px`
+    this.window.style.zIndex = zIndex ? `${zIndex}` : "auto"
   }
   onDrag = (e: PointerEvent) => {
     const {pageX, pageY} = e
@@ -77,11 +83,11 @@ class Window extends React.Component<WindowProps, void> {
   }
   render() {
     return (
-      <div className="DraggableWindow" ref={w => { this.window = w }}>
-        <div className="DraggableWindow_label" ref={l => { this.label = l }}>
+      <div className="DraggablePanel" ref={w => { this.window = w }}>
+        <div className="DraggablePanel_label" ref={l => { this.label = l }}>
           {this.props.label}
         </div>
-        <div className="DraggableWindow_contents">
+        <div className="DraggablePanel_contents">
           {this.props.children}
         </div>
       </div>
@@ -95,16 +101,17 @@ interface PreviewState {
   width: number
   visibility: boolean
 }
-const PreviewWindow = (props: PreviewState) => {
+const PreviewPanel = (props: PreviewState) => {
   const style = {
     top: `${props.top}px`,
     left: `${props.left}px`,
     width: `${props.width}px`,
     height: `${props.height}px`,
+    zIndex: 100,
     visibility: props.visibility ? "visible" : "hidden"
   }
   return (
-    <div style={style} className="PreviewWindow">
+    <div style={style} className="PreviewPanel">
     </div>
   )
 }
@@ -116,20 +123,21 @@ interface ChildState {
   initialTop: number
   initialLeft: number
   order: number
+  dragging: boolean
 }
-interface DraggableWindowContainerProps {
+interface DraggablePanelContainerProps {
   labelHeight: number
   margin: number
   top: number
   left: number
 }
-export class DraggableWindowContainer extends React.Component<DraggableWindowContainerProps, void> {
+export class DraggablePanelContainer extends React.Component<DraggablePanelContainerProps, void> {
   childrenState: ChildState[] = []
   previewState: PreviewState
   componentWillMount() {
     React.Children.forEach(this.props.children!, (_child, i) => {
       if(_child["props"] && _child["props"]["label"]) {
-        const child = _child as any as React.ReactElement<DraggableWindowProps & { children?: React.ReactNode }>
+        const child = _child as any as React.ReactElement<DraggablePanelProps & { children?: React.ReactNode }>
         const order = i
         this.childrenState[i] = {
           order: order,
@@ -138,7 +146,8 @@ export class DraggableWindowContainer extends React.Component<DraggableWindowCon
           top: 0,
           left: 0,
           height: child.props.height,
-          width:  child.props.width
+          width:  child.props.width,
+          dragging: false
         }
         this.previewState = {
           visibility: false,
@@ -161,63 +170,66 @@ export class DraggableWindowContainer extends React.Component<DraggableWindowCon
       s.left = s.initialLeft = left
     }
   }
+  insideSwapArea = (childState: ChildState, x: number, y: number) => {
+    return childState.top <= y && y <= childState.top + this.props.labelHeight
+  }
+  getSwapTargets = (childState: ChildState, x: number, y: number) => {
+    return this.childrenState.filter(s => { return s.order !== childState.order && this.insideSwapArea(s, x, y) })
+  }
+  swapChild = (a: ChildState, b: ChildState) => {
+    const tmp = a.order
+    a.order = b.order
+    b.order = tmp
+  }
+  onChildDrag = (childState: ChildState, x: number, y: number) => {
+    childState.left = x
+    childState.top = y
+    childState.dragging = true
+    const swapTargets = this.getSwapTargets(childState, x, y)
+    if(swapTargets.length) {
+      this.previewState.top = swapTargets[0].top
+      this.previewState.left = swapTargets[0].left
+      this.previewState.height = swapTargets[0].height + this.props.labelHeight
+      this.previewState.width = swapTargets[0].width
+      this.previewState.visibility = true
+    } else {
+      this.previewState.visibility = false
+    }
+    this.forceUpdate()
+  }
+  onChildDrop = (childState: ChildState, x: number, y: number) => {
+    const swapTargets = this.getSwapTargets(childState, x, y)
+    if(swapTargets.length) {
+      this.swapChild(childState, swapTargets[0])
+      childState.left = childState.initialLeft
+      this.onChildrenOrderUpdate()
+    } else {
+      childState.left = childState.initialLeft
+      childState.top = childState.initialTop
+    }
+    this.previewState.visibility = false
+    childState.dragging = false
+    this.forceUpdate()
+  }
   render() {
     const children = React.Children.map(this.props.children!, (_child, i) => {
       if(_child["props"] && _child["props"]["label"]) {
-        const child = _child as any as React.ReactElement<DraggableWindowProps & { children?: React.ReactNode }>
+        const child = _child as any as React.ReactElement<DraggablePanelProps & { children?: React.ReactNode }>
         const currentIndex = i
-        let childState = this.childrenState[currentIndex]
-        const onDrag = (x: number, y: number) => {
-          this.childrenState[currentIndex].left = x
-          this.childrenState[currentIndex].top = y
-          const insideSwapArea = (childState: ChildState) => {
-            return childState.top <= y && y <= childState.top + this.props.labelHeight
-          }
-          const swapTargets = this.childrenState.filter(x => { return x.order !== childState.order && insideSwapArea(x) })
-          if(swapTargets.length) {
-            this.previewState.top = swapTargets[0].top
-            this.previewState.left = swapTargets[0].left
-            this.previewState.height = swapTargets[0].height + this.props.labelHeight
-            this.previewState.width = swapTargets[0].width
-            this.previewState.visibility = true
-          } else {
-            this.previewState.visibility = false
-          }
-          this.forceUpdate()
-        }
-        const onDrop = (x: number, y: number) => {
-          const insideSwapArea = (childState: ChildState) => {
-            return childState.top <= y && y <= childState.top + this.props.labelHeight
-          }
-          const swapTargets = this.childrenState.filter(x => { return x.order !== childState.order && insideSwapArea(x) })
-          const swap = (a: ChildState, b: ChildState) => {
-            const tmp = a.order
-            a.order = b.order
-            b.order = tmp
-          }
-          if(swapTargets.length) {
-            swap(childState, swapTargets[0])
-            childState.left = childState.initialLeft
-            this.onChildrenOrderUpdate()
-          } else {
-            childState.left = childState.initialLeft
-            childState.top = childState.initialTop
-          }
-          this.previewState.visibility = false
-          this.forceUpdate()
-        }
         const result = (
-          <Window height={child.props.height + this.props.labelHeight} width={child.props.width} label={child.props.label} top={this.childrenState[i].top} left={this.childrenState[i].left} onDrag={onDrag} onDrop={onDrop}>
+          <Panel height={child.props.height + this.props.labelHeight} width={child.props.width} label={child.props.label} top={this.childrenState[i].top} left={this.childrenState[i].left}
+            onDrag={this.onChildDrag.bind(this, this.childrenState[currentIndex])} onDrop={this.onChildDrop.bind(this, this.childrenState[currentIndex])}
+            zIndex={this.childrenState[i].dragging ? 100 : undefined}>
             {child.props.children}
-          </Window>
+          </Panel>
         )
         return result
       }
     })
     return (
-      <div className="DraggableWindowContainer">
+      <div className="DraggablePanelContainer">
         {children}
-        <PreviewWindow top={this.previewState.top} left={this.previewState.left}
+        <PreviewPanel top={this.previewState.top} left={this.previewState.left}
           visibility={this.previewState.visibility} width={this.previewState.width} height={this.previewState.height} />
       </div>
     )

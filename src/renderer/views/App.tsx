@@ -14,7 +14,7 @@ import LayerList from "./LayerList"
 import ColorPicker from "./ColorPicker"
 import Palette from "./Palette"
 import Navigator from "./Navigator"
-import {DraggableWindow, DraggableWindowContainer} from "./components/DraggableWindow"
+import {DraggablePanel, DraggablePanelContainer} from "./components/DraggablePanel"
 import {HSVColor} from "../../lib/Color"
 import {Vec2} from "paintvec"
 import NavigationKeyBinding from "./NavigationKeyBinding"
@@ -134,20 +134,20 @@ class App extends React.Component<void, void> {
     return (
       <div className="App">
         <aside className="LeftSidebar">
-          <DraggableWindowContainer top={20} left={18} margin={14} labelHeight={20}>
-            <DraggableWindow label="Color" width={200} height={200}>
+          <DraggablePanelContainer top={20} left={18} margin={14} labelHeight={20}>
+            <DraggablePanel label="Color" width={200} height={200}>
               <ColorPicker color={this.brushColor} onChange={onBrushColorChange} />
-            </DraggableWindow>
-            <DraggableWindow label="Palette" width={200} height={80}>
+            </DraggablePanel>
+            <DraggablePanel label="Palette" width={200} height={80}>
               <Palette palette={this.palette} paletteIndex={this.paletteIndex} onChange={onPaletteChange} />
-            </DraggableWindow>
-            <DraggableWindow label="Tools" width={200} height={80}>
+            </DraggablePanel>
+            <DraggablePanel label="Tools" width={200} height={80}>
               <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
-            </DraggableWindow>
-            <DraggableWindow label="Settings" width={200} height={200}>
+            </DraggablePanel>
+            <DraggablePanel label="Settings" width={200} height={200}>
               {currentTool.renderSettings()}
-            </DraggableWindow>
-          </DraggableWindowContainer>
+            </DraggablePanel>
+          </DraggablePanelContainer>
         </aside>
         <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
         <aside className="RightSidebar">
