@@ -14,6 +14,7 @@ import LayerList from "./LayerList"
 import ColorPicker from "./ColorPicker"
 import Palette from "./Palette"
 import Navigator from "./Navigator"
+import RGBRangeSliders from "./components/RGBRangeSliders"
 import {DraggablePanel, DraggablePanelContainer} from "./components/DraggablePanel"
 import {HSVColor} from "../../lib/Color"
 import {Vec2} from "paintvec"
@@ -137,6 +138,9 @@ class App extends React.Component<void, void> {
           <DraggablePanelContainer top={20} left={18} margin={14} labelHeight={20}>
             <DraggablePanel label="Color" width={200} height={200}>
               <ColorPicker color={this.brushColor} onChange={onBrushColorChange} />
+            </DraggablePanel>
+            <DraggablePanel label="Slider" width={200} height={70}>
+              <RGBRangeSliders color={this.brushColor} onChange={onBrushColorChange} />
             </DraggablePanel>
             <DraggablePanel label="Palette" width={200} height={80}>
               <Palette palette={this.palette} paletteIndex={this.paletteIndex} onChange={onPaletteChange} />
