@@ -85,6 +85,22 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
   }
   dialog: HTMLFormElement
 
+  currentPresetIndex() {
+    const {widthPx, heightPx, widthMm, heightMm, dpi} = this.state
+    for (const [i, preset] of sizePresets.entries()) {
+      if (preset.unit == "px") {
+        if (preset.widthPx == widthPx && preset.heightPx == heightPx && preset.dpi == dpi) {
+          return i
+        }
+      } else {
+        if (preset.widthMm == widthMm && preset.heightMm == heightMm && preset.dpi == dpi) {
+          return i
+        }
+      }
+    }
+    return -1
+  }
+
   componentDidMount() {
     this.setPreset(sizePresets[0])
     const {width, height} = this.dialog.getBoundingClientRect()
@@ -102,9 +118,10 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
       <form className="NewPictureDialog" ref={e => this.dialog = e}>
         <div className="NewPictureDialog_Row">
           <label>Preset</label>
-          <select autoFocus onChange={this.onPresetSelect}>{
-            sizePresets.map((preset, i) => <option value={i}>{preset.name}</option>)
-          }</select>
+          <select value={this.currentPresetIndex()} autoFocus onChange={this.onPresetSelect}>
+            {sizePresets.map((preset, i) => <option key={i} value={i}>{preset.name}</option>)}
+            <option value={-1}>Custom</option>
+          </select>
         </div>
         <div className="NewPictureDialog_Row">
           <label>Width</label>
@@ -148,7 +165,9 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
 
   onPresetSelect = (ev: React.FormEvent<HTMLSelectElement>) => {
     const i = parseInt((ev.target as HTMLSelectElement).value)
-    this.setPreset(sizePresets[i])
+    if (i >= 0) {
+      this.setPreset(sizePresets[i])
+    }
   }
 
   onUnitChange = (ev: React.FormEvent<HTMLSelectElement>) => {
