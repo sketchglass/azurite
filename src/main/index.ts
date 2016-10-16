@@ -3,6 +3,7 @@ type BrowserWindow = Electron.BrowserWindow
 const {app, BrowserWindow, ipcMain} = Electron
 import qs = require('querystring')
 import {TabletEventReceiver} from "receive-tablet-event"
+import "rxjs/add/operator/first"
 import * as IPCChannels from "../common/IPCChannels"
 import PictureParams from "../renderer/models/PictureParams"
 
