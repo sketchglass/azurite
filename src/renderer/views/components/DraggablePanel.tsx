@@ -39,9 +39,9 @@ class Panel extends React.Component<PanelProps, void> {
     this.update(props)
   }
   componentWillUnmount() {
-    this.label.removeEventListener('pointerup')
-    this.label.removeEventListener('pointerdown')
-    this.label.removeEventListener('pointermove')
+    this.label.removeEventListener('pointerup', this.onPointerUp)
+    this.label.removeEventListener('pointerdown', this.onPointerDown)
+    this.label.removeEventListener('pointermove', this.onPointerMove)
   }
   update(props: PanelProps) {
     const {height, width, left, top, zIndex} = props
@@ -137,7 +137,7 @@ export class DraggablePanelContainer extends React.Component<DraggablePanelConta
   componentWillMount() {
     React.Children.forEach(this.props.children!, (_child, i) => {
       if(_child["props"] && _child["props"]["label"]) {
-        const child = _child as any as React.ReactElement<DraggablePanelProps & { children?: React.ReactNode }>
+        const child = _child as React.ReactElement<DraggablePanelProps & { children?: React.ReactNode }>
         const order = i
         this.childrenState[i] = {
           order: order,
@@ -170,13 +170,13 @@ export class DraggablePanelContainer extends React.Component<DraggablePanelConta
       s.left = s.initialLeft = left
     }
   }
-  insideSwapArea = (childState: ChildState, x: number, y: number) => {
+  insideSwapArea(childState: ChildState, x: number, y: number) {
     return childState.top <= y && y <= childState.top + this.props.labelHeight
   }
-  getSwapTargets = (childState: ChildState, x: number, y: number) => {
+  getSwapTargets(childState: ChildState, x: number, y: number) {
     return this.childrenState.filter(s => { return s.order !== childState.order && this.insideSwapArea(s, x, y) })
   }
-  swapChild = (a: ChildState, b: ChildState) => {
+  swapChild(a: ChildState, b: ChildState) {
     const tmp = a.order
     a.order = b.order
     b.order = tmp
@@ -214,7 +214,7 @@ export class DraggablePanelContainer extends React.Component<DraggablePanelConta
   render() {
     const children = React.Children.map(this.props.children!, (_child, i) => {
       if(_child["props"] && _child["props"]["label"]) {
-        const child = _child as any as React.ReactElement<DraggablePanelProps & { children?: React.ReactNode }>
+        const child = _child as React.ReactElement<DraggablePanelProps & { children?: React.ReactNode }>
         const currentIndex = i
         const result = (
           <Panel height={child.props.height + this.props.labelHeight} width={child.props.width} label={child.props.label} top={this.childrenState[i].top} left={this.childrenState[i].left}
