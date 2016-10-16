@@ -83,7 +83,7 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
     dpi: 0,
     unit: "px" as SizeUnits
   }
-  dialog: HTMLDivElement
+  dialog: HTMLFormElement
 
   componentDidMount() {
     this.setPreset(sizePresets[0])
@@ -101,8 +101,8 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
     return (
       <form className="NewPictureDialog" ref={e => this.dialog = e}>
         <div className="NewPictureDialog_Row">
-          <label>Width</label>
-          <select onChange={this.onPresetSelect}>{
+          <label>Preset</label>
+          <select autoFocus onChange={this.onPresetSelect}>{
             sizePresets.map((preset, i) => <option value={i}>{preset.name}</option>)
           }</select>
         </div>
