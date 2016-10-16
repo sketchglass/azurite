@@ -1,0 +1,29 @@
+body
+  font-family: 'Open Sans', "Hiragino Kaku Gothic ProN", メイリオ, sans-serif
+  font-size: 12px
+  margin: 0
+#app
+  display: flex
+  justify-content: center
+
+.NewPictureDialog
+  box-sizing: border-box
+  padding: 24px
+  display: flex
+  flex-direction: column
+  button
+    align-self: flex-end
+
+.NewPictureDialog_Row
+  margin: 4px 0
+  > *
+    display: inline-block
+  :nth-child(1)
+    text-align: right
+    margin-right: 4px
+    width: 64px
+  :nth-child(2)
+    margin-right: 4px
+    width: 100px
+  :nth-child(3)
+    width: 48px

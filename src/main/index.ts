@@ -12,7 +12,8 @@ app.commandLine.appendSwitch("enable-experimental-web-platform-features")
 const windows = new Set<BrowserWindow>()
 
 async function openNewPictureDialog() {
-  const win = new BrowserWindow({width: 400, height: 200})
+  const win = new BrowserWindow({width: 400, height: 200, show: false})
+  win.setMenu(null as any)
   windows.add(win)
   win.loadURL(`file://${__dirname}/../dialogs/newPicture.html`)
 
