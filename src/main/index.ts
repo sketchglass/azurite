@@ -25,7 +25,9 @@ async function openNewPictureDialog() {
       resolve(undefined)
     })
   })
-
+  if (pictureParams) {
+    win.close()
+  }
   windows.delete(win)
   return pictureParams
 }
