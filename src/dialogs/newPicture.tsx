@@ -5,7 +5,64 @@ import * as IPCChannels from "../common/IPCChannels"
 import {remote} from "electron"
 import "./newPicture.sass"
 
-type SizeUnits = "px"|"mm"
+type SizeUnits = "px" | "mm"
+
+interface SizePresetPx {
+  name: string
+  unit: "px"
+  widthPx: number
+  heightPx: number
+  dpi: number
+}
+
+interface SizePresetMm {
+  name: string
+  unit: "mm"
+  widthMm: number
+  heightMm: number
+  dpi: number
+}
+
+type SizePreset = SizePresetPx | SizePresetMm
+
+const sizePresets: SizePreset[] = [
+  {
+    name: "A4",
+    unit: "mm",
+    widthMm: 210,
+    heightMm: 297,
+    dpi: 144,
+  },
+  {
+    name: "A5",
+    unit: "mm",
+    widthMm: 148,
+    heightMm: 210,
+    dpi: 144,
+  },
+  {
+    name: "A6",
+    unit: "mm",
+    widthMm: 105,
+    heightMm: 148,
+    dpi: 144,
+  },
+  {
+    name: "1200 x 800",
+    unit: "px",
+    widthPx: 1200,
+    heightPx: 800,
+    dpi: 144,
+  }
+]
+
+function mmToPx(mm: number, dpi: number) {
+  return Math.round(mm / 25.4 * dpi)
+}
+
+function pxToMm(px: number, dpi: number) {
+  return Math.round(px / dpi * 25.4)
+}
 
 interface NewPictureDialogState {
   widthMm: number
@@ -16,27 +73,20 @@ interface NewPictureDialogState {
   unit: SizeUnits
 }
 
-function mmToPx(mm: number, dpi: number) {
-  return Math.round(mm / 25.4 * dpi)
-}
-
-function pxToMm(px: number, dpi: number) {
-  return Math.round(px / dpi * 25.4)
-}
-
 class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
   // TODO: save & load last dimension
   state = {
-    widthMm: pxToMm(1200, 72),
-    heightMm: pxToMm(800, 72),
-    widthPx: 1200,
-    heightPx: 800,
-    dpi: 72,
+    widthMm: 0,
+    heightMm: 0,
+    widthPx: 0,
+    heightPx: 0,
+    dpi: 0,
     unit: "px" as SizeUnits
   }
   dialog: HTMLDivElement
 
   componentDidMount() {
+    this.setPreset(sizePresets[0])
     const {width, height} = this.dialog.getBoundingClientRect()
     const win = remote.getCurrentWindow()
     win.setContentSize(width, height)
@@ -50,6 +100,12 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
 
     return (
       <div className="NewPictureDialog" ref={e => this.dialog = e}>
+        <div className="NewPictureDialog_Row">
+          <label>Width</label>
+          <select onChange={this.onPresetSelect}>{
+            sizePresets.map((preset, i) => <option value={i}>{preset.name}</option>)
+          }</select>
+        </div>
         <div className="NewPictureDialog_Row">
           <label>Width</label>
           <input type="number" max={MAX_PICTURE_SIZE} value={width} onChange={this.onWidthChange} />
@@ -74,6 +130,25 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
         <button onClick={this.onOK.bind(this)}>OK</button>
       </div>
     )
+  }
+
+  setPreset(preset: SizePreset) {
+    if (preset.unit == "px") {
+      const {widthPx, heightPx, dpi, unit} = preset
+      const widthMm = pxToMm(widthPx, dpi)
+      const heightMm = pxToMm(heightPx, dpi)
+      this.setState({widthPx, heightPx, widthMm, heightMm, dpi, unit} as NewPictureDialogState)
+    } else {
+      const {widthMm, heightMm, dpi, unit} = preset
+      const widthPx = mmToPx(widthMm, dpi)
+      const heightPx = mmToPx(heightMm, dpi)
+      this.setState({widthPx, heightPx, widthMm, heightMm, dpi, unit} as NewPictureDialogState)
+    }
+  }
+
+  onPresetSelect = (ev: React.FormEvent<HTMLSelectElement>) => {
+    const i = parseInt((ev.target as HTMLSelectElement).value)
+    this.setPreset(sizePresets[i])
   }
 
   onUnitChange = (ev: React.FormEvent<HTMLSelectElement>) => {
