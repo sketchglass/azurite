@@ -3,12 +3,12 @@ import ReactDOM = require("react-dom")
 import {MAX_PICTURE_SIZE} from "../common/constants"
 import * as IPCChannels from "../common/IPCChannels"
 
-interface SizeDialogState {
+interface NewPictureDialogState {
   width: number
   height: number
 }
 
-class SizeDialog extends React.Component<{}, SizeDialogState> {
+class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
   // TODO: save & load last dimension
   state = {
     width: 1200,
@@ -19,7 +19,7 @@ class SizeDialog extends React.Component<{}, SizeDialogState> {
     const {width, height} = this.state
 
     return (
-      <div className="SizeDialog">
+      <div className="NewPictureDialog">
         <div>
           <label>Width</label>
           <input type="number" max={MAX_PICTURE_SIZE} value={width} onChange={this.onWidthChange.bind(this)} />
@@ -46,10 +46,10 @@ class SizeDialog extends React.Component<{}, SizeDialogState> {
   }
 
   onOK() {
-    IPCChannels.sizeDialogDone.send(this.state)
+    IPCChannels.newPictureDialogDone.send(this.state)
   }
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  ReactDOM.render(<SizeDialog />, document.getElementById("app"))
+  ReactDOM.render(<NewPictureDialog />, document.getElementById("app"))
 })

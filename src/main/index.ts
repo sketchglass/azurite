@@ -11,14 +11,14 @@ app.commandLine.appendSwitch("enable-experimental-web-platform-features")
 
 const windows = new Set<BrowserWindow>()
 
-async function openSizeDialog() {
+async function openNewPictureDialog() {
   const win = new BrowserWindow({width: 400, height: 200})
   windows.add(win)
-  win.loadURL(`file://${__dirname}/../sizeDialog.html`)
+  win.loadURL(`file://${__dirname}/../dialogs/newPicture.html`)
 
-  const size = await new Promise<PictureParams|undefined>((resolve, reject) => {
-    IPCChannels.sizeDialogDone.listen(win.webContents).first().forEach(size => {
-      resolve(size)
+  const pictureParams = await new Promise<PictureParams|undefined>((resolve, reject) => {
+    IPCChannels.newPictureDialogDone.listen(win.webContents).first().forEach(pictureParams => {
+      resolve(pictureParams)
     })
     win.once('closed', () => {
       resolve(undefined)
@@ -26,7 +26,7 @@ async function openSizeDialog() {
   })
 
   windows.delete(win)
-  return size
+  return pictureParams
 }
 
 function openPictureWindow(params: PictureParams) {
@@ -63,9 +63,9 @@ function openPictureWindow(params: PictureParams) {
 }
 
 async function onStartup() {
-  const size = await openSizeDialog()
-  if (size) {
-    openPictureWindow(size)
+  const pictureParams = await openNewPictureDialog()
+  if (pictureParams) {
+    openPictureWindow(pictureParams)
   } else {
     if (process.platform !== 'darwin') {
       app.quit()
