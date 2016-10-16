@@ -170,7 +170,7 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
             <span className="NewPictureDialog_TooLarge" hidden={!tooLarge}>Too Large</span>
           </span>
         </div>
-        <button type="submit" onClick={this.onOK.bind(this)} disabled={!isValid}>OK</button>
+        <button type="submit" onClick={this.onOK} disabled={!isValid}>OK</button>
       </form>
     )
   }
@@ -251,7 +251,7 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
     this.setState({keepRatio: !this.state.keepRatio} as NewPictureDialogState)
   }
 
-  onOK() {
+  onOK = () => {
     const {widthPx, heightPx} = this.state
     IPCChannels.newPictureDialogDone.send({width: widthPx, height: heightPx})
   }
