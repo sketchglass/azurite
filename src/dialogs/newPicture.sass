@@ -2,6 +2,7 @@ body
   font-family: 'Open Sans', "Hiragino Kaku Gothic ProN", メイリオ, sans-serif
   font-size: 12px
   margin: 0
+  -webkit-user-select: none
 #app
   display: flex
   justify-content: center
@@ -19,12 +20,14 @@ body
   margin: 4px 0
   > *
     display: inline-block
-  :nth-child(1)
+  > :nth-child(1)
     text-align: right
     margin-right: 4px
     width: 64px
-  :nth-child(2)
+
+.NewPictureDialog_Value
+  > *
+    display: inline-block
+  > :nth-child(1)
     margin-right: 4px
     width: 100px
-  :nth-child(3)
-    width: 56px

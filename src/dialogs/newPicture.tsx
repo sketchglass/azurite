@@ -70,7 +70,9 @@ interface NewPictureDialogState {
   widthPx: number
   heightPx: number
   dpi: number
-  unit: SizeUnits
+  unit: SizeUnits,
+  ratio: number
+  keepRatio: boolean
 }
 
 class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
@@ -81,7 +83,9 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
     widthPx: 0,
     heightPx: 0,
     dpi: 0,
-    unit: "px" as SizeUnits
+    unit: "px" as SizeUnits,
+    ratio: 1,
+    keepRatio: true
   }
   dialog: HTMLFormElement
 
@@ -110,7 +114,7 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
   }
 
   render() {
-    const {widthMm, heightMm, widthPx, heightPx, dpi, unit} = this.state
+    const {widthMm, heightMm, widthPx, heightPx, dpi, unit, keepRatio} = this.state
     const width = unit == "mm" ? widthMm : widthPx
     const height = unit == "mm" ? heightMm : heightPx
 
@@ -125,24 +129,37 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
         </div>
         <div className="NewPictureDialog_Row">
           <label>Width</label>
-          <input type="number" max={MAX_PICTURE_SIZE} value={width} onChange={this.onWidthChange} />
-          <select value={unit} onChange={this.onUnitChange}>
-            <option value="px">px</option>
-            <option value="mm">mm</option>
-          </select>
+          <div className="NewPictureDialog_Value">
+            <input type="number" max={MAX_PICTURE_SIZE} value={width} onChange={this.onWidthChange} />
+            <select value={unit} onChange={this.onUnitChange}>
+              <option value="px">px</option>
+              <option value="mm">mm</option>
+            </select>
+          </div>
         </div>
         <div className="NewPictureDialog_Row">
           <label>Height</label>
-          <input type="number" max={MAX_PICTURE_SIZE} value={height} onChange={this.onHeightChange} />
-          <select value={unit} onChange={this.onUnitChange}>
-            <option value="px">px</option>
-            <option value="mm">mm</option>
-          </select>
+          <div className="NewPictureDialog_Value">
+            <input type="number" max={MAX_PICTURE_SIZE} value={height} onChange={this.onHeightChange} />
+            <select value={unit} onChange={this.onUnitChange}>
+              <option value="px">px</option>
+              <option value="mm">mm</option>
+            </select>
+          </div>
         </div>
         <div className="NewPictureDialog_Row">
           <label>Resolution</label>
-          <input type="number" max={MAX_PICTURE_SIZE} value={dpi} onChange={this.onDpiChange} />
-          DPI
+          <div className="NewPictureDialog_Value">
+            <input type="number" max={MAX_PICTURE_SIZE} value={dpi} onChange={this.onDpiChange} />
+            DPI
+          </div>
+        </div>
+        <div className="NewPictureDialog_Row">
+          <label></label>
+          <label>
+            <input type="checkbox" checked={keepRatio} onChange={this.onKeepRatioToggle}/>
+            Keep Ratio
+          </label>
         </div>
         <button type="submit" onClick={this.onOK.bind(this)}>OK</button>
       </form>
@@ -152,15 +169,25 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
   setPreset(preset: SizePreset) {
     if (preset.unit == "px") {
       const {widthPx, heightPx, dpi, unit} = preset
-      const widthMm = pxToMm(widthPx, dpi)
-      const heightMm = pxToMm(heightPx, dpi)
-      this.setState({widthPx, heightPx, widthMm, heightMm, dpi, unit} as NewPictureDialogState)
+      this.setPx(widthPx, heightPx, dpi, unit, false)
     } else {
       const {widthMm, heightMm, dpi, unit} = preset
-      const widthPx = mmToPx(widthMm, dpi)
-      const heightPx = mmToPx(heightMm, dpi)
-      this.setState({widthPx, heightPx, widthMm, heightMm, dpi, unit} as NewPictureDialogState)
+      this.setMm(widthMm, heightMm, dpi, unit, false)
     }
+  }
+
+  setMm(widthMm: number, heightMm: number, dpi: number, unit: SizeUnits, keepRatio: boolean) {
+    const widthPx = mmToPx(widthMm, dpi)
+    const heightPx = mmToPx(heightMm, dpi)
+    const ratio = keepRatio ? this.state.ratio : heightMm / widthMm
+    this.setState({widthPx, heightPx, widthMm, heightMm, dpi, ratio, unit} as NewPictureDialogState)
+  }
+
+  setPx(widthPx: number, heightPx: number, dpi: number, unit: SizeUnits, keepRatio: boolean) {
+    const widthMm = pxToMm(widthPx, dpi)
+    const heightMm = pxToMm(heightPx, dpi)
+    const ratio = keepRatio ? this.state.ratio : heightPx / widthPx
+    this.setState({widthPx, heightPx, widthMm, heightMm, dpi, ratio, unit} as NewPictureDialogState)
   }
 
   onPresetSelect = (ev: React.FormEvent<HTMLSelectElement>) => {
@@ -177,42 +204,42 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
 
   onWidthChange = (ev: React.FormEvent<HTMLInputElement>) => {
     const width = parseInt((ev.target as HTMLInputElement).value)
-    const {unit, dpi} = this.state
+    const {unit, dpi, keepRatio} = this.state
     if (unit == "mm") {
-      const widthPx = mmToPx(width, dpi)
-      this.setState({widthMm: width, widthPx} as NewPictureDialogState)
+      const height = keepRatio ? Math.round(width * this.state.ratio) : this.state.heightMm
+      this.setMm(width, height, dpi, unit, keepRatio)
     } else {
-      const widthMm = pxToMm(width, dpi)
-      this.setState({widthMm, widthPx: width} as NewPictureDialogState)
+      const height = keepRatio ? Math.round(width * this.state.ratio) : this.state.heightPx
+      this.setPx(width, height, dpi, unit, keepRatio)
     }
   }
 
   onHeightChange = (ev: React.FormEvent<HTMLInputElement>) => {
     const height = parseInt((ev.target as HTMLInputElement).value)
-    const {unit, dpi} = this.state
+    const {unit, dpi, keepRatio} = this.state
     if (unit == "mm") {
-      const heightPx = mmToPx(height, dpi)
-      this.setState({heightMm: height, heightPx} as NewPictureDialogState)
+      const width = this.state.keepRatio ? Math.round(height / this.state.ratio) : this.state.widthMm
+      this.setMm(width, height, dpi, unit, keepRatio)
     } else {
-      const heightMm = pxToMm(height, dpi)
-      this.setState({heightMm, heightPx: height} as NewPictureDialogState)
+      const width = this.state.keepRatio ? Math.round(height / this.state.ratio) : this.state.widthPx
+      this.setPx(width, height, dpi, unit, keepRatio)
     }
   }
 
   onDpiChange = (ev: React.FormEvent<HTMLInputElement>) => {
     const dpi = parseInt((ev.target as HTMLInputElement).value) || 72
-    const {unit} = this.state
+    const {unit, keepRatio} = this.state
     if (unit == "mm") {
       const {widthMm, heightMm} = this.state
-      const widthPx = mmToPx(widthMm, dpi)
-      const heightPx = mmToPx(heightMm, dpi)
-      this.setState({dpi, widthPx, heightPx} as NewPictureDialogState)
+      this.setMm(widthMm, heightMm, dpi, unit, keepRatio)
     } else {
       const {widthPx, heightPx} = this.state
-      const widthMm = pxToMm(widthPx, dpi)
-      const heightMm = pxToMm(heightPx, dpi)
-      this.setState({dpi, widthMm, heightMm} as NewPictureDialogState)
+      this.setPx(widthPx, heightPx, dpi, unit, keepRatio)
     }
+  }
+
+  onKeepRatioToggle = () => {
+    this.setState({keepRatio: !this.state.keepRatio} as NewPictureDialogState)
   }
 
   onOK() {
