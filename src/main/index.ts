@@ -62,10 +62,6 @@ function openPictureWindow(params: PictureParams) {
   win.on('closed', () => {
     windows.delete(win)
     receiver.dispose()
-
-    if (windows.size == 0 && process.platform !== 'darwin') {
-      app.quit()
-    }
   })
 }
 
@@ -83,7 +79,12 @@ async function onStartup() {
 app.on('ready', onStartup)
 
 app.on('window-all-closed', () => {
-  // do nothing
+  // don't quit if a new window is created in same tick
+  setImmediate(() => {
+    if (process.platform != 'darwin' && BrowserWindow.getAllWindows().length == 0) {
+      app.quit()
+    }
+  })
 })
 
 app.on('activate', () => {
