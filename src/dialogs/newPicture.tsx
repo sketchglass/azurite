@@ -99,7 +99,7 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
     const height = unit == "mm" ? heightMm : heightPx
 
     return (
-      <div className="NewPictureDialog" ref={e => this.dialog = e}>
+      <form className="NewPictureDialog" ref={e => this.dialog = e}>
         <div className="NewPictureDialog_Row">
           <label>Width</label>
           <select onChange={this.onPresetSelect}>{
@@ -127,8 +127,8 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
           <input type="number" max={MAX_PICTURE_SIZE} value={dpi} onChange={this.onDpiChange} />
           DPI
         </div>
-        <button onClick={this.onOK.bind(this)}>OK</button>
-      </div>
+        <button type="submit" onClick={this.onOK.bind(this)}>OK</button>
+      </form>
     )
   }
 
