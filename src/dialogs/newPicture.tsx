@@ -117,6 +117,8 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
     const {widthMm, heightMm, widthPx, heightPx, dpi, unit, keepRatio} = this.state
     const width = unit == "mm" ? widthMm : widthPx
     const height = unit == "mm" ? heightMm : heightPx
+    const tooLarge = widthPx > MAX_PICTURE_SIZE || heightPx > MAX_PICTURE_SIZE
+    const isValid = 0 < widthPx && 0 < heightPx && !tooLarge
 
     return (
       <form className="NewPictureDialog" ref={e => this.dialog = e}>
@@ -130,7 +132,7 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
         <div className="NewPictureDialog_Row">
           <label>Width</label>
           <div className="NewPictureDialog_Value">
-            <input type="number" max={MAX_PICTURE_SIZE} value={width} onChange={this.onWidthChange} />
+            <input type="number" value={width} min={1} onChange={this.onWidthChange} />
             <select value={unit} onChange={this.onUnitChange}>
               <option value="px">px</option>
               <option value="mm">mm</option>
@@ -140,7 +142,7 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
         <div className="NewPictureDialog_Row">
           <label>Height</label>
           <div className="NewPictureDialog_Value">
-            <input type="number" max={MAX_PICTURE_SIZE} value={height} onChange={this.onHeightChange} />
+            <input type="number" value={height} min={1} onChange={this.onHeightChange} />
             <select value={unit} onChange={this.onUnitChange}>
               <option value="px">px</option>
               <option value="mm">mm</option>
@@ -150,7 +152,7 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
         <div className="NewPictureDialog_Row">
           <label>Resolution</label>
           <div className="NewPictureDialog_Value">
-            <input type="number" max={MAX_PICTURE_SIZE} value={dpi} onChange={this.onDpiChange} />
+            <input type="number" value={dpi} min={1} onChange={this.onDpiChange} />
             DPI
           </div>
         </div>
@@ -161,7 +163,14 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
             Keep Ratio
           </label>
         </div>
-        <button type="submit" onClick={this.onOK.bind(this)}>OK</button>
+        <div className="NewPictureDialog_Row">
+          <label></label>
+          <span className="NewPictureDialog_PixelSize">
+            {widthPx || 0} x {heightPx || 0} px
+            <span className="NewPictureDialog_TooLarge" hidden={!tooLarge}>Too Large</span>
+          </span>
+        </div>
+        <button type="submit" onClick={this.onOK.bind(this)} disabled={!isValid}>OK</button>
       </form>
     )
   }
