@@ -14,6 +14,7 @@ import LayerList from "./LayerList"
 import ColorPicker from "./ColorPicker"
 import Palette from "./Palette"
 import Navigator from "./Navigator"
+import {DraggablePanel, DraggablePanelContainer} from "./components/DraggablePanel"
 import {HSVColor} from "../../lib/Color"
 import {Vec2} from "paintvec"
 import NavigationKeyBinding from "./NavigationKeyBinding"
@@ -133,10 +134,20 @@ class App extends React.Component<void, void> {
     return (
       <div className="App">
         <aside className="LeftSidebar">
-          <ColorPicker color={this.brushColor} onChange={onBrushColorChange} />
-          <Palette palette={this.palette} paletteIndex={this.paletteIndex} onChange={onPaletteChange} />
-          <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
-          {currentTool.renderSettings()}
+          <DraggablePanelContainer top={20} left={18} margin={14} labelHeight={20}>
+            <DraggablePanel label="Color" width={200} height={200}>
+              <ColorPicker color={this.brushColor} onChange={onBrushColorChange} />
+            </DraggablePanel>
+            <DraggablePanel label="Palette" width={200} height={80}>
+              <Palette palette={this.palette} paletteIndex={this.paletteIndex} onChange={onPaletteChange} />
+            </DraggablePanel>
+            <DraggablePanel label="Tools" width={200} height={80}>
+              <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
+            </DraggablePanel>
+            <DraggablePanel label="Settings" width={200} height={200}>
+              {currentTool.renderSettings()}
+            </DraggablePanel>
+          </DraggablePanelContainer>
         </aside>
         <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
         <aside className="RightSidebar">
