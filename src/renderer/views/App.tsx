@@ -139,7 +139,7 @@ class App extends React.Component<void, void> {
             <DraggablePanel label="Color" width={200} height={200}>
               <ColorPicker color={this.brushColor} onChange={onBrushColorChange} />
             </DraggablePanel>
-            <DraggablePanel label="Slider" width={200} height={140}>
+            <DraggablePanel label="Slider" width={200} height={70}>
               <RGBRangeSliders color={this.brushColor} onChange={onBrushColorChange} />
             </DraggablePanel>
             <DraggablePanel label="Palette" width={200} height={80}>

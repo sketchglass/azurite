@@ -2,8 +2,10 @@ import React = require("react")
 import { Color } from "paintgl"
 import { HSVColor } from "../../../lib/Color"
 import RangeSlider from "./RangeSlider"
+import {BackgroundProps} from "./RangeSlider"
+import "../../../styles/components/RGBRangeSliders.sass"
 
-interface RGBRangeSliderProps {
+interface RGBRangeSliderProps extends BackgroundProps {
   color: Color
   width: number
   height: number
@@ -14,7 +16,15 @@ class BaseBackground extends React.Component<RGBRangeSliderProps, void> {
   context: CanvasRenderingContext2D
   componentDidMount() {
     this.context = this.canvas.getContext("2d")!
+    this.canvas.addEventListener('pointerup', this.props.onPointerUp)
+    this.canvas.addEventListener('pointerdown', this.props.onPointerDown)
+    this.canvas.addEventListener('pointermove', this.props.onPointerMove)
     this.update()
+  }
+  componentWillUnmount() {
+    this.canvas.removeEventListener('pointerup', this.props.onPointerUp)
+    this.canvas.removeEventListener('pointerdown', this.props.onPointerDown)
+    this.canvas.removeEventListener('pointermove', this.props.onPointerMove)
   }
   componentWillReceiveProps() {
     this.update()
@@ -23,11 +33,13 @@ class BaseBackground extends React.Component<RGBRangeSliderProps, void> {
     // do something
   }
   update = () => {
-    this.createLinerGradient()
+    requestAnimationFrame(() => {
+      this.createLinerGradient()
+    })
   }
   render() {
     return (
-      <canvas width={this.props.width} height={this.props.height} ref={c => { this.canvas = c }}/>
+      <canvas width={this.props.width} height={this.props.height} ref={c => { this.canvas = c }} className="RangeSlider_canvas" />
     )
   }
 }
@@ -107,13 +119,11 @@ class RGBRangeSliders extends React.Component<RGBRangeSlidersProps, void> {
     this.forceUpdate()
   }
   render() {
-    const width = 200
-    const height = 20
     return (
-      <div>
-        <RangeSlider backgroundComponent={backgroundR} backgroundComponentProps={{color: this.color, width, height}} max={255} min={0} value={Math.round(this.color.r * 255)} onChange={this.onChangeR} />
-        <RangeSlider backgroundComponent={backgroundG} backgroundComponentProps={{color: this.color, width, height}} max={255} min={0} value={Math.round(this.color.g * 255)} onChange={this.onChangeG} />
-        <RangeSlider backgroundComponent={backgroundB} backgroundComponentProps={{color: this.color, width, height}} max={255} min={0} value={Math.round(this.color.b * 255)} onChange={this.onChangeB} />
+      <div className="RGBRangeSliders">
+        <RangeSlider backgroundComponent={backgroundR} backgroundComponentProps={{color: this.color}} max={255} min={0} value={Math.round(this.color.r * 255)} onChange={this.onChangeR} />
+        <RangeSlider backgroundComponent={backgroundG} backgroundComponentProps={{color: this.color}} max={255} min={0} value={Math.round(this.color.g * 255)} onChange={this.onChangeG} />
+        <RangeSlider backgroundComponent={backgroundB} backgroundComponentProps={{color: this.color}} max={255} min={0} value={Math.round(this.color.b * 255)} onChange={this.onChangeB} />
       </div>
     )
   }
