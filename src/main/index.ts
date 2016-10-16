@@ -82,6 +82,10 @@ async function onStartup() {
 
 app.on('ready', onStartup)
 
+app.on('window-all-closed', () => {
+  // do nothing
+})
+
 app.on('activate', () => {
   if (!window) {
     onStartup()
