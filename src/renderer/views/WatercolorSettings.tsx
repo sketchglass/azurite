@@ -1,3 +1,4 @@
+import {observer} from "mobx-react"
 import React = require("react")
 import WatercolorTool from "../models/WatercolorTool"
 import {parseHexColor, toHexColor} from "../../lib/Color"
@@ -7,33 +8,24 @@ interface WatercolorSettingsProps {
   tool: WatercolorTool
 }
 
-export default
+@observer export default
 class WatercolorSettings extends React.Component<WatercolorSettingsProps, void> {
-  constructor() {
-    super();
-  }
-
   render() {
     const {tool} = this.props
     const onWidthChange = (value: number) => {
       tool.width = value
-      this.forceUpdate()
     }
     const onBlendingChange = (value: number) => {
       tool.blending = value / 100
-      this.forceUpdate()
     }
     const onThicknessChange = (value: number) => {
       tool.thickness = value / 100
-      this.forceUpdate()
     }
     const onMinWidthChange = (value: number) => {
       tool.minWidthRatio = value / 100
-      this.forceUpdate()
     }
     const onSoftnessChange = (value: number) => {
       tool.softness = value / 100
-      this.forceUpdate()
     }
     return (
       <table className="BrushSettings">
@@ -57,6 +49,10 @@ class WatercolorSettings extends React.Component<WatercolorSettingsProps, void> 
           <tr>
             <td>Thickness</td>
             <td><RangeSlider onChange={onThicknessChange} min={0} max={100} value={Math.round(tool.thickness * 100)} /></td><td>{Math.round(tool.thickness * 100)}%</td>
+          </tr>
+          <tr>
+            <td>Stabilizing</td>
+            <td><RangeSlider onChange={value => tool.stabilizingLevel = value} min={0} max={10} value={tool.stabilizingLevel} /></td><td>{tool.stabilizingLevel}</td>
           </tr>
         </tbody>
       </table>

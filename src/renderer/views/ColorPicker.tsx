@@ -39,13 +39,19 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
 
   componentDidMount() {
     this.canvas = this.refs["canvas"] as HTMLCanvasElement
-    this.canvas.addEventListener("pointerdown", this.onPointerDown.bind(this))
-    this.canvas.addEventListener("pointermove", this.onPointerMove.bind(this))
-    this.canvas.addEventListener("pointerup", this.onPointerUp.bind(this))
+    this.canvas.addEventListener("pointerdown", this.onPointerDown)
+    this.canvas.addEventListener("pointermove", this.onPointerMove)
+    this.canvas.addEventListener("pointerup", this.onPointerUp)
     this.context = this.canvas.getContext("2d")!
     this.wheelGradient = this.createWheelGradient()
     this.squareGradient = this.context.createImageData(squareSize, squareSize)
     this.update()
+  }
+
+  componentWillUnmount() {
+    this.canvas.removeEventListener("pointerdown", this.onPointerDown)
+    this.canvas.removeEventListener("pointermove", this.onPointerMove)
+    this.canvas.removeEventListener("pointerup", this.onPointerUp)
   }
 
   render() {
@@ -55,7 +61,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
     )
   }
 
-  onPointerDown(event: PointerEvent) {
+  onPointerDown = (event: PointerEvent) => {
     event.preventDefault()
     const center = new Vec2(wheelSize / 2, wheelSize / 2)
     const pos = mouseOffsetPos(event, this.canvas).sub(center)
@@ -74,7 +80,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
       this.canvas.setPointerCapture(event.pointerId)
     }
   }
-  onPointerMove(event: PointerEvent) {
+  onPointerMove = (event: PointerEvent) => {
     event.preventDefault()
     const center = new Vec2(wheelSize / 2, wheelSize / 2)
     const pos = mouseOffsetPos(event, this.canvas).sub(center)
@@ -84,7 +90,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
       this.onSVChanged(this.posToSV(pos))
     }
   }
-  onPointerUp(event: PointerEvent) {
+  onPointerUp = (event: PointerEvent) => {
     event.preventDefault()
     this.draggingWheel = false
     this.draggingSquare = false

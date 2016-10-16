@@ -30,8 +30,7 @@ class RotateTool extends Tool {
     const angle = offset.angle()
     const {translation, scale} = this.picture.navigation
     const rotation = modRotation(angle - this.originalAngle + this.originalRotation)
-    this.picture.navigation = {translation, scale, rotation}
-    this.picture.changed.next()
+    this.picture.navigation.rotation = rotation
   }
 
   end() {
