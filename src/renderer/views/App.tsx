@@ -65,7 +65,6 @@ class App extends React.Component<AppProps, {}> {
   constructor(props: AppProps) {
     super(props)
     this.brushColor = this.palette[this.paletteIndex]
-    Picture.current = this.picture
     if(this.currentTool instanceof BaseBrushTool) {
       const tool = this.currentTool as BaseBrushTool
       tool.color = this.brushColor.toRgb()

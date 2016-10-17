@@ -1,6 +1,4 @@
 import {observable, computed, reaction} from "mobx"
-import msgpack = require("msgpack-lite")
-import fs = require("fs")
 import {Vec2, Rect} from "paintvec"
 import {Texture} from "paintgl"
 import Layer, {LayerData} from "./Layer"
@@ -36,11 +34,15 @@ class Picture {
   @observable edited = false
 
   constructor(public readonly size: Vec2, public readonly dpi: number) {
+    Picture.current = this
     this.updated.forEach(() => {
       this.layerBlender.render()
     })
     this.layers.observe(() => {
       this.updated.next()
+    })
+    this.undoStack.commands.observe(() => {
+      this.edited = true
     })
     this.layerBlender.render()
   }
@@ -65,18 +67,5 @@ class Picture {
     return picture
   }
 
-  saveAs(filePath: string) {
-    const fileData = msgpack.encode(this.toData())
-    fs.writeFileSync(filePath, fileData)
-    this.filePath = filePath
-  }
-
-  static open(filePath: string) {
-    const fileData = fs.readFileSync(filePath)
-    const picture = this.fromData(msgpack.decode(fileData))
-    picture.filePath = filePath
-    return picture
-  }
-
-  static current: Picture|undefined
+  static current: Picture
 }

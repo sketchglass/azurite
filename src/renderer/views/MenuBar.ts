@@ -1,16 +1,37 @@
 import {remote} from "electron"
-const {Menu, app} = remote
+const {Menu, app, dialog} = remote
 type MenuItem = Electron.MenuItem
 type BrowserWindow = Electron.BrowserWindow
 type MenuItemOptions = Electron.MenuItemOptions
 import Picture from "../models/Picture"
 import PictureExport from "../models/PictureExport"
+import PictureSave from "../models/PictureSave"
 import {isTextInput} from "./util"
+import * as IPCChannels from "../../common/IPCChannels"
 
 class MenuBar {
   constructor() {
     const menu = Menu.buildFromTemplate(this.render())
     Menu.setApplicationMenu(menu)
+  }
+
+  save() {
+    new PictureSave(Picture.current).save()
+  }
+
+  saveAs() {
+    new PictureSave(Picture.current).saveAs()
+  }
+
+  newPicture() {
+    IPCChannels.newPicture.send(undefined)
+  }
+
+  async open() {
+    const filePath = await PictureSave.getOpenPath()
+    if (filePath != undefined) {
+      IPCChannels.openPicture.send(filePath)
+    }
   }
 
   undo() {
@@ -50,6 +71,29 @@ class MenuBar {
     const fileMenu: MenuItemOptions = {
       label: "File",
       submenu: [
+        {
+          label: "New",
+          accelerator: "CmdOrCtrl+N",
+          click: () => this.newPicture()
+        },
+        {
+          label: "Open",
+          accelerator: "CmdOrCtrl+O",
+          click: () => this.open()
+        },
+        {
+          type: 'separator'
+        },
+        {
+          label: "Save",
+          accelerator: "CmdOrCtrl+S",
+          click: () => this.save(),
+        },
+        {
+          label: "Save As...",
+          accelerator: "CmdOrCtrl+Shift+S",
+          click: () => this.saveAs(),
+        },
         {
           label: "Export",
           submenu: [

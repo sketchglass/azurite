@@ -8,3 +8,6 @@ export const tabletMove = new IPCToRenderer<TabletEvent>("tabletMove")
 export const tabletUp = new IPCToRenderer<TabletEvent>("tabletUp")
 
 export const newPictureDialogDone = new IPCToMain<PictureParams>("newPictureDialogDone")
+
+export const newPicture = new IPCToMain<void>("newPicture")
+export const openPicture = new IPCToMain<string>("openPicture")
