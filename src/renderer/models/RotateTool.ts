@@ -20,17 +20,20 @@ class RotateTool extends Tool {
   originalRotation = 0
 
   start(waypoint: Waypoint, rendererPos: Vec2) {
-    const offset = rendererPos.sub(this.renderer.size.mulScalar(0.5).round())
-    this.originalAngle = offset.angle()
+    this.originalAngle = this.posAngle(rendererPos)
     this.originalRotation = this.picture.navigation.rotation
   }
 
   move(waypoint: Waypoint, rendererPos: Vec2) {
-    const offset = rendererPos.sub(this.renderer.size.mulScalar(0.5).round())
-    const angle = offset.angle()
     const {translation, scale} = this.picture.navigation
+    const angle = this.posAngle(rendererPos)
     const rotation = modRotation(angle - this.originalAngle + this.originalRotation)
     this.picture.navigation.rotation = rotation
+  }
+
+  posAngle(rendererPos: Vec2) {
+    const offset = rendererPos.sub(this.renderer.size.mulScalar(0.5).round())
+    return this.picture.navigation.horizontalFlip ? new Vec2(-offset.x, offset.y).angle() : offset.angle()
   }
 
   end() {
