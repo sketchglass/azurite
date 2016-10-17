@@ -25,7 +25,7 @@ class Picture {
   })
   readonly updated = new Subject<Rect|undefined>()
 
-constructor(public params: PictureParams) {
+  constructor(public params: PictureParams) {
     this.updated.forEach(() => {
       this.layerBlender.render()
     })
@@ -38,6 +38,4 @@ constructor(public params: PictureParams) {
   @computed get currentLayer() {
     return this.layers[this.currentLayerIndex]
   }
-
-  static current: Picture|undefined
 }

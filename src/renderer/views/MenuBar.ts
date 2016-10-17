@@ -3,6 +3,7 @@ const {Menu, app} = remote
 type MenuItem = Electron.MenuItem
 type BrowserWindow = Electron.BrowserWindow
 type MenuItemOptions = Electron.MenuItemOptions
+import {AppState} from "../models/AppState"
 import Picture from "../models/Picture"
 import PictureExport from "../models/PictureExport"
 import {isTextInput} from "./util"
@@ -13,25 +14,29 @@ class MenuBar {
     Menu.setApplicationMenu(menu)
   }
 
+  get currentPicture() {
+    return AppState.instance.currentPicture
+  }
+
   undo() {
     if (isTextInput(document.activeElement)) {
       remote.getCurrentWebContents().undo()
-    } else if (Picture.current) {
-      Picture.current.undoStack.undo()
+    } else if (this.currentPicture) {
+      this.currentPicture.undoStack.undo()
     }
   }
 
   redo() {
     if (isTextInput(document.activeElement)) {
       remote.getCurrentWebContents().redo()
-    } else if (Picture.current) {
-      Picture.current.undoStack.redo()
+    } else if (this.currentPicture) {
+      this.currentPicture.undoStack.redo()
     }
   }
 
   async export(format: "png"|"jpeg"|"bmp") {
-    if (Picture.current) {
-      const pictureExport = new PictureExport(Picture.current)
+    if (this.currentPicture) {
+      const pictureExport = new PictureExport(this.currentPicture)
       await pictureExport.showExportDialog(format)
       pictureExport.dispose()
     }
