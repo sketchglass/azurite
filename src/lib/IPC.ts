@@ -1,7 +1,7 @@
 import Electron = require("electron")
 import assert = require("assert")
-import {Observable} from "@reactivex/rxjs/dist/cjs/Observable"
-import {Observer} from "@reactivex/rxjs/dist/cjs/Observer"
+import {Observable} from "rxjs/Observable"
+import {Observer} from "rxjs/Observer"
 
 export
 class IPCToRenderer<T> {
@@ -34,11 +34,15 @@ class IPCToMain<T> {
     Electron.ipcRenderer.send(this.name, value)
   }
 
-  listen(): Observable<T> {
+  listen(sender?: Electron.WebContents): Observable<T> {
     assert.equal(process.type, "browser")
     return Observable.create((observer: Observer<T>) => {
       const {ipcMain} = Electron
-      const callback = (ev: Electron.IpcMainEvent, value: T) => observer.next(value)
+      const callback = (ev: Electron.IpcMainEvent, value: T) => {
+        if (!sender || ev.sender == sender) {
+          observer.next(value)
+        }
+      }
       ipcMain.on(this.name, callback)
       return () => ipcMain.removeListener(this.name, callback)
     })
