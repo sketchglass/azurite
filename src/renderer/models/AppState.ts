@@ -24,7 +24,10 @@ class AppState {
   @observable color = new HSVColor(0, 0, 1)
   @observable paletteIndex: number = 0
   readonly palette = observable<HSVColor>(new Array(100).fill(new HSVColor(0, 0, 1)))
-}
 
-export
-const appState = new AppState()
+  constructor() {
+    AppState.instance = this
+  }
+
+  static instance: AppState
+}

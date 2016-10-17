@@ -16,7 +16,7 @@ import RGBRangeSliders from "./components/RGBRangeSliders"
 import {DraggablePanel, DraggablePanelContainer} from "./components/DraggablePanel"
 import {HSVColor} from "../../lib/Color"
 import NavigationKeyBinding from "./NavigationKeyBinding"
-import {appState} from "../models/AppState"
+import {AppState} from "../models/AppState"
 import {remote} from "electron"
 const {Menu, app} = remote
 import "./MenuBar"
@@ -50,6 +50,7 @@ function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool
 class App extends React.Component<{}, {}> {
   constructor() {
     super()
+    const appState = AppState.instance
 
     new NavigationKeyBinding(klass => {
       if (klass) {
@@ -64,6 +65,7 @@ class App extends React.Component<{}, {}> {
     })
   }
   render() {
+    const appState = AppState.instance
     const {tools, currentTool, overrideTool, color, paletteIndex, palette} = appState
     const picture = appState.currentPicture! // TODO: support undefined current picture
     const onToolChange = (tool: Tool) => {
