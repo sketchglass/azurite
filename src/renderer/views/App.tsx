@@ -1,12 +1,10 @@
 import React = require("react")
-import Picture from "../models/Picture"
+import {action} from "mobx"
+import {observer} from "mobx-react"
 import Tool from "../models/Tool"
 import BaseBrushTool from "../models/BaseBrushTool"
 import BrushTool from "../models/BrushTool"
 import WatercolorTool from "../models/WatercolorTool"
-import PanTool from "../models/PanTool"
-import {ZoomTool} from "../models/ZoomTool"
-import RotateTool from "../models/RotateTool"
 import BrushSettings from "./BrushSettings"
 import WatercolorSettings from "./WatercolorSettings"
 import DrawArea from "./DrawArea"
@@ -17,9 +15,8 @@ import Navigator from "./Navigator"
 import RGBRangeSliders from "./components/RGBRangeSliders"
 import {DraggablePanel, DraggablePanelContainer} from "./components/DraggablePanel"
 import {HSVColor} from "../../lib/Color"
-import {Vec2} from "paintvec"
 import NavigationKeyBinding from "./NavigationKeyBinding"
-import PictureParams from "../models/PictureParams"
+import {AppState} from "../models/AppState"
 import {remote} from "electron"
 const {Menu, app} = remote
 import "./MenuBar"
@@ -49,67 +46,43 @@ function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool
   )
 }
 
-interface AppProps {
-  pictureParams: PictureParams
-}
-
-export default
-class App extends React.Component<AppProps, {}> {
-  picture = new Picture(this.props.pictureParams)
-  tools: Tool[] = [new BrushTool(), new WatercolorTool(), new PanTool(), new ZoomTool(),  new RotateTool()]
-  currentTool = this.tools[0]
-  overrideTool: Tool|undefined
-  brushColor: HSVColor
-  paletteIndex: number = 0
-  palette: HSVColor[] = new Array(100).fill(new HSVColor(0, 0, 1))
-
-  constructor(props: AppProps) {
-    super(props)
-    this.brushColor = this.palette[this.paletteIndex]
-    Picture.current = this.picture
-    if(this.currentTool instanceof BaseBrushTool) {
-      const tool = this.currentTool as BaseBrushTool
-      tool.color = this.brushColor.toRgb()
-    }
+@observer export default
+class App extends React.Component<{}, {}> {
+  constructor() {
+    super()
+    const appState = AppState.instance
 
     new NavigationKeyBinding(klass => {
       if (klass) {
-        for (const tool of this.tools) {
+        for (const tool of appState.tools) {
           if (tool instanceof klass) {
-            this.overrideTool = tool
+            appState.overrideTool = tool
           }
         }
       } else {
-        this.overrideTool = undefined
+        appState.overrideTool = undefined
       }
-      this.forceUpdate()
     })
   }
   render() {
-    const {picture, tools, currentTool, overrideTool} = this
+    const appState = AppState.instance
+    const {tools, currentTool, overrideTool, color, paletteIndex, palette} = appState
+    const picture = appState.currentPicture! // TODO: support undefined current picture
     const onToolChange = (tool: Tool) => {
-      this.currentTool = tool
-      if(this.currentTool instanceof BaseBrushTool) {
-        const tool = this.currentTool as BaseBrushTool
-        tool.color = this.brushColor.toRgb()
-      }
-      this.forceUpdate()
+      appState.currentTool = tool
     }
-    const onToolContextMenu = (selectedTool: Tool, e: React.MouseEvent<Element>) => {
+    const onToolContextMenu = action((selectedTool: Tool, e: React.MouseEvent<Element>) => {
       e.preventDefault()
-      const removeTool = () => {
-        this.tools = this.tools.filter((tool) => {
-          return tool !== selectedTool
-        })
-        this.forceUpdate()
-      }
-      const appendTool = (item: Tool) => {
+      const removeTool = action(() => {
+        const index = appState.tools.indexOf(selectedTool)
+        appState.tools.splice(index, 1)
+      })
+      const appendTool = action((item: Tool) => {
         return () => {
-          const index = this.tools.indexOf(selectedTool) + 1
-          this.tools.splice(index, 0, item)
-          this.forceUpdate()
+          const index = appState.tools.indexOf(selectedTool) + 1
+          appState.tools.splice(index, 0, item)
         }
-      }
+      })
       const menuTemplate = [
         {label: '追加', submenu: [
           {label: "BrushTool", click: appendTool(new BrushTool())},
@@ -119,36 +92,30 @@ class App extends React.Component<AppProps, {}> {
       ]
       const menu = Menu.buildFromTemplate(menuTemplate)
       menu.popup(remote.getCurrentWindow())
-    }
-    const onBrushColorChange = (color: HSVColor) => {
-      this.brushColor = color
-      if(this.currentTool instanceof BaseBrushTool) {
-        const brushTool = this.currentTool as BrushTool
-        brushTool.color = color.toRgb()
-      }
-      this.forceUpdate()
-    }
-    const onPaletteChange = (e: React.MouseEvent<Element>, index: number) => {
-      this.paletteIndex = index
+    })
+    const onPaletteChange = action((e: React.MouseEvent<Element>, index: number) => {
+      appState.paletteIndex = index
       if(e.shiftKey) {
-        this.palette[index] = this.brushColor
+        appState.palette[index] = appState.color
       } else {
-        onBrushColorChange(this.palette[index])
+        appState.color = appState.palette[index]
       }
-      this.forceUpdate()
-    }
+    })
+    const onColorChange = action((value: HSVColor) => {
+      appState.color = value
+    })
     return (
       <div className="App">
         <aside className="LeftSidebar">
           <DraggablePanelContainer top={20} left={18} margin={14} labelHeight={20}>
             <DraggablePanel label="Color" width={200} height={200}>
-              <ColorPicker color={this.brushColor} onChange={onBrushColorChange} />
+              <ColorPicker color={color} onChange={onColorChange} />
             </DraggablePanel>
             <DraggablePanel label="Slider" width={200} height={70}>
-              <RGBRangeSliders color={this.brushColor} onChange={onBrushColorChange} />
+              <RGBRangeSliders color={color} onChange={onColorChange} />
             </DraggablePanel>
             <DraggablePanel label="Palette" width={200} height={80}>
-              <Palette palette={this.palette} paletteIndex={this.paletteIndex} onChange={onPaletteChange} />
+              <Palette palette={palette} paletteIndex={paletteIndex} onChange={onPaletteChange} />
             </DraggablePanel>
             <DraggablePanel label="Tools" width={200} height={80}>
               <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />

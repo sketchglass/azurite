@@ -35,8 +35,6 @@ abstract class BaseBrushTool extends Tool {
 
   // brush width (diameter)
   @observable width = 10
-  // brush color RGBA
-  color = new Color(0, 0, 0, 1)
   // brush opacity
   @observable opacity = 1
   // distance used to soften edge, compared to brush radius
