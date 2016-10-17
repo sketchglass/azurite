@@ -1,4 +1,6 @@
 import {observable, computed, reaction} from "mobx"
+import msgpack = require("msgpack-lite")
+import fs = require("fs")
 import {Vec2, Rect} from "paintvec"
 import {Texture} from "paintgl"
 import Layer, {LayerData} from "./Layer"
@@ -30,6 +32,8 @@ class Picture {
     horizontalFlip: false
   })
   readonly updated = new Subject<Rect|undefined>()
+  @observable filePath = ""
+  @observable edited = false
 
   constructor(public params: PictureParams) {
     this.updated.forEach(() => {
@@ -57,6 +61,19 @@ class Picture {
     const picture = new Picture({width, height})
     const layers = data.layers.map(l => Layer.fromData(picture, l))
     picture.layers.splice(0, 1, ...layers)
+    return picture
+  }
+
+  saveAs(filePath: string) {
+    const fileData = msgpack.encode(this.toData())
+    fs.writeFileSync(filePath, fileData)
+    this.filePath = filePath
+  }
+
+  static open(filePath: string) {
+    const fileData = fs.readFileSync(filePath)
+    const picture = this.fromData(msgpack.decode(fileData))
+    picture.filePath = filePath
     return picture
   }
 
