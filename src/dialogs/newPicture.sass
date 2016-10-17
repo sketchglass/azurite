@@ -8,7 +8,6 @@ body
   justify-content: center
 
 .NewPictureDialog
-  box-sizing: border-box
   padding: 24px
   display: flex
   flex-direction: column
@@ -18,16 +17,18 @@ body
 
 .NewPictureDialog_Row
   margin: 4px 0
+  display: flex
   > *
-    display: inline-block
+    display: block
   > :nth-child(1)
     text-align: right
     margin-right: 4px
     width: 64px
 
 .NewPictureDialog_Value
+  display: flex
   > *
-    display: inline-block
+    display: block
   > :nth-child(1)
     margin-right: 4px
     width: 100px

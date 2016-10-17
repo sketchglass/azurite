@@ -109,7 +109,7 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
     this.setPreset(sizePresets[0])
     const {width, height} = this.dialog.getBoundingClientRect()
     const win = remote.getCurrentWindow()
-    win.setContentSize(width, height)
+    win.setContentSize(Math.round(width), Math.round(height))
     win.show()
   }
 
