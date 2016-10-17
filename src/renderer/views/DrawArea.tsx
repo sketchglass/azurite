@@ -42,24 +42,28 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     this.element.appendChild(canvas)
     this.updateCursor()
 
+    this.element.addEventListener("pointerdown", this.onPointerDown)
+    this.element.addEventListener("pointermove", this.onPointerMove)
+    this.element.addEventListener("pointerup", this.onPointerUp)
+
     IPCChannels.tabletDown.listen().forEach(ev => {
       this.usingTablet = true
-      this.onPointerDown(ev)
+      this.onDown(ev)
     })
     IPCChannels.tabletMove.listen().forEach(ev => {
-      this.onPointerMove(ev)
+      this.onMove(ev)
       this.cursorPosition = this.offsetPos(ev)
     })
     IPCChannels.tabletUp.listen().forEach(ev => {
       this.usingTablet = false
-      this.onPointerUp()
+      this.onUp()
     })
 
     this.resize()
     window.addEventListener("resize", () => {
       this.resize()
     })
-    document.addEventListener("mousemove", (ev) => {
+    document.addEventListener("pointermove", (ev) => {
       if (!this.usingTablet) {
         this.cursorPosition = this.offsetPos(ev)
       }
@@ -111,11 +115,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   render() {
     return (
-      <div ref="root" className="DrawArea"
-        onMouseDown={this.onMouseDown.bind(this)}
-        onMouseMove={this.onMouseMove.bind(this)}
-        onMouseUp={this.onMouseUp.bind(this)}
-      />
+      <div ref="root" className="DrawArea" />
     )
   }
 
@@ -134,25 +134,26 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     return {waypoint, rendererPos}
   }
 
-  onMouseDown(ev: MouseEvent) {
+  onPointerDown = (ev: PointerEvent) => {
     if (!this.usingTablet) {
-      this.onPointerDown(ev)
+      this.onDown(ev)
+      this.element!.setPointerCapture(ev.pointerId)
     }
     ev.preventDefault()
   }
-  onMouseMove(ev: MouseEvent) {
+  onPointerMove = (ev: PointerEvent) => {
     if (!this.usingTablet) {
-      this.onPointerMove(ev)
+      this.onMove(ev)
     }
     ev.preventDefault()
   }
-  onMouseUp(ev: MouseEvent) {
+  onPointerUp = (ev: PointerEvent) => {
     if (!this.usingTablet) {
-      this.onPointerUp()
+      this.onUp()
     }
     ev.preventDefault()
   }
-  onPointerDown(ev: {clientX: number, clientY: number, pressure?: number}) {
+  onDown(ev: {clientX: number, clientY: number, pressure?: number}) {
     const {tool, picture} = this.props
     tool.picture = picture
     tool.renderer = this.renderer
@@ -160,13 +161,13 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const rect = tool.start(waypoint, rendererPos)
     this.currentTool = tool
   }
-  onPointerMove(ev: {clientX: number, clientY: number, pressure?: number}) {
+  onMove(ev: {clientX: number, clientY: number, pressure?: number}) {
     if (this.currentTool) {
       const {waypoint, rendererPos} = this.eventToWaypoint(ev)
       const rect = this.currentTool.move(waypoint, rendererPos)
     }
   }
-  onPointerUp() {
+  onUp() {
     if (this.currentTool) {
       const rect = this.currentTool.end()
       this.currentTool = undefined
