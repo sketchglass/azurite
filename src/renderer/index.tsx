@@ -9,8 +9,7 @@ import Picture from "./models/Picture"
 const pictureParams: PictureParams = JSON.parse(qs.parse(location.search.slice(1)).params)
 
 window.addEventListener("DOMContentLoaded", () => {
-  const appState = new AppState()
   const picture = new Picture(pictureParams)
-  appState.pictures.push(picture)
+  AppState.instance.pictures.push(picture)
   ReactDOM.render(<App />, document.getElementById("app"))
 })
