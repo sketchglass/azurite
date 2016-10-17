@@ -1,5 +1,5 @@
 import {observable, autorun, action, observe} from "mobx"
-import {Subscription} from "@reactivex/rxjs/dist/cjs/Subscription"
+import {Subscription} from "rxjs/Subscription"
 import React = require("react")
 import Picture from "../models/Picture"
 import {Vec2, Transform} from "paintvec"
@@ -65,7 +65,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
     this.onResize()
     window.addEventListener("resize", this.onResize)
-    document.addEventListener("pointermove", this.onPointerMoveDocument)
+    document.addEventListener("pointermove", this.onDocumentPointerMove)
   }
 
   componentWillUnmount() {
@@ -77,7 +77,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     this.tabletMoveSubscription.unsubscribe()
     this.tabletUpSubscription.unsubscribe()
     window.removeEventListener("resize", this.onResize)
-    document.removeEventListener("pointermove", this.onPointerMoveDocument)
+    document.removeEventListener("pointermove", this.onDocumentPointerMove)
   }
 
   updateCursor() {
@@ -144,7 +144,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     return {waypoint, rendererPos}
   }
 
-  onPointerMoveDocument = (ev: PointerEvent) => {
+  onDocumentPointerMove = (ev: PointerEvent) => {
     if (!this.usingTablet) {
       this.cursorPosition = this.offsetPos(ev)
     }
