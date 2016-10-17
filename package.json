@@ -44,7 +44,6 @@
     "webpack": "^1.13.2"
   },
   "dependencies": {
-    "@reactivex/rxjs": "^5.0.0-beta.12",
     "classnames": "^2.2.5",
     "mobx": "^2.6.0",
     "mobx-react": "^3.5.8",
@@ -52,6 +51,7 @@
     "paintvec": "github:sketchglass/paintvec",
     "react": "^15.3.2",
     "react-dom": "^15.3.2",
-    "receive-tablet-event": "github:seanchas116/receive-tablet-event#b47eb6b856ee642b96f96b98dcf99517b781fb61"
+    "receive-tablet-event": "github:seanchas116/receive-tablet-event#b47eb6b856ee642b96f96b98dcf99517b781fb61",
+    "rxjs": "^5.0.0-rc.1"
   }
 }

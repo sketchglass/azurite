@@ -5,3 +5,5 @@ export const setTabletCaptureArea = new IPCToMain<{left: number, top: number, wi
 export const tabletDown = new IPCToRenderer<TabletEvent>("tabletDown")
 export const tabletMove = new IPCToRenderer<TabletEvent>("tabletMove")
 export const tabletUp = new IPCToRenderer<TabletEvent>("tabletUp")
+
+export const newPictureDialogDone = new IPCToMain<{width: number, height: number}>("newPictureDialogDone")

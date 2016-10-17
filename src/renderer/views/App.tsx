@@ -19,6 +19,7 @@ import {DraggablePanel, DraggablePanelContainer} from "./components/DraggablePan
 import {HSVColor} from "../../lib/Color"
 import {Vec2} from "paintvec"
 import NavigationKeyBinding from "./NavigationKeyBinding"
+import PictureParams from "../models/PictureParams"
 import {remote} from "electron"
 const {Menu, app} = remote
 import "./MenuBar"
@@ -48,9 +49,13 @@ function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool
   )
 }
 
+interface AppProps {
+  pictureParams: PictureParams
+}
+
 export default
-class App extends React.Component<void, void> {
-  picture = new Picture()
+class App extends React.Component<AppProps, {}> {
+  picture = new Picture(this.props.pictureParams)
   tools: Tool[] = [new BrushTool(), new WatercolorTool(), new PanTool(), new ZoomTool(),  new RotateTool()]
   currentTool = this.tools[0]
   overrideTool: Tool|undefined
@@ -58,8 +63,8 @@ class App extends React.Component<void, void> {
   paletteIndex: number = 0
   palette: HSVColor[] = new Array(100).fill(new HSVColor(0, 0, 1))
 
-  constructor() {
-    super()
+  constructor(props: AppProps) {
+    super(props)
     this.brushColor = this.palette[this.paletteIndex]
     Picture.current = this.picture
     if(this.currentTool instanceof BaseBrushTool) {
