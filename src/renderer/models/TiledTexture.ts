@@ -1,7 +1,8 @@
 import {Vec2, Rect} from "paintvec"
-import {Texture, PixelType} from "paintgl"
+import {Texture, PixelType, TextureDrawTarget, Model, TextureShader, RectShape} from "paintgl"
 import {context} from "../GLContext"
 import {copyTexture} from "../GLUtil"
+import {float32ArrayTo16} from "../../lib/Float"
 
 function keyToString(key: Vec2) {
   return `${key.x},${key.y}`
@@ -12,9 +13,20 @@ function stringToKey(str: string) {
   return new Vec2(parseInt(strs[0]), parseInt(strs[1]))
 }
 
+const tileSize = 256
+const tileRect = new Rect(new Vec2(0), new Vec2(tileSize))
+
+const tileModel = new Model(context, {
+  shape: new RectShape(context, {usage: "static", rect: tileRect}),
+  shader: TextureShader,
+  blendMode: "src",
+})
+const floatTile = new Texture(context, {size: new Vec2(tileSize), pixelType: "float"})
+const floatDrawTarget = new TextureDrawTarget(context, floatTile)
+
 export default
 class TiledTexture {
-  static tileSize = 256
+  static tileSize = tileSize
   tiles = new Map<string, Texture>()
 
   has(key: Vec2) {
@@ -27,9 +39,17 @@ class TiledTexture {
 
   newTile() {
     return new Texture(context, {
-      size: new Vec2(TiledTexture.tileSize),
+      size: new Vec2(tileSize),
       pixelType: "half-float",
     })
+  }
+
+  tileToData(tile: Texture) {
+    tileModel.uniforms = {texture: tile}
+    floatDrawTarget.draw(tileModel)
+    const floatData = new Float32Array(tileSize * tileSize * 4)
+    floatDrawTarget.readPixels(tileRect, floatData)
+    return float32ArrayTo16(floatData)
   }
 
   get(key: Vec2) {
@@ -59,14 +79,14 @@ class TiledTexture {
   writeTexture(src: Texture, offset: Vec2) {
     const rect = new Rect(offset, offset.add(src.size))
     for (const key of TiledTexture.keysForRect(rect)) {
-      copyTexture(src, this.get(key), key.mulScalar(TiledTexture.tileSize).sub(offset))
+      copyTexture(src, this.get(key), key.mulScalar(tileSize).sub(offset))
     }
   }
 
   readToTexture(dest: Texture, offset: Vec2) {
     const rect = new Rect(offset, offset.add(dest.size))
     for (const key of TiledTexture.keysForRect(rect)) {
-      copyTexture(this.get(key), dest, offset.sub(key.mulScalar(TiledTexture.tileSize)))
+      copyTexture(this.get(key), dest, offset.sub(key.mulScalar(tileSize)))
     }
   }
 
