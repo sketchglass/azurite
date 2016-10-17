@@ -1,6 +1,7 @@
 import PanTool from "../models/PanTool"
 import {ZoomTool} from "../models/ZoomTool"
 import RotateTool from "../models/RotateTool"
+import {isTextInput} from "./util"
 
 const keys = [" ", "Control", "Meta", "Alt", "Shift"]
 
@@ -12,7 +13,12 @@ class NavigationKeyBinding {
     document.addEventListener("keydown", e => {
       if (keys.indexOf(e.key) >= 0) {
         this.pressedKeys.add(e.key)
-        this.onKeyChange()
+        if (!isTextInput(e.target as Element)) {
+          this.onKeyChange()
+          if (e.key == " ") {
+            e.preventDefault()
+          }
+        }
       }
     })
     document.addEventListener("keyup", e => {
