@@ -90,6 +90,13 @@ class TiledTexture {
     }
   }
 
+  toData() {
+    return {
+      tileSize,
+      tiles: Array.from(this.tiles).map(([key, tile]) => [key, this.tileToData(tile)]),
+    }
+  }
+
   dispose() {
     for (const tile of this.tiles.values()) {
       tile.dispose()
