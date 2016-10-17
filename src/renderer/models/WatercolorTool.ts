@@ -138,7 +138,6 @@ class WatercolorTool extends BaseBrushTool {
   sampleSize = 0
 
   start(waypoint: Waypoint) {
-    const layerSize = this.picture.currentLayer.size
     this.sampleSize = Math.pow(2, Math.ceil(Math.log2(this.width + 2)))
 
     this.model.uniforms = {
