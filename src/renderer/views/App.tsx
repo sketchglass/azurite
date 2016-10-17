@@ -19,7 +19,6 @@ import {DraggablePanel, DraggablePanelContainer} from "./components/DraggablePan
 import {HSVColor} from "../../lib/Color"
 import {Vec2} from "paintvec"
 import NavigationKeyBinding from "./NavigationKeyBinding"
-import PictureParams from "../models/PictureParams"
 import {remote} from "electron"
 const {Menu, app} = remote
 import "./MenuBar"
@@ -50,12 +49,12 @@ function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool
 }
 
 interface AppProps {
-  pictureParams: PictureParams
+  picture: Picture
 }
 
 export default
 class App extends React.Component<AppProps, {}> {
-  picture = new Picture(this.props.pictureParams)
+  picture = this.props.picture
   tools: Tool[] = [new BrushTool(), new WatercolorTool(), new PanTool(), new ZoomTool(),  new RotateTool()]
   currentTool = this.tools[0]
   overrideTool: Tool|undefined
@@ -66,7 +65,6 @@ class App extends React.Component<AppProps, {}> {
   constructor(props: AppProps) {
     super(props)
     this.brushColor = this.palette[this.paletteIndex]
-    Picture.current = this.picture
     if(this.currentTool instanceof BaseBrushTool) {
       const tool = this.currentTool as BaseBrushTool
       tool.color = this.brushColor.toRgb()

@@ -1,7 +1,8 @@
 import {Vec2, Rect} from "paintvec"
-import {Texture, PixelType} from "paintgl"
+import {Texture, PixelType, TextureDrawTarget, Model, TextureShader, RectShape} from "paintgl"
 import {context} from "../GLContext"
 import {copyTexture} from "../GLUtil"
+import {float32ArrayTo16} from "../../lib/Float"
 
 function keyToString(key: Vec2) {
   return `${key.x},${key.y}`
@@ -12,9 +13,42 @@ function stringToKey(str: string) {
   return new Vec2(parseInt(strs[0]), parseInt(strs[1]))
 }
 
+const tileSize = 256
+const tileRect = new Rect(new Vec2(0), new Vec2(tileSize))
+
+const tileModel = new Model(context, {
+  shape: new RectShape(context, {usage: "static", rect: tileRect}),
+  shader: TextureShader,
+  blendMode: "src",
+})
+const floatTile = new Texture(context, {size: new Vec2(tileSize), pixelType: "float"})
+const floatDrawTarget = new TextureDrawTarget(context, floatTile)
+
+function newTile(data?: Uint16Array) {
+  return new Texture(context, {
+    size: new Vec2(tileSize),
+    pixelType: "half-float",
+    data
+  })
+}
+
+function tileToData(tile: Texture) {
+  tileModel.uniforms = {texture: tile}
+  floatDrawTarget.draw(tileModel)
+  const floatData = new Float32Array(tileSize * tileSize * 4)
+  floatDrawTarget.readPixels(tileRect, floatData)
+  return float32ArrayTo16(floatData)
+}
+
+export
+interface TiledTextureData {
+  tileSize: number
+  tiles: [[number, number], Uint16Array][]
+}
+
 export default
 class TiledTexture {
-  static tileSize = 256
+  static tileSize = tileSize
   tiles = new Map<string, Texture>()
 
   has(key: Vec2) {
@@ -25,19 +59,12 @@ class TiledTexture {
     return Array.from(this.tiles.keys()).map(stringToKey)
   }
 
-  newTile() {
-    return new Texture(context, {
-      size: new Vec2(TiledTexture.tileSize),
-      pixelType: "half-float",
-    })
-  }
-
   get(key: Vec2) {
     const keyStr = keyToString(key)
     if (this.tiles.has(keyStr)) {
       return this.tiles.get(keyStr)!
     }
-    const tile = this.newTile()
+    const tile = newTile()
     this.tiles.set(keyStr, tile)
     return tile
   }
@@ -49,7 +76,7 @@ class TiledTexture {
   clone() {
     const cloned = new TiledTexture()
     for (const key of this.keys()) {
-      const tile = this.newTile()
+      const tile = newTile()
       copyTexture(this.get(key), tile, new Vec2(0))
       cloned.set(key, tile)
     }
@@ -59,15 +86,42 @@ class TiledTexture {
   writeTexture(src: Texture, offset: Vec2) {
     const rect = new Rect(offset, offset.add(src.size))
     for (const key of TiledTexture.keysForRect(rect)) {
-      copyTexture(src, this.get(key), key.mulScalar(TiledTexture.tileSize).sub(offset))
+      copyTexture(src, this.get(key), key.mulScalar(tileSize).sub(offset))
     }
   }
 
   readToTexture(dest: Texture, offset: Vec2) {
     const rect = new Rect(offset, offset.add(dest.size))
     for (const key of TiledTexture.keysForRect(rect)) {
-      copyTexture(this.get(key), dest, offset.sub(key.mulScalar(TiledTexture.tileSize)))
+      copyTexture(this.get(key), dest, offset.sub(key.mulScalar(tileSize)))
     }
+  }
+
+  toData(): TiledTextureData {
+    const tiles = Array.from(this.tiles).map(([key, tile]) => {
+      const {x, y} = stringToKey(key)
+      const elem: [[number, number], Uint16Array] = [[x, y], tileToData(tile)]
+      return elem
+    })
+    return {
+      tileSize,
+      tiles,
+    }
+  }
+
+  static fromData(data: TiledTextureData) {
+    if (data.tileSize != tileSize) {
+      throw new Error("tile size incompatible")
+    }
+    const tiles = data.tiles.map(([[x, y], data]) => {
+      const tile = newTile(data)
+      const key = keyToString(new Vec2(x, y))
+      const kv: [string, Texture] = [key, tile]
+      return kv
+    })
+    const tiledTexture = new TiledTexture()
+    tiledTexture.tiles = new Map(tiles)
+    return tiledTexture
   }
 
   dispose() {

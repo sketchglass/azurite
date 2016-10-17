@@ -65,18 +65,21 @@ function openPictureWindow(params: PictureParams) {
   })
 }
 
-async function onStartup() {
+async function newPicture() {
   const pictureParams = await openNewPictureDialog()
   if (pictureParams) {
     openPictureWindow(pictureParams)
-  } else {
-    if (process.platform !== 'darwin') {
-      app.quit()
-    }
   }
 }
 
-app.on('ready', onStartup)
+IPCChannels.openPicture.listen().subscribe(filePath => {
+  openPictureWindow({action: "open", filePath})
+})
+IPCChannels.newPicture.listen().subscribe(() => {
+  newPicture()
+})
+
+app.on('ready', newPicture)
 
 app.on('window-all-closed', () => {
   // don't quit if a new window is created in same tick
@@ -88,7 +91,7 @@ app.on('window-all-closed', () => {
 })
 
 app.on('activate', () => {
-  if (!window) {
-    onStartup()
+  if (windows.size == 0) {
+    newPicture()
   }
 })
