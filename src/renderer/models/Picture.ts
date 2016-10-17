@@ -21,6 +21,7 @@ class Picture {
     translation: new Vec2(0),
     scale: 1,
     rotation: 0,
+    horizontalFlip: false
   })
   readonly updated = new Subject<Rect|undefined>()
 

@@ -4,7 +4,7 @@ interface Navigation {
   translation: Vec2
   scale: number
   rotation: number
-  //horizontalFlip: boolean
+  horizontalFlip: boolean
 }
 
 export default Navigation

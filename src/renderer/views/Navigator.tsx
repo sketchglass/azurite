@@ -19,8 +19,11 @@ class Navigator extends React.Component<NavigatorProps, {}> {
     const onRotationChange = (ev: React.FormEvent<HTMLInputElement>) => {
       navigation.rotation = parseInt((ev.target as HTMLInputElement).value) / 180 * Math.PI
     }
-    const {rotation, scale} = picture.navigation
+    const {rotation, scale, horizontalFlip} = picture.navigation
     const rotationDeg = Math.round(rotation / Math.PI * 180)
+    const onHorizontalFlipChange = (ev: React.FormEvent<HTMLInputElement>) => {
+      navigation.horizontalFlip = (ev.target as HTMLInputElement).checked
+    }
 
     return (
       <div className="Navigator">
@@ -29,6 +32,9 @@ class Navigator extends React.Component<NavigatorProps, {}> {
         </div>
         <div>
           Rotation: <input type="number" min={-180} max={180} onChange={onRotationChange} value={rotationDeg} />
+        </div>
+        <div>
+          <label><input type="checkbox" checked={horizontalFlip} onChange={onHorizontalFlipChange} />Flip Horizontally</label>
         </div>
       </div>
     )
