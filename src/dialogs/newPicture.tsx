@@ -252,8 +252,13 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
   }
 
   onOK = () => {
-    const {widthPx, heightPx} = this.state
-    IPCChannels.newPictureDialogDone.send({width: widthPx, height: heightPx})
+    const {widthPx, heightPx, dpi} = this.state
+    IPCChannels.newPictureDialogDone.send({
+      action: "new",
+      width: widthPx,
+      height: heightPx,
+      dpi: dpi
+    })
   }
 }
 

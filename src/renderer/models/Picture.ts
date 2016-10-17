@@ -14,12 +14,12 @@ import PictureParams from "./PictureParams"
 export
 interface PictureData {
   size: [number, number]
+  dpi: number
   layers: LayerData[]
 }
 
 export default
 class Picture {
-  readonly size = new Vec2(this.params.width, this.params.height)
   @observable currentLayerIndex = 0
   readonly thumbnailGenerator = new ThumbnailGenerator(this.size)
   readonly layers = observable([new Layer(this)])
@@ -35,7 +35,7 @@ class Picture {
   @observable filePath = ""
   @observable edited = false
 
-  constructor(public params: PictureParams) {
+  constructor(public readonly size: Vec2, public readonly dpi: number) {
     this.updated.forEach(() => {
       this.layerBlender.render()
     })
@@ -52,13 +52,14 @@ class Picture {
   toData(): PictureData {
     return {
       size: [this.size.width, this.size.height],
+      dpi: this.dpi,
       layers: this.layers.map(l => l.toData()),
     }
   }
 
   static fromData(data: PictureData) {
     const [width, height] = data.size
-    const picture = new Picture({width, height})
+    const picture = new Picture(new Vec2(width, height), data.dpi)
     const layers = data.layers.map(l => Layer.fromData(picture, l))
     picture.layers.splice(0, 1, ...layers)
     return picture
