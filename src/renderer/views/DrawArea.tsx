@@ -13,7 +13,7 @@ import * as IPCChannels from "../../common/IPCChannels"
 
 interface DrawAreaProps {
   tool: Tool
-  picture: Picture
+  picture: Picture|undefined
 }
 
 export default
@@ -39,6 +39,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
 
   componentWillReceiveProps(nextProps: DrawAreaProps) {
+    this.renderer.picture = nextProps.picture
     this.tool = nextProps.tool
   }
 
@@ -171,6 +172,9 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
   onDown(ev: {clientX: number, clientY: number, pressure?: number}) {
     const {tool, picture} = this.props
+    if (!picture) {
+      return
+    }
     tool.picture = picture
     tool.renderer = this.renderer
     const {waypoint, rendererPos} = this.eventToWaypoint(ev)

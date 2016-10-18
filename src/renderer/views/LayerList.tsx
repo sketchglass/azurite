@@ -9,7 +9,7 @@ import {mouseOffsetPos} from "./util"
 import "../../styles/LayerList.sass"
 
 interface LayerListProps {
-  picture: Picture
+  picture: Picture|undefined
 }
 
 const CELL_HEIGHT = 72
@@ -44,7 +44,8 @@ const LayerListItem = observer((props: {layer: Layer, current: boolean, index: n
 class LayerList extends React.Component<LayerListProps, {}> {
   render() {
     const {picture} = this.props
-    const {layers, currentLayerIndex} = picture
+    let layers: Layer[] = picture ? picture.layers : []
+    let currentLayerIndex = picture ? picture.currentLayerIndex : 0
     return (
       <div className="LayerList" onDragOver={this.onDragOver.bind(this)} onDrop={this.onDrop.bind(this)}>
         <div className="LayerList_buttons">
@@ -68,6 +69,9 @@ class LayerList extends React.Component<LayerListProps, {}> {
     }
     ev.preventDefault()
     const {picture} = this.props
+    if (!picture) {
+      return
+    }
     const from = parseInt(data)
     const {y} = mouseOffsetPos(ev, this.refs["scroll"] as HTMLElement)
     let to = Math.min(Math.floor((y + CELL_HEIGHT / 2) / CELL_HEIGHT), picture.layers.length)
@@ -80,16 +84,25 @@ class LayerList extends React.Component<LayerListProps, {}> {
 
   @action selectLayer(i: number) {
     const {picture} = this.props
+    if (!picture) {
+      return
+    }
     picture.currentLayerIndex = i
   }
 
   addLayer() {
     const {picture} = this.props
+    if (!picture) {
+      return
+    }
     picture.undoStack.redoAndPush(new AddLayerCommand(picture, picture.currentLayerIndex))
   }
 
   removeLayer() {
     const {picture} = this.props
+    if (!picture) {
+      return
+    }
     if (picture.layers.length > 1) {
       picture.undoStack.redoAndPush(new RemoveLayerCommand(picture, picture.currentLayerIndex))
     }

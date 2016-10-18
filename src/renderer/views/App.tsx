@@ -67,7 +67,7 @@ class App extends React.Component<{}, {}> {
   render() {
     const appState = AppState.instance
     const {tools, currentTool, overrideTool, color, paletteIndex, palette} = appState
-    const picture = appState.currentPicture! // TODO: support undefined current picture
+    const picture = appState.currentPicture
     const onToolChange = (tool: Tool) => {
       appState.currentTool = tool
     }
