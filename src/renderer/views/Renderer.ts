@@ -71,7 +71,7 @@ class Renderer {
         canvas.width = size.width
         canvas.height = size.height
       }),
-      reaction(() => this.transformToPicture, () => {
+      reaction(() => [this.size, this.transformToPicture], () => {
         requestAnimationFrame(() => {
           this.render()
         })
@@ -96,7 +96,9 @@ class Renderer {
       drawTarget.scissor = rectInPicture.transform(this.transformFromPicture)
     }
     drawTarget.clear(new Color(240/255, 240/255, 240/255, 1))
-    drawTarget.transform = this.transformFromPicture
-    drawTarget.draw(this.model)
+    if (this.picture) {
+      drawTarget.transform = this.transformFromPicture
+      drawTarget.draw(this.model)
+    }
   }
 }

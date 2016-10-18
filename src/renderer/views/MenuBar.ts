@@ -5,8 +5,10 @@ type BrowserWindow = Electron.BrowserWindow
 type MenuItemOptions = Electron.MenuItemOptions
 import {AppState} from "../models/AppState"
 import Picture from "../models/Picture"
+import PictureParams from "../models/PictureParams"
 import PictureExport from "../models/PictureExport"
 import {isTextInput} from "./util"
+import {Dialog} from "./Dialog"
 
 class MenuBar {
   constructor() {
@@ -16,6 +18,16 @@ class MenuBar {
 
   get currentPicture() {
     return AppState.instance.currentPicture
+  }
+
+  async newPicture() {
+    const dialog = new Dialog<PictureParams>("newPicture")
+    const params = await dialog.open()
+    if (params) {
+      const appState = AppState.instance
+      appState.pictures.push(new Picture(params))
+      appState.currentPictureIndex = appState.pictures.length - 1
+    }
   }
 
   undo() {
@@ -55,6 +67,14 @@ class MenuBar {
     const fileMenu: MenuItemOptions = {
       label: "File",
       submenu: [
+        {
+          label: "New...",
+          accelerator: "CmdOrCtrl+N",
+          click: () => this.newPicture(),
+        },
+        {
+          type: "separator",
+        },
         {
           label: "Export",
           submenu: [

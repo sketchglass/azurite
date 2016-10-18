@@ -5,24 +5,30 @@ import Picture from "../models/Picture"
 import "../../styles/Navigator.sass"
 
 interface NavigatorProps {
-  picture: Picture
+  picture: Picture|undefined
 }
 
 @observer export default
 class Navigator extends React.Component<NavigatorProps, {}> {
   render() {
     const {picture} = this.props
-    const {navigation} = picture
     const onScaleChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      navigation.scale = parseFloat((ev.target as HTMLInputElement).value) / 100
+      if (picture) {
+        picture.navigation.scale = parseFloat((ev.target as HTMLInputElement).value) / 100
+      }
     }
     const onRotationChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      navigation.rotation = parseInt((ev.target as HTMLInputElement).value) / 180 * Math.PI
+      if (picture) {
+        picture.navigation.rotation = parseInt((ev.target as HTMLInputElement).value) / 180 * Math.PI
+      }
     }
-    const {rotation, scale, horizontalFlip} = picture.navigation
+    const navigation = picture ? picture.navigation : {rotation: 0, scale: 1, horizontalFlip: false}
+    const {rotation, scale, horizontalFlip} = navigation
     const rotationDeg = Math.round(rotation / Math.PI * 180)
     const onHorizontalFlipChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      navigation.horizontalFlip = (ev.target as HTMLInputElement).checked
+      if (picture) {
+        picture.navigation.horizontalFlip = (ev.target as HTMLInputElement).checked
+      }
     }
 
     return (

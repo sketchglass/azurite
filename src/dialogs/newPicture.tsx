@@ -1,8 +1,7 @@
 import React = require("react")
 import ReactDOM = require("react-dom")
 import {MAX_PICTURE_SIZE} from "../common/constants"
-import * as IPCChannels from "../common/IPCChannels"
-import {remote} from "electron"
+import {remote, ipcRenderer} from "electron"
 import "./newPicture.sass"
 
 type SizeUnits = "px" | "mm"
@@ -253,7 +252,7 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
 
   onOK = () => {
     const {widthPx, heightPx} = this.state
-    IPCChannels.newPictureDialogDone.send({width: widthPx, height: heightPx})
+    ipcRenderer.send("dialogDone", {width: widthPx, height: heightPx})
   }
 }
 

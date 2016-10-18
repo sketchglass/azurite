@@ -1,44 +1,17 @@
 import Electron = require('electron')
 type BrowserWindow = Electron.BrowserWindow
-const {app, BrowserWindow, ipcMain} = Electron
-import qs = require('querystring')
+const {app, BrowserWindow} = Electron
 import {TabletEventReceiver} from "receive-tablet-event"
-import "rxjs/add/operator/first"
 import * as IPCChannels from "../common/IPCChannels"
-import PictureParams from "../renderer/models/PictureParams"
 
 app.commandLine.appendSwitch("enable-experimental-web-platform-features")
 
-const windows = new Set<BrowserWindow>()
+let window: BrowserWindow|undefined
 
-async function openNewPictureDialog() {
-  const win = new BrowserWindow({width: 400, height: 200, show: false})
-  win.setMenu(null as any)
-  windows.add(win)
-  win.loadURL(`file://${__dirname}/../dialogs/newPicture.html`)
+function openWindow() {
+  const win = window = new BrowserWindow({width: 1200, height: 768})
 
-  const pictureParams = await new Promise<PictureParams|undefined>((resolve, reject) => {
-    IPCChannels.newPictureDialogDone.listen(win.webContents).first().forEach(pictureParams => {
-      resolve(pictureParams)
-    })
-    win.once('closed', () => {
-      resolve(undefined)
-    })
-  })
-  if (pictureParams) {
-    win.close()
-  }
-  windows.delete(win)
-  return pictureParams
-}
-
-function openPictureWindow(params: PictureParams) {
-  const win = new BrowserWindow({width: 1200, height: 768})
-  windows.add(win)
-
-  const query = qs.stringify({params: JSON.stringify(params)})
-
-  win.loadURL(`file://${__dirname}/../index.html?${query}`)
+  win.loadURL(`file://${__dirname}/../index.html`)
   if (process.env.NODE_ENV == "development") {
     win.webContents.openDevTools()
   }
@@ -60,35 +33,21 @@ function openPictureWindow(params: PictureParams) {
   })
 
   win.on('closed', () => {
-    windows.delete(win)
     receiver.dispose()
+    window = undefined
   })
 }
 
-async function onStartup() {
-  const pictureParams = await openNewPictureDialog()
-  if (pictureParams) {
-    openPictureWindow(pictureParams)
-  } else {
-    if (process.platform !== 'darwin') {
-      app.quit()
-    }
-  }
-}
-
-app.on('ready', onStartup)
+app.on('ready', openWindow)
 
 app.on('window-all-closed', () => {
-  // don't quit if a new window is created in same tick
-  setImmediate(() => {
-    if (process.platform != 'darwin' && BrowserWindow.getAllWindows().length == 0) {
-      app.quit()
-    }
-  })
+  if (process.platform != 'darwin') {
+    app.quit()
+  }
 })
 
 app.on('activate', () => {
   if (!window) {
-    onStartup()
+    openWindow()
   }
 })

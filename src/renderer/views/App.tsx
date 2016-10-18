@@ -14,6 +14,7 @@ import Palette from "./Palette"
 import Navigator from "./Navigator"
 import RGBRangeSliders from "./components/RGBRangeSliders"
 import {DraggablePanel, DraggablePanelContainer} from "./components/DraggablePanel"
+import {PictureTabBar} from "./PictureTabBar"
 import {HSVColor} from "../../lib/Color"
 import NavigationKeyBinding from "./NavigationKeyBinding"
 import {AppState} from "../models/AppState"
@@ -67,7 +68,7 @@ class App extends React.Component<{}, {}> {
   render() {
     const appState = AppState.instance
     const {tools, currentTool, overrideTool, color, paletteIndex, palette} = appState
-    const picture = appState.currentPicture! // TODO: support undefined current picture
+    const picture = appState.currentPicture
     const onToolChange = (tool: Tool) => {
       appState.currentTool = tool
     }
@@ -125,7 +126,10 @@ class App extends React.Component<{}, {}> {
             </DraggablePanel>
           </DraggablePanelContainer>
         </aside>
-        <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
+        <div className="CenterArea">
+          <PictureTabBar />
+          <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
+        </div>
         <aside className="RightSidebar">
           <Navigator picture={picture} />
           <LayerList picture={picture} />

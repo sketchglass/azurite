@@ -18,4 +18,8 @@ class Layer {
   @action updateThumbnail() {
     this.thumbnail = this.picture.thumbnailGenerator.generate(this)
   }
+
+  dispose() {
+    this.tiledTexture.dispose()
+  }
 }

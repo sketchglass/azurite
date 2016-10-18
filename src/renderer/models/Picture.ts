@@ -24,6 +24,7 @@ class Picture {
     horizontalFlip: false
   })
   readonly updated = new Subject<Rect|undefined>()
+  fileName = "Untitled" // stub
 
   constructor(public params: PictureParams) {
     this.updated.forEach(() => {
@@ -37,5 +38,13 @@ class Picture {
 
   @computed get currentLayer() {
     return this.layers[this.currentLayerIndex]
+  }
+
+  dispose() {
+    this.thumbnailGenerator.dispose()
+    this.layerBlender.dispose()
+    for (const layer of this.layers) {
+      layer.dispose()
+    }
   }
 }
