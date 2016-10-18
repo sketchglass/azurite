@@ -11,7 +11,7 @@ class PanTool extends Tool {
   originalRendererToPicture = new Transform()
 
   start(waypoint: Waypoint, rendererPos: Vec2) {
-    this.originalRendererToPicture = this.renderer.transforms.rendererToPicture
+    this.originalRendererToPicture = this.renderer.transformToPicture
     this.originalPos = rendererPos.transform(this.originalRendererToPicture)
     this.originalTranslation = this.picture.navigation.translation
   }

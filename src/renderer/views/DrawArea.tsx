@@ -31,7 +31,8 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   constructor(props: DrawAreaProps) {
     super(props)
-    this.renderer = new Renderer(props.picture)
+    this.renderer = new Renderer()
+    this.renderer.picture = props.picture
     this.tool = props.tool
     autorun(() => this.updateCursor())
     autorun(() => this.updateCursorGeometry())
@@ -117,8 +118,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       width: Math.round(rect.width),
       height: Math.round(rect.height),
     }
-    const size = new Vec2(roundRect.width, roundRect.height).mulScalar(window.devicePixelRatio)
-    this.renderer.resize(size)
+    this.renderer.size = new Vec2(roundRect.width, roundRect.height).mulScalar(window.devicePixelRatio)
 
     IPCChannels.setTabletCaptureArea.send(roundRect)
   }
@@ -139,7 +139,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   eventToWaypoint(ev: {clientX: number, clientY: number, pressure?: number}) {
     const pressure = ev.pressure == undefined ? 1.0 : ev.pressure
     const rendererPos = this.offsetPos(ev).mulScalar(window.devicePixelRatio)
-    const pos = rendererPos.transform(this.renderer.transforms.rendererToPicture)
+    const pos = rendererPos.transform(this.renderer.transformToPicture)
     const waypoint = new Waypoint(pos, pressure)
     return {waypoint, rendererPos}
   }
