@@ -24,6 +24,7 @@ class Picture {
     horizontalFlip: false
   })
   readonly updated = new Subject<Rect|undefined>()
+  fileName = "Untitled" // stub
 
   constructor(public params: PictureParams) {
     this.updated.forEach(() => {

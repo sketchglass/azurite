@@ -14,6 +14,7 @@ import Palette from "./Palette"
 import Navigator from "./Navigator"
 import RGBRangeSliders from "./components/RGBRangeSliders"
 import {DraggablePanel, DraggablePanelContainer} from "./components/DraggablePanel"
+import {PictureTabBar} from "./PictureTabBar"
 import {HSVColor} from "../../lib/Color"
 import NavigationKeyBinding from "./NavigationKeyBinding"
 import {AppState} from "../models/AppState"
@@ -125,7 +126,10 @@ class App extends React.Component<{}, {}> {
             </DraggablePanel>
           </DraggablePanelContainer>
         </aside>
-        <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
+        <div className="CenterArea">
+          <PictureTabBar />
+          <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
+        </div>
         <aside className="RightSidebar">
           <Navigator picture={picture} />
           <LayerList picture={picture} />
