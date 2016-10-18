@@ -1,3 +1,4 @@
+import * as path from "path"
 import {observable, computed, reaction} from "mobx"
 import {Vec2, Rect} from "paintvec"
 import {Texture} from "paintgl"
@@ -30,7 +31,15 @@ class Picture {
     horizontalFlip: false
   })
   readonly updated = new Subject<Rect|undefined>()
-  fileName = "Untitled" // stub
+  @observable filePath = ""
+  @observable edited = false
+  @computed get fileName() {
+    if (this.filePath) {
+      return path.basename(this.filePath)
+    } else {
+      return "Untitled"
+    }
+  }
 
   constructor(public params: PictureParams) {
     this.updated.forEach(() => {
@@ -40,6 +49,9 @@ class Picture {
       this.updated.next()
     })
     this.layerBlender.render()
+    this.undoStack.commands.observe(() => {
+      this.edited = true
+    })
   }
 
   @computed get currentLayer() {
