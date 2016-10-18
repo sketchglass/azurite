@@ -1,7 +1,7 @@
 import {observable, computed, reaction} from "mobx"
 import {Vec2, Rect} from "paintvec"
 import {Texture} from "paintgl"
-import Layer from "./Layer"
+import Layer, {LayerData} from "./Layer"
 import {Subject} from "rxjs/Subject"
 import ThumbnailGenerator from "./ThumbnailGenerator"
 import LayerBlender from "./LayerBlender"
@@ -9,12 +9,18 @@ import {UndoStack} from "./UndoStack"
 import Navigation from "./Navigation"
 import PictureParams from "./PictureParams"
 
+export
+interface PictureData {
+  size: [number, number]
+  layers: LayerData[]
+}
+
 export default
 class Picture {
   readonly size = new Vec2(this.params.width, this.params.height)
   @observable currentLayerIndex = 0
   readonly thumbnailGenerator = new ThumbnailGenerator(this.size)
-  readonly layers = observable([new Layer(this, this.size)])
+  readonly layers = observable([new Layer(this)])
   readonly layerBlender = new LayerBlender(this)
   readonly undoStack = new UndoStack()
   readonly navigation = observable({
@@ -46,5 +52,20 @@ class Picture {
     for (const layer of this.layers) {
       layer.dispose()
     }
+  }
+
+  toData(): PictureData {
+    return {
+      size: [this.size.width, this.size.height],
+      layers: this.layers.map(l => l.toData()),
+    }
+  }
+
+  static fromData(data: PictureData) {
+    const [width, height] = data.size
+    const picture = new Picture({width, height})
+    const layers = data.layers.map(l => Layer.fromData(picture, l))
+    picture.layers.splice(0, 1, ...layers)
+    return picture
   }
 }
