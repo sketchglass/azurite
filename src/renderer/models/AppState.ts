@@ -14,7 +14,10 @@ class AppState {
   @observable currentPictureIndex = 0
 
   @computed get currentPicture(): Picture|undefined {
-    return this.pictures[this.currentPictureIndex]
+    const i = this.currentPictureIndex
+    if (i < this.pictures.length) {
+      return this.pictures[this.currentPictureIndex]
+    }
   }
 
   readonly tools = observable<Tool>([new BrushTool(), new WatercolorTool(), new PanTool(), new ZoomTool(),  new RotateTool()])
