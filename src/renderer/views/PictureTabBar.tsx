@@ -2,7 +2,6 @@ import * as React from "react"
 import {observer} from "mobx-react"
 import {AppState} from "../models/AppState"
 import Picture from "../models/Picture"
-import "../../styles/PictureTabBar.sass"
 const classNames = require("classnames")
 
 const PictureTab = observer((props: {picture: Picture, current: boolean, onClick: () => void, onClose: () => void}) => {

@@ -1,0 +1,14 @@
+.Palette {
+  margin: 12px 0;
+  height: 50px;
+  overflow-y: scroll;
+  border-radius: 2px;
+  border: 1px solid #dddddd;
+}
+.Palette-row {
+  display: flex;
+}
+.Palette-button {
+  width: 12px;
+  height: 12px;
+}
