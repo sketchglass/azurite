@@ -28,18 +28,22 @@ module.exports = {
         loader: "ts-loader",
       },
       {
-        test: /\.(scss|sass)$/,
-        loader: "style-loader!css-loader!sass-loader"
-      },
-      {
         test: /\.css$/,
-        loader: "style-loader!css-loader"
+        loader: 'style-loader!css-loader?importLoaders=1!postcss-loader'
       },
       {
         test: /\.(jpg|png|woff|woff2|eot|ttf|svg)/,
         loader: 'url-loader?limit=10000'
       }
     ],
+  },
+  postcss: function(webpack) {
+    return [
+      require('postcss-import')({
+        addDependencyTo: webpack
+      }),
+      require('postcss-cssnext'),
+    ];
   },
   devtool: "inline-source-map",
 }

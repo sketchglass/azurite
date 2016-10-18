@@ -21,7 +21,7 @@ import {AppState} from "../models/AppState"
 import {remote} from "electron"
 const {Menu, app} = remote
 import "./MenuBar"
-import "../../styles/main.sass"
+import "../../styles/main.css"
 
 function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool: Tool) => void, onContextMenu: (tool: Tool, e: React.MouseEvent<Element>) => void}) {
   return (
