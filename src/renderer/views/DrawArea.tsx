@@ -125,8 +125,9 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
 
   render() {
+    const style = {visibility: this.props.picture ? "visible" : "hidden"}
     return (
-      <div ref="root" className="DrawArea" />
+      <div ref="root" className="DrawArea" style={style} />
     )
   }
 
