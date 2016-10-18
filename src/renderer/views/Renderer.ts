@@ -65,7 +65,6 @@ class Renderer {
           })
         } else {
           this.model.uniforms = {}
-          this.render()
         }
       }),
       reaction(() => this.size, size => {
