@@ -1,5 +1,4 @@
 import React = require("react")
-import "../../../styles/components/RangeSlider.sass"
 
 export interface BackgroundProps {
   onPointerUp: (e: PointerEvent) => void

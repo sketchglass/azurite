@@ -3,7 +3,6 @@ import { Color } from "paintgl"
 import { HSVColor } from "../../../lib/Color"
 import RangeSlider from "./RangeSlider"
 import {BackgroundProps} from "./RangeSlider"
-import "../../../styles/components/RGBRangeSliders.sass"
 
 interface RGBRangeSliderProps extends BackgroundProps {
   color: Color

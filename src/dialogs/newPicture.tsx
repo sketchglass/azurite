@@ -2,7 +2,6 @@ import React = require("react")
 import ReactDOM = require("react-dom")
 import {MAX_PICTURE_SIZE} from "../common/constants"
 import {remote, ipcRenderer} from "electron"
-import "./newPicture.sass"
 
 type SizeUnits = "px" | "mm"
 

@@ -1,5 +1,4 @@
 import * as React from "react"
-import "../../../styles/components/DraggablePanel.sass"
 
 interface DraggablePanelProps {
   label: string

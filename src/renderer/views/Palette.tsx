@@ -1,6 +1,5 @@
 import React = require("react")
 import {HSVColor} from "../../lib/Color"
-import "../../styles/Palette.sass"
 
 interface PaletteProps {
   palette: HSVColor[]
