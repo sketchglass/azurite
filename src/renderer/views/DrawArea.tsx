@@ -31,7 +31,8 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   constructor(props: DrawAreaProps) {
     super(props)
-    this.renderer = new Renderer(props.picture)
+    this.renderer = new Renderer()
+    this.renderer.picture = props.picture
     this.tool = props.tool
     autorun(() => this.updateCursor())
     autorun(() => this.updateCursorGeometry())
