@@ -6,10 +6,15 @@ import "../../styles/PictureTabBar.sass"
 const classNames = require("classnames")
 
 const PictureTab = observer((props: {picture: Picture, current: boolean, onClick: () => void, onClose: () => void}) => {
+  const onCloseClick = (e: React.MouseEvent<HTMLSpanElement>) => {
+    e.stopPropagation()
+    props.onClose()
+  }
+
   return (
     <div className={classNames("PictureTab", {"PictureTab-current": props.current})} onClick={props.onClick}>
       <span className="PictureTab_title">{props.picture.fileName}</span>
-      <span className="PictureTab_close" onClick={props.onClose}>x</span>
+      <span className="PictureTab_close" onClick={onCloseClick}>x</span>
     </div>
   )
 })
