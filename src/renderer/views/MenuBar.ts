@@ -24,7 +24,9 @@ class MenuBar {
     const dialog = new Dialog<PictureParams>("newPicture")
     const params = await dialog.open()
     if (params) {
-      AppState.instance.pictures.push(new Picture(params))
+      const appState = AppState.instance
+      appState.pictures.push(new Picture(params))
+      appState.currentPictureIndex = appState.pictures.length - 1
     }
   }
 
