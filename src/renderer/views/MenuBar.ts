@@ -9,6 +9,7 @@ import PictureParams from "../models/PictureParams"
 import PictureExport from "../models/PictureExport"
 import {isTextInput} from "./util"
 import {Dialog} from "./Dialog"
+import {PictureSave} from "../models/PictureSave"
 
 class MenuBar {
   constructor() {
@@ -26,6 +27,27 @@ class MenuBar {
     if (params) {
       const appState = AppState.instance
       appState.pictures.push(new Picture(params))
+      appState.currentPictureIndex = appState.pictures.length - 1
+    }
+  }
+
+  async save() {
+    if (this.currentPicture) {
+      await new PictureSave(this.currentPicture).save()
+    }
+  }
+
+  async saveAs() {
+    if (this.currentPicture) {
+      await new PictureSave(this.currentPicture).saveAs()
+    }
+  }
+
+  async open() {
+    const appState = AppState.instance
+    const picture = await PictureSave.open()
+    if (picture) {
+      appState.pictures.push(picture)
       appState.currentPictureIndex = appState.pictures.length - 1
     }
   }
@@ -73,7 +95,22 @@ class MenuBar {
           click: () => this.newPicture(),
         },
         {
+          label: "Open...",
+          accelerator: "CmdOrCtrl+O",
+          click: () => this.open(),
+        },
+        {
           type: "separator",
+        },
+        {
+          label: "Save",
+          accelerator: "CmdOrCtrl+S",
+          click: () => this.save(),
+        },
+        {
+          label: "Save As...",
+          accelerator: "CmdOrCtrl+Shift+S",
+          click: () => this.saveAs(),
         },
         {
           label: "Export",

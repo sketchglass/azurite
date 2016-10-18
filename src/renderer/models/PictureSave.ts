@@ -10,7 +10,7 @@ const fileFilter = {
   extensions: ["azurite"]
 }
 
-export default
+export
 class PictureSave {
 
   constructor(public picture: Picture) {
