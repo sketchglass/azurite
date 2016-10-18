@@ -39,4 +39,12 @@ class Picture {
   @computed get currentLayer() {
     return this.layers[this.currentLayerIndex]
   }
+
+  dispose() {
+    this.thumbnailGenerator.dispose()
+    this.layerBlender.dispose()
+    for (const layer of this.layers) {
+      layer.dispose()
+    }
+  }
 }

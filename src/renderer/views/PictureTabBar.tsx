@@ -5,10 +5,11 @@ import Picture from "../models/Picture"
 import "../../styles/PictureTabBar.sass"
 const classNames = require("classnames")
 
-const PictureTab = observer((props: {picture: Picture, current: boolean, onClick: () => void}) => {
+const PictureTab = observer((props: {picture: Picture, current: boolean, onClick: () => void, onClose: () => void}) => {
   return (
     <div className={classNames("PictureTab", {"PictureTab-current": props.current})} onClick={props.onClick}>
-      {props.picture.fileName}
+      <span className="PictureTab_title">{props.picture.fileName}</span>
+      <span className="PictureTab_close" onClick={props.onClose}>x</span>
     </div>
   )
 })
@@ -22,8 +23,15 @@ const PictureTabBar = observer(() => {
       {
         pictures.map((p, i) => {
           const onClick = () => appState.currentPictureIndex = i
+          const onClose = () => {
+            const [picture] = appState.pictures.splice(i, 1)
+            picture.dispose()
+            if (appState.pictures.length <= appState.currentPictureIndex) {
+              appState.currentPictureIndex = appState.pictures.length - 1
+            }
+          }
           const current = i == currentPictureIndex
-          return <PictureTab key={i} picture={p} current={current} onClick={onClick}/>
+          return <PictureTab key={i} picture={p} current={current} onClick={onClick} onClose={onClose}/>
         })
       }
     </div>

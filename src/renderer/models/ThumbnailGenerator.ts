@@ -37,4 +37,8 @@ class ThumbnailGenerator {
     this.thumbnailContext.drawImage(this.textureToCanvas.canvas, 0, 0, this.thumbnail.width, this.thumbnail.height)
     return this.thumbnail.toDataURL()
   }
+
+  dispose() {
+    this.textureToCanvas.dispose()
+  }
 }

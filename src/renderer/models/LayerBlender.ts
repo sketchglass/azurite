@@ -40,4 +40,9 @@ class LayerBlender {
       }
     }
   }
+
+  dispose() {
+    this.drawTarget.dispose()
+    this.blendedTexture.dispose()
+  }
 }
