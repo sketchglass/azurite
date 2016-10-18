@@ -55,6 +55,7 @@ class Renderer {
       reaction(() => this.picture, picture => {
         if (this.updatedSubscription) {
           this.updatedSubscription.unsubscribe()
+          this.updatedSubscription = undefined
         }
         if (picture) {
           this.shape.rect = new Rect(new Vec2(), picture.size)
