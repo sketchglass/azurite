@@ -69,42 +69,38 @@ class LayerList extends React.Component<LayerListProps, {}> {
     }
     ev.preventDefault()
     const {picture} = this.props
-    if (!picture) {
-      return
+    if (picture) {
+      const from = parseInt(data)
+      const {y} = mouseOffsetPos(ev, this.refs["scroll"] as HTMLElement)
+      let to = Math.min(Math.floor((y + CELL_HEIGHT / 2) / CELL_HEIGHT), picture.layers.length)
+      if (from < to) {
+        to -= 1
+      }
+      const command = new MoveLayerCommand(picture, from, to)
+      picture.undoStack.redoAndPush(command)
     }
-    const from = parseInt(data)
-    const {y} = mouseOffsetPos(ev, this.refs["scroll"] as HTMLElement)
-    let to = Math.min(Math.floor((y + CELL_HEIGHT / 2) / CELL_HEIGHT), picture.layers.length)
-    if (from < to) {
-      to -= 1
-    }
-    const command = new MoveLayerCommand(picture, from, to)
-    picture.undoStack.redoAndPush(command)
   }
 
   @action selectLayer(i: number) {
     const {picture} = this.props
-    if (!picture) {
-      return
+    if (picture) {
+      picture.currentLayerIndex = i
     }
-    picture.currentLayerIndex = i
   }
 
   addLayer() {
     const {picture} = this.props
-    if (!picture) {
-      return
+    if (picture) {
+      picture.undoStack.redoAndPush(new AddLayerCommand(picture, picture.currentLayerIndex))
     }
-    picture.undoStack.redoAndPush(new AddLayerCommand(picture, picture.currentLayerIndex))
   }
 
   removeLayer() {
     const {picture} = this.props
-    if (!picture) {
-      return
-    }
-    if (picture.layers.length > 1) {
-      picture.undoStack.redoAndPush(new RemoveLayerCommand(picture, picture.currentLayerIndex))
+    if (picture) {
+      if (picture.layers.length > 1) {
+        picture.undoStack.redoAndPush(new RemoveLayerCommand(picture, picture.currentLayerIndex))
+      }
     }
   }
 }

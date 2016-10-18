@@ -16,7 +16,7 @@ class AppState {
   @computed get currentPicture(): Picture|undefined {
     const i = this.currentPictureIndex
     if (i < this.pictures.length) {
-      return this.pictures[this.currentPictureIndex]
+      return this.pictures[i]
     }
   }
 
