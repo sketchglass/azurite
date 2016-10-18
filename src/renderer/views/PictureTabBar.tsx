@@ -5,9 +5,9 @@ import Picture from "../models/Picture"
 import "../../styles/PictureTabBar.sass"
 const classNames = require("classnames")
 
-const PictureTab = observer((props: {picture: Picture, current: boolean}) => {
+const PictureTab = observer((props: {picture: Picture, current: boolean, onClick: () => void}) => {
   return (
-    <div className={classNames("PictureTab", {"PictureTab-current": props.current})}>
+    <div className={classNames("PictureTab", {"PictureTab-current": props.current})} onClick={props.onClick}>
       {props.picture.fileName}
     </div>
   )
@@ -19,7 +19,13 @@ const PictureTabBar = observer(() => {
   const {pictures, currentPictureIndex} = appState
   return (
     <div className="PictureTabBar">
-      {pictures.map((p, i) => <PictureTab key={i} picture={p} current={i == currentPictureIndex}/>)}
+      {
+        pictures.map((p, i) => {
+          const onClick = () => appState.currentPictureIndex = i
+          const current = i == currentPictureIndex
+          return <PictureTab key={i} picture={p} current={current} onClick={onClick}/>
+        })
+      }
     </div>
   )
 })
