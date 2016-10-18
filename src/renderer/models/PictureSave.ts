@@ -17,11 +17,11 @@ class PictureSave {
   }
 
   async save() {
-    if (!this.picture.edited) {
-      return
-    }
-    if (!this.picture.filePath) {
-      await this.saveAs()
+    if (this.picture.filePath) {
+      if (!this.picture.edited) {
+        return
+      }
+      await this.saveToPath(this.picture.filePath)
     } else {
       await this.saveAs()
     }
