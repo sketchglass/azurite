@@ -1,15 +1,13 @@
 import React = require("react")
 import {action} from "mobx"
 import {observer} from "mobx-react"
-import Tool from "../models/Tool"
-import BaseBrushTool from "../models/BaseBrushTool"
-import BrushTool from "../models/BrushTool"
-import WatercolorTool from "../models/WatercolorTool"
-import BrushSettings from "./BrushSettings"
-import WatercolorSettings from "./WatercolorSettings"
+import Tool from "../tools/Tool"
+import BaseBrushTool from "../tools/BaseBrushTool"
+import BrushTool from "../tools/BrushTool"
+import WatercolorTool from "../tools/WatercolorTool"
 import DrawArea from "./DrawArea"
 import LayerList from "./LayerList"
-import ColorPicker from "./ColorPicker"
+import ColorPicker from "./components/ColorPicker"
 import Palette from "./Palette"
 import Navigator from "./Navigator"
 import RGBRangeSliders from "./components/RGBRangeSliders"
@@ -17,7 +15,7 @@ import {DraggablePanel, DraggablePanelContainer} from "./components/DraggablePan
 import {PictureTabBar} from "./PictureTabBar"
 import {HSVColor} from "../../lib/Color"
 import NavigationKeyBinding from "./NavigationKeyBinding"
-import {AppState} from "../models/AppState"
+import {AppViewModel} from "../viewmodels/AppViewModel"
 import {remote} from "electron"
 const {Menu, app} = remote
 import "./MenuBar"
@@ -51,37 +49,37 @@ function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool
 class App extends React.Component<{}, {}> {
   constructor() {
     super()
-    const appState = AppState.instance
+    const appVM = AppViewModel.instance
 
     new NavigationKeyBinding(klass => {
       if (klass) {
-        for (const tool of appState.tools) {
+        for (const tool of appVM.tools) {
           if (tool instanceof klass) {
-            appState.overrideTool = tool
+            appVM.overrideTool = tool
           }
         }
       } else {
-        appState.overrideTool = undefined
+        appVM.overrideTool = undefined
       }
     })
   }
   render() {
-    const appState = AppState.instance
-    const {tools, currentTool, overrideTool, color, paletteIndex, palette} = appState
-    const picture = appState.currentPicture
+    const appVM = AppViewModel.instance
+    const {tools, currentTool, overrideTool, color, paletteIndex, palette} = appVM
+    const picture = appVM.currentPicture
     const onToolChange = (tool: Tool) => {
-      appState.currentTool = tool
+      appVM.currentTool = tool
     }
     const onToolContextMenu = action((selectedTool: Tool, e: React.MouseEvent<Element>) => {
       e.preventDefault()
       const removeTool = action(() => {
-        const index = appState.tools.indexOf(selectedTool)
-        appState.tools.splice(index, 1)
+        const index = appVM.tools.indexOf(selectedTool)
+        appVM.tools.splice(index, 1)
       })
       const appendTool = action((item: Tool) => {
         return () => {
-          const index = appState.tools.indexOf(selectedTool) + 1
-          appState.tools.splice(index, 0, item)
+          const index = appVM.tools.indexOf(selectedTool) + 1
+          appVM.tools.splice(index, 0, item)
         }
       })
       const menuTemplate = [
@@ -95,15 +93,15 @@ class App extends React.Component<{}, {}> {
       menu.popup(remote.getCurrentWindow())
     })
     const onPaletteChange = action((e: React.MouseEvent<Element>, index: number) => {
-      appState.paletteIndex = index
+      appVM.paletteIndex = index
       if(e.shiftKey) {
-        appState.palette[index] = appState.color
+        appVM.palette[index] = appVM.color
       } else {
-        appState.color = appState.palette[index]
+        appVM.color = appVM.palette[index]
       }
     })
     const onColorChange = action((value: HSVColor) => {
-      appState.color = value
+      appVM.color = value
     })
     return (
       <div className="App">

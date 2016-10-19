@@ -1,6 +1,6 @@
 import {Vec2, Transform} from "paintvec"
 import Tool from './Tool'
-import Waypoint from "./Waypoint"
+import Waypoint from "../models/Waypoint"
 
 export default
 class PanTool extends Tool {

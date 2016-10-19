@@ -1,12 +1,12 @@
 import {observable} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Model, Shader, RectShape, Texture, TextureDrawTarget} from "paintgl"
-import Waypoint from "./Waypoint"
+import Waypoint from "../models/Waypoint"
 import BaseBrushTool from "./BaseBrushTool"
 import {context} from "../GLContext"
-import TiledTexture from "./TiledTexture"
+import TiledTexture from "../models/TiledTexture"
 import WatercolorSettings from "../views/WatercolorSettings"
-import {AppState} from "./AppState"
+import {AppViewModel} from "../viewmodels/AppViewModel"
 import React = require("react")
 
 enum ShapeClipModes {
@@ -145,7 +145,7 @@ class WatercolorTool extends BaseBrushTool {
       uSampleSize: this.sampleSize,
       uBlending: this.blending,
       uThickness: this.thickness,
-      uColor: AppState.instance.color.toRgb(),
+      uColor: AppViewModel.instance.color.toRgb(),
       uOpacity: this.opacity,
     }
 

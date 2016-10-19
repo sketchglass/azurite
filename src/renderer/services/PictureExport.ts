@@ -1,6 +1,6 @@
 import {Vec2} from "paintvec"
-import Picture from "./Picture"
-import TextureToCanvas from "./TextureToCanvas"
+import Picture from "../models/Picture"
+import TextureToCanvas from "../models/TextureToCanvas"
 import {remote} from "electron"
 const {dialog} = remote
 import * as path from "path"
