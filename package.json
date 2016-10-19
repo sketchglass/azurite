@@ -6,7 +6,7 @@
   "scripts": {
     "build": "webpack",
     "watch": "webpack --watch",
-    "app": "electron . NODE_ENV=development",
+    "app": "cross-env NODE_ENV=development electron .",
     "start": "npm-run-all build --parallel watch app",
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "electron-rebuild -e node_modules/electron -w receive-tablet-event",
@@ -28,6 +28,7 @@
     "@types/node": "^6.0.41",
     "@types/react": "^0.14.37",
     "@types/react-dom": "^0.14.17",
+    "cross-env": "^3.1.3",
     "css-loader": "^0.25.0",
     "electron": "^1.4.1",
     "electron-packager": "^8.1.0",
