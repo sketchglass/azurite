@@ -9,7 +9,7 @@ import RotateTool from "../tools/RotateTool"
 import {HSVColor} from "../../lib/Color"
 
 export
-class AppState {
+class AppViewModel {
   readonly pictures = observable<Picture>([])
   @observable currentPictureIndex = 0
 
@@ -30,10 +30,10 @@ class AppState {
 
   static get instance() {
     if (!_instance) {
-      _instance = new AppState()
+      _instance = new AppViewModel()
     }
     return _instance
   }
 }
 
-let _instance: AppState|undefined
+let _instance: AppViewModel|undefined

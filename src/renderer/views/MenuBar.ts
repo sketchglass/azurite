@@ -3,7 +3,7 @@ const {Menu, app} = remote
 type MenuItem = Electron.MenuItem
 type BrowserWindow = Electron.BrowserWindow
 type MenuItemOptions = Electron.MenuItemOptions
-import {AppState} from "../viewmodels/AppState"
+import {AppViewModel} from "../viewmodels/AppViewModel"
 import Picture from "../models/Picture"
 import PictureParams from "../models/PictureParams"
 import PictureExport from "../services/PictureExport"
@@ -18,16 +18,16 @@ class MenuBar {
   }
 
   get currentPicture() {
-    return AppState.instance.currentPicture
+    return AppViewModel.instance.currentPicture
   }
 
   async newPicture() {
     const dialog = new Dialog<PictureParams>("newPicture")
     const params = await dialog.open()
     if (params) {
-      const appState = AppState.instance
-      appState.pictures.push(new Picture(params))
-      appState.currentPictureIndex = appState.pictures.length - 1
+      const appVM = AppViewModel.instance
+      appVM.pictures.push(new Picture(params))
+      appVM.currentPictureIndex = appVM.pictures.length - 1
     }
   }
 
@@ -44,11 +44,11 @@ class MenuBar {
   }
 
   async open() {
-    const appState = AppState.instance
+    const appVM = AppViewModel.instance
     const picture = await PictureSave.open()
     if (picture) {
-      appState.pictures.push(picture)
-      appState.currentPictureIndex = appState.pictures.length - 1
+      appVM.pictures.push(picture)
+      appVM.currentPictureIndex = appVM.pictures.length - 1
     }
   }
 

@@ -6,7 +6,7 @@ import BaseBrushTool from "./BaseBrushTool";
 import {context} from "../GLContext"
 import BrushSettings from "../views/BrushSettings"
 import TiledTexture from "../models/TiledTexture"
-import {AppState} from "../viewmodels/AppState"
+import {AppViewModel} from "../viewmodels/AppViewModel"
 import React = require("react")
 
 class BrushShader extends Shader {
@@ -75,7 +75,7 @@ class BrushTool extends BaseBrushTool {
   start(waypoint: Waypoint) {
     this.model.uniforms = {
       uBrushSize: this.width,
-      uColor: AppState.instance.color.toRgb(),
+      uColor: AppViewModel.instance.color.toRgb(),
       uOpacity: this.opacity,
       uMinWidthRatio: this.minWidthRatio,
       uSpacingRatio: this.spacingRatio,
