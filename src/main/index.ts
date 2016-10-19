@@ -1,4 +1,5 @@
 import Electron = require('electron')
+import * as fs from "fs"
 type BrowserWindow = Electron.BrowserWindow
 const {app, BrowserWindow} = Electron
 import {TabletEventReceiver} from "receive-tablet-event"
@@ -13,6 +14,9 @@ function openWindow() {
 
   win.loadURL(`file://${__dirname}/../index.html`)
   if (process.env.NODE_ENV == "development") {
+    fs.watch(`${__dirname}/../../dist`, { recursive: true }, (eventType, filename) => {
+      win.webContents.send("notify-update", filename)
+    })
     win.webContents.openDevTools()
   }
 
