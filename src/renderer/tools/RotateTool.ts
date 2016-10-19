@@ -1,6 +1,6 @@
 import {Vec2} from "paintvec"
 import Tool from './Tool'
-import Waypoint from "./Waypoint"
+import Waypoint from "../models/Waypoint"
 
 function modRotation(rotation: number) {
   while (Math.PI < rotation) {

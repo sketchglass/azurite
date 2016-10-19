@@ -1,11 +1,11 @@
 import {observable, computed} from "mobx"
-import Picture from "./Picture"
-import Tool from "./Tool"
-import BrushTool from "./BrushTool"
-import WatercolorTool from "./WatercolorTool"
-import PanTool from "./PanTool"
-import {ZoomTool} from "./ZoomTool"
-import RotateTool from "./RotateTool"
+import Picture from "../models/Picture"
+import Tool from "../tools/Tool"
+import BrushTool from "../tools/BrushTool"
+import WatercolorTool from "../tools/WatercolorTool"
+import PanTool from "../tools/PanTool"
+import {ZoomTool} from "../tools/ZoomTool"
+import RotateTool from "../tools/RotateTool"
 import {HSVColor} from "../../lib/Color"
 
 export

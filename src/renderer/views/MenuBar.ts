@@ -3,13 +3,13 @@ const {Menu, app} = remote
 type MenuItem = Electron.MenuItem
 type BrowserWindow = Electron.BrowserWindow
 type MenuItemOptions = Electron.MenuItemOptions
-import {AppState} from "../models/AppState"
+import {AppState} from "../viewmodels/AppState"
 import Picture from "../models/Picture"
 import PictureParams from "../models/PictureParams"
-import PictureExport from "../models/PictureExport"
+import PictureExport from "../services/PictureExport"
 import {isTextInput} from "./util"
 import {Dialog} from "./Dialog"
-import {PictureSave} from "../models/PictureSave"
+import {PictureSave} from "../services/PictureSave"
 
 class MenuBar {
   constructor() {

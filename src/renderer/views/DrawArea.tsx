@@ -3,7 +3,7 @@ import {Subscription} from "rxjs/Subscription"
 import React = require("react")
 import Picture from "../models/Picture"
 import {Vec2, Transform} from "paintvec"
-import Tool from "../models/Tool"
+import Tool from "../tools/Tool"
 import Waypoint from "../models/Waypoint"
 import {TabletEvent} from "receive-tablet-event"
 import {canvas} from "../GLContext"

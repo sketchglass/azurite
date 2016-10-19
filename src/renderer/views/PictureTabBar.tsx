@@ -1,6 +1,6 @@
 import * as React from "react"
 import {observer} from "mobx-react"
-import {AppState} from "../models/AppState"
+import {AppState} from "../viewmodels/AppState"
 import Picture from "../models/Picture"
 const classNames = require("classnames")
 

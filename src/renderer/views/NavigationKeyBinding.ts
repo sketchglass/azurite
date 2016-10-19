@@ -1,6 +1,6 @@
-import PanTool from "../models/PanTool"
-import {ZoomTool} from "../models/ZoomTool"
-import RotateTool from "../models/RotateTool"
+import PanTool from "../tools/PanTool"
+import {ZoomTool} from "../tools/ZoomTool"
+import RotateTool from "../tools/RotateTool"
 import {isTextInput} from "./util"
 
 const keys = [" ", "Control", "Meta", "Alt", "Shift"]
