@@ -1,12 +1,12 @@
 import {observable} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Model, TextureDrawTarget, Shape, Shader}  from "paintgl"
-import Waypoint from "./Waypoint"
+import Waypoint from "../models/Waypoint"
 import BaseBrushTool from "./BaseBrushTool";
 import {context} from "../GLContext"
 import BrushSettings from "../views/BrushSettings"
-import TiledTexture from "./TiledTexture"
-import {AppState} from "./AppState"
+import TiledTexture from "../models/TiledTexture"
+import {AppViewModel} from "../viewmodels/AppViewModel"
 import React = require("react")
 
 class BrushShader extends Shader {
@@ -75,7 +75,7 @@ class BrushTool extends BaseBrushTool {
   start(waypoint: Waypoint) {
     this.model.uniforms = {
       uBrushSize: this.width,
-      uColor: AppState.instance.color.toRgb(),
+      uColor: AppViewModel.instance.color.toRgb(),
       uOpacity: this.opacity,
       uMinWidthRatio: this.minWidthRatio,
       uSpacingRatio: this.spacingRatio,

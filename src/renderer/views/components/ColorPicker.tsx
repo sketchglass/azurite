@@ -1,7 +1,7 @@
 import React = require("react")
 import {Vec2} from "paintvec"
-import {HSVColor} from "../../lib/Color"
-import {mouseOffsetPos} from "./util"
+import {HSVColor} from "../../../lib/Color"
+import {mouseOffsetPos} from "../util"
 
 const wheelWidth = 16
 const squareSize = 96

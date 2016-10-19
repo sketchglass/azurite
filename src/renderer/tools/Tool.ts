@@ -1,7 +1,7 @@
 import {observable} from "mobx"
-import Picture from "./Picture"
+import Picture from "../models/Picture"
 import Renderer from "../views/Renderer"
-import Waypoint from "./Waypoint"
+import Waypoint from "../models/Waypoint"
 import {Vec2} from "paintvec"
 import React = require("react")
 

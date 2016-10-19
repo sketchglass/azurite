@@ -1,7 +1,7 @@
 import {remote} from "electron"
 import * as msgpack from "msgpack-lite"
 import * as fs from "fs"
-import Picture from "./Picture"
+import Picture from "../models/Picture"
 
 const {dialog} = remote
 

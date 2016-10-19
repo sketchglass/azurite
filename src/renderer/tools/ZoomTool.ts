@@ -1,6 +1,6 @@
 import {Vec2} from "paintvec"
 import Tool from './Tool'
-import Waypoint from "./Waypoint"
+import Waypoint from "../models/Waypoint"
 
 const SCALE_STEPS = [
   0.25,

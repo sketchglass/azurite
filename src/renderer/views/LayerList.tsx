@@ -3,7 +3,7 @@ import {observer} from "mobx-react"
 import React = require("react")
 import Picture from "../models/Picture"
 import Layer from "../models/Layer"
-import ClickToEdit from "./ClickToEdit"
+import ClickToEdit from "./components/ClickToEdit"
 const classNames = require("classnames")
 import {mouseOffsetPos} from "./util"
 
