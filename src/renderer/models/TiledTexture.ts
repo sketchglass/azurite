@@ -1,3 +1,4 @@
+import * as zlib from "zlib"
 import {Vec2, Rect} from "paintvec"
 import {Texture, PixelType, TextureDrawTarget, Model, TextureShader, RectShape} from "paintgl"
 import {context} from "../GLContext"
@@ -43,7 +44,7 @@ function tileToData(tile: Texture) {
 export
 interface TiledTextureData {
   tileSize: number
-  tiles: [[number, number], Uint16Array][]
+  tiles: [[number, number], Buffer][]
 }
 
 export default
@@ -100,7 +101,10 @@ class TiledTexture {
   toData(): TiledTextureData {
     const tiles = Array.from(this.tiles).map(([key, tile]) => {
       const {x, y} = stringToKey(key)
-      const elem: [[number, number], Uint16Array] = [[x, y], tileToData(tile)]
+      const data = tileToData(tile)
+      const buffer = Buffer.from(data.buffer)
+      const compressed = zlib.deflateSync(buffer)
+      const elem: [[number, number], Buffer] = [[x, y], compressed]
       return elem
     })
     return {
@@ -113,7 +117,9 @@ class TiledTexture {
     if (data.tileSize != tileSize) {
       throw new Error("tile size incompatible")
     }
-    const tiles = data.tiles.map(([[x, y], data]) => {
+    const tiles = data.tiles.map(([[x, y], compressed]) => {
+      const buffer = zlib.inflateSync(compressed)
+      const data = new Uint16Array(new Uint8Array(buffer).buffer)
       const tile = newTile(data)
       const key = keyToString(new Vec2(x, y))
       const kv: [string, Texture] = [key, tile]
