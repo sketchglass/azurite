@@ -8,13 +8,14 @@
     <div id="app"></div>
   </body>
   <script>
-    require("./assets/renderer.js");
-    // for auto-reloading
-    if(process.env.NODE_ENV === "development") {
-      let {ipcRenderer} = require('electron');
-      ipcRenderer.on('notify-update', (event, arg) => {
-        location.reload();
-      });
-    }
+    (() => {
+      require("./assets/renderer.js")
+      if(process.env.NODE_ENV==="development") {
+        const fs = require("fs")
+        fs.watch(__dirname, { recursive: true }, (eventType, filename) => {
+          location.reload()
+        })
+      }
+    })()
   </script>
 </html>
