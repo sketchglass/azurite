@@ -3,6 +3,7 @@ type BrowserWindow = Electron.BrowserWindow
 const {app, BrowserWindow} = Electron
 import {TabletEventReceiver} from "receive-tablet-event"
 import * as IPCChannels from "../common/IPCChannels"
+import {contentBase} from "../common/contentBase"
 
 app.commandLine.appendSwitch("enable-experimental-web-platform-features")
 
@@ -11,7 +12,7 @@ let window: BrowserWindow|undefined
 function openWindow() {
   const win = window = new BrowserWindow({width: 1200, height: 768})
 
-  win.loadURL(`file://${__dirname}/../index.html`)
+  win.loadURL(`${contentBase}/index.html`)
   if (process.env.NODE_ENV == "development") {
     win.webContents.openDevTools()
   }

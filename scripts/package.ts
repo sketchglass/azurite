@@ -34,7 +34,7 @@ function ignore(path: string) {
 }
 
 async function package() {
-  sh.exec("webpack")
+  sh.exec("npm run build")
 
   const options = {
     dir: ".",

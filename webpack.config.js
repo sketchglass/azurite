@@ -1,22 +1,17 @@
 module.exports = {
   entry: {
-    main: "./src/main/index.ts",
     renderer: "./src/renderer/index.tsx",
     "dialogs/newPicture": "./src/dialogs/newPicture.tsx",
   },
   output: {
     path: "./dist/assets",
+    publicPath: "/assets/",
     filename: '[name].js',
-    libraryTarget: "commonjs",
   },
-  target: "node",
+  target: "electron-renderer",
   node: {
     __filename: false,
     __dirname: false,
-  },
-  externals: {
-    electron: true,
-    "receive-tablet-event": true,
   },
   resolve: {
     extensions: ["", ".ts", ".tsx", ".js"],
@@ -46,4 +41,9 @@ module.exports = {
     ];
   },
   devtool: "inline-source-map",
+  devServer: {
+    contentBase: './dist',
+    port: 23000,
+    inline: true,
+  },
 }
