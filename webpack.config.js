@@ -4,7 +4,8 @@ module.exports = {
     "dialogs/newPicture": "./src/dialogs/newPicture.tsx",
   },
   output: {
-    path: "./dist",
+    path: "./dist/assets",
+    publicPath: "/assets/",
     filename: '[name].js',
     libraryTarget: "commonjs",
   },
