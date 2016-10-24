@@ -1,6 +1,5 @@
 module.exports = {
   entry: {
-    main: "./src/main/index.ts",
     renderer: "./src/renderer/index.tsx",
     "dialogs/newPicture": "./src/dialogs/newPicture.tsx",
   },

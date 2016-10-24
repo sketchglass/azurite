@@ -4,8 +4,12 @@
   "description": "Casual Painting App in Electron",
   "main": "dist/assets/main.js",
   "scripts": {
-    "build": "webpack",
+    "build:main": "webpack --config webpack.config.main.js",
+    "build:renderer": "webpack",
+    "build": "npm-run-all build:main build:renderer",
+    "watch:main": "webpack --watch --config webpack.config.main.js",
     "devserver": "webpack-dev-server",
+    "watch": "npm-run-all --parallel watch:main devserver",
     "app": "cross-env NODE_ENV=development electron .",
     "start": "npm-run-all build --parallel devserver app",
     "test": "echo \"Error: no test specified\" && exit 1",
