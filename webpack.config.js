@@ -7,15 +7,13 @@ module.exports = {
     path: "./dist/assets",
     publicPath: "/assets/",
     filename: '[name].js',
-    libraryTarget: "commonjs",
   },
-  target: "node",
+  target: "electron-renderer",
   node: {
     __filename: false,
     __dirname: false,
   },
   externals: {
-    electron: true,
     "receive-tablet-event": true,
   },
   resolve: {
