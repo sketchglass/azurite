@@ -8,7 +8,7 @@
     "build:renderer": "webpack",
     "build": "npm-run-all build:main build:renderer",
     "watch:main": "webpack --watch --config webpack.config.main.js",
-    "devserver": "webpack-dev-server",
+    "devserver": "webpack-dev-server --hot",
     "watch": "npm-run-all --parallel watch:main devserver",
     "app": "cross-env NODE_ENV=development electron .",
     "start": "npm-run-all build --parallel devserver app",
