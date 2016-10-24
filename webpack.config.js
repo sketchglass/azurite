@@ -4,7 +4,7 @@ module.exports = {
     "dialogs/newPicture": "./src/dialogs/newPicture.tsx",
   },
   output: {
-    path: "./dist/assets",
+    path: "./dist",
     filename: '[name].js',
     libraryTarget: "commonjs",
   },
@@ -47,6 +47,7 @@ module.exports = {
   devtool: "inline-source-map",
   devServer: {
     contentBase: './dist',
-    port: 23000
+    port: 23000,
+    inline: true,
   },
 }
