@@ -11,9 +11,11 @@ let window: BrowserWindow|undefined
 function openWindow() {
   const win = window = new BrowserWindow({width: 1200, height: 768})
 
-  win.loadURL(`file://${__dirname}/../index.html`)
   if (process.env.NODE_ENV == "development") {
+    win.loadURL(`http://localhost:23000/index.html`)
     win.webContents.openDevTools()
+  } else {
+    win.loadURL(`file://${__dirname}/../index.html`)
   }
 
   const receiver = new TabletEventReceiver(win)

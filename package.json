@@ -5,9 +5,9 @@
   "main": "dist/assets/main.js",
   "scripts": {
     "build": "webpack",
-    "watch": "webpack --watch",
+    "devserver": "webpack-dev-server",
     "app": "cross-env NODE_ENV=development electron .",
-    "start": "npm-run-all build --parallel watch app",
+    "start": "npm-run-all build --parallel devserver app",
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "electron-rebuild -e node_modules/electron -w receive-tablet-event",
     "package": "ts-node scripts/package.ts"
