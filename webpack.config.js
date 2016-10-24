@@ -13,9 +13,6 @@ module.exports = {
     __filename: false,
     __dirname: false,
   },
-  externals: {
-    "receive-tablet-event": true,
-  },
   resolve: {
     extensions: ["", ".ts", ".tsx", ".js"],
   },
