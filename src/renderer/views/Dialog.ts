@@ -1,5 +1,6 @@
 import {remote} from "electron"
 const {BrowserWindow, ipcMain} = remote
+import {contentBase} from "../../common/contentBase"
 
 export
 class Dialog<TResult> {
@@ -9,7 +10,7 @@ class Dialog<TResult> {
   async open(): Promise<TResult|undefined> {
     const win = new BrowserWindow({width: 400, height: 200, show: false})
     win.setMenu(null as any)
-    win.loadURL(`file://${__dirname}/../dialogs/${this.name}.html`)
+    win.loadURL(`${contentBase}/dialogs/${this.name}.html`)
     let callback: any
     let closed = false
     const result = await new Promise<TResult|undefined>((resolve, reject) => {
