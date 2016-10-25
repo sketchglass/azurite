@@ -29,7 +29,7 @@ export default
 class ColorPicker extends React.Component<ColorPickerProps, {}> {
   canvas: HTMLCanvasElement
   context: CanvasRenderingContext2D
-  wheelGradient: ImageData
+  wheelGradient: HTMLCanvasElement
   squareGradient: ImageData
   draggingWheel = false
   draggingSquare = false
@@ -139,8 +139,10 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
   }
 
   createWheelGradient() {
-    const {context} = this
-    const image = context.createImageData(wheelSize, wheelSize)
+    const canvas = document.createElement("canvas")
+    canvas.width = canvas.height = wheelSize
+    const context = canvas.getContext("2d", {alpha: false})!
+    const image = new ImageData(wheelSize, wheelSize)
     const center = new Vec2(wheelSize / 2, wheelSize / 2)
 
     for (let y = 0; y < wheelSize; ++y) {
@@ -151,8 +153,18 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
         setPixel(image, x, y, color)
       }
     }
+    context.putImageData(image, 0, 0)
 
-    return image
+    context.globalCompositeOperation = "destination-in"
+    context.lineWidth = wheelWidth
+
+    const radius = wheelSize / 2
+
+    context.beginPath()
+    context.arc(radius, radius, radius - wheelWidth / 2, 0, 2 * Math.PI)
+    context.stroke()
+
+    return canvas
   }
 
   update() {
@@ -172,19 +184,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
 
   drawWheel() {
     const {context} = this
-
-    context.putImageData(this.wheelGradient, 0, 0)
-
-    context.globalCompositeOperation = "destination-in"
-    context.lineWidth = wheelWidth
-
-    const radius = wheelSize / 2
-
-    context.beginPath()
-    context.arc(radius, radius, radius - wheelWidth / 2, 0, 2 * Math.PI)
-    context.stroke()
-
-    context.globalCompositeOperation = "source-over"
+    context.drawImage(this.wheelGradient, 0, 0)
   }
 
   drawSVCursor() {
