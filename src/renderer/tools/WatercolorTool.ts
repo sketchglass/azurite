@@ -164,7 +164,11 @@ class WatercolorTool extends BaseBrushTool {
   }
 
   renderWaypoints(waypoints: Waypoint[], rect: Rect) {
-    const {tiledTexture} = this.picture.currentLayer
+    const {content} = this.picture.currentLayer
+    if (content.type != "image") {
+      return
+    }
+    const {tiledTexture} = content
 
     for (let i = 0; i < waypoints.length; ++i) {
       const waypoint = waypoints[i]

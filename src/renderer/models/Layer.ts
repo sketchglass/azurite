@@ -1,45 +1,43 @@
-import {observable, action} from "mobx"
-import {Vec2} from "paintvec"
-import {Texture} from "paintgl"
+import {observable} from "mobx"
 import Picture from "./Picture"
-import {context} from "../GLContext"
-import TiledTexture, {TiledTextureData} from "./TiledTexture"
+import {LayerContent, GroupLayerContent, ImageLayerContent, LayerContentData} from "./LayerContent"
 
 export
 interface LayerData {
   name: string
-  image: TiledTextureData
+  content: LayerContentData
 }
 
 export default
 class Layer {
-  @observable name = "Layer"
-  @observable thumbnail = ""
+  @observable name: string
 
-  constructor(public picture: Picture, public tiledTexture = new TiledTexture()) {
-    this.updateThumbnail()
-  }
-
-  @action updateThumbnail() {
-    this.thumbnail = this.picture.thumbnailGenerator.generate(this)
+  constructor(public picture: Picture, name: string, public readonly content: LayerContent) {
+    this.name = name
   }
 
   dispose() {
-    this.tiledTexture.dispose()
+    this.content.dispose()
   }
 
   toData(): LayerData {
     const {name} = this
-    const image = this.tiledTexture.toData()
-    return {
-      name,
-      image,
-    }
+    const content = this.content.toData()
+    return {name, content}
   }
 
-  static fromData(picture: Picture, data: LayerData) {
-    const layer = new Layer(picture, TiledTexture.fromData(data.image))
-    layer.name = data.name
+  static fromData(picture: Picture, data: LayerData): Layer {
+    let content: LayerContent
+    switch (data.content.type) {
+      default:
+      case "image":
+        content = ImageLayerContent.fromData(picture, data.content)
+        break
+      case "group":
+        content = GroupLayerContent.fromData(picture, data.content)
+        break
+    }
+    const layer = new Layer(picture, data.name, content)
     return layer
   }
 }

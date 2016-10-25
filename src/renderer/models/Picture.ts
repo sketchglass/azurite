@@ -3,6 +3,7 @@ import {observable, computed, reaction} from "mobx"
 import {Vec2, Rect} from "paintvec"
 import {Texture} from "paintgl"
 import Layer, {LayerData} from "./Layer"
+import {GroupLayerContent, ImageLayerContent} from "./LayerContent"
 import {Subject} from "rxjs/Subject"
 import ThumbnailGenerator from "./ThumbnailGenerator"
 import LayerBlender from "./LayerBlender"
@@ -21,7 +22,9 @@ class Picture {
   readonly size = new Vec2(this.params.width, this.params.height)
   @observable currentLayerIndex = 0
   readonly thumbnailGenerator = new ThumbnailGenerator(this.size)
-  readonly layers = observable([new Layer(this)])
+  readonly rootLayer = new Layer(this, "root", new GroupLayerContent([
+    new Layer(this, "Layer", new ImageLayerContent(this))
+  ]))
   readonly layerBlender = new LayerBlender(this)
   readonly undoStack = new UndoStack()
   readonly navigation = observable({
@@ -39,6 +42,9 @@ class Picture {
     } else {
       return "Untitled"
     }
+  }
+  @computed get layers() {
+    return (this.rootLayer.content as GroupLayerContent).children
   }
 
   constructor(public params: PictureParams) {

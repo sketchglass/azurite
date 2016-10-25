@@ -85,6 +85,12 @@ class BrushTool extends BaseBrushTool {
   }
 
   renderWaypoints(waypoints: Waypoint[], rect: Rect) {
+    const {content} = this.picture.currentLayer
+    if (content.type != "image") {
+      return
+    }
+    const {tiledTexture} = content
+
     const relIndices = [
       0, 1, 2,
       1, 2, 3
@@ -114,8 +120,6 @@ class BrushTool extends BaseBrushTool {
     this.shape.texCoords = texCoords
     this.shape.setVec2Attributes("aCenter", centers)
     this.shape.indices = indices
-
-    const {tiledTexture} = this.picture.currentLayer
 
     this.model.blendMode = this.eraser ? "dst-out" : "src-over"
 
