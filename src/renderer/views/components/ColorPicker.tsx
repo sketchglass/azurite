@@ -119,17 +119,19 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
 
   drawSquare() {
     const image = this.squareGradient
-    const center = new Vec2(squareSize / 2, squareSize / 2)
-    const temporaryColor = new HSVColor(0, 0, 0, 1)
+    const center = squareSize / 2
+    const color = new HSVColor(0, 0, 0, 1)
+    const pos = new Vec2()
     for (let y = 0; y < squareSize; ++y) {
       for (let x = 0; x < squareSize; ++x) {
-        const pos = new Vec2(x + 0.5, y + 0.5).sub(center)
+        pos.x = x + 0.5 - center
+        pos.y = y + 0.5 - center
         const {s, v} = this.posToSV(pos)
-        temporaryColor.h = this.props.color.h
-        temporaryColor.s = s
-        temporaryColor.v = v
-        const color = temporaryColor.toRgb()
-        setPixel(image, x, y, color)
+        color.h = this.props.color.h
+        color.s = s
+        color.v = v
+        const rgb = color.toRgb()
+        setPixel(image, x, y, rgb)
       }
     }
 
