@@ -4,6 +4,7 @@ import {Texture, TextureDrawTarget, Color} from "paintgl"
 import Waypoint from "../models/Waypoint"
 import Tool from "./Tool"
 import Layer from "../models/Layer"
+import {ImageLayerContent} from "../models/LayerContent"
 import TiledTexture from "../models/TiledTexture"
 import {context} from "../GLContext"
 import {copyTexture, copyNewTexture, readTextureFloat} from "../GLUtil"
@@ -100,7 +101,12 @@ abstract class BaseBrushTool extends Tool {
   }
 
   start(waypoint: Waypoint) {
-    const {tiledTexture} = this.picture.currentLayer
+    const {content} = this.picture.currentLayer
+    if (content.type != "image") {
+      return
+    }
+    const {tiledTexture} = content
+
     if (this.oldTiledTexture) {
       this.oldTiledTexture.dispose()
     }
@@ -119,7 +125,10 @@ abstract class BaseBrushTool extends Tool {
   @action end() {
     this.stabilizeEnd()
     this.pushUndoStack()
-    this.picture.currentLayer.updateThumbnail()
+    const {content} = this.picture.currentLayer
+    if (content.type == "image") {
+      content.updateThumbnail()
+    }
   }
 
   stabilizeMove(waypoint: Waypoint) {
@@ -213,7 +222,11 @@ abstract class BaseBrushTool extends Tool {
       return
     }
     this.editedRect = undefined
-    const {tiledTexture} = this.picture.currentLayer
+    const {content} = this.picture.currentLayer
+    if (content.type != "image") {
+      return
+    }
+    const {tiledTexture} = content
     // can't read directly from half float texture so read it to float texture first
     const oldTexture = new Texture(context, {size: rect.size, pixelType: "float"})
     const newTexture = new Texture(context, {size: rect.size, pixelType: "float"})
@@ -223,7 +236,7 @@ abstract class BaseBrushTool extends Tool {
     const newData = float32ArrayTo16(readTextureFloat(newTexture))
     oldTexture.dispose()
     newTexture.dispose()
-    const undoCommand = new BrushUndoCommand(this.picture.currentLayer, rect, oldData, newData)
+    const undoCommand = new BrushUndoCommand(content, rect, oldData, newData)
     this.picture.undoStack.push(undoCommand)
   }
 
@@ -248,7 +261,7 @@ abstract class BaseBrushTool extends Tool {
 }
 
 class BrushUndoCommand {
-  constructor(public layer: Layer, public rect: Rect, public oldData: Uint16Array, public newData: Uint16Array) {
+  constructor(public content: ImageLayerContent, public rect: Rect, public oldData: Uint16Array, public newData: Uint16Array) {
   }
 
   @action replace(data: Uint16Array) {
@@ -257,10 +270,10 @@ class BrushUndoCommand {
       pixelType: "half-float",
       data
     })
-    this.layer.tiledTexture.writeTexture(texture, this.rect.topLeft)
+    this.content.tiledTexture.writeTexture(texture, this.rect.topLeft)
     texture.dispose()
-    this.layer.picture.updated.next(this.rect)
-    this.layer.updateThumbnail()
+    this.content.picture.updated.next(this.rect)
+    this.content.updateThumbnail()
   }
 
   undo() {

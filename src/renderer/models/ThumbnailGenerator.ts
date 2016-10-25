@@ -1,6 +1,5 @@
 import {Vec2} from "paintvec"
 import TextureToCanvas from "./TextureToCanvas"
-import Layer from "./Layer"
 import TiledTexture from "./TiledTexture"
 
 function calcThumbnailSize(layerSize: Vec2, maxSize: Vec2) {
@@ -28,10 +27,10 @@ class ThumbnailGenerator {
     this.thumbnail.height = thumbSize.height
   }
 
-  generate(layer: Layer) {
+  generate(tiledTexture: TiledTexture) {
     this.textureToCanvas.clear()
-    for (const tileKey of layer.tiledTexture.keys()) {
-      this.textureToCanvas.loadTexture(layer.tiledTexture.get(tileKey), tileKey.mulScalar(TiledTexture.tileSize))
+    for (const tileKey of tiledTexture.keys()) {
+      this.textureToCanvas.loadTexture(tiledTexture.get(tileKey), tileKey.mulScalar(TiledTexture.tileSize))
     }
     this.textureToCanvas.updateCanvas()
     this.thumbnailContext.drawImage(this.textureToCanvas.canvas, 0, 0, this.thumbnail.width, this.thumbnail.height)
