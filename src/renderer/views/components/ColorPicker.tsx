@@ -30,7 +30,7 @@ export default
 class ColorPicker extends React.Component<ColorPickerProps, {}> {
   canvas: HTMLCanvasElement
   context: CanvasRenderingContext2D
-  wheelGradient: ImageData
+  wheelGradient: HTMLCanvasElement
   squareGradient: ImageData
   draggingWheel = false
   draggingSquare = false
@@ -120,17 +120,19 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
 
   drawSquare() {
     const image = this.squareGradient
-    const center = new Vec2(squareSize / 2, squareSize / 2)
-    const temporaryColor = new HSVColor(0, 0, 0, 1)
+    const center = squareSize / 2
+    const color = new HSVColor(0, 0, 0, 1)
+    const pos = new Vec2()
     for (let y = 0; y < squareSize; ++y) {
       for (let x = 0; x < squareSize; ++x) {
-        const pos = new Vec2(x + 0.5, y + 0.5).sub(center)
+        pos.x = x + 0.5 - center
+        pos.y = y + 0.5 - center
         const {s, v} = this.posToSV(pos)
-        temporaryColor.h = this.props.color.h
-        temporaryColor.s = s
-        temporaryColor.v = v
-        const color = temporaryColor.toRgb()
-        setPixel(image, x, y, color)
+        color.h = this.props.color.h
+        color.s = s
+        color.v = v
+        const rgb = color.toRgb()
+        setPixel(image, x, y, rgb)
       }
     }
 
@@ -138,8 +140,10 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
   }
 
   createWheelGradient() {
-    const {context} = this
-    const image = context.createImageData(wheelSize, wheelSize)
+    const canvas = document.createElement("canvas")
+    canvas.width = canvas.height = wheelSize
+    const context = canvas.getContext("2d", {alpha: false})!
+    const image = new ImageData(wheelSize, wheelSize)
     const center = new Vec2(wheelSize / 2, wheelSize / 2)
 
     for (let y = 0; y < wheelSize; ++y) {
@@ -150,8 +154,18 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
         setPixel(image, x, y, color)
       }
     }
+    context.putImageData(image, 0, 0)
 
-    return image
+    context.globalCompositeOperation = "destination-in"
+    context.lineWidth = wheelWidth
+
+    const radius = wheelSize / 2
+
+    context.beginPath()
+    context.arc(radius, radius, radius - wheelWidth / 2, 0, 2 * Math.PI)
+    context.stroke()
+
+    return canvas
   }
 
   update() {
@@ -171,19 +185,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
 
   drawWheel() {
     const {context} = this
-
-    context.putImageData(this.wheelGradient, 0, 0)
-
-    context.globalCompositeOperation = "destination-in"
-    context.lineWidth = wheelWidth
-
-    const radius = wheelSize / 2
-
-    context.beginPath()
-    context.arc(radius, radius, radius - wheelWidth / 2, 0, 2 * Math.PI)
-    context.stroke()
-
-    context.globalCompositeOperation = "source-over"
+    context.drawImage(this.wheelGradient, 0, 0)
   }
 
   drawSVCursor() {
@@ -219,10 +221,10 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
   }
 }
 
-function setPixel(image: ImageData, x: number, y: number, color: {r: number, g: number, b: number, a: number}) {
+function setPixel(image: ImageData, x: number, y: number, color: {r: number, g: number, b: number}) {
   const offset = (x + image.width * y) * 4
-  image.data[offset] = color.r * 255
-  image.data[offset + 1] = color.g * 255
-  image.data[offset + 2] = color.b * 255
-  image.data[offset + 3] = color.a * 255
+  image.data[offset] = Math.round(color.r * 255)
+  image.data[offset + 1] = Math.round(color.g * 255)
+  image.data[offset + 2] = Math.round(color.b * 255)
+  image.data[offset + 3] = 255
 }
