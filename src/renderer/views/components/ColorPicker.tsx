@@ -5,6 +5,7 @@ import {mouseOffsetPos} from "../util"
 
 const wheelWidth = Math.round(16 * devicePixelRatio)
 const squareSize = Math.round(96 * devicePixelRatio)
+const lineWidth = 2 * devicePixelRatio
 const wheelSize = squareSize * 1.5 + wheelWidth * 2
 const logicalWheelSize = Math.round(wheelSize / devicePixelRatio)
 
@@ -193,7 +194,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
     const x = (wheelSize - squareSize) / 2 + s * squareSize
     const y = (wheelSize - squareSize) / 2 + (1 - v) * squareSize
 
-    context.lineWidth = 2 * devicePixelRatio
+    context.lineWidth = lineWidth
     context.strokeStyle = "white"
     context.fillStyle = this.props.color.toString()
     context.beginPath()
@@ -210,7 +211,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
     const x = wheelSize / 2 + Math.cos(arg) * r
     const y = wheelSize / 2 + Math.sin(arg) * r
 
-    context.lineWidth = 2 * devicePixelRatio
+    context.lineWidth = lineWidth
     context.strokeStyle = "white"
     context.fillStyle = new HSVColor(h, 1, 1).toString()
     context.beginPath()
