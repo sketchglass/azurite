@@ -3,6 +3,7 @@ import {observer} from "mobx-react"
 import React = require("react")
 import Picture from "../models/Picture"
 import Layer from "../models/Layer"
+import {ImageLayerContent} from "../models/LayerContent"
 import ClickToEdit from "./components/ClickToEdit"
 const classNames = require("classnames")
 import {mouseOffsetPos} from "./util"
@@ -31,9 +32,13 @@ const LayerListItem = observer((props: {layer: Layer, current: boolean, index: n
   const onDragStart = (ev: React.DragEvent<HTMLElement>) => {
     ev.dataTransfer.setData(LAYER_DRAG_MIME, index.toString())
   }
+
+  const {content} = layer
+  const thumbnail = (content.type == "image") ? content.thumbnail : ""
+
   return (
     <div className={classNames("LayerList_layer", {"LayerList_layer-current": current})} onClick={select} draggable={true} onDragStart={onDragStart}>
-      <img src={layer.thumbnail} />
+      <img src={thumbnail} />
       <ClickToEdit text={layer.name} onChange={rename} editable={current} />
     </div>
   )
@@ -123,7 +128,7 @@ class MoveLayerCommand {
 }
 
 class AddLayerCommand {
-  layer = new Layer(this.picture)
+  layer = new Layer(this.picture, "Layer", new ImageLayerContent(this.picture))
   constructor(public picture: Picture, public index: number) {
   }
   undo() {
