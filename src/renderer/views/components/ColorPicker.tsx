@@ -3,9 +3,11 @@ import {Vec2} from "paintvec"
 import {HSVColor} from "../../../lib/Color"
 import {mouseOffsetPos} from "../util"
 
-const wheelWidth = 16
-const squareSize = 96
+const wheelWidth = Math.round(16 * devicePixelRatio)
+const squareSize = Math.round(96 * devicePixelRatio)
+const lineWidth = 2 * devicePixelRatio
 const wheelSize = squareSize * 1.5 + wheelWidth * 2
+const logicalWheelSize = Math.round(wheelSize / devicePixelRatio)
 
 interface ColorPickerProps {
   color: HSVColor
@@ -57,14 +59,14 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
   render() {
     this.update()
     return (
-      <canvas ref="canvas" width={wheelSize} height={wheelSize} />
+      <canvas ref="canvas" width={wheelSize} height={wheelSize} style={{width: logicalWheelSize, height: logicalWheelSize}}/>
     )
   }
 
   onPointerDown = (event: PointerEvent) => {
     event.preventDefault()
     const center = new Vec2(wheelSize / 2, wheelSize / 2)
-    const pos = mouseOffsetPos(event, this.canvas).sub(center)
+    const pos = mouseOffsetPos(event, this.canvas).mulScalar(devicePixelRatio).sub(center)
     const r = pos.length()
     if (wheelSize / 2 - wheelWidth <= r && r <= wheelSize / 2) {
       // wheel clicked
@@ -83,7 +85,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
   onPointerMove = (event: PointerEvent) => {
     event.preventDefault()
     const center = new Vec2(wheelSize / 2, wheelSize / 2)
-    const pos = mouseOffsetPos(event, this.canvas).sub(center)
+    const pos = mouseOffsetPos(event, this.canvas).mulScalar(devicePixelRatio).sub(center)
     if (this.draggingWheel) {
       this.onHueChanged(this.posToHue(pos))
     } else if (this.draggingSquare) {
@@ -190,11 +192,11 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
     const x = (wheelSize - squareSize) / 2 + s * squareSize
     const y = (wheelSize - squareSize) / 2 + (1 - v) * squareSize
 
-    context.lineWidth = 2
+    context.lineWidth = lineWidth
     context.strokeStyle = "white"
     context.fillStyle = this.props.color.toString()
     context.beginPath()
-    context.arc(x, y, 8, 0, 2 * Math.PI)
+    context.arc(x, y, wheelWidth / 2, 0, 2 * Math.PI)
     context.fill()
     context.stroke()
   }
@@ -207,11 +209,11 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
     const x = wheelSize / 2 + Math.cos(arg) * r
     const y = wheelSize / 2 + Math.sin(arg) * r
 
-    context.lineWidth = 2
+    context.lineWidth = lineWidth
     context.strokeStyle = "white"
     context.fillStyle = new HSVColor(h, 1, 1).toString()
     context.beginPath()
-    context.arc(x, y, 8, 0, 2 * Math.PI)
+    context.arc(x, y, wheelWidth / 2, 0, 2 * Math.PI)
     context.fill()
     context.stroke()
   }
