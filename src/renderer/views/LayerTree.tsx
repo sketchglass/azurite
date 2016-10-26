@@ -8,14 +8,14 @@ import ClickToEdit from "./components/ClickToEdit"
 const classNames = require("classnames")
 import {mouseOffsetPos} from "./util"
 
-interface LayerListProps {
+interface LayerTreeProps {
   picture: Picture|undefined
 }
 
 const CELL_HEIGHT = 72
 const LAYER_DRAG_MIME = "x-azurite-layer-drag"
 
-const LayerListItem = observer((props: {layer: Layer, current: boolean, index: number}) => {
+const LayerTreeItem = observer((props: {layer: Layer, current: boolean, index: number}) => {
   const {layer, current, index} = props
   const select = () => {
     const {picture} = layer
@@ -45,7 +45,7 @@ const LayerListItem = observer((props: {layer: Layer, current: boolean, index: n
 })
 
 @observer export default
-class LayerList extends React.Component<LayerListProps, {}> {
+class LayerTree extends React.Component<LayerTreeProps, {}> {
   render() {
     const {picture} = this.props
     let layers: Layer[] = picture ? picture.layers : []
@@ -57,7 +57,7 @@ class LayerList extends React.Component<LayerListProps, {}> {
           <button onClick={this.removeLayer.bind(this)}>Remove</button>
         </div>
         <div ref="scroll" className="LayerList_scroll">
-          {layers.map((layer, i) => <LayerListItem key={i} layer={layer} index={i} current={currentLayerIndex == i} />)}
+          {layers.map((layer, i) => <LayerTreeItem key={i} layer={layer} index={i} current={currentLayerIndex == i} />)}
         </div>
       </div>
     )

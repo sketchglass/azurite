@@ -6,7 +6,7 @@ import BaseBrushTool from "../tools/BaseBrushTool"
 import BrushTool from "../tools/BrushTool"
 import WatercolorTool from "../tools/WatercolorTool"
 import DrawArea from "./DrawArea"
-import LayerList from "./LayerList"
+import LayerTree from "./LayerTree"
 import ColorPicker from "./components/ColorPicker"
 import Palette from "./Palette"
 import Navigator from "./Navigator"
@@ -130,7 +130,7 @@ class App extends React.Component<{}, {}> {
         </div>
         <aside className="RightSidebar">
           <Navigator picture={picture} />
-          <LayerList picture={picture} />
+          <LayerTree picture={picture} />
         </aside>
       </div>
     )
