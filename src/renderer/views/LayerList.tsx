@@ -128,7 +128,7 @@ class MoveLayerCommand {
 }
 
 class AddLayerCommand {
-  layer = new Layer(this.picture, "Layer", new ImageLayerContent(this.picture))
+  layer = new Layer(this.picture, "Layer", layer => new ImageLayerContent(layer))
   constructor(public picture: Picture, public index: number) {
   }
   undo() {
