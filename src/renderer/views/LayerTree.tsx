@@ -167,18 +167,18 @@ class MoveLayerCommand {
 }
 
 class AddLayerCommand {
-  layer = new Layer(this.picture, "Layer", new ImageLayerContent(this.picture))
-
   constructor(public readonly picture: Picture, public readonly path: number[]) {
   }
 
   undo() {
     const [siblings, index] = getSiblingsAndIndex(this.picture, this.path)
-    siblings.splice(index, 1)
+    const layer = siblings.splice(index, 1)[0]
+    layer.dispose()
   }
   redo() {
     const [siblings, index] = getSiblingsAndIndex(this.picture, this.path)
-    siblings.splice(index, 0, this.layer)
+    const layer = new Layer(this.picture, "Layer", layer => new ImageLayerContent(layer))
+    siblings.splice(index, 0, layer)
   }
 }
 
