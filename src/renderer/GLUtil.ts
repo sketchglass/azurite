@@ -9,9 +9,17 @@ const drawTextureModel = new Model(context, {
 })
 
 export
-function drawTexture(target: DrawTarget, texture: Texture, offset: Vec2, blendMode: BlendMode) {
-  drawTextureShape.rect = new Rect(offset, offset.add(texture.size))
-  drawTextureModel.blendMode = blendMode
+function drawTexture(target: DrawTarget, texture: Texture, params: {offset?: Vec2, rect?: Rect, blendMode?: BlendMode}) {
+  let rect: Rect
+  if (params.rect) {
+    rect = params.rect
+  } else {
+    const offset = params.offset || new Vec2(0)
+    const {size} = texture
+    rect = new Rect(offset, offset.add(size))
+  }
+  drawTextureShape.rect = rect
+  drawTextureModel.blendMode = params.blendMode || "src-over"
   drawTextureModel.uniforms = {texture}
   target.draw(drawTextureModel)
 }
