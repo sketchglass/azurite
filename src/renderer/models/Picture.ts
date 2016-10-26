@@ -77,6 +77,10 @@ class Picture {
     }
   }
 
+  layerFromPath(path: number[]) {
+    return this.rootLayer.descendantFromPath(path)
+  }
+
   toData(): PictureData {
     return {
       size: [this.size.width, this.size.height],
