@@ -37,7 +37,7 @@ const thumbnailSizeMax = new Vec2(64, 48).mulScalar(window.devicePixelRatio)
 export default
 class ThumbnailGenerator {
   thumbnailSize = calcThumbnailSize(this.size, thumbnailSizeMax)
-  texture = new Texture(context, {size: getBoundingPowerOf2Size(this.size), filter: "mipmap-bilinear"})
+  texture = new Texture(context, {size: getBoundingPowerOf2Size(this.size), filter: "trilinear"})
   drawTarget = new TextureDrawTarget(context, this.texture)
   thumbnailTexture = new Texture(context, {size: this.thumbnailSize})
   thumbnailDrawTarget = new TextureDrawTarget(context, this.thumbnailTexture)
