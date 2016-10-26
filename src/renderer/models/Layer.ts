@@ -11,9 +11,12 @@ interface LayerData {
 export default
 class Layer {
   @observable name: string
+  parent: Layer|undefined
+  public readonly content: LayerContent
 
-  constructor(public picture: Picture, name: string, public readonly content: LayerContent) {
+  constructor(public picture: Picture, name: string, makeContent: (layer: Layer) => LayerContent) {
     this.name = name
+    this.content = makeContent(this)
   }
 
   dispose() {
@@ -26,18 +29,41 @@ class Layer {
     return {name, content}
   }
 
-  static fromData(picture: Picture, data: LayerData): Layer {
-    let content: LayerContent
-    switch (data.content.type) {
-      default:
-      case "image":
-        content = ImageLayerContent.fromData(picture, data.content)
-        break
-      case "group":
-        content = GroupLayerContent.fromData(picture, data.content)
-        break
+  path(): number[] {
+    if (this.parent) {
+      if (this.parent.content.type != "group") {
+        throw new Error("invalid parent")
+      }
+      const index = this.parent.content.children.indexOf(this)
+      if (index < 0) {
+        throw new Error("cannot find in children list")
+      }
+      return [...this.parent.path(), index]
+    } else {
+      return []
     }
-    const layer = new Layer(picture, data.name, content)
+  }
+
+  descendantFromPath(path: number[]): Layer|undefined {
+    if (path.length == 0) {
+      return this
+    }
+    if (this.content.type == "group") {
+      return this.content.children[path[0]].descendantFromPath(path.slice(1))
+    }
+  }
+
+  static fromData(picture: Picture, data: LayerData): Layer {
+    const makeContent: (layer: Layer) => LayerContent = layer => {
+      switch (data.content.type) {
+        default:
+        case "image":
+          return ImageLayerContent.fromData(layer, data.content)
+        case "group":
+          return GroupLayerContent.fromData(layer, data.content)
+      }
+    }
+    const layer = new Layer(picture, data.name, makeContent)
     return layer
   }
 }
