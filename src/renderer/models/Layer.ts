@@ -29,6 +29,21 @@ class Layer {
     return {name, content}
   }
 
+  path(): number[] {
+    if (this.parent) {
+      if (this.parent.content.type != "group") {
+        throw new Error("invalid parent")
+      }
+      const index = this.parent.content.children.indexOf(this)
+      if (index < 0) {
+        throw new Error("cannot find in children list")
+      }
+      return [...this.parent.path(), index]
+    } else {
+      return []
+    }
+  }
+
   static fromData(picture: Picture, data: LayerData): Layer {
     const makeContent: (layer: Layer) => LayerContent = layer => {
       switch (data.content.type) {
