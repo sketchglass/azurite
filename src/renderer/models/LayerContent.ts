@@ -15,7 +15,7 @@ class ImageLayerContent {
 
   @observable thumbnail = ""
 
-  constructor(public picture: Picture, public tiledTexture: TiledTexture = new TiledTexture()) {
+  constructor(public readonly layer: Layer, public tiledTexture: TiledTexture = new TiledTexture()) {
     this.updateThumbnail()
   }
 
@@ -31,13 +31,13 @@ class ImageLayerContent {
     this.tiledTexture.dispose()
   }
 
-  static fromData(picture: Picture, data: ImageLayerContentData) {
+  static fromData(layer: Layer, data: ImageLayerContentData) {
     const tiledTexture = TiledTexture.fromData(data.image)
-    return new ImageLayerContent(picture, tiledTexture)
+    return new ImageLayerContent(layer, tiledTexture)
   }
 
   @action updateThumbnail() {
-    this.thumbnail = this.picture.thumbnailGenerator.generate(this.tiledTexture)
+    this.thumbnail = this.layer.picture.thumbnailGenerator.generate(this.tiledTexture)
   }
 }
 
@@ -53,7 +53,7 @@ class GroupLayerContent {
 
   children: IObservableArray<Layer>
 
-  constructor(children: Layer[]) {
+  constructor(public readonly layer: Layer, children: Layer[]) {
     this.children = observable(children)
   }
 
@@ -71,9 +71,9 @@ class GroupLayerContent {
     }
   }
 
-  static fromData(picture: Picture, data: GroupLayerContentData) {
-    const children = data.children.map(d => Layer.fromData(picture, d))
-    return new GroupLayerContent(children)
+  static fromData(layer: Layer, data: GroupLayerContentData) {
+    const children = data.children.map(d => Layer.fromData(layer.picture, d))
+    return new GroupLayerContent(layer, children)
   }
 }
 

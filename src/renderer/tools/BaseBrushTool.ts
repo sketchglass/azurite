@@ -272,7 +272,7 @@ class BrushUndoCommand {
     })
     this.content.tiledTexture.writeTexture(texture, this.rect.topLeft)
     texture.dispose()
-    this.content.picture.updated.next(this.rect)
+    this.content.layer.picture.updated.next(this.rect)
     this.content.updateThumbnail()
   }
 

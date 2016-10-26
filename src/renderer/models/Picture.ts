@@ -22,9 +22,7 @@ class Picture {
   readonly size = new Vec2(this.params.width, this.params.height)
   @observable currentLayerIndex = 0
   readonly thumbnailGenerator = new ThumbnailGenerator(this.size)
-  readonly rootLayer = new Layer(this, "root", new GroupLayerContent([
-    new Layer(this, "Layer", new ImageLayerContent(this))
-  ]))
+  readonly rootLayer: Layer
   readonly layerBlender = new LayerBlender(this)
   readonly undoStack = new UndoStack()
   readonly navigation = observable({
@@ -48,6 +46,13 @@ class Picture {
   }
 
   constructor(public params: PictureParams) {
+    const defaultLayer = new Layer(this, "Layer", layer => new ImageLayerContent(layer))
+    this.rootLayer = new Layer(this, "root", layer =>
+      new GroupLayerContent(layer, [
+        new Layer(this, "Layer", layer => new ImageLayerContent(layer))
+      ])
+    )
+
     this.updated.forEach(() => {
       this.layerBlender.render()
     })
