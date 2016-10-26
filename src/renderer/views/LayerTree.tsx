@@ -1,6 +1,7 @@
 import {action} from "mobx"
 import {observer} from "mobx-react"
 import React = require("react")
+import {Tree, TreeNode, NodeInfo} from "react-draggable-tree"
 import Picture from "../models/Picture"
 import Layer from "../models/Layer"
 import {ImageLayerContent} from "../models/LayerContent"
@@ -12,15 +13,36 @@ interface LayerTreeProps {
   picture: Picture|undefined
 }
 
-const CELL_HEIGHT = 72
-const LAYER_DRAG_MIME = "x-azurite-layer-drag"
+interface LayerTreeNode extends TreeNode {
+  layer: Layer
+}
 
-const LayerTreeItem = observer((props: {layer: Layer, current: boolean, index: number}) => {
-  const {layer, current, index} = props
-  const select = () => {
-    const {picture} = layer
-    picture.currentLayerIndex = index
+const layerKeys = new WeakMap<Layer, number>()
+let currentLayerKey = 0
+
+function getLayerKey(layer: Layer) {
+  if (!layerKeys.has(layer)) {
+    layerKeys.set(layer, currentLayerKey++)
   }
+  return layerKeys.get(layer)!
+}
+
+function layerToNode(layer: Layer): LayerTreeNode {
+  const {content} = layer
+  let children: LayerTreeNode[] | undefined
+  if (content.type == "group") {
+    children = content.children.map(layerToNode)
+  } else {
+    children = undefined
+  }
+  const key = getLayerKey(layer)
+  const collapsed = false // TODO
+
+  return {key, children, collapsed, layer}
+}
+
+const LayerTreeItem = observer((props: {layer: Layer, selected: boolean}) => {
+  const {layer, selected} = props
 
   const rename = (name: string) => {
     const {picture} = layer
@@ -29,60 +51,59 @@ const LayerTreeItem = observer((props: {layer: Layer, current: boolean, index: n
     }
   }
 
-  const onDragStart = (ev: React.DragEvent<HTMLElement>) => {
-    ev.dataTransfer.setData(LAYER_DRAG_MIME, index.toString())
-  }
-
   const {content} = layer
   const thumbnail = (content.type == "image") ? content.thumbnail : ""
 
   return (
-    <div className={classNames("LayerList_layer", {"LayerList_layer-current": current})} onClick={select} draggable={true} onDragStart={onDragStart}>
+    <div className="LayerTree_layer">
       <img src={thumbnail} />
-      <ClickToEdit text={layer.name} onChange={rename} editable={current} />
+      <ClickToEdit text={layer.name} onChange={rename} editable={selected}/>
     </div>
   )
 })
+
+class LayerTreeView extends Tree<LayerTreeNode> {
+}
 
 @observer export default
 class LayerTree extends React.Component<LayerTreeProps, {}> {
   render() {
     const {picture} = this.props
-    let layers: Layer[] = picture ? picture.layers : []
-    let currentLayerIndex = picture ? picture.currentLayerIndex : 0
+    const dummyRoot = {key: 0} as LayerTreeNode
+    const root = picture ? layerToNode(picture.rootLayer) : dummyRoot
+    const selectedKeys = new Set<number>()
+
+    const onSelectedKeysChange = (selectedKeys: Set<number>) => {
+      // TODO
+    }
+    const onCollapsedChange = (nodeInfo: NodeInfo<LayerTreeNode>, collapsed: boolean) => {
+      // TODO
+    }
+    const onMove = (src: NodeInfo<LayerTreeNode>[], dest: NodeInfo<LayerTreeNode>, destIndex: number, destIndexAfter: number) => {
+      // TODO
+    }
+    const onCopy = (src: NodeInfo<LayerTreeNode>[], dest: NodeInfo<LayerTreeNode>, destIndex: number) => {
+      // TODO
+    }
+
     return (
-      <div className="LayerList" onDragOver={this.onDragOver.bind(this)} onDrop={this.onDrop.bind(this)}>
-        <div className="LayerList_buttons">
+      <div className="LayerTree">
+        <div className="LayerTree_buttons">
           <button onClick={this.addLayer.bind(this)}>Add</button>
           <button onClick={this.removeLayer.bind(this)}>Remove</button>
         </div>
-        <div ref="scroll" className="LayerList_scroll">
-          {layers.map((layer, i) => <LayerTreeItem key={i} layer={layer} index={i} current={currentLayerIndex == i} />)}
-        </div>
+        <LayerTreeView
+          root={root}
+          selectedKeys={selectedKeys}
+          rowHeight={72}
+          rowContent={({node, selected}) => <LayerTreeItem layer={node.layer} selected={selected} />}
+          onSelectedKeysChange={onSelectedKeysChange}
+          onCollapsedChange={onCollapsedChange}
+          onMove={onMove}
+          onCopy={onCopy}
+        />
       </div>
     )
-  }
-
-  onDragOver(ev: React.DragEvent<HTMLElement>) {
-    ev.preventDefault()
-  }
-  onDrop(ev: React.DragEvent<HTMLElement>) {
-    const data = ev.dataTransfer.getData(LAYER_DRAG_MIME)
-    if (data == "") {
-      return
-    }
-    ev.preventDefault()
-    const {picture} = this.props
-    if (picture) {
-      const from = parseInt(data)
-      const {y} = mouseOffsetPos(ev, this.refs["scroll"] as HTMLElement)
-      let to = Math.min(Math.floor((y + CELL_HEIGHT / 2) / CELL_HEIGHT), picture.layers.length)
-      if (from < to) {
-        to -= 1
-      }
-      const command = new MoveLayerCommand(picture, from, to)
-      picture.undoStack.redoAndPush(command)
-    }
   }
 
   @action selectLayer(i: number) {
