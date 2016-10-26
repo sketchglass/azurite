@@ -7,7 +7,7 @@ import Layer from "../models/Layer"
 import {ImageLayerContent} from "../models/LayerContent"
 import TiledTexture from "../models/TiledTexture"
 import {context} from "../GLContext"
-import {copyTexture, copyNewTexture, readTextureFloat} from "../GLUtil"
+import {drawTexture} from "../GLUtil"
 import {float32ArrayTo16} from "../../lib/Float"
 
 function stabilizeWaypoint(waypoints: Waypoint[], level: number, index: number) {
@@ -227,15 +227,24 @@ abstract class BaseBrushTool extends Tool {
       return
     }
     const {tiledTexture} = content
+
     // can't read directly from half float texture so read it to float texture first
-    const oldTexture = new Texture(context, {size: rect.size, pixelType: "float"})
-    const newTexture = new Texture(context, {size: rect.size, pixelType: "float"})
-    this.oldTiledTexture!.readToTexture(oldTexture, rect.topLeft)
-    tiledTexture.readToTexture(newTexture, rect.topLeft)
-    const oldData = float32ArrayTo16(readTextureFloat(oldTexture))
-    const newData = float32ArrayTo16(readTextureFloat(newTexture))
-    oldTexture.dispose()
-    newTexture.dispose()
+
+    const texture = new Texture(context, {size: rect.size, pixelType: "float"})
+    const drawTarget = new TextureDrawTarget(context, texture)
+    const data = new Float32Array(rect.width * rect.height * 4)
+
+    this.oldTiledTexture!.drawToDrawTarget(drawTarget, rect.topLeft.neg(), "src")
+    drawTarget.readPixels(new Rect(new Vec2(0), rect.size), data)
+    const oldData = float32ArrayTo16(data)
+
+    tiledTexture!.drawToDrawTarget(drawTarget, rect.topLeft.neg(), "src")
+    drawTarget.readPixels(new Rect(new Vec2(0), rect.size), data)
+    const newData = float32ArrayTo16(data)
+
+    drawTarget.dispose()
+    texture.dispose()
+
     const undoCommand = new BrushUndoCommand(content, rect, oldData, newData)
     this.picture.undoStack.push(undoCommand)
   }
@@ -270,7 +279,7 @@ class BrushUndoCommand {
       pixelType: "half-float",
       data
     })
-    this.content.tiledTexture.writeTexture(texture, this.rect.topLeft)
+    this.content.tiledTexture.drawTexture(texture, this.rect.topLeft, "src")
     texture.dispose()
     this.content.picture.updated.next(this.rect)
     this.content.updateThumbnail()

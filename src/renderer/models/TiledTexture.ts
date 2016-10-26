@@ -1,8 +1,8 @@
 import * as zlib from "zlib"
 import {Vec2, Rect} from "paintvec"
-import {Texture, PixelType, TextureDrawTarget, Model, TextureShader, RectShape} from "paintgl"
+import {Texture, PixelType, DrawTarget, TextureDrawTarget, Model, TextureShader, RectShape, BlendMode} from "paintgl"
 import {context} from "../GLContext"
-import {copyTexture} from "../GLUtil"
+import {drawTexture} from "../GLUtil"
 import {float32ArrayTo16} from "../../lib/Float"
 
 function keyToString(key: Vec2) {
@@ -76,25 +76,33 @@ class TiledTexture {
 
   clone() {
     const cloned = new TiledTexture()
+    const target = new TextureDrawTarget(context)
     for (const key of this.keys()) {
       const tile = newTile()
-      copyTexture(this.get(key), tile, new Vec2(0))
+      target.texture = tile
+      drawTexture(target, this.get(key), new Vec2(0), "src")
       cloned.set(key, tile)
     }
+    target.dispose()
     return cloned
   }
 
-  writeTexture(src: Texture, offset: Vec2) {
+  drawTexture(src: Texture, offset: Vec2, blendMode: BlendMode) {
     const rect = new Rect(offset, offset.add(src.size))
+    const target = new TextureDrawTarget(context)
     for (const key of TiledTexture.keysForRect(rect)) {
-      copyTexture(src, this.get(key), key.mulScalar(tileSize).sub(offset))
+      target.texture = this.get(key)
+      drawTexture(target, src, offset.sub(key.mulScalar(tileSize)), blendMode)
     }
+    target.dispose()
   }
 
-  readToTexture(dest: Texture, offset: Vec2) {
-    const rect = new Rect(offset, offset.add(dest.size))
+  drawToDrawTarget(dest: DrawTarget, offset: Vec2, blendMode: "src" | "src-over") {
+    const rect = new Rect(offset.neg(), offset.neg().add(dest.size))
     for (const key of TiledTexture.keysForRect(rect)) {
-      copyTexture(this.get(key), dest, offset.sub(key.mulScalar(tileSize)))
+      if (this.has(key)) {
+        drawTexture(dest, this.get(key), offset.add(key.mulScalar(tileSize)), blendMode)
+      }
     }
   }
 
