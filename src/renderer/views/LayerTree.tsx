@@ -1,4 +1,4 @@
-import {action} from "mobx"
+import {action, IObservableArray} from "mobx"
 import {observer} from "mobx-react"
 import React = require("react")
 import {Tree, TreeNode, NodeInfo} from "react-draggable-tree"
@@ -116,7 +116,7 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
   addLayer() {
     const {picture} = this.props
     if (picture) {
-      picture.undoStack.redoAndPush(new AddLayerCommand(picture, picture.currentLayerIndex))
+      picture.undoStack.redoAndPush(new AddLayerCommand(picture, [picture.currentLayerIndex]))
     }
   }
 
@@ -124,57 +124,82 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
     const {picture} = this.props
     if (picture) {
       if (picture.layers.length > 1) {
-        picture.undoStack.redoAndPush(new RemoveLayerCommand(picture, picture.currentLayerIndex))
+        picture.undoStack.redoAndPush(new RemoveLayerCommand(picture, [[picture.currentLayerIndex]]))
       }
     }
   }
 }
 
+function getSiblingsAndIndex(picture: Picture, path: number[]): [IObservableArray<Layer>, number] {
+  const parent = picture.layerForPath(path.slice(0, -1))
+  if (!parent || parent.content.type != "group") {
+    throw new Error("invalid path")
+  }
+  const index = path[path.length - 1]
+  return [parent.content.children, index]
+}
+
 class MoveLayerCommand {
-  constructor(public picture: Picture, public from: number, public to: number) {
+  constructor(public readonly picture: Picture, public readonly srcPaths: number[][], public readonly dstPath: number[]) {
   }
-  move(from: number, to: number) {
-    const {picture} = this
-    const layer = picture.layers[from]
-    picture.layers.splice(from, 1)
-    picture.layers.splice(to, 0, layer)
-    picture.currentLayerIndex = to
-  }
+
   undo() {
-    this.move(this.to, this.from)
+    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.dstPath)
+    const srcs = dstSiblings.splice(dstIndex, this.srcPaths.length)
+
+    for (const [i, srcPath] of this.srcPaths.entries()) {
+      const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
+      srcSiblings.splice(srcIndex, 0, srcs[i])
+    }
   }
+
   redo() {
-    this.move(this.from, this.to)
+    const srcs: Layer[] = []
+    for (const srcPath of [...this.srcPaths].reverse()) {
+      const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
+      const src = srcSiblings.splice(srcIndex, 1)[0]
+      srcs.unshift(src)
+    }
+
+    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.dstPath)
+    dstSiblings.splice(dstIndex, 0, ...srcs)
   }
 }
 
 class AddLayerCommand {
   layer = new Layer(this.picture, "Layer", new ImageLayerContent(this.picture))
-  constructor(public picture: Picture, public index: number) {
+
+  constructor(public readonly picture: Picture, public readonly path: number[]) {
   }
+
   undo() {
-    const {picture} = this
-    picture.layers.splice(this.index, 1)
-    picture.currentLayerIndex = Math.min(picture.currentLayerIndex, picture.layers.length - 1)
+    const [siblings, index] = getSiblingsAndIndex(this.picture, this.path)
+    siblings.splice(index, 1)
   }
   redo() {
-    const {picture} = this
-    picture.layers.splice(this.index, 0, this.layer)
+    const [siblings, index] = getSiblingsAndIndex(this.picture, this.path)
+    siblings.splice(index, 0, this.layer)
   }
 }
 
 class RemoveLayerCommand {
-  removedLayer: Layer
-  constructor(public picture: Picture, public index: number) {
+  removedLayers: Layer[] = []
+  constructor(public picture: Picture, public paths: number[][]) {
   }
   undo() {
-    const {picture} = this
-    picture.layers.splice(this.index, 0, this.removedLayer)
+    for (const [i, path] of this.paths.entries()) {
+      const [siblings, index] = getSiblingsAndIndex(this.picture, path)
+      siblings.splice(index, 0, this.removedLayers[i])
+    }
   }
   redo() {
-    const {picture} = this
-    this.removedLayer = picture.layers.splice(this.index, 1)[0]
-    picture.currentLayerIndex = Math.min(picture.currentLayerIndex, picture.layers.length - 1)
+    const removedLayers: Layer[] = []
+    for (const path of [...this.paths].reverse()) {
+      const [siblings, index] = getSiblingsAndIndex(this.picture, path)
+      const removed = siblings.splice(index, 1)[0]
+      removedLayers.unshift(removed)
+    }
+    this.removedLayers = removedLayers
   }
 }
 
