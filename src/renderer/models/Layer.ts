@@ -44,6 +44,15 @@ class Layer {
     }
   }
 
+  descendantFromPath(path: number[]): Layer|undefined {
+    if (path.length == 0) {
+      return this
+    }
+    if (this.content.type == "group") {
+      return this.content.children[path[0]].descendantFromPath(path.slice(1))
+    }
+  }
+
   static fromData(picture: Picture, data: LayerData): Layer {
     const makeContent: (layer: Layer) => LayerContent = layer => {
       switch (data.content.type) {
