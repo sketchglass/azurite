@@ -31,13 +31,14 @@ function getLayerKey(layer: Layer) {
 function layerToNode(layer: Layer): LayerTreeNode {
   const {content} = layer
   let children: LayerTreeNode[] | undefined
+  let collapsed = false
   if (content.type == "group") {
     children = content.children.map(layerToNode)
+    collapsed = content.collapsed
   } else {
     children = undefined
   }
   const key = getLayerKey(layer)
-  const collapsed = false // TODO
 
   return {key, children, collapsed, layer}
 }
@@ -80,7 +81,10 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
       }
     }
     const onCollapsedChange = (nodeInfo: NodeInfo<LayerTreeNode>, collapsed: boolean) => {
-      // TODO
+      const {layer} = nodeInfo.node
+      if (layer.content.type == "group") {
+        layer.content.collapsed = collapsed
+      }
     }
     const onMove = (src: NodeInfo<LayerTreeNode>[], dest: NodeInfo<LayerTreeNode>, destIndex: number, destIndexAfter: number) => {
       // TODO

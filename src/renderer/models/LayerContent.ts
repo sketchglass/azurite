@@ -51,6 +51,7 @@ export
 class GroupLayerContent {
   type: "group" = "group"
 
+  @observable collapsed = false
   children: IObservableArray<Layer>
 
   constructor(public readonly layer: Layer, children: Layer[]) {
