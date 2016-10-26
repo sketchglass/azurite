@@ -55,6 +55,11 @@ class GroupLayerContent {
 
   constructor(public readonly layer: Layer, children: Layer[]) {
     this.children = observable(children)
+    this.children.observe(() => {
+      for (const child of this.children) {
+        child.parent = layer
+      }
+    })
   }
 
   toData(): GroupLayerContentData {

@@ -11,6 +11,7 @@ interface LayerData {
 export default
 class Layer {
   @observable name: string
+  parent: Layer|undefined
   public readonly content: LayerContent
 
   constructor(public picture: Picture, name: string, makeContent: (layer: Layer) => LayerContent) {
