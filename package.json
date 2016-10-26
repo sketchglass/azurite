@@ -60,6 +60,7 @@
     "paintvec": "github:sketchglass/paintvec",
     "react": "^15.3.2",
     "react-dom": "^15.3.2",
+    "react-draggable-tree": "sketchglass/react-draggable-tree",
     "receive-tablet-event": "github:seanchas116/receive-tablet-event#b47eb6b856ee642b96f96b98dcf99517b781fb61",
     "rxjs": "^5.0.0-rc.1"
   }
