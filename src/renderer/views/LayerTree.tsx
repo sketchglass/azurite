@@ -2,6 +2,7 @@ import {action, IObservableArray} from "mobx"
 import {observer} from "mobx-react"
 import React = require("react")
 import {Tree, TreeNode, NodeInfo} from "react-draggable-tree"
+import "react-draggable-tree/lib/index.css"
 import Picture from "../models/Picture"
 import Layer from "../models/Layer"
 import {ImageLayerContent} from "../models/LayerContent"
@@ -71,10 +72,12 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
     const {picture} = this.props
     const dummyRoot = {key: 0} as LayerTreeNode
     const root = picture ? layerToNode(picture.rootLayer) : dummyRoot
-    const selectedKeys = new Set<number>()
+    const selectedKeys = picture ? picture.selectedLayers.map(getLayerKey) : []
 
-    const onSelectedKeysChange = (selectedKeys: Set<number>) => {
-      // TODO
+    const onSelectedKeysChange = (selectedKeys: Set<number>, selectedNodeInfos: NodeInfo<LayerTreeNode>[]) => {
+      if (picture) {
+        picture.selectedLayers.replace(selectedNodeInfos.map(info => info.node.layer))
+      }
     }
     const onCollapsedChange = (nodeInfo: NodeInfo<LayerTreeNode>, collapsed: boolean) => {
       // TODO
@@ -94,7 +97,7 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
         </div>
         <LayerTreeView
           root={root}
-          selectedKeys={selectedKeys}
+          selectedKeys={new Set(selectedKeys)}
           rowHeight={72}
           rowContent={({node, selected}) => <LayerTreeItem layer={node.layer} selected={selected} />}
           onSelectedKeysChange={onSelectedKeysChange}
@@ -106,26 +109,19 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
     )
   }
 
-  @action selectLayer(i: number) {
-    const {picture} = this.props
-    if (picture) {
-      picture.currentLayerIndex = i
-    }
-  }
-
   addLayer() {
     const {picture} = this.props
     if (picture) {
-      picture.undoStack.redoAndPush(new AddLayerCommand(picture, [picture.currentLayerIndex]))
+      const path = picture.currentLayer ? picture.currentLayer.path() : [0]
+      picture.undoStack.redoAndPush(new AddLayerCommand(picture, path))
     }
   }
 
   removeLayer() {
     const {picture} = this.props
     if (picture) {
-      if (picture.layers.length > 1) {
-        picture.undoStack.redoAndPush(new RemoveLayerCommand(picture, [[picture.currentLayerIndex]]))
-      }
+      const paths = picture.selectedLayers.map(l => l.path())
+      picture.undoStack.redoAndPush(new RemoveLayerCommand(picture, paths))
     }
   }
 }

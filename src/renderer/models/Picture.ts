@@ -20,9 +20,9 @@ interface PictureData {
 export default
 class Picture {
   readonly size = new Vec2(this.params.width, this.params.height)
-  @observable currentLayerIndex = 0
   readonly thumbnailGenerator = new ThumbnailGenerator(this.size)
   readonly rootLayer: Layer
+  readonly selectedLayers = observable<Layer>([])
   readonly layerBlender = new LayerBlender(this)
   readonly undoStack = new UndoStack()
   readonly navigation = observable({
@@ -48,10 +48,9 @@ class Picture {
   constructor(public params: PictureParams) {
     const defaultLayer = new Layer(this, "Layer", layer => new ImageLayerContent(layer))
     this.rootLayer = new Layer(this, "root", layer =>
-      new GroupLayerContent(layer, [
-        new Layer(this, "Layer", layer => new ImageLayerContent(layer))
-      ])
+      new GroupLayerContent(layer, [defaultLayer])
     )
+    this.selectedLayers.push(defaultLayer)
 
     this.updated.forEach(() => {
       this.layerBlender.render()
@@ -66,7 +65,9 @@ class Picture {
   }
 
   @computed get currentLayer() {
-    return this.layers[this.currentLayerIndex]
+    if (this.selectedLayers.length > 0) {
+      return this.selectedLayers[0]
+    }
   }
 
   dispose() {

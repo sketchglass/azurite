@@ -101,9 +101,16 @@ abstract class BaseBrushTool extends Tool {
     this.renderer.render(rect)
   }
 
+  currentLayerContent(): ImageLayerContent|undefined {
+    const layer = this.picture.currentLayer
+    if (layer && layer.content.type == "image") {
+      return layer.content
+    }
+  }
+
   start(waypoint: Waypoint) {
-    const {content} = this.picture.currentLayer
-    if (content.type != "image") {
+    const content = this.currentLayerContent()
+    if (!content) {
       return
     }
     const {tiledTexture} = content
@@ -126,8 +133,8 @@ abstract class BaseBrushTool extends Tool {
   @action end() {
     this.stabilizeEnd()
     this.pushUndoStack()
-    const {content} = this.picture.currentLayer
-    if (content.type == "image") {
+    const content = this.currentLayerContent()
+    if (content) {
       content.updateThumbnail()
     }
   }
@@ -223,8 +230,8 @@ abstract class BaseBrushTool extends Tool {
       return
     }
     this.editedRect = undefined
-    const {content} = this.picture.currentLayer
-    if (content.type != "image") {
+    const content = this.currentLayerContent()
+    if (!content) {
       return
     }
     const {tiledTexture} = content
@@ -246,7 +253,7 @@ abstract class BaseBrushTool extends Tool {
     drawTarget.dispose()
     texture.dispose()
 
-    const undoCommand = new BrushUndoCommand(this.picture, this.picture.currentLayer.path(), rect, oldData, newData)
+    const undoCommand = new BrushUndoCommand(this.picture, content.layer.path(), rect, oldData, newData)
     this.picture.undoStack.push(undoCommand)
   }
 
