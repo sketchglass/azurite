@@ -97,12 +97,10 @@ class TiledTexture {
     target.dispose()
   }
 
-  drawToDrawTarget(dest: DrawTarget, offset: Vec2, blendMode: "src" | "src-over") {
+  drawToDrawTarget(dest: DrawTarget, offset: Vec2, blendMode: BlendMode) {
     const rect = new Rect(offset.neg(), offset.neg().add(dest.size))
     for (const key of TiledTexture.keysForRect(rect)) {
-      if (this.has(key)) {
-        drawTexture(dest, this.get(key), offset.add(key.mulScalar(tileSize)), blendMode)
-      }
+      drawTexture(dest, this.get(key), offset.add(key.mulScalar(tileSize)), blendMode)
     }
   }
 
