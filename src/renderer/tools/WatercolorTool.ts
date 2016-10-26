@@ -132,6 +132,7 @@ class WatercolorTool extends BaseBrushTool {
   model = new Model(context, {shape: this.shape, blendMode: "src", shader: WatercolorShader})
   drawTarget = new TextureDrawTarget(context)
   originalTexture = new Texture(context, {pixelType: "half-float"})
+  originalDrawTarget = new TextureDrawTarget(context, this.originalTexture)
   shapeClipTexture = new Texture(context, {pixelType: "half-float", filter: "mipmap-nearest"})
   shapeClipDrawTarget = new TextureDrawTarget(context, this.shapeClipTexture)
   shapeClipModel = new Model(context, {shape: this.shape, blendMode: "src", shader: ShapeClipShader})
@@ -178,7 +179,7 @@ class WatercolorTool extends BaseBrushTool {
 
       const topLeft = waypoint.pos.floor().sub(new Vec2(this.sampleSize / 2))
 
-      tiledTexture.readToTexture(this.originalTexture, topLeft)
+      tiledTexture.drawToDrawTarget(this.originalDrawTarget, topLeft.neg(), "src")
 
       this.shapeClipModel.uniforms["uOriginalTexture"] = this.originalTexture
 
