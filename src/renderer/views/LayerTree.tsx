@@ -87,7 +87,12 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
       }
     }
     const onMove = (src: NodeInfo<LayerTreeNode>[], dest: NodeInfo<LayerTreeNode>, destIndex: number, destIndexAfter: number) => {
-      // TODO
+      if (picture) {
+        const srcPaths = src.map(info => info.path)
+        const destPath = [...dest.path, destIndexAfter]
+        const command = new MoveLayerCommand(picture, srcPaths, destPath)
+        picture.undoStack.redoAndPush(command)
+      }
     }
     const onCopy = (src: NodeInfo<LayerTreeNode>[], dest: NodeInfo<LayerTreeNode>, destIndex: number) => {
       // TODO
