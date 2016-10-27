@@ -29,6 +29,10 @@ class Layer {
     return {name, content}
   }
 
+  clone(): Layer {
+    return new Layer(this.picture, this.name, layer => this.content.clone(layer))
+  }
+
   path(): number[] {
     if (this.parent) {
       if (this.parent.content.type != "group") {

@@ -27,6 +27,10 @@ class ImageLayerContent {
     }
   }
 
+  clone(layer: Layer) {
+    return new ImageLayerContent(layer, this.tiledTexture.clone())
+  }
+
   dispose() {
     this.tiledTexture.dispose()
   }
@@ -69,6 +73,10 @@ class GroupLayerContent {
       type: "group",
       children,
     }
+  }
+
+  clone(layer: Layer) {
+    return new GroupLayerContent(layer, this.children.map(c => c.clone()))
   }
 
   dispose() {
