@@ -211,6 +211,7 @@ class MoveLayerCommand {
       const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
       srcSiblings.splice(srcIndex, 0, srcs[i])
     }
+    this.picture.selectedLayers.replace(srcs)
   }
 
   redo() {
@@ -223,6 +224,7 @@ class MoveLayerCommand {
 
     const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.dstPathAfter)
     dstSiblings.splice(dstIndex, 0, ...srcs)
+    this.picture.selectedLayers.replace(srcs)
   }
 }
 
@@ -267,6 +269,7 @@ class GroupLayerCommand {
     }
 
     group.dispose()
+    this.picture.selectedLayers.replace(srcs)
   }
 
   redo() {
@@ -280,6 +283,7 @@ class GroupLayerCommand {
 
     const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.srcPaths[0])
     dstSiblings.splice(dstIndex, 0, group)
+    this.picture.selectedLayers.replace([group])
   }
 }
 
@@ -291,11 +295,16 @@ class AddLayerCommand {
     const [siblings, index] = getSiblingsAndIndex(this.picture, this.path)
     const layer = siblings.splice(index, 1)[0]
     layer.dispose()
+    const nextLayer = this.picture.layerFromPath(this.path)
+    if (nextLayer) {
+      this.picture.selectedLayers.replace([nextLayer])
+    }
   }
   redo() {
     const [siblings, index] = getSiblingsAndIndex(this.picture, this.path)
     const layer = new Layer(this.picture, "Layer", layer => new ImageLayerContent(layer))
     siblings.splice(index, 0, layer)
+    this.picture.selectedLayers.replace([layer])
   }
 }
 
@@ -308,6 +317,7 @@ class RemoveLayerCommand {
       const [siblings, index] = getSiblingsAndIndex(this.picture, path)
       siblings.splice(index, 0, this.removedLayers[i])
     }
+    this.picture.selectedLayers.replace(this.removedLayers)
   }
   redo() {
     const removedLayers: Layer[] = []
