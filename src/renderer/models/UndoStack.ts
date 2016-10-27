@@ -7,24 +7,6 @@ interface UndoCommand {
 }
 
 export
-class CompositeCommand implements UndoCommand {
-  commands: UndoCommand[]
-  constructor(...commands: UndoCommand[]) {
-    this.commands = commands
-  }
-  undo() {
-    for (const c of [...this.commands].reverse()) {
-      c.undo()
-    }
-  }
-  redo() {
-    for (const c of this.commands) {
-      c.redo()
-    }
-  }
-}
-
-export
 class UndoStack {
   readonly commands: IObservableArray<UndoCommand> = observable([])
   @observable doneCount = 0
