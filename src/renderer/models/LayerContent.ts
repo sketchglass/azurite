@@ -56,27 +56,32 @@ class GroupLayerContent {
   type: "group" = "group"
 
   @observable collapsed = false
-  children: IObservableArray<Layer>
+  children = observable<Layer>([])
 
   constructor(public readonly layer: Layer, children: Layer[]) {
-    this.children = observable(children)
     this.children.observe(change => this.onChildChange(change))
+    this.children.replace(children)
   }
 
   @action onChildChange(change: IArrayChange<Layer>|IArraySplice<Layer>) {
-    if (change.type == "splice") {
-      for (const child of change.added) {
-        child.parent = this.layer
-      }
-      for (const child of change.removed) {
-        child.parent = undefined
-        const selected = this.layer.picture.selectedLayers
-        for (let i = selected.length - 1; i >= 0; --i) {
-          if (selected[i] == child) {
-            selected.splice(i, 1)
-          }
+    const onAdded = (child: Layer) => {
+      child.parent = this.layer
+    }
+    const onRemoved = (child: Layer) => {
+      child.parent = undefined
+      const selected = this.layer.picture.selectedLayers
+      for (let i = selected.length - 1; i >= 0; --i) {
+        if (selected[i] == child) {
+          selected.splice(i, 1)
         }
       }
+    }
+    if (change.type == "splice") {
+      change.added.forEach(onAdded)
+      change.removed.forEach(onRemoved)
+    } else {
+      onRemoved(change.oldValue)
+      onAdded(change.newValue)
     }
   }
 
