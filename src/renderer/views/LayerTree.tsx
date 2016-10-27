@@ -163,7 +163,7 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
 }
 
 function getSiblingsAndIndex(picture: Picture, path: number[]): [IObservableArray<Layer>, number] {
-  const parent = picture.layerForPath(path.slice(0, -1))
+  const parent = picture.layerFromPath(path.slice(0, -1))
   if (!parent || parent.content.type != "group") {
     throw new Error("invalid path")
   }

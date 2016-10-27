@@ -89,28 +89,11 @@ class Picture {
     }
   }
 
-  layerForPath(path: number[]) {
-    return layerForPath(this.rootLayer, path)
-  }
-
   static fromData(data: PictureData) {
     const [width, height] = data.size
     const picture = new Picture({width, height})
     const layers = data.layers.map(l => Layer.fromData(picture, l))
     picture.layers.splice(0, 1, ...layers)
     return picture
-  }
-}
-
-function layerForPath(layer: Layer, path: number[]): Layer|undefined {
-  if (path.length == 0) {
-    return layer
-  }
-  const {content} = layer
-  if (content.type == "group") {
-    const child = content.children[path[0]]
-    if (child) {
-      return layerForPath(child, path.slice(1))
-    }
   }
 }
