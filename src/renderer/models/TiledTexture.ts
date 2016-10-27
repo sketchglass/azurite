@@ -80,7 +80,7 @@ class TiledTexture {
     for (const key of this.keys()) {
       const tile = newTile()
       target.texture = tile
-      drawTexture(target, this.get(key), new Vec2(0), "src")
+      drawTexture(target, this.get(key), {blendMode: "src"})
       cloned.set(key, tile)
     }
     target.dispose()
@@ -92,7 +92,7 @@ class TiledTexture {
     const target = new TextureDrawTarget(context)
     for (const key of TiledTexture.keysForRect(rect)) {
       target.texture = this.get(key)
-      drawTexture(target, src, offset.sub(key.mulScalar(tileSize)), blendMode)
+      drawTexture(target, src, {offset: offset.sub(key.mulScalar(tileSize)), blendMode})
     }
     target.dispose()
   }
@@ -100,7 +100,12 @@ class TiledTexture {
   drawToDrawTarget(dest: DrawTarget, offset: Vec2, blendMode: BlendMode) {
     const rect = new Rect(offset.neg(), offset.neg().add(dest.size))
     for (const key of TiledTexture.keysForRect(rect)) {
-      drawTexture(dest, this.get(key), offset.add(key.mulScalar(tileSize)), blendMode)
+      if (blendMode == "src-over") {
+        if (!this.has(key)) {
+          continue
+        }
+      }
+      drawTexture(dest, this.get(key), {offset: offset.add(key.mulScalar(tileSize)), blendMode})
     }
   }
 
