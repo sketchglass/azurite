@@ -53,7 +53,11 @@ class Layer {
       return this
     }
     if (this.content.type == "group") {
-      return this.content.children[path[0]].descendantFromPath(path.slice(1))
+      const {children} = this.content
+      const index = path[0]
+      if (index < children.length) {
+        return this.content.children[index].descendantFromPath(path.slice(1))
+      }
     }
   }
 
