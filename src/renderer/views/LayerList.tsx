@@ -10,11 +10,11 @@ import ClickToEdit from "./components/ClickToEdit"
 const classNames = require("classnames")
 import {mouseOffsetPos} from "./util"
 
-interface LayerTreeProps {
+interface LayerListProps {
   picture: Picture|undefined
 }
 
-interface LayerTreeNode extends TreeNode {
+interface LayerNode extends TreeNode {
   layer: Layer
 }
 
@@ -28,9 +28,9 @@ function getLayerKey(layer: Layer) {
   return layerKeys.get(layer)!
 }
 
-function layerToNode(layer: Layer): LayerTreeNode {
+function layerToNode(layer: Layer): LayerNode {
   const {content} = layer
-  let children: LayerTreeNode[] | undefined
+  let children: LayerNode[] | undefined
   let collapsed = false
   if (content.type == "group") {
     children = content.children.map(layerToNode)
@@ -43,7 +43,7 @@ function layerToNode(layer: Layer): LayerTreeNode {
   return {key, children, collapsed, layer}
 }
 
-const LayerTreeItem = observer((props: {layer: Layer, selected: boolean}) => {
+const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
   const {layer, selected} = props
 
   const rename = (name: string) => {
@@ -57,32 +57,32 @@ const LayerTreeItem = observer((props: {layer: Layer, selected: boolean}) => {
   const thumbnail = (content.type == "image") ? content.thumbnail : ""
 
   return (
-    <div className="LayerTree_layer">
+    <div className="LayerList_layer">
       <img src={thumbnail} />
       <ClickToEdit text={layer.name} onChange={rename} editable={selected}/>
     </div>
   )
 })
 
-class LayerTreeView extends Tree<LayerTreeNode> {
+class LayerTree extends Tree<LayerNode> {
 }
 
 @observer export default
-class LayerTree extends React.Component<LayerTreeProps, {}> {
+class LayerList extends React.Component<LayerListProps, {}> {
 
-  onSelectedKeysChange = action((selectedKeys: Set<number>, selectedNodeInfos: NodeInfo<LayerTreeNode>[]) => {
+  onSelectedKeysChange = action((selectedKeys: Set<number>, selectedNodeInfos: NodeInfo<LayerNode>[]) => {
     const {picture} = this.props
     if (picture) {
       picture.selectedLayers.replace(selectedNodeInfos.map(info => info.node.layer))
     }
   })
-  onCollapsedChange = action((nodeInfo: NodeInfo<LayerTreeNode>, collapsed: boolean) => {
+  onCollapsedChange = action((nodeInfo: NodeInfo<LayerNode>, collapsed: boolean) => {
     const {layer} = nodeInfo.node
     if (layer.content.type == "group") {
       layer.content.collapsed = collapsed
     }
   })
-  onMove = action((src: NodeInfo<LayerTreeNode>[], dest: NodeInfo<LayerTreeNode>, destIndex: number) => {
+  onMove = action((src: NodeInfo<LayerNode>[], dest: NodeInfo<LayerNode>, destIndex: number) => {
     const {picture} = this.props
     if (picture) {
       const srcPaths = src.map(info => info.path)
@@ -91,7 +91,7 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
       picture.undoStack.redoAndPush(command)
     }
   })
-  onCopy = action((src: NodeInfo<LayerTreeNode>[], dest: NodeInfo<LayerTreeNode>, destIndex: number) => {
+  onCopy = action((src: NodeInfo<LayerNode>[], dest: NodeInfo<LayerNode>, destIndex: number) => {
     const {picture} = this.props
     if (picture) {
       const srcPaths = src.map(info => info.path)
@@ -110,22 +110,22 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
 
   render() {
     const {picture} = this.props
-    const dummyRoot = {key: 0} as LayerTreeNode
+    const dummyRoot = {key: 0} as LayerNode
     const root = picture ? layerToNode(picture.rootLayer) : dummyRoot
     const selectedKeys = picture ? picture.selectedLayers.map(getLayerKey) : []
 
     return (
-      <div className="LayerTree">
-        <div className="LayerTree_buttons">
+      <div className="LayerLists">
+        <div className="LayerList_buttons">
           <button onClick={this.addLayer.bind(this)}>Add</button>
           <button onClick={this.groupLayer.bind(this)}>Group</button>
           <button onClick={this.removeLayer.bind(this)}>Remove</button>
         </div>
-        <LayerTreeView
+        <LayerTree
           root={root}
           selectedKeys={new Set(selectedKeys)}
           rowHeight={72}
-          rowContent={({node, selected}) => <LayerTreeItem layer={node.layer} selected={selected} />}
+          rowContent={({node, selected}) => <LayerListItem layer={node.layer} selected={selected} />}
           onSelectedKeysChange={this.onSelectedKeysChange}
           onCollapsedChange={this.onCollapsedChange}
           onMove={this.onMove}
