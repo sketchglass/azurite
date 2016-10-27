@@ -95,7 +95,12 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
       }
     }
     const onCopy = (src: NodeInfo<LayerTreeNode>[], dest: NodeInfo<LayerTreeNode>, destIndex: number) => {
-      // TODO
+      if (picture) {
+        const srcPaths = src.map(info => info.path)
+        const destPath = [...dest.path, destIndex]
+        const command = new CopyLayerCommand(picture, srcPaths, destPath)
+        picture.undoStack.redoAndPush(command)
+      }
     }
 
     return (
@@ -163,6 +168,28 @@ class MoveLayerCommand {
     for (const srcPath of [...this.srcPaths].reverse()) {
       const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
       const src = srcSiblings.splice(srcIndex, 1)[0]
+      srcs.unshift(src)
+    }
+
+    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.dstPath)
+    dstSiblings.splice(dstIndex, 0, ...srcs)
+  }
+}
+
+class CopyLayerCommand {
+  constructor(public readonly picture: Picture, public readonly srcPaths: number[][], public readonly dstPath: number[]) {
+  }
+
+  undo() {
+    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.dstPath)
+    dstSiblings.splice(dstIndex, this.srcPaths.length)
+  }
+
+  redo() {
+    const srcs: Layer[] = []
+    for (const srcPath of [...this.srcPaths].reverse()) {
+      const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
+      const src = srcSiblings[srcIndex].clone()
       srcs.unshift(src)
     }
 
