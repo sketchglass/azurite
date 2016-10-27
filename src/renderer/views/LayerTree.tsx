@@ -100,6 +100,13 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
         const destPath = [...dest.path, destIndex]
         const command = new CopyLayerCommand(picture, srcPaths, destPath)
         picture.undoStack.redoAndPush(command)
+        const copiedLayers: Layer[] = []
+        for (let i = 0; i < srcPaths.length; ++i) {
+          const path = [...dest.path, destIndex + i]
+          const layer = picture.layerFromPath(path)!
+          copiedLayers.push(layer)
+        }
+        picture.selectedLayers.replace(copiedLayers)
       }
     }
 
