@@ -75,26 +75,26 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
     const root = picture ? layerToNode(picture.rootLayer) : dummyRoot
     const selectedKeys = picture ? picture.selectedLayers.map(getLayerKey) : []
 
-    const onSelectedKeysChange = (selectedKeys: Set<number>, selectedNodeInfos: NodeInfo<LayerTreeNode>[]) => {
+    const onSelectedKeysChange = action((selectedKeys: Set<number>, selectedNodeInfos: NodeInfo<LayerTreeNode>[]) => {
       if (picture) {
         picture.selectedLayers.replace(selectedNodeInfos.map(info => info.node.layer))
       }
-    }
-    const onCollapsedChange = (nodeInfo: NodeInfo<LayerTreeNode>, collapsed: boolean) => {
+    })
+    const onCollapsedChange = action((nodeInfo: NodeInfo<LayerTreeNode>, collapsed: boolean) => {
       const {layer} = nodeInfo.node
       if (layer.content.type == "group") {
         layer.content.collapsed = collapsed
       }
-    }
-    const onMove = (src: NodeInfo<LayerTreeNode>[], dest: NodeInfo<LayerTreeNode>, destIndex: number, destIndexAfter: number) => {
+    })
+    const onMove = action((src: NodeInfo<LayerTreeNode>[], dest: NodeInfo<LayerTreeNode>, destIndex: number, destIndexAfter: number) => {
       if (picture) {
         const srcPaths = src.map(info => info.path)
         const destPath = [...dest.path, destIndexAfter]
         const command = new MoveLayerCommand(picture, srcPaths, destPath)
         picture.undoStack.redoAndPush(command)
       }
-    }
-    const onCopy = (src: NodeInfo<LayerTreeNode>[], dest: NodeInfo<LayerTreeNode>, destIndex: number) => {
+    })
+    const onCopy = action((src: NodeInfo<LayerTreeNode>[], dest: NodeInfo<LayerTreeNode>, destIndex: number) => {
       if (picture) {
         const srcPaths = src.map(info => info.path)
         const destPath = [...dest.path, destIndex]
@@ -108,7 +108,7 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
         }
         picture.selectedLayers.replace(copiedLayers)
       }
-    }
+    })
 
     return (
       <div className="LayerTree">
