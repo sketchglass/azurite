@@ -5,7 +5,7 @@ import {Tree, TreeNode, NodeInfo} from "react-draggable-tree"
 import "react-draggable-tree/lib/index.css"
 import Picture from "../models/Picture"
 import Layer from "../models/Layer"
-import {ImageLayerContent} from "../models/LayerContent"
+import {ImageLayerContent, GroupLayerContent} from "../models/LayerContent"
 import ClickToEdit from "./components/ClickToEdit"
 const classNames = require("classnames")
 import {mouseOffsetPos} from "./util"
