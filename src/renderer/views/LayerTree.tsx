@@ -69,46 +69,50 @@ class LayerTreeView extends Tree<LayerTreeNode> {
 
 @observer export default
 class LayerTree extends React.Component<LayerTreeProps, {}> {
+
+  onSelectedKeysChange = action((selectedKeys: Set<number>, selectedNodeInfos: NodeInfo<LayerTreeNode>[]) => {
+    const {picture} = this.props
+    if (picture) {
+      picture.selectedLayers.replace(selectedNodeInfos.map(info => info.node.layer))
+    }
+  })
+  onCollapsedChange = action((nodeInfo: NodeInfo<LayerTreeNode>, collapsed: boolean) => {
+    const {layer} = nodeInfo.node
+    if (layer.content.type == "group") {
+      layer.content.collapsed = collapsed
+    }
+  })
+  onMove = action((src: NodeInfo<LayerTreeNode>[], dest: NodeInfo<LayerTreeNode>, destIndex: number, destIndexAfter: number) => {
+    const {picture} = this.props
+    if (picture) {
+      const srcPaths = src.map(info => info.path)
+      const destPath = [...dest.path, destIndexAfter]
+      const command = new MoveLayerCommand(picture, srcPaths, destPath)
+      picture.undoStack.redoAndPush(command)
+    }
+  })
+  onCopy = action((src: NodeInfo<LayerTreeNode>[], dest: NodeInfo<LayerTreeNode>, destIndex: number) => {
+    const {picture} = this.props
+    if (picture) {
+      const srcPaths = src.map(info => info.path)
+      const destPath = [...dest.path, destIndex]
+      const command = new CopyLayerCommand(picture, srcPaths, destPath)
+      picture.undoStack.redoAndPush(command)
+      const copiedLayers: Layer[] = []
+      for (let i = 0; i < srcPaths.length; ++i) {
+        const path = [...dest.path, destIndex + i]
+        const layer = picture.layerFromPath(path)!
+        copiedLayers.push(layer)
+      }
+      picture.selectedLayers.replace(copiedLayers)
+    }
+  })
+
   render() {
     const {picture} = this.props
     const dummyRoot = {key: 0} as LayerTreeNode
     const root = picture ? layerToNode(picture.rootLayer) : dummyRoot
     const selectedKeys = picture ? picture.selectedLayers.map(getLayerKey) : []
-
-    const onSelectedKeysChange = action((selectedKeys: Set<number>, selectedNodeInfos: NodeInfo<LayerTreeNode>[]) => {
-      if (picture) {
-        picture.selectedLayers.replace(selectedNodeInfos.map(info => info.node.layer))
-      }
-    })
-    const onCollapsedChange = action((nodeInfo: NodeInfo<LayerTreeNode>, collapsed: boolean) => {
-      const {layer} = nodeInfo.node
-      if (layer.content.type == "group") {
-        layer.content.collapsed = collapsed
-      }
-    })
-    const onMove = action((src: NodeInfo<LayerTreeNode>[], dest: NodeInfo<LayerTreeNode>, destIndex: number, destIndexAfter: number) => {
-      if (picture) {
-        const srcPaths = src.map(info => info.path)
-        const destPath = [...dest.path, destIndexAfter]
-        const command = new MoveLayerCommand(picture, srcPaths, destPath)
-        picture.undoStack.redoAndPush(command)
-      }
-    })
-    const onCopy = action((src: NodeInfo<LayerTreeNode>[], dest: NodeInfo<LayerTreeNode>, destIndex: number) => {
-      if (picture) {
-        const srcPaths = src.map(info => info.path)
-        const destPath = [...dest.path, destIndex]
-        const command = new CopyLayerCommand(picture, srcPaths, destPath)
-        picture.undoStack.redoAndPush(command)
-        const copiedLayers: Layer[] = []
-        for (let i = 0; i < srcPaths.length; ++i) {
-          const path = [...dest.path, destIndex + i]
-          const layer = picture.layerFromPath(path)!
-          copiedLayers.push(layer)
-        }
-        picture.selectedLayers.replace(copiedLayers)
-      }
-    })
 
     return (
       <div className="LayerTree">
@@ -121,10 +125,10 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
           selectedKeys={new Set(selectedKeys)}
           rowHeight={72}
           rowContent={({node, selected}) => <LayerTreeItem layer={node.layer} selected={selected} />}
-          onSelectedKeysChange={onSelectedKeysChange}
-          onCollapsedChange={onCollapsedChange}
-          onMove={onMove}
-          onCopy={onCopy}
+          onSelectedKeysChange={this.onSelectedKeysChange}
+          onCollapsedChange={this.onCollapsedChange}
+          onMove={this.onMove}
+          onCopy={this.onCopy}
         />
       </div>
     )
