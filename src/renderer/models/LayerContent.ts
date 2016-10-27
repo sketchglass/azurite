@@ -1,4 +1,4 @@
-import {observable, action, IObservableArray} from "mobx"
+import {observable, action, IObservableArray, IArrayChange, IArraySplice} from "mobx"
 import Picture from "./Picture"
 import Layer, {LayerData} from "./Layer"
 import TiledTexture, {TiledTextureData} from "./TiledTexture"
@@ -60,11 +60,24 @@ class GroupLayerContent {
 
   constructor(public readonly layer: Layer, children: Layer[]) {
     this.children = observable(children)
-    this.children.observe(() => {
-      for (const child of this.children) {
-        child.parent = layer
+    this.children.observe(change => this.onChildChange(change))
+  }
+
+  @action onChildChange(change: IArrayChange<Layer>|IArraySplice<Layer>) {
+    if (change.type == "splice") {
+      for (const child of change.added) {
+        child.parent = this.layer
       }
-    })
+      for (const child of change.removed) {
+        child.parent = undefined
+        const selected = this.layer.picture.selectedLayers
+        for (let i = selected.length - 1; i >= 0; --i) {
+          if (selected[i] == child) {
+            selected.splice(i, 1)
+          }
+        }
+      }
+    }
   }
 
   toData(): GroupLayerContentData {
