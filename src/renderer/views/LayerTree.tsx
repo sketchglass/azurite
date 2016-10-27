@@ -82,11 +82,11 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
       layer.content.collapsed = collapsed
     }
   })
-  onMove = action((src: NodeInfo<LayerTreeNode>[], dest: NodeInfo<LayerTreeNode>, destIndex: number, destIndexAfter: number) => {
+  onMove = action((src: NodeInfo<LayerTreeNode>[], dest: NodeInfo<LayerTreeNode>, destIndex: number) => {
     const {picture} = this.props
     if (picture) {
       const srcPaths = src.map(info => info.path)
-      const destPath = [...dest.path, destIndexAfter]
+      const destPath = [...dest.path, destIndex]
       const command = new MoveLayerCommand(picture, srcPaths, destPath)
       picture.undoStack.redoAndPush(command)
     }
@@ -171,12 +171,40 @@ function getSiblingsAndIndex(picture: Picture, path: number[]): [IObservableArra
   return [parent.content.children, index]
 }
 
+function isUpperSibling(path: number[], from: number[]) {
+  if (path.length != from.length) {
+    return false
+  }
+  const count = path.length
+  for (let i = 0; i < count - 1; ++i) {
+    if (path[i] != from[i]) {
+      return false
+    }
+  }
+  return path[count - 1] < from[count - 1]
+}
+
+function dstPathAfterMove(srcPaths: number[][], dstPath: number[]) {
+  const newDstPath = [...dstPath]
+  for (let len = dstPath.length; len > 0; --len) {
+    const subPath = dstPath.slice(0, len)
+    for (const srcPath of srcPaths) {
+      if (isUpperSibling(srcPath, subPath)) {
+        newDstPath[len - 1]--
+      }
+    }
+  }
+  return newDstPath
+}
+
 class MoveLayerCommand {
+  dstPathAfter = dstPathAfterMove(this.srcPaths, this.dstPath)
+
   constructor(public readonly picture: Picture, public readonly srcPaths: number[][], public readonly dstPath: number[]) {
   }
 
   undo() {
-    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.dstPath)
+    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.dstPathAfter)
     const srcs = dstSiblings.splice(dstIndex, this.srcPaths.length)
 
     for (const [i, srcPath] of this.srcPaths.entries()) {
@@ -193,7 +221,7 @@ class MoveLayerCommand {
       srcs.unshift(src)
     }
 
-    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.dstPath)
+    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.dstPathAfter)
     dstSiblings.splice(dstIndex, 0, ...srcs)
   }
 }
