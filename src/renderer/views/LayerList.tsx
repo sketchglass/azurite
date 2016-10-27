@@ -327,6 +327,11 @@ class RemoveLayerCommand {
       removedLayers.unshift(removed)
     }
     this.removedLayers = removedLayers
+
+    const nextLayer = this.picture.layerFromPath(this.paths[0])
+    if (nextLayer) {
+      this.picture.selectedLayers.replace([nextLayer])
+    }
   }
 }
 
