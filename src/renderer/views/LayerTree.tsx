@@ -5,7 +5,7 @@ import {Tree, TreeNode, NodeInfo} from "react-draggable-tree"
 import "react-draggable-tree/lib/index.css"
 import Picture from "../models/Picture"
 import Layer from "../models/Layer"
-import {ImageLayerContent} from "../models/LayerContent"
+import {ImageLayerContent, GroupLayerContent} from "../models/LayerContent"
 import ClickToEdit from "./components/ClickToEdit"
 const classNames = require("classnames")
 import {mouseOffsetPos} from "./util"
@@ -138,7 +138,7 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
     const {picture} = this.props
     if (picture) {
       const path = picture.currentLayer ? picture.currentLayer.path() : [0]
-      picture.undoStack.redoAndPush(new AddLayerCommand(picture, path))
+      picture.undoStack.redoAndPush(new AddLayerCommand(picture, path, "image"))
     }
   }
 
@@ -210,7 +210,7 @@ class CopyLayerCommand {
 }
 
 class AddLayerCommand {
-  constructor(public readonly picture: Picture, public readonly path: number[]) {
+  constructor(public readonly picture: Picture, public readonly path: number[], public type: "image" | "group") {
   }
 
   undo() {
@@ -220,7 +220,10 @@ class AddLayerCommand {
   }
   redo() {
     const [siblings, index] = getSiblingsAndIndex(this.picture, this.path)
-    const layer = new Layer(this.picture, "Layer", layer => new ImageLayerContent(layer))
+    const layer = new Layer(
+      this.picture, "Layer",
+      layer => this.type == "image" ? new ImageLayerContent(layer) : new GroupLayerContent(layer, [])
+    )
     siblings.splice(index, 0, layer)
   }
 }
