@@ -118,6 +118,7 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
       <div className="LayerTree">
         <div className="LayerTree_buttons">
           <button onClick={this.addLayer.bind(this)}>Add</button>
+          <button onClick={this.groupLayer.bind(this)}>Group</button>
           <button onClick={this.removeLayer.bind(this)}>Remove</button>
         </div>
         <LayerTreeView
@@ -134,7 +135,17 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
     )
   }
 
-  addLayer() {
+  @action groupLayer() {
+    const {picture} = this.props
+    if (picture) {
+      if (picture.selectedLayers.length > 0) {
+        const paths = picture.selectedLayers.map(l => l.path())
+        picture.undoStack.redoAndPush(new GroupLayerCommand(picture, paths))
+      }
+    }
+  }
+
+  @action addLayer() {
     const {picture} = this.props
     if (picture) {
       const path = picture.currentLayer ? picture.currentLayer.path() : [0]
@@ -142,7 +153,7 @@ class LayerTree extends React.Component<LayerTreeProps, {}> {
     }
   }
 
-  removeLayer() {
+  @action removeLayer() {
     const {picture} = this.props
     if (picture) {
       const paths = picture.selectedLayers.map(l => l.path())
@@ -206,6 +217,41 @@ class CopyLayerCommand {
 
     const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.dstPath)
     dstSiblings.splice(dstIndex, 0, ...srcs)
+  }
+}
+
+class GroupLayerCommand {
+  constructor(public readonly picture: Picture, public readonly srcPaths: number[][]) {
+  }
+
+  undo() {
+    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.srcPaths[0])
+    const group = dstSiblings.splice(dstIndex, 1)[0]
+    if (group.content.type != "group") {
+      return
+    }
+    const {children} = group.content
+    const srcs = children.splice(0, children.length)
+
+    for (const [i, srcPath] of this.srcPaths.entries()) {
+      const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
+      srcSiblings.splice(srcIndex, 0, srcs[i])
+    }
+
+    group.dispose()
+  }
+
+  redo() {
+    const srcs: Layer[] = []
+    for (const srcPath of [...this.srcPaths].reverse()) {
+      const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
+      const src = srcSiblings.splice(srcIndex, 1)[0]
+      srcs.unshift(src)
+    }
+    const group = new Layer(this.picture, "Group", layer => new GroupLayerContent(layer, srcs))
+
+    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.srcPaths[0])
+    dstSiblings.splice(dstIndex, 0, group)
   }
 }
 

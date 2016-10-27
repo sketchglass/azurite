@@ -55,7 +55,7 @@ class Picture {
     this.updated.forEach(() => {
       this.layerBlender.render()
     })
-    this.layers.observe(() => {
+    reaction(() => this.layers.peek(), () => {
       this.updated.next()
     })
     this.layerBlender.render()
