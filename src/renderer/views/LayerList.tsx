@@ -1,9 +1,11 @@
-import {action} from "mobx"
+import {action, IObservableArray} from "mobx"
 import {observer} from "mobx-react"
 import React = require("react")
+import {Tree, TreeNode, NodeInfo} from "react-draggable-tree"
+import "react-draggable-tree/lib/index.css"
 import Picture from "../models/Picture"
 import Layer from "../models/Layer"
-import {ImageLayerContent} from "../models/LayerContent"
+import {ImageLayerContent, GroupLayerContent} from "../models/LayerContent"
 import ClickToEdit from "./components/ClickToEdit"
 const classNames = require("classnames")
 import {mouseOffsetPos} from "./util"
@@ -12,15 +14,37 @@ interface LayerListProps {
   picture: Picture|undefined
 }
 
-const CELL_HEIGHT = 72
-const LAYER_DRAG_MIME = "x-azurite-layer-drag"
+interface LayerNode extends TreeNode {
+  layer: Layer
+}
 
-const LayerListItem = observer((props: {layer: Layer, current: boolean, index: number}) => {
-  const {layer, current, index} = props
-  const select = () => {
-    const {picture} = layer
-    picture.currentLayerIndex = index
+const layerKeys = new WeakMap<Layer, number>()
+let currentLayerKey = 0
+
+function getLayerKey(layer: Layer) {
+  if (!layerKeys.has(layer)) {
+    layerKeys.set(layer, currentLayerKey++)
   }
+  return layerKeys.get(layer)!
+}
+
+function layerToNode(layer: Layer): LayerNode {
+  const {content} = layer
+  let children: LayerNode[] | undefined
+  let collapsed = false
+  if (content.type == "group") {
+    children = content.children.map(layerToNode)
+    collapsed = content.collapsed
+  } else {
+    children = undefined
+  }
+  const key = getLayerKey(layer)
+
+  return {key, children, collapsed, layer}
+}
+
+const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
+  const {layer, selected} = props
 
   const rename = (name: string) => {
     const {picture} = layer
@@ -29,131 +53,285 @@ const LayerListItem = observer((props: {layer: Layer, current: boolean, index: n
     }
   }
 
-  const onDragStart = (ev: React.DragEvent<HTMLElement>) => {
-    ev.dataTransfer.setData(LAYER_DRAG_MIME, index.toString())
-  }
-
   const {content} = layer
   const thumbnail = (content.type == "image") ? content.thumbnail : ""
 
   return (
-    <div className={classNames("LayerList_layer", {"LayerList_layer-current": current})} onClick={select} draggable={true} onDragStart={onDragStart}>
+    <div className="LayerList_layer">
       <img src={thumbnail} />
-      <ClickToEdit text={layer.name} onChange={rename} editable={current} />
+      <ClickToEdit text={layer.name} onChange={rename} editable={selected}/>
     </div>
   )
 })
 
+class LayerTree extends Tree<LayerNode> {
+}
+
 @observer export default
 class LayerList extends React.Component<LayerListProps, {}> {
+
+  onSelectedKeysChange = action((selectedKeys: Set<number>, selectedNodeInfos: NodeInfo<LayerNode>[]) => {
+    const {picture} = this.props
+    if (picture) {
+      picture.selectedLayers.replace(selectedNodeInfos.map(info => info.node.layer))
+    }
+  })
+  onCollapsedChange = action((nodeInfo: NodeInfo<LayerNode>, collapsed: boolean) => {
+    const {layer} = nodeInfo.node
+    if (layer.content.type == "group") {
+      layer.content.collapsed = collapsed
+    }
+  })
+  onMove = action((src: NodeInfo<LayerNode>[], dest: NodeInfo<LayerNode>, destIndex: number) => {
+    const {picture} = this.props
+    if (picture) {
+      const srcPaths = src.map(info => info.path)
+      const destPath = [...dest.path, destIndex]
+      const command = new MoveLayerCommand(picture, srcPaths, destPath)
+      picture.undoStack.redoAndPush(command)
+    }
+  })
+  onCopy = action((src: NodeInfo<LayerNode>[], dest: NodeInfo<LayerNode>, destIndex: number) => {
+    const {picture} = this.props
+    if (picture) {
+      const srcPaths = src.map(info => info.path)
+      const destPath = [...dest.path, destIndex]
+      const command = new CopyLayerCommand(picture, srcPaths, destPath)
+      picture.undoStack.redoAndPush(command)
+      const copiedLayers: Layer[] = []
+      for (let i = 0; i < srcPaths.length; ++i) {
+        const path = [...dest.path, destIndex + i]
+        const layer = picture.layerFromPath(path)!
+        copiedLayers.push(layer)
+      }
+      picture.selectedLayers.replace(copiedLayers)
+    }
+  })
+
   render() {
     const {picture} = this.props
-    let layers: Layer[] = picture ? picture.layers : []
-    let currentLayerIndex = picture ? picture.currentLayerIndex : 0
+    const dummyRoot = {key: 0} as LayerNode
+    const root = picture ? layerToNode(picture.rootLayer) : dummyRoot
+    const selectedKeys = picture ? picture.selectedLayers.map(getLayerKey) : []
+
     return (
-      <div className="LayerList" onDragOver={this.onDragOver.bind(this)} onDrop={this.onDrop.bind(this)}>
+      <div className="LayerLists">
         <div className="LayerList_buttons">
           <button onClick={this.addLayer.bind(this)}>Add</button>
+          <button onClick={this.groupLayer.bind(this)}>Group</button>
           <button onClick={this.removeLayer.bind(this)}>Remove</button>
         </div>
-        <div ref="scroll" className="LayerList_scroll">
-          {layers.map((layer, i) => <LayerListItem key={i} layer={layer} index={i} current={currentLayerIndex == i} />)}
-        </div>
+        <LayerTree
+          root={root}
+          selectedKeys={new Set(selectedKeys)}
+          rowHeight={72}
+          rowContent={({node, selected}) => <LayerListItem layer={node.layer} selected={selected} />}
+          onSelectedKeysChange={this.onSelectedKeysChange}
+          onCollapsedChange={this.onCollapsedChange}
+          onMove={this.onMove}
+          onCopy={this.onCopy}
+        />
       </div>
     )
   }
 
-  onDragOver(ev: React.DragEvent<HTMLElement>) {
-    ev.preventDefault()
-  }
-  onDrop(ev: React.DragEvent<HTMLElement>) {
-    const data = ev.dataTransfer.getData(LAYER_DRAG_MIME)
-    if (data == "") {
-      return
-    }
-    ev.preventDefault()
+  @action groupLayer() {
     const {picture} = this.props
     if (picture) {
-      const from = parseInt(data)
-      const {y} = mouseOffsetPos(ev, this.refs["scroll"] as HTMLElement)
-      let to = Math.min(Math.floor((y + CELL_HEIGHT / 2) / CELL_HEIGHT), picture.layers.length)
-      if (from < to) {
-        to -= 1
+      if (picture.selectedLayers.length > 0) {
+        const paths = picture.selectedLayers.map(l => l.path())
+        picture.undoStack.redoAndPush(new GroupLayerCommand(picture, paths))
       }
-      const command = new MoveLayerCommand(picture, from, to)
-      picture.undoStack.redoAndPush(command)
     }
   }
 
-  @action selectLayer(i: number) {
+  @action addLayer() {
     const {picture} = this.props
     if (picture) {
-      picture.currentLayerIndex = i
+      const path = picture.currentLayer ? picture.currentLayer.path() : [0]
+      picture.undoStack.redoAndPush(new AddLayerCommand(picture, path))
     }
   }
 
-  addLayer() {
+  @action removeLayer() {
     const {picture} = this.props
     if (picture) {
-      picture.undoStack.redoAndPush(new AddLayerCommand(picture, picture.currentLayerIndex))
-    }
-  }
-
-  removeLayer() {
-    const {picture} = this.props
-    if (picture) {
-      if (picture.layers.length > 1) {
-        picture.undoStack.redoAndPush(new RemoveLayerCommand(picture, picture.currentLayerIndex))
-      }
+      const paths = picture.selectedLayers.map(l => l.path())
+      picture.undoStack.redoAndPush(new RemoveLayerCommand(picture, paths))
     }
   }
 }
 
+function getSiblingsAndIndex(picture: Picture, path: number[]): [IObservableArray<Layer>, number] {
+  const parent = picture.layerFromPath(path.slice(0, -1))
+  if (!parent || parent.content.type != "group") {
+    throw new Error("invalid path")
+  }
+  const index = path[path.length - 1]
+  return [parent.content.children, index]
+}
+
+function isUpperSibling(path: number[], from: number[]) {
+  if (path.length != from.length) {
+    return false
+  }
+  const count = path.length
+  for (let i = 0; i < count - 1; ++i) {
+    if (path[i] != from[i]) {
+      return false
+    }
+  }
+  return path[count - 1] < from[count - 1]
+}
+
+function dstPathAfterMove(srcPaths: number[][], dstPath: number[]) {
+  const newDstPath = [...dstPath]
+  for (let len = dstPath.length; len > 0; --len) {
+    const subPath = dstPath.slice(0, len)
+    for (const srcPath of srcPaths) {
+      if (isUpperSibling(srcPath, subPath)) {
+        newDstPath[len - 1]--
+      }
+    }
+  }
+  return newDstPath
+}
+
 class MoveLayerCommand {
-  constructor(public picture: Picture, public from: number, public to: number) {
+  dstPathAfter = dstPathAfterMove(this.srcPaths, this.dstPath)
+
+  constructor(public readonly picture: Picture, public readonly srcPaths: number[][], public readonly dstPath: number[]) {
   }
-  move(from: number, to: number) {
-    const {picture} = this
-    const layer = picture.layers[from]
-    picture.layers.splice(from, 1)
-    picture.layers.splice(to, 0, layer)
-    picture.currentLayerIndex = to
-  }
+
   undo() {
-    this.move(this.to, this.from)
+    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.dstPathAfter)
+    const srcs = dstSiblings.splice(dstIndex, this.srcPaths.length)
+
+    for (const [i, srcPath] of this.srcPaths.entries()) {
+      const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
+      srcSiblings.splice(srcIndex, 0, srcs[i])
+    }
+    this.picture.selectedLayers.replace(srcs)
   }
+
   redo() {
-    this.move(this.from, this.to)
+    const srcs: Layer[] = []
+    for (const srcPath of [...this.srcPaths].reverse()) {
+      const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
+      const src = srcSiblings.splice(srcIndex, 1)[0]
+      srcs.unshift(src)
+    }
+
+    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.dstPathAfter)
+    dstSiblings.splice(dstIndex, 0, ...srcs)
+    this.picture.selectedLayers.replace(srcs)
+  }
+}
+
+class CopyLayerCommand {
+  constructor(public readonly picture: Picture, public readonly srcPaths: number[][], public readonly dstPath: number[]) {
+  }
+
+  undo() {
+    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.dstPath)
+    dstSiblings.splice(dstIndex, this.srcPaths.length)
+  }
+
+  redo() {
+    const srcs: Layer[] = []
+    for (const srcPath of [...this.srcPaths].reverse()) {
+      const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
+      const src = srcSiblings[srcIndex].clone()
+      srcs.unshift(src)
+    }
+
+    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.dstPath)
+    dstSiblings.splice(dstIndex, 0, ...srcs)
+  }
+}
+
+class GroupLayerCommand {
+  constructor(public readonly picture: Picture, public readonly srcPaths: number[][]) {
+  }
+
+  undo() {
+    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.srcPaths[0])
+    const group = dstSiblings.splice(dstIndex, 1)[0]
+    if (group.content.type != "group") {
+      return
+    }
+    const {children} = group.content
+    const srcs = children.splice(0, children.length)
+
+    for (const [i, srcPath] of this.srcPaths.entries()) {
+      const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
+      srcSiblings.splice(srcIndex, 0, srcs[i])
+    }
+
+    group.dispose()
+    this.picture.selectedLayers.replace(srcs)
+  }
+
+  redo() {
+    const srcs: Layer[] = []
+    for (const srcPath of [...this.srcPaths].reverse()) {
+      const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
+      const src = srcSiblings.splice(srcIndex, 1)[0]
+      srcs.unshift(src)
+    }
+    const group = new Layer(this.picture, "Group", layer => new GroupLayerContent(layer, srcs))
+
+    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.srcPaths[0])
+    dstSiblings.splice(dstIndex, 0, group)
+    this.picture.selectedLayers.replace([group])
   }
 }
 
 class AddLayerCommand {
-  layer = new Layer(this.picture, "Layer", layer => new ImageLayerContent(layer))
-  constructor(public picture: Picture, public index: number) {
+  constructor(public readonly picture: Picture, public readonly path: number[]) {
   }
+
   undo() {
-    const {picture} = this
-    picture.layers.splice(this.index, 1)
-    picture.currentLayerIndex = Math.min(picture.currentLayerIndex, picture.layers.length - 1)
+    const [siblings, index] = getSiblingsAndIndex(this.picture, this.path)
+    const layer = siblings.splice(index, 1)[0]
+    layer.dispose()
+    const nextLayer = this.picture.layerFromPath(this.path)
+    if (nextLayer) {
+      this.picture.selectedLayers.replace([nextLayer])
+    }
   }
   redo() {
-    const {picture} = this
-    picture.layers.splice(this.index, 0, this.layer)
+    const [siblings, index] = getSiblingsAndIndex(this.picture, this.path)
+    const layer = new Layer(this.picture, "Layer", layer => new ImageLayerContent(layer))
+    siblings.splice(index, 0, layer)
+    this.picture.selectedLayers.replace([layer])
   }
 }
 
 class RemoveLayerCommand {
-  removedLayer: Layer
-  constructor(public picture: Picture, public index: number) {
+  removedLayers: Layer[] = []
+  constructor(public picture: Picture, public paths: number[][]) {
   }
   undo() {
-    const {picture} = this
-    picture.layers.splice(this.index, 0, this.removedLayer)
+    for (const [i, path] of this.paths.entries()) {
+      const [siblings, index] = getSiblingsAndIndex(this.picture, path)
+      siblings.splice(index, 0, this.removedLayers[i])
+    }
+    this.picture.selectedLayers.replace(this.removedLayers)
   }
   redo() {
-    const {picture} = this
-    this.removedLayer = picture.layers.splice(this.index, 1)[0]
-    picture.currentLayerIndex = Math.min(picture.currentLayerIndex, picture.layers.length - 1)
+    const removedLayers: Layer[] = []
+    for (const path of [...this.paths].reverse()) {
+      const [siblings, index] = getSiblingsAndIndex(this.picture, path)
+      const removed = siblings.splice(index, 1)[0]
+      removedLayers.unshift(removed)
+    }
+    this.removedLayers = removedLayers
+
+    const nextLayer = this.picture.layerFromPath(this.paths[0])
+    if (nextLayer) {
+      this.picture.selectedLayers.replace([nextLayer])
+    }
   }
 }
 

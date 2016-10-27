@@ -1,4 +1,4 @@
-import {observable, action, IObservableArray} from "mobx"
+import {observable, action, IObservableArray, IArrayChange, IArraySplice} from "mobx"
 import Picture from "./Picture"
 import Layer, {LayerData} from "./Layer"
 import TiledTexture, {TiledTextureData} from "./TiledTexture"
@@ -27,6 +27,10 @@ class ImageLayerContent {
     }
   }
 
+  clone(layer: Layer) {
+    return new ImageLayerContent(layer, this.tiledTexture.clone())
+  }
+
   dispose() {
     this.tiledTexture.dispose()
   }
@@ -51,15 +55,34 @@ export
 class GroupLayerContent {
   type: "group" = "group"
 
-  children: IObservableArray<Layer>
+  @observable collapsed = false
+  children = observable<Layer>([])
 
   constructor(public readonly layer: Layer, children: Layer[]) {
-    this.children = observable(children)
-    this.children.observe(() => {
-      for (const child of this.children) {
-        child.parent = layer
+    this.children.observe(change => this.onChildChange(change))
+    this.children.replace(children)
+  }
+
+  @action onChildChange(change: IArrayChange<Layer>|IArraySplice<Layer>) {
+    const onAdded = (child: Layer) => {
+      child.parent = this.layer
+    }
+    const onRemoved = (child: Layer) => {
+      child.parent = undefined
+      const selected = this.layer.picture.selectedLayers
+      for (let i = selected.length - 1; i >= 0; --i) {
+        if (selected[i] == child) {
+          selected.splice(i, 1)
+        }
       }
-    })
+    }
+    if (change.type == "splice") {
+      change.added.forEach(onAdded)
+      change.removed.forEach(onRemoved)
+    } else {
+      onRemoved(change.oldValue)
+      onAdded(change.newValue)
+    }
   }
 
   toData(): GroupLayerContentData {
@@ -68,6 +91,10 @@ class GroupLayerContent {
       type: "group",
       children,
     }
+  }
+
+  clone(layer: Layer) {
+    return new GroupLayerContent(layer, this.children.map(c => c.clone()))
   }
 
   dispose() {

@@ -3,7 +3,7 @@
   flex-direction: column;
   flex: 1;
 }
-.LayerList_scroll {
+.LayerList .ReactDraggableTree {
   flex: 1;
   overflow-y: scroll;
 }

@@ -25,7 +25,6 @@ class LayerBlender {
   }
 
   render(rect?: Rect) {
-    const {layers} = this.picture
     this.drawTarget.scissor = rect
     this.drawTarget.clear(new Color(1, 1, 1, 1))
     const tileKeys = TiledTexture.keysForRect(rect || new Rect(new Vec2(0), this.picture.size))
@@ -42,8 +41,9 @@ class LayerBlender {
           }
         }
       } else {
-        for (let i = layers.length - 1; i >= 0; --i) {
-          renderLayer(layers[i])
+        const {children} = content
+        for (let i = children.length - 1; i >= 0; --i) {
+          renderLayer(children[i])
         }
       }
     }

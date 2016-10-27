@@ -6,6 +6,7 @@ import Tool from "./Tool"
 import Layer from "../models/Layer"
 import {ImageLayerContent} from "../models/LayerContent"
 import TiledTexture from "../models/TiledTexture"
+import Picture from "../models/Picture"
 import {context} from "../GLContext"
 import {drawTexture} from "../GLUtil"
 import {float32ArrayTo16} from "../../lib/Float"
@@ -100,9 +101,16 @@ abstract class BaseBrushTool extends Tool {
     this.renderer.render(rect)
   }
 
+  currentLayerContent(): ImageLayerContent|undefined {
+    const layer = this.picture.currentLayer
+    if (layer && layer.content.type == "image") {
+      return layer.content
+    }
+  }
+
   start(waypoint: Waypoint) {
-    const {content} = this.picture.currentLayer
-    if (content.type != "image") {
+    const content = this.currentLayerContent()
+    if (!content) {
       return
     }
     const {tiledTexture} = content
@@ -125,8 +133,8 @@ abstract class BaseBrushTool extends Tool {
   @action end() {
     this.stabilizeEnd()
     this.pushUndoStack()
-    const {content} = this.picture.currentLayer
-    if (content.type == "image") {
+    const content = this.currentLayerContent()
+    if (content) {
       content.updateThumbnail()
     }
   }
@@ -222,8 +230,8 @@ abstract class BaseBrushTool extends Tool {
       return
     }
     this.editedRect = undefined
-    const {content} = this.picture.currentLayer
-    if (content.type != "image") {
+    const content = this.currentLayerContent()
+    if (!content) {
       return
     }
     const {tiledTexture} = content
@@ -245,7 +253,7 @@ abstract class BaseBrushTool extends Tool {
     drawTarget.dispose()
     texture.dispose()
 
-    const undoCommand = new BrushUndoCommand(content, rect, oldData, newData)
+    const undoCommand = new BrushUndoCommand(this.picture, content.layer.path(), rect, oldData, newData)
     this.picture.undoStack.push(undoCommand)
   }
 
@@ -270,19 +278,28 @@ abstract class BaseBrushTool extends Tool {
 }
 
 class BrushUndoCommand {
-  constructor(public content: ImageLayerContent, public rect: Rect, public oldData: Uint16Array, public newData: Uint16Array) {
+  constructor(public picture: Picture, public path: number[], public rect: Rect, public oldData: Uint16Array, public newData: Uint16Array) {
   }
 
   @action replace(data: Uint16Array) {
+    const layer = this.picture.layerFromPath(this.path)
+    if (!layer) {
+      return
+    }
+    const {content} = layer
+    if (content.type != "image") {
+      return
+    }
+
     const texture = new Texture(context, {
       size: this.rect.size,
       pixelType: "half-float",
       data
     })
-    this.content.tiledTexture.drawTexture(texture, this.rect.topLeft, "src")
+    content.tiledTexture.drawTexture(texture, this.rect.topLeft, "src")
     texture.dispose()
-    this.content.layer.picture.updated.next(this.rect)
-    this.content.updateThumbnail()
+    content.layer.picture.updated.next(this.rect)
+    content.updateThumbnail()
   }
 
   undo() {

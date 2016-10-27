@@ -29,6 +29,38 @@ class Layer {
     return {name, content}
   }
 
+  clone(): Layer {
+    return new Layer(this.picture, this.name, layer => this.content.clone(layer))
+  }
+
+  path(): number[] {
+    if (this.parent) {
+      if (this.parent.content.type != "group") {
+        throw new Error("invalid parent")
+      }
+      const index = this.parent.content.children.indexOf(this)
+      if (index < 0) {
+        throw new Error("cannot find in children list")
+      }
+      return [...this.parent.path(), index]
+    } else {
+      return []
+    }
+  }
+
+  descendantFromPath(path: number[]): Layer|undefined {
+    if (path.length == 0) {
+      return this
+    }
+    if (this.content.type == "group") {
+      const {children} = this.content
+      const index = path[0]
+      if (index < children.length) {
+        return this.content.children[index].descendantFromPath(path.slice(1))
+      }
+    }
+  }
+
   static fromData(picture: Picture, data: LayerData): Layer {
     const makeContent: (layer: Layer) => LayerContent = layer => {
       switch (data.content.type) {
