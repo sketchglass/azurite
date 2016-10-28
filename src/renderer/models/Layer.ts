@@ -5,6 +5,9 @@ import {LayerContent, GroupLayerContent, ImageLayerContent, LayerContentData} fr
 export
 interface LayerData {
   name: string
+  visible: boolean
+  blendMode: LayerBlendMode
+  opacity: number
   content: LayerContentData
 }
 
@@ -33,9 +36,9 @@ class Layer {
   }
 
   toData(): LayerData {
-    const {name} = this
+    const {name, visible, blendMode, opacity} = this
     const content = this.content.toData()
-    return {name, content}
+    return {name, visible, blendMode, opacity, content}
   }
 
   clone(): Layer {
@@ -81,6 +84,10 @@ class Layer {
       }
     }
     const layer = new Layer(picture, data.name, makeContent)
+    const {visible, blendMode, opacity} = data
+    layer.visible = visible
+    layer.blendMode = blendMode
+    layer.opacity = opacity
     return layer
   }
 }
