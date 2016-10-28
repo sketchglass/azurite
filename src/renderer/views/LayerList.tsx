@@ -56,10 +56,15 @@ const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
   const {content} = layer
   const thumbnail = (content.type == "image") ? content.thumbnail : ""
 
+  const onToggleCheck = (e: React.FormEvent<HTMLInputElement>) => {
+    layer.visible = e.target.checked
+  }
+
   return (
     <div className="LayerList_layer">
       <img src={thumbnail} />
       <ClickToEdit text={layer.name} onChange={rename} editable={selected}/>
+      <input type="checkbox" checked={layer.visible} onChange={onToggleCheck} />
     </div>
   )
 })
