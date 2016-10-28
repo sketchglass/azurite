@@ -30,6 +30,9 @@ class LayerBlender {
     const tileKeys = TiledTexture.keysForRect(rect || new Rect(new Vec2(0), this.picture.size))
 
     const renderLayer = (layer: Layer) => {
+      if (!layer.visible) {
+        return
+      }
       const {content} = layer
       if (content.type == "image") {
         for (const key of tileKeys) {

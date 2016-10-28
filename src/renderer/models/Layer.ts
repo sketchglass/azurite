@@ -1,4 +1,4 @@
-import {observable} from "mobx"
+import {observable, reaction} from "mobx"
 import Picture from "./Picture"
 import {LayerContent, GroupLayerContent, ImageLayerContent, LayerContentData} from "./LayerContent"
 
@@ -11,12 +11,16 @@ interface LayerData {
 export default
 class Layer {
   @observable name: string
+  @observable visible = true
   parent: Layer|undefined
   public readonly content: LayerContent
 
   constructor(public picture: Picture, name: string, makeContent: (layer: Layer) => LayerContent) {
     this.name = name
     this.content = makeContent(this)
+    reaction(() => this.visible, () => {
+      picture.updated.next()
+    })
   }
 
   dispose() {
