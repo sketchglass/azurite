@@ -19,7 +19,7 @@ class Layer {
   @observable name: string
   @observable visible = true
   @observable blendMode: LayerBlendMode = "normal"
-  @observable opacity = 0
+  @observable opacity = 1
   parent: Layer|undefined
   public readonly content: LayerContent
 
