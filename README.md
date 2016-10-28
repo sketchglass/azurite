@@ -5,6 +5,8 @@ Casual Painting App in Electron
 ## Prerequisites
 
 * Node.js
+* yarn
+* typings
 
 ### Windows
 
@@ -14,6 +16,7 @@ Casual Painting App in Electron
 
 ```
 yarn install
+typings install
 npm run watch
 ```
 

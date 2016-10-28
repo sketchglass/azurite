@@ -24,7 +24,7 @@ class BrushSettings extends React.Component<BrushSettingsProps, void> {
     const onSoftnessChange = (value: number) => {
       tool.softness = value / 100
     }
-    const onEraserModeChange = (ev: React.FormEvent<HTMLInputElement>) => {
+    const onEraserModeChange = (ev: React.FormEvent) => {
       tool.eraser = !tool.eraser
     }
     return (

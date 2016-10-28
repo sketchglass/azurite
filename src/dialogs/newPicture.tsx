@@ -123,15 +123,15 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
       <form className="NewPictureDialog" ref={e => this.dialog = e}>
         <div className="NewPictureDialog_Row">
           <label>Preset</label>
-          <select value={this.currentPresetIndex()} autoFocus onChange={this.onPresetSelect}>
-            {sizePresets.map((preset, i) => <option key={i} value={i}>{preset.name}</option>)}
-            <option value={-1}>Custom</option>
+          <select value={String(this.currentPresetIndex())} autoFocus onChange={this.onPresetSelect}>
+            {sizePresets.map((preset, i) => <option key={i} value={String(i)}>{preset.name}</option>)}
+            <option value={String(-1)}>Custom</option>
           </select>
         </div>
         <div className="NewPictureDialog_Row">
           <label>Width</label>
           <div className="NewPictureDialog_Value">
-            <input type="number" value={width} min={1} onChange={this.onWidthChange} />
+            <input type="number" value={String(width)} min={1} onChange={this.onWidthChange} />
             <select value={unit} onChange={this.onUnitChange}>
               <option value="px">px</option>
               <option value="mm">mm</option>
@@ -141,7 +141,7 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
         <div className="NewPictureDialog_Row">
           <label>Height</label>
           <div className="NewPictureDialog_Value">
-            <input type="number" value={height} min={1} onChange={this.onHeightChange} />
+            <input type="number" value={String(height)} min={1} onChange={this.onHeightChange} />
             <select value={unit} onChange={this.onUnitChange}>
               <option value="px">px</option>
               <option value="mm">mm</option>
@@ -151,7 +151,7 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
         <div className="NewPictureDialog_Row">
           <label>Resolution</label>
           <div className="NewPictureDialog_Value">
-            <input type="number" value={dpi} min={1} onChange={this.onDpiChange} />
+            <input type="number" value={String(dpi)} min={1} onChange={this.onDpiChange} />
             DPI
           </div>
         </div>
@@ -198,19 +198,19 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
     this.setState({widthPx, heightPx, widthMm, heightMm, dpi, ratio, unit} as NewPictureDialogState)
   }
 
-  onPresetSelect = (ev: React.FormEvent<HTMLSelectElement>) => {
+  onPresetSelect = (ev: React.FormEvent) => {
     const i = parseInt((ev.target as HTMLSelectElement).value)
     if (i >= 0) {
       this.setPreset(sizePresets[i])
     }
   }
 
-  onUnitChange = (ev: React.FormEvent<HTMLSelectElement>) => {
+  onUnitChange = (ev: React.FormEvent) => {
     const unit = (ev.target as HTMLSelectElement).value
     this.setState({unit} as NewPictureDialogState)
   }
 
-  onWidthChange = (ev: React.FormEvent<HTMLInputElement>) => {
+  onWidthChange = (ev: React.FormEvent) => {
     const width = parseInt((ev.target as HTMLInputElement).value)
     const {unit, dpi, keepRatio} = this.state
     if (unit == "mm") {
@@ -222,7 +222,7 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
     }
   }
 
-  onHeightChange = (ev: React.FormEvent<HTMLInputElement>) => {
+  onHeightChange = (ev: React.FormEvent) => {
     const height = parseInt((ev.target as HTMLInputElement).value)
     const {unit, dpi, keepRatio} = this.state
     if (unit == "mm") {
@@ -234,7 +234,7 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
     }
   }
 
-  onDpiChange = (ev: React.FormEvent<HTMLInputElement>) => {
+  onDpiChange = (ev: React.FormEvent) => {
     const dpi = parseInt((ev.target as HTMLInputElement).value) || 72
     const {unit, keepRatio} = this.state
     if (unit == "mm") {
@@ -257,5 +257,5 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
-  ReactDOM.render(<NewPictureDialog />, document.getElementById("app"))
+  ReactDOM.render(<NewPictureDialog />, document.getElementById("app")!)
 })

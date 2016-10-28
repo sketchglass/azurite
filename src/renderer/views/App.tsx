@@ -21,7 +21,7 @@ const {Menu, app} = remote
 import "./MenuBar"
 import "../../styles/main.css"
 
-function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool: Tool) => void, onContextMenu: (tool: Tool, e: React.MouseEvent<Element>) => void}) {
+function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool: Tool) => void, onContextMenu: (tool: Tool, e: React.MouseEvent) => void}) {
   return (
     <div className="ToolSelection">
       <div className="ToolSelection_subtools">{
@@ -34,7 +34,7 @@ function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool
       }</div>
       <div className="ToolSelection_brushes">{
         props.tools.filter(tool => { return tool instanceof BaseBrushTool }).map((tool, i) => {
-          const onContextMenu = (e: React.MouseEvent<Element>) => props.onContextMenu(tool, e)
+          const onContextMenu = (e: React.MouseEvent) => props.onContextMenu(tool, e)
           const selected = tool === props.currentTool
           const className = (selected) ? "ToolSelection_button ToolSelection_button-selected" : "ToolSelection_button"
           const onClick = () => props.onChange(tool)
@@ -70,7 +70,7 @@ class App extends React.Component<{}, {}> {
     const onToolChange = (tool: Tool) => {
       appVM.currentTool = tool
     }
-    const onToolContextMenu = action((selectedTool: Tool, e: React.MouseEvent<Element>) => {
+    const onToolContextMenu = action((selectedTool: Tool, e: React.MouseEvent) => {
       e.preventDefault()
       const removeTool = action(() => {
         const index = appVM.tools.indexOf(selectedTool)
@@ -92,7 +92,7 @@ class App extends React.Component<{}, {}> {
       const menu = Menu.buildFromTemplate(menuTemplate)
       menu.popup(remote.getCurrentWindow())
     })
-    const onPaletteChange = action((e: React.MouseEvent<Element>, index: number) => {
+    const onPaletteChange = action((e: React.MouseEvent, index: number) => {
       appVM.paletteIndex = index
       if(e.shiftKey) {
         appVM.palette[index] = appVM.color
