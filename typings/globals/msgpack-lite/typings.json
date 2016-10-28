@@ -1,8 +1,0 @@
-{
-  "resolution": "main",
-  "tree": {
-    "src": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/3ced2ed66cbbbadf509f6bbc62db314421aa0611/msgpack-lite/msgpack-lite.d.ts",
-    "raw": "registry:dt/msgpack-lite#0.1.20+20161003194826",
-    "typings": "https://raw.githubusercontent.com/DefinitelyTyped/DefinitelyTyped/3ced2ed66cbbbadf509f6bbc62db314421aa0611/msgpack-lite/msgpack-lite.d.ts"
-  }
-}
