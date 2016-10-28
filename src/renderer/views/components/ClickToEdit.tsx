@@ -58,11 +58,11 @@ class ClickToEdit extends React.Component<ClickToEditProps, ClickToEditState> {
     })
     this.props.onChange(text)
   }
-  onInputBlur(event: React.FocusEvent<HTMLInputElement>) {
+  onInputBlur(event: React.FocusEvent) {
     const text = this.inputElem.value
     this.onEditFinish(text)
   }
-  onInputKeyPress(event: React.KeyboardEvent<HTMLInputElement>) {
+  onInputKeyPress(event: React.KeyboardEvent) {
     if (event.key == "Enter") {
       const text = this.inputElem.value
       this.onEditFinish(text)

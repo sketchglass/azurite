@@ -5,7 +5,7 @@ import Picture from "../models/Picture"
 const classNames = require("classnames")
 
 const PictureTab = observer((props: {picture: Picture, current: boolean, onClick: () => void, onClose: () => void}) => {
-  const onCloseClick = (e: React.MouseEvent<HTMLSpanElement>) => {
+  const onCloseClick = (e: React.MouseEvent) => {
     e.stopPropagation()
     props.onClose()
   }

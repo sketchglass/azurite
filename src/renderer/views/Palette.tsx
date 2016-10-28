@@ -4,7 +4,7 @@ import {HSVColor} from "../../lib/Color"
 interface PaletteProps {
   palette: HSVColor[]
   paletteIndex: number
-  onChange: (event: React.MouseEvent<Element>, index: number) => void
+  onChange: (event: React.MouseEvent, index: number) => void
 }
 
 export default
@@ -23,7 +23,7 @@ function Palette(props: PaletteProps) {
       const style = {
         backgroundColor: color.toString(),
       }
-      const onClick = (e: React.MouseEvent<Element>) => {
+      const onClick = (e: React.MouseEvent) => {
         props.onChange(e, i)
       }
       return <div className="Palette-button" style={style} key={x} onClick={onClick} />
