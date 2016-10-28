@@ -14,7 +14,7 @@ export interface RangeSliderProps {
   step?: number
   onChange: (value: number) => void
   disabled?: boolean
-  backgroundComponent?: React.ComponentClass<any & BackgroundProps> | React.StatelessComponent<any & BackgroundProps>
+  backgroundComponent?: React.ComponentClass<any & BackgroundProps> | ((props: any & BackgroundProps) => JSX.Element)
   backgroundComponentProps?: any
 }
 
