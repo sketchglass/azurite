@@ -8,10 +8,14 @@ interface LayerData {
   content: LayerContentData
 }
 
+export
+type LayerBlendMode = "normal" | "plus" | "multiply" // TODO: add more
+
 export default
 class Layer {
   @observable name: string
   @observable visible = true
+  @observable blendMode: LayerBlendMode = "normal"
   parent: Layer|undefined
   public readonly content: LayerContent
 
