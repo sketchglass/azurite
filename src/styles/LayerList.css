@@ -10,8 +10,13 @@
 .LayerList_layer {
   height: 48px;
   padding: 12px;
+  padding-left: 4px;
   display: flex;
   align-items: center;
+  flex: 1;
+}
+.LayerList_layer .ClickToEdit {
+  flex: 1;
 }
 .LayerList_layer img {
   margin-right: 12px;

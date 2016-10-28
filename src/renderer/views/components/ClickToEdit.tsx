@@ -29,8 +29,8 @@ class ClickToEdit extends React.Component<ClickToEditProps, ClickToEditState> {
     const {isEditing} = this.state
     return (
       <div className="ClickToEdit">
-        <div hidden={isEditing} className="ClickToEdit-text" onClick={this.onTextClick.bind(this)}>{text}</div>
-        <input ref="input" type="text" hidden={!isEditing} className="ClickToEdit-input" defaultValue={text}
+        <div style={{visibility: isEditing ? "hidden" : "visible"}} className="ClickToEdit_text" onClick={this.onTextClick.bind(this)}>{text}</div>
+        <input ref="input" type="text" hidden={!isEditing} className="ClickToEdit_input" defaultValue={text}
           onBlur={this.onInputBlur.bind(this)}
           onKeyPress={this.onInputKeyPress.bind(this)}
         />

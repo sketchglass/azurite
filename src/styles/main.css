@@ -7,8 +7,9 @@
 @import "./Navigator.css";
 @import "./Palette.css";
 @import "./PictureTabBar.css";
-;
+
 /* Components */
+@import "./components/ClickToEdit.css";
 @import "./components/DraggablePanel.css";
 @import "./components/RangeSlider.css";
 @import "./components/RGBRangeSliders.css";
