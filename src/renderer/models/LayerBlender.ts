@@ -36,9 +36,11 @@ class NormalBlendShader extends BlendShader {
   }
 }
 
+const tileRect = new Rect(new Vec2(), new Vec2(TiledTexture.tileSize))
+
 class TileBlender {
   shape = new RectShape(context, {
-    rect: new Rect(new Vec2(), new Vec2(TiledTexture.tileSize)),
+    rect: tileRect
   })
   model = new Model(context, {
     shape: this.shape,
@@ -82,6 +84,12 @@ class TileBlender {
   clear() {
     this.currentDrawTarget.clear(new Color(1, 1, 1, 1))
   }
+
+  setScissor(rect: Rect|undefined) {
+    for (const target of this.drawTargets) {
+      target.scissor = rect
+    }
+  }
 }
 
 const tileBlender = new TileBlender()
@@ -101,9 +109,13 @@ class LayerBlender {
     this.drawTarget.scissor = rect
     const tileKeys = TiledTexture.keysForRect(rect || new Rect(new Vec2(0), this.picture.size))
     for (const key of tileKeys) {
+      const offset = key.mulScalar(TiledTexture.tileSize)
+      const tileScissor = rect
+        ? new Rect(rect.topLeft.sub(offset), rect.bottomRight.sub(offset)).intersection(tileRect)
+        : undefined
+      tileBlender.setScissor(tileScissor)
       tileBlender.clear()
       this.renderTile(this.picture.rootLayer, key)
-      const offset = key.mulScalar(TiledTexture.tileSize)
       drawTexture(this.drawTarget, tileBlender.currentTile, {offset, blendMode: "src"})
     }
   }
