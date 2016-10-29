@@ -3,6 +3,7 @@
 
 /* App Styles */
 @import "./App.css";
+@import "./LayerDetail.css";
 @import "./LayerList.css";
 @import "./Navigator.css";
 @import "./Palette.css";

@@ -7,6 +7,7 @@ import Picture from "../models/Picture"
 import Layer from "../models/Layer"
 import {ImageLayerContent, GroupLayerContent} from "../models/LayerContent"
 import ClickToEdit from "./components/ClickToEdit"
+import LayerDetail from "./LayerDetail"
 const classNames = require("classnames")
 import {mouseOffsetPos} from "./util"
 
@@ -123,7 +124,7 @@ class LayerList extends React.Component<LayerListProps, {}> {
     const selectedKeys = picture ? picture.selectedLayers.map(getLayerKey) : []
 
     return (
-      <div className="LayerLists">
+      <div className="LayerList">
         <div className="LayerList_buttons">
           <button onClick={this.addLayer.bind(this)}>Add</button>
           <button onClick={this.groupLayer.bind(this)}>Group</button>
@@ -139,6 +140,7 @@ class LayerList extends React.Component<LayerListProps, {}> {
           onMove={this.onMove}
           onCopy={this.onCopy}
         />
+        <LayerDetail layer={picture && picture.currentLayer} />
       </div>
     )
   }

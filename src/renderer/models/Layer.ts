@@ -5,20 +5,28 @@ import {LayerContent, GroupLayerContent, ImageLayerContent, LayerContentData} fr
 export
 interface LayerData {
   name: string
+  visible: boolean
+  blendMode: LayerBlendMode
+  opacity: number
   content: LayerContentData
 }
+
+export
+type LayerBlendMode = "normal" | "plus" | "multiply" // TODO: add more
 
 export default
 class Layer {
   @observable name: string
   @observable visible = true
+  @observable blendMode: LayerBlendMode = "normal"
+  @observable opacity = 1
   parent: Layer|undefined
   public readonly content: LayerContent
 
   constructor(public picture: Picture, name: string, makeContent: (layer: Layer) => LayerContent) {
     this.name = name
     this.content = makeContent(this)
-    reaction(() => this.visible, () => {
+    reaction(() => [this.visible, this.blendMode, this.opacity], () => {
       picture.updated.next()
     })
   }
@@ -28,9 +36,9 @@ class Layer {
   }
 
   toData(): LayerData {
-    const {name} = this
+    const {name, visible, blendMode, opacity} = this
     const content = this.content.toData()
-    return {name, content}
+    return {name, visible, blendMode, opacity, content}
   }
 
   clone(): Layer {
@@ -76,6 +84,10 @@ class Layer {
       }
     }
     const layer = new Layer(picture, data.name, makeContent)
+    const {visible, blendMode, opacity} = data
+    layer.visible = visible
+    layer.blendMode = blendMode
+    layer.opacity = opacity
     return layer
   }
 }
