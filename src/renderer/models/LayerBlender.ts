@@ -3,11 +3,11 @@ import {Vec2, Rect, Transform} from "paintvec"
 import {Model, Texture, TextureDrawTarget, Shader, TextureShader, RectShape, PixelType, Color} from "paintgl"
 import {context} from "../GLContext"
 import TiledTexture from "./TiledTexture"
-import Layer from "./Layer"
+import Layer, {LayerBlendMode} from "./Layer"
 import {drawTexture} from "../GLUtil"
 
 abstract class BlendShader extends Shader {
-  abstract get blendFunc(): string
+  abstract get blendOp(): string
 
   get fragmentShader() {
     return `
@@ -16,25 +16,30 @@ abstract class BlendShader extends Shader {
       uniform sampler2D srcTexture;
       uniform sampler2D dstTexture;
       uniform float opacity;
-      ${this.blendFunc}
+      vec4 blendOp(vec4 src, vec4 dst) {
+        ${this.blendOp}
+      }
       void main(void) {
         vec4 src = texture2D(srcTexture, vTexCoord) * opacity;
         vec4 dst = texture2D(dstTexture, vTexCoord);
-        gl_FragColor = blendFunc(src, dst);
+        gl_FragColor = clamp(blendOp(src, dst), 0.0, 1.0);
       }
     `
   }
 }
 
-class NormalBlendShader extends BlendShader {
-  get blendFunc() {
-    return `
-      vec4 blendFunc(vec4 src, vec4 dst) {
-        return src + dst * (1.0 - src.a);
-      }
-    `
-  }
-}
+// https://www.w3.org/TR/SVGCompositing/
+const blendOps = new Map<LayerBlendMode, string>([
+  ["normal", `
+    return src + dst * (1.0 - src.a);
+  `],
+  ["plus", `
+    return src + dst;
+  `],
+  ["multiply", `
+    return src * dst + src * (1.0 - dst.a) + dst * (1.0 - src.a);
+  `]
+])
 
 const tileRect = new Rect(new Vec2(), new Vec2(TiledTexture.tileSize))
 
@@ -42,10 +47,8 @@ class TileBlender {
   shape = new RectShape(context, {
     rect: tileRect
   })
-  model = new Model(context, {
-    shape: this.shape,
-    shader: NormalBlendShader,
-  })
+  models = new Map<LayerBlendMode, Model>()
+
   tiles = [0, 1].map(i => new Texture(context, {
     size: new Vec2(TiledTexture.tileSize),
     pixelType: "half-float",
@@ -71,14 +74,30 @@ class TileBlender {
     return this.drawTargets[[1, 0][this.currentIndex]]
   }
 
-  blend(tile: Texture, opacity: number) {
+  constructor() {
+    for (const [type, op] of blendOps) {
+      class shader extends BlendShader {
+        get blendOp() {
+          return op
+        }
+      }
+      const model = new Model(context, {
+        shape: this.shape,
+        shader: shader
+      })
+      this.models.set(type, model)
+    }
+  }
+
+  blend(tile: Texture, mode: LayerBlendMode, opacity: number) {
     this.swapCurrent()
-    this.model.uniforms = {
+    const model = this.models.get(mode)!
+    model.uniforms = {
       srcTexture: tile,
       dstTexture: this.previousTile,
       opacity
     }
-    this.currentDrawTarget.draw(this.model)
+    this.currentDrawTarget.draw(model)
   }
 
   clear() {
@@ -127,7 +146,7 @@ class LayerBlender {
     const {content} = layer
     if (content.type == "image") {
       if (content.tiledTexture.has(key)) {
-        tileBlender.blend(content.tiledTexture.get(key), 1)
+        tileBlender.blend(content.tiledTexture.get(key), layer.blendMode, layer.opacity)
       }
     } else {
       const {children} = content

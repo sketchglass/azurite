@@ -26,7 +26,7 @@ class Layer {
   constructor(public picture: Picture, name: string, makeContent: (layer: Layer) => LayerContent) {
     this.name = name
     this.content = makeContent(this)
-    reaction(() => this.visible, () => {
+    reaction(() => [this.visible, this.blendMode, this.opacity], () => {
       picture.updated.next()
     })
   }
