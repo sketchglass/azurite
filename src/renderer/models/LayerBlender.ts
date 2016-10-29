@@ -47,9 +47,6 @@ abstract class BlendShader extends Shader {
 }
 
 const blendOps = new Map<LayerBlendMode, string>([
-  ["normal", `
-    return src;
-  `],
   ["plus", `
     return src + dst;
   `],
@@ -60,17 +57,29 @@ const blendOps = new Map<LayerBlendMode, string>([
 
 const tileRect = new Rect(new Vec2(), new Vec2(TiledTexture.tileSize))
 
+const tileShape = new RectShape(context, {
+  rect: tileRect
+})
+const tileBlendModels = new Map(Array.from(blendOps).map(([type, op]) => {
+  class shader extends BlendShader {
+    get blendOp() {
+      return op
+    }
+  }
+  const model = new Model(context, {
+    shape: tileShape,
+    shader: shader,
+    blendMode: "src",
+  })
+  return [type, model] as [LayerBlendMode, Model]
+}))
+
+const tileNormalModel = new Model(context, {
+  shape: tileShape,
+  shader: NormalBlendShader,
+})
+
 class TileBlender {
-  shape = new RectShape(context, {
-    rect: tileRect
-  })
-  models = new Map<LayerBlendMode, Model>()
-
-  normalModel = new Model(context, {
-    shape: this.shape,
-    shader: NormalBlendShader,
-  })
-
   tiles = [0, 1].map(i => new Texture(context, {
     size: new Vec2(TiledTexture.tileSize),
     pixelType: "half-float",
@@ -96,38 +105,22 @@ class TileBlender {
     return this.drawTargets[[1, 0][this.currentIndex]]
   }
 
-  constructor() {
-    for (const [type, op] of blendOps) {
-      class shader extends BlendShader {
-        get blendOp() {
-          return op
-        }
-      }
-      const model = new Model(context, {
-        shape: this.shape,
-        shader: shader,
-        blendMode: "src",
-      })
-      this.models.set(type, model)
-    }
-  }
-
   blend(tile: Texture, mode: LayerBlendMode, opacity: number) {
-    if (mode == "normal") {
-      this.normalModel.uniforms = {
-        srcTexture: tile,
-        opacity
-      }
-      this.currentDrawTarget.draw(this.normalModel)
-    } else {
+    const model = tileBlendModels.get(mode)
+    if (model) {
       this.swapCurrent()
-      const model = this.models.get(mode)!
       model.uniforms = {
         srcTexture: tile,
         dstTexture: this.previousTile,
         opacity
       }
       this.currentDrawTarget.draw(model)
+    } else {
+      tileNormalModel.uniforms = {
+        srcTexture: tile,
+        opacity
+      }
+      this.currentDrawTarget.draw(tileNormalModel)
     }
   }
 
