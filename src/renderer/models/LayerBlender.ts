@@ -125,7 +125,7 @@ class TileBlender {
   }
 
   clear() {
-    this.currentDrawTarget.clear(new Color(1, 1, 1, 1))
+    this.currentDrawTarget.clear(new Color(0, 0, 0, 0))
   }
 
   setScissor(rect: Rect|undefined) {
@@ -150,6 +150,7 @@ class LayerBlender {
 
   render(rect?: Rect) {
     this.drawTarget.scissor = rect
+    this.drawTarget.clear(new Color(1, 1, 1, 1))
     const tileKeys = TiledTexture.keysForRect(rect || new Rect(new Vec2(0), this.picture.size))
     for (const key of tileKeys) {
       const offset = key.mulScalar(TiledTexture.tileSize)
@@ -157,7 +158,7 @@ class LayerBlender {
         ? new Rect(rect.topLeft.sub(offset), rect.bottomRight.sub(offset)).intersection(tileRect)
         : undefined
       this.renderLayers(this.picture.layers, key, tileScissor, 0)
-      drawTexture(this.drawTarget, tileBlenders[0].currentTile, {offset, blendMode: "src"})
+      drawTexture(this.drawTarget, tileBlenders[0].currentTile, {offset, blendMode: "src-over"})
     }
   }
 
