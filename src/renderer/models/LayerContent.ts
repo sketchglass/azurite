@@ -83,6 +83,7 @@ class GroupLayerContent {
       onRemoved(change.oldValue)
       onAdded(change.newValue)
     }
+    this.layer.picture.updated.next()
   }
 
   toData(): GroupLayerContentData {
