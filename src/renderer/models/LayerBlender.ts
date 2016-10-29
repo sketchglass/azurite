@@ -16,28 +16,31 @@ abstract class BlendShader extends Shader {
       uniform sampler2D srcTexture;
       uniform sampler2D dstTexture;
       uniform float opacity;
-      vec4 blendOp(vec4 src, vec4 dst) {
+      vec3 blendOp(vec3 src, vec3 dst) {
         ${this.blendOp}
+      }
+      vec3 getColor(vec4 pixel) {
+        return pixel.a == 0.0 ? vec3(0.0) : pixel.rgb / pixel.a;
       }
       void main(void) {
         vec4 src = texture2D(srcTexture, vTexCoord) * opacity;
         vec4 dst = texture2D(dstTexture, vTexCoord);
-        gl_FragColor = clamp(blendOp(src, dst), 0.0, 1.0);
+        vec4 blended = vec4(clamp(blendOp(getColor(src), getColor(dst)), 0.0, 1.0), 1.0);
+        gl_FragColor = blended * src.a * dst.a + src * (1.0 - dst.a) + dst * (1.0 - src.a);
       }
     `
   }
 }
 
-// https://www.w3.org/TR/SVGCompositing/
 const blendOps = new Map<LayerBlendMode, string>([
   ["normal", `
-    return src + dst * (1.0 - src.a);
+    return src;
   `],
   ["plus", `
     return src + dst;
   `],
   ["multiply", `
-    return src * dst + src * (1.0 - dst.a) + dst * (1.0 - src.a);
+    return src * dst;
   `]
 ])
 
