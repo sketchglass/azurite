@@ -6,6 +6,20 @@ import TiledTexture from "./TiledTexture"
 import Layer, {LayerBlendMode} from "./Layer"
 import {drawTexture} from "../GLUtil"
 
+class NormalBlendShader extends Shader {
+  get fragmentShader() {
+    return `
+      precision mediump float;
+      varying highp vec2 vTexCoord;
+      uniform sampler2D srcTexture;
+      uniform float opacity;
+      void main(void) {
+        gl_FragColor = texture2D(srcTexture, vTexCoord) * opacity;
+      }
+    `
+  }
+}
+
 abstract class BlendShader extends Shader {
   abstract get blendOp(): string
 
@@ -52,6 +66,11 @@ class TileBlender {
   })
   models = new Map<LayerBlendMode, Model>()
 
+  normalModel = new Model(context, {
+    shape: this.shape,
+    shader: NormalBlendShader,
+  })
+
   tiles = [0, 1].map(i => new Texture(context, {
     size: new Vec2(TiledTexture.tileSize),
     pixelType: "half-float",
@@ -86,21 +105,30 @@ class TileBlender {
       }
       const model = new Model(context, {
         shape: this.shape,
-        shader: shader
+        shader: shader,
+        blendMode: "src",
       })
       this.models.set(type, model)
     }
   }
 
   blend(tile: Texture, mode: LayerBlendMode, opacity: number) {
-    this.swapCurrent()
-    const model = this.models.get(mode)!
-    model.uniforms = {
-      srcTexture: tile,
-      dstTexture: this.previousTile,
-      opacity
+    if (mode == "normal") {
+      this.normalModel.uniforms = {
+        srcTexture: tile,
+        opacity
+      }
+      this.currentDrawTarget.draw(this.normalModel)
+    } else {
+      this.swapCurrent()
+      const model = this.models.get(mode)!
+      model.uniforms = {
+        srcTexture: tile,
+        dstTexture: this.previousTile,
+        opacity
+      }
+      this.currentDrawTarget.draw(model)
     }
-    this.currentDrawTarget.draw(model)
   }
 
   clear() {
