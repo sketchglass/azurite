@@ -135,7 +135,7 @@ class TileBlender {
   }
 }
 
-const tileBlender = new TileBlender()
+const tileBlenders = [new TileBlender()]
 
 export default
 class LayerBlender {
@@ -156,28 +156,49 @@ class LayerBlender {
       const tileScissor = rect
         ? new Rect(rect.topLeft.sub(offset), rect.bottomRight.sub(offset)).intersection(tileRect)
         : undefined
-      tileBlender.setScissor(tileScissor)
-      tileBlender.clear()
-      this.renderTile(this.picture.rootLayer, key)
-      drawTexture(this.drawTarget, tileBlender.currentTile, {offset, blendMode: "src"})
+      this.renderLayers(this.picture.layers, key, tileScissor, 0)
+      drawTexture(this.drawTarget, tileBlenders[0].currentTile, {offset, blendMode: "src"})
     }
   }
 
-  renderTile(layer: Layer, key: Vec2) {
+  renderLayer(layer: Layer, key: Vec2, scissor: Rect|undefined, depth: number): boolean {
     if (!layer.visible) {
-      return
+      return false
     }
     const {content} = layer
+    let tile: Texture|undefined = undefined
+
     if (content.type == "image") {
       if (content.tiledTexture.has(key)) {
-        tileBlender.blend(content.tiledTexture.get(key), layer.blendMode, layer.opacity)
+        tile = content.tiledTexture.get(key)
       }
     } else {
       const {children} = content
-      for (let i = children.length - 1; i >= 0; --i) {
-        this.renderTile(children[i], key)
+      const rendered = this.renderLayers(children, key, scissor, depth + 1)
+      if (rendered) {
+        tile = tileBlenders[depth + 1].currentTile
       }
     }
+
+    if (!tile) {
+      return false
+    }
+    tileBlenders[depth].blend(tile, layer.blendMode, layer.opacity)
+    return true
+  }
+
+  renderLayers(layers: Layer[], key: Vec2, scissor: Rect|undefined, depth: number): boolean {
+    if (!tileBlenders[depth]) {
+      tileBlenders[depth] = new TileBlender()
+    }
+    tileBlenders[depth].setScissor(scissor)
+    tileBlenders[depth].clear()
+    let rendered = false
+    for (let i = layers.length - 1; i >= 0; --i) {
+      const childRendered = this.renderLayer(layers[i], key, scissor, depth)
+      rendered = rendered || childRendered
+    }
+    return rendered
   }
 
   dispose() {
