@@ -476,6 +476,10 @@ boom@2.x.x:
   dependencies:
     hoek "2.x.x"
 
+bowser@^1.4.6:
+  version "1.4.6"
+  resolved "https://registry.yarnpkg.com/bowser/-/bowser-1.4.6.tgz#2be801851089a165d504f417ea6ddcacf774af43"
+
 brace-expansion@^1.0.0:
   version "1.1.6"
   resolved "https://registry.yarnpkg.com/brace-expansion/-/brace-expansion-1.1.6.tgz#7197d7eaa9b87e648390ea61fc66c84427420df9"
@@ -1706,6 +1710,13 @@ getpass@^0.1.1:
   resolved "https://registry.yarnpkg.com/getpass/-/getpass-0.1.6.tgz#283ffd9fc1256840875311c1b60e8c40187110e6"
   dependencies:
     assert-plus "^1.0.0"
+
+"github:sketchglass/react-draggable-tree":
+  name react-draggable-tree
+  version "0.1.0"
+  resolved "https://codeload.github.com/sketchglass/react-draggable-tree/tar.gz/42ecf6896dfe4a0446d71a1fe1e3c742621c292c"
+  dependencies:
+    classnames "^2.2.5"
 
 glob-base@^0.3.0:
   version "0.3.0"
@@ -3904,12 +3915,6 @@ rcedit@^0.7.0:
 react-dom@^15.3.2:
   version "15.3.2"
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-15.3.2.tgz#c46b0aa5380d7b838e7a59c4a7beff2ed315531f"
-
-react-draggable-tree@sketchglass/react-draggable-tree:
-  version "0.1.0"
-  resolved "https://codeload.github.com/sketchglass/react-draggable-tree/tar.gz/154b016ca34fadcdb416e4ac6e4492d7a3e9b617"
-  dependencies:
-    classnames "^2.2.5"
 
 react@^15.3.2:
   version "15.3.2"
