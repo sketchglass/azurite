@@ -5,7 +5,7 @@ import {Tree, TreeNode, NodeInfo} from "react-draggable-tree"
 import "react-draggable-tree/lib/index.css"
 import Picture from "../models/Picture"
 import Layer from "../models/Layer"
-import {MoveLayerCommand, CopyLayerCommand, GroupLayerCommand, AddLayerCommand, RemoveLayerCommand, RenameLayerCommand} from "../commands/LayerCommand"
+import {MoveLayerCommand, CopyLayerCommand, GroupLayerCommand, AddLayerCommand, RemoveLayerCommand, ChangeLayerPropsCommand} from "../commands/LayerCommand"
 import ClickToEdit from "./components/ClickToEdit"
 import LayerDetail from "./LayerDetail"
 const classNames = require("classnames")
@@ -50,7 +50,7 @@ const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
   const rename = (name: string) => {
     const {picture} = layer
     if (layer.name != name) {
-      picture.undoStack.redoAndPush(new RenameLayerCommand(layer, name))
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(layer, {name}))
     }
   }
 

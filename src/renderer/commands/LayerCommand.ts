@@ -1,6 +1,6 @@
 import {IObservableArray} from "mobx"
 import Picture from "../models/Picture"
-import Layer from "../models/Layer"
+import Layer, {LayerBlendMode} from "../models/Layer"
 import {ImageLayerContent, GroupLayerContent} from "../models/LayerContent"
 
 function getSiblingsAndIndex(picture: Picture, path: number[]): [IObservableArray<Layer>, number] {
@@ -182,14 +182,25 @@ class RemoveLayerCommand {
 }
 
 export
-class RenameLayerCommand {
-  oldName = this.layer.name
-  constructor(public layer: Layer, public name: string) {
+interface LayerProps {
+  name?: string
+  visible?: boolean
+  blendMode?: LayerBlendMode
+  opacity?: number
+}
+
+export
+class ChangeLayerPropsCommand {
+  oldProps: LayerProps
+
+  constructor(public layer: Layer, public props: LayerProps) {
   }
   undo() {
-    this.layer.name = this.oldName
+    Object.assign(this.layer, this.oldProps)
   }
   redo() {
-    this.layer.name = this.name
+    const {name, visible, blendMode, opacity} = this.layer
+    this.oldProps = {name, visible, blendMode, opacity}
+    Object.assign(this.layer, this.props)
   }
 }
