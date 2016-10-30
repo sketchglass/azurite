@@ -1,7 +1,10 @@
+import {Rect} from "paintvec"
+import {Texture} from "paintgl"
 import {IObservableArray} from "mobx"
 import Picture from "../models/Picture"
 import Layer, {LayerBlendMode} from "../models/Layer"
 import {ImageLayerContent, GroupLayerContent} from "../models/LayerContent"
+import {context} from "../GLContext"
 
 function getSiblingsAndIndex(picture: Picture, path: number[]): [IObservableArray<Layer>, number] {
   const parent = picture.layerFromPath(path.slice(0, -1))
@@ -202,5 +205,39 @@ class ChangeLayerPropsCommand {
     const {name, visible, blendMode, opacity} = this.layer
     this.oldProps = {name, visible, blendMode, opacity}
     Object.assign(this.layer, this.props)
+  }
+}
+
+export
+class ChangeLayerImageCommand {
+  constructor(public picture: Picture, public path: number[], public rect: Rect, public oldData: Uint16Array, public newData: Uint16Array) {
+  }
+
+  replace(data: Uint16Array) {
+    const layer = this.picture.layerFromPath(this.path)
+    if (!layer) {
+      return
+    }
+    const {content} = layer
+    if (content.type != "image") {
+      return
+    }
+
+    const texture = new Texture(context, {
+      size: this.rect.size,
+      pixelType: "half-float",
+      data
+    })
+    content.tiledTexture.drawTexture(texture, this.rect.topLeft, "src")
+    texture.dispose()
+    content.layer.picture.updated.next(this.rect)
+    content.updateThumbnail()
+  }
+
+  undo() {
+    this.replace(this.oldData)
+  }
+  redo() {
+    this.replace(this.newData)
   }
 }

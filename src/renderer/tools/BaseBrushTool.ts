@@ -7,6 +7,7 @@ import Layer from "../models/Layer"
 import {ImageLayerContent} from "../models/LayerContent"
 import TiledTexture from "../models/TiledTexture"
 import Picture from "../models/Picture"
+import {ChangeLayerImageCommand} from "../commands/LayerCommand"
 import {context} from "../GLContext"
 import {drawTexture} from "../GLUtil"
 import {float32ArrayTo16} from "../../lib/Float"
@@ -253,8 +254,8 @@ abstract class BaseBrushTool extends Tool {
     drawTarget.dispose()
     texture.dispose()
 
-    const undoCommand = new BrushUndoCommand(this.picture, content.layer.path(), rect, oldData, newData)
-    this.picture.undoStack.push(undoCommand)
+    const command = new ChangeLayerImageCommand(this.picture, content.layer.path(), rect, oldData, newData)
+    this.picture.undoStack.push(command)
   }
 
   brushSize(waypoint: Waypoint) {
@@ -275,39 +276,6 @@ abstract class BaseBrushTool extends Tool {
   }
 
   abstract renderWaypoints(waypoints: Waypoint[], rect: Rect): void
-}
-
-class BrushUndoCommand {
-  constructor(public picture: Picture, public path: number[], public rect: Rect, public oldData: Uint16Array, public newData: Uint16Array) {
-  }
-
-  @action replace(data: Uint16Array) {
-    const layer = this.picture.layerFromPath(this.path)
-    if (!layer) {
-      return
-    }
-    const {content} = layer
-    if (content.type != "image") {
-      return
-    }
-
-    const texture = new Texture(context, {
-      size: this.rect.size,
-      pixelType: "half-float",
-      data
-    })
-    content.tiledTexture.drawTexture(texture, this.rect.topLeft, "src")
-    texture.dispose()
-    content.layer.picture.updated.next(this.rect)
-    content.updateThumbnail()
-  }
-
-  undo() {
-    this.replace(this.oldData)
-  }
-  redo() {
-    this.replace(this.newData)
-  }
 }
 
 export default BaseBrushTool
