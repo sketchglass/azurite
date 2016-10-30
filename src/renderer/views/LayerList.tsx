@@ -50,7 +50,7 @@ const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
   const rename = (name: string) => {
     const {picture} = layer
     if (layer.name != name) {
-      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(layer, {name}))
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), {name}))
     }
   }
 

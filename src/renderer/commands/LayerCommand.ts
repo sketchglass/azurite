@@ -196,15 +196,21 @@ export
 class ChangeLayerPropsCommand {
   oldProps: LayerProps
 
-  constructor(public layer: Layer, public props: LayerProps) {
+  constructor(public picture: Picture, public path: number[], public props: LayerProps) {
   }
   undo() {
-    Object.assign(this.layer, this.oldProps)
+    const layer = this.picture.layerFromPath(this.path)
+    if (layer) {
+      Object.assign(layer, this.oldProps)
+    }
   }
   redo() {
-    const {name, visible, blendMode, opacity} = this.layer
-    this.oldProps = {name, visible, blendMode, opacity}
-    Object.assign(this.layer, this.props)
+    const layer = this.picture.layerFromPath(this.path)
+    if (layer) {
+      const {name, visible, blendMode, opacity} = layer
+      this.oldProps = {name, visible, blendMode, opacity}
+      Object.assign(layer, this.props)
+    }
   }
 }
 
