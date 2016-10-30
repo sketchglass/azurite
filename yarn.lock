@@ -3910,8 +3910,8 @@ react-dom@^15.3.2:
   resolved "https://registry.yarnpkg.com/react-dom/-/react-dom-15.3.2.tgz#c46b0aa5380d7b838e7a59c4a7beff2ed315531f"
 
 react-draggable-tree@sketchglass/react-draggable-tree:
-  version "0.1.0"
-  resolved "https://codeload.github.com/sketchglass/react-draggable-tree/tar.gz/5a486219bc78961309a6fcc464345e06ad6245e4"
+  version "0.1.1"
+  resolved "https://codeload.github.com/sketchglass/react-draggable-tree/tar.gz/0a953b3579802af7cad945001abdb39148ecc829"
   dependencies:
     bowser "^1.4.6"
     classnames "^2.2.5"
