@@ -13,7 +13,7 @@ Casual Painting App in Electron
 ## Build
 
 ```
-yarn install
+npm install
 npm run watch
 ```
 
