@@ -5,7 +5,7 @@ import Waypoint from "../models/Waypoint"
 import BaseBrushTool from "./BaseBrushTool";
 import {context} from "../GLContext"
 import BrushSettings from "../views/BrushSettings"
-import TiledTexture from "../models/TiledTexture"
+import TiledTexture, {Tile} from "../models/TiledTexture"
 import {AppViewModel} from "../viewmodels/AppViewModel"
 import React = require("react")
 
@@ -124,8 +124,8 @@ class BrushTool extends BaseBrushTool {
     this.model.blendMode = this.eraser ? "dst-out" : "src-over"
 
     for (const key of TiledTexture.keysForRect(rect)) {
-      this.drawTarget.texture = tiledTexture.get(key)
-      this.model.transform = Transform.translate(key.mulScalar(-TiledTexture.tileSize))
+      this.drawTarget.texture = tiledTexture.get(key).texture
+      this.model.transform = Transform.translate(key.mulScalar(-Tile.width))
       this.drawTarget.draw(this.model)
     }
   }

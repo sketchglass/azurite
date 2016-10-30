@@ -4,7 +4,7 @@ import {Model, Shader, RectShape, Texture, TextureDrawTarget} from "paintgl"
 import Waypoint from "../models/Waypoint"
 import BaseBrushTool from "./BaseBrushTool"
 import {context} from "../GLContext"
-import TiledTexture from "../models/TiledTexture"
+import TiledTexture, {Tile} from "../models/TiledTexture"
 import WatercolorSettings from "../views/WatercolorSettings"
 import {AppViewModel} from "../viewmodels/AppViewModel"
 import React = require("react")
@@ -199,8 +199,8 @@ class WatercolorTool extends BaseBrushTool {
       this.model.uniforms["uShapeClipTexture"] = this.shapeClipTexture
 
       for (const key of TiledTexture.keysForRect(rect)) {
-        this.drawTarget.texture = tiledTexture.get(key)
-        this.model.transform = Transform.translate(topLeft.sub(key.mulScalar(TiledTexture.tileSize)))
+        this.drawTarget.texture = tiledTexture.get(key).texture
+        this.model.transform = Transform.translate(topLeft.sub(key.mulScalar(Tile.width)))
         this.drawTarget.draw(this.model)
       }
     }

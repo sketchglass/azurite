@@ -2,7 +2,7 @@ import Picture from "./Picture"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Model, Texture, TextureDrawTarget, Shader, TextureShader, RectShape, PixelType, Color} from "paintgl"
 import {context} from "../GLContext"
-import TiledTexture from "./TiledTexture"
+import TiledTexture, {Tile} from "./TiledTexture"
 import Layer, {LayerBlendMode} from "./Layer"
 import {drawTexture} from "../GLUtil"
 
@@ -55,10 +55,8 @@ const blendOps = new Map<LayerBlendMode, string>([
   `]
 ])
 
-const tileRect = new Rect(new Vec2(), new Vec2(TiledTexture.tileSize))
-
 const tileShape = new RectShape(context, {
-  rect: tileRect
+  rect: Tile.rect
 })
 const tileBlendModels = new Map(Array.from(blendOps).map(([type, op]) => {
   class shader extends BlendShader {
@@ -80,11 +78,8 @@ const tileNormalModel = new Model(context, {
 })
 
 class TileBlender {
-  tiles = [0, 1].map(i => new Texture(context, {
-    size: new Vec2(TiledTexture.tileSize),
-    pixelType: "half-float",
-  }))
-  drawTargets = this.tiles.map(tile => new TextureDrawTarget(context, tile))
+  tiles = [0, 1].map(i => new Tile())
+  drawTargets = this.tiles.map(tile => new TextureDrawTarget(context, tile.texture))
 
   currentIndex = 0
 
@@ -105,19 +100,19 @@ class TileBlender {
     return this.drawTargets[[1, 0][this.currentIndex]]
   }
 
-  blend(tile: Texture, mode: LayerBlendMode, opacity: number) {
+  blend(tile: Tile, mode: LayerBlendMode, opacity: number) {
     const model = tileBlendModels.get(mode)
     if (model) {
       this.swapCurrent()
       model.uniforms = {
-        srcTexture: tile,
-        dstTexture: this.previousTile,
+        srcTexture: tile.texture,
+        dstTexture: this.previousTile.texture,
         opacity
       }
       this.currentDrawTarget.draw(model)
     } else {
       tileNormalModel.uniforms = {
-        srcTexture: tile,
+        srcTexture: tile.texture,
         opacity
       }
       this.currentDrawTarget.draw(tileNormalModel)
@@ -153,12 +148,12 @@ class LayerBlender {
     this.drawTarget.clear(new Color(1, 1, 1, 1))
     const tileKeys = TiledTexture.keysForRect(rect || new Rect(new Vec2(0), this.picture.size))
     for (const key of tileKeys) {
-      const offset = key.mulScalar(TiledTexture.tileSize)
+      const offset = key.mulScalar(Tile.width)
       const tileScissor = rect
-        ? new Rect(rect.topLeft.sub(offset), rect.bottomRight.sub(offset)).intersection(tileRect)
+        ? new Rect(rect.topLeft.sub(offset), rect.bottomRight.sub(offset)).intersection(Tile.rect)
         : undefined
       this.renderLayers(this.picture.layers, key, tileScissor, 0)
-      drawTexture(this.drawTarget, tileBlenders[0].currentTile, {offset, blendMode: "src-over"})
+      drawTexture(this.drawTarget, tileBlenders[0].currentTile.texture, {offset, blendMode: "src-over"})
     }
   }
 
@@ -167,7 +162,7 @@ class LayerBlender {
       return false
     }
     const {content} = layer
-    let tile: Texture|undefined = undefined
+    let tile: Tile|undefined = undefined
 
     if (content.type == "image") {
       if (content.tiledTexture.has(key)) {
