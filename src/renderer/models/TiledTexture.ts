@@ -5,40 +5,40 @@ import {context} from "../GLContext"
 import {drawTexture} from "../GLUtil"
 import {float32ArrayTo16} from "../../lib/Float"
 
-function keyToString(key: Vec2) {
-  return `${key.x},${key.y}`
-}
+export
+class Tile {
+  texture: Texture
+  static width = 256
+  static size = new Vec2(Tile.width)
+  static rect = new Rect(new Vec2(0), Tile.size)
 
-function stringToKey(str: string) {
-  const strs = str.split(",")
-  return new Vec2(parseInt(strs[0]), parseInt(strs[1]))
-}
+  constructor(data?: Uint16Array) {
+    this.texture = new Texture(context, {
+      size: Tile.size,
+      pixelType: "half-float",
+      data
+    })
+  }
 
-const tileSize = 256
-const tileRect = new Rect(new Vec2(0), new Vec2(tileSize))
+  toData() {
+    tileModel.uniforms = {texture: this.texture}
+    floatDrawTarget.draw(tileModel)
+    const {width, rect} = Tile
+    const floatData = new Float32Array(width * width * 4)
+    floatDrawTarget.readPixels(rect, floatData)
+    return float32ArrayTo16(floatData)
+  }
 
-const tileModel = new Model(context, {
-  shape: new RectShape(context, {usage: "static", rect: tileRect}),
-  shader: TextureShader,
-  blendMode: "src",
-})
-const floatTile = new Texture(context, {size: new Vec2(tileSize), pixelType: "float"})
-const floatDrawTarget = new TextureDrawTarget(context, floatTile)
+  clone() {
+    const cloned = new Tile()
+    tileDrawTarget.texture = cloned.texture
+    drawTexture(tileDrawTarget, this.texture, {blendMode: "src"})
+    return cloned
+  }
 
-function newTile(data?: Uint16Array) {
-  return new Texture(context, {
-    size: new Vec2(tileSize),
-    pixelType: "half-float",
-    data
-  })
-}
-
-function tileToData(tile: Texture) {
-  tileModel.uniforms = {texture: tile}
-  floatDrawTarget.draw(tileModel)
-  const floatData = new Float32Array(tileSize * tileSize * 4)
-  floatDrawTarget.readPixels(tileRect, floatData)
-  return float32ArrayTo16(floatData)
+  dispose() {
+    this.texture.dispose()
+  }
 }
 
 export
@@ -49,8 +49,7 @@ interface TiledTextureData {
 
 export default
 class TiledTexture {
-  static tileSize = tileSize
-  tiles = new Map<string, Texture>()
+  tiles = new Map<string, Tile>()
 
   has(key: Vec2) {
     return this.tiles.has(keyToString(key))
@@ -65,36 +64,30 @@ class TiledTexture {
     if (this.tiles.has(keyStr)) {
       return this.tiles.get(keyStr)!
     }
-    const tile = newTile()
+    const tile = new Tile()
     this.tiles.set(keyStr, tile)
     return tile
   }
 
-  set(key: Vec2, tile: Texture) {
+  set(key: Vec2, tile: Tile) {
     this.tiles.set(keyToString(key), tile)
   }
 
   clone() {
     const cloned = new TiledTexture()
-    const target = new TextureDrawTarget(context)
     for (const key of this.keys()) {
-      const tile = newTile()
-      target.texture = tile
-      drawTexture(target, this.get(key), {blendMode: "src"})
+      const tile = this.get(key).clone()
       cloned.set(key, tile)
     }
-    target.dispose()
     return cloned
   }
 
   drawTexture(src: Texture, offset: Vec2, blendMode: BlendMode) {
     const rect = new Rect(offset, offset.add(src.size))
-    const target = new TextureDrawTarget(context)
     for (const key of TiledTexture.keysForRect(rect)) {
-      target.texture = this.get(key)
-      drawTexture(target, src, {offset: offset.sub(key.mulScalar(tileSize)), blendMode})
+      tileDrawTarget.texture = this.get(key).texture
+      drawTexture(tileDrawTarget, src, {offset: offset.sub(key.mulScalar(Tile.width)), blendMode})
     }
-    target.dispose()
   }
 
   drawToDrawTarget(dest: DrawTarget, offset: Vec2, blendMode: BlendMode) {
@@ -105,35 +98,35 @@ class TiledTexture {
           continue
         }
       }
-      drawTexture(dest, this.get(key), {offset: offset.add(key.mulScalar(tileSize)), blendMode})
+      drawTexture(dest, this.get(key).texture, {offset: offset.add(key.mulScalar(Tile.width)), blendMode})
     }
   }
 
   toData(): TiledTextureData {
     const tiles = Array.from(this.tiles).map(([key, tile]) => {
       const {x, y} = stringToKey(key)
-      const data = tileToData(tile)
+      const data = tile.toData()
       const buffer = Buffer.from(data.buffer)
       const compressed = zlib.deflateSync(buffer)
       const elem: [[number, number], Buffer] = [[x, y], compressed]
       return elem
     })
     return {
-      tileSize,
+      tileSize: Tile.width,
       tiles,
     }
   }
 
   static fromData(data: TiledTextureData) {
-    if (data.tileSize != tileSize) {
+    if (data.tileSize != Tile.width) {
       throw new Error("tile size incompatible")
     }
     const tiles = data.tiles.map(([[x, y], compressed]) => {
       const buffer = zlib.inflateSync(compressed)
       const data = new Uint16Array(new Uint8Array(buffer).buffer)
-      const tile = newTile(data)
+      const tile = new Tile(data)
       const key = keyToString(new Vec2(x, y))
-      const kv: [string, Texture] = [key, tile]
+      const kv: [string, Tile] = [key, tile]
       return kv
     })
     const tiledTexture = new TiledTexture()
@@ -149,10 +142,10 @@ class TiledTexture {
   }
 
   static keysForRect(rect: Rect) {
-    const left = Math.floor(rect.left / this.tileSize)
-    const right = Math.floor((rect.right - 1) / this.tileSize)
-    const top = Math.floor(rect.top / this.tileSize)
-    const bottom = Math.floor((rect.bottom - 1) / this.tileSize)
+    const left = Math.floor(rect.left / Tile.width)
+    const right = Math.floor((rect.right - 1) / Tile.width)
+    const top = Math.floor(rect.top / Tile.width)
+    const bottom = Math.floor((rect.bottom - 1) / Tile.width)
     const keys: Vec2[] = []
     for (let y = top; y <= bottom; ++y) {
       for (let x = left; x <= right; ++x) {
@@ -162,3 +155,22 @@ class TiledTexture {
     return keys
   }
 }
+
+function keyToString(key: Vec2) {
+  return `${key.x},${key.y}`
+}
+
+function stringToKey(str: string) {
+  const strs = str.split(",")
+  return new Vec2(parseInt(strs[0]), parseInt(strs[1]))
+}
+
+const tileModel = new Model(context, {
+  shape: new RectShape(context, {usage: "static", rect: Tile.rect}),
+  shader: TextureShader,
+  blendMode: "src",
+})
+const floatTile = new Texture(context, {size: Tile.size, pixelType: "float"})
+const floatDrawTarget = new TextureDrawTarget(context, floatTile)
+
+const tileDrawTarget = new TextureDrawTarget(context)
