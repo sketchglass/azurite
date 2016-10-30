@@ -46,9 +46,9 @@ function layerToNode(layer: Layer): LayerNode {
 
 const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
   const {layer, selected} = props
+  const {picture} = layer
 
   const rename = (name: string) => {
-    const {picture} = layer
     if (layer.name != name) {
       picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), {name}))
     }
@@ -58,7 +58,10 @@ const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
   const thumbnail = (content.type == "image") ? content.thumbnail : ""
 
   const onVisibleToggle = (e: React.FormEvent<HTMLInputElement>) => {
-    layer.visible = e.target.checked
+    const visible = e.target.checked
+    if (layer.visible != visible) {
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), {visible}))
+    }
   }
   const onVisibleClick = (e: React.MouseEvent<HTMLInputElement>) => {
     e.stopPropagation()

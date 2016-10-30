@@ -1,7 +1,9 @@
+import {computed, observable, action} from "mobx"
 import * as React from "react"
 import {observer} from "mobx-react"
 import Layer, {LayerBlendMode} from "../models/Layer"
 import RangeSlider from "./components/RangeSlider"
+import {ChangeLayerPropsCommand} from "../commands/LayerCommand"
 
 const blendModes: LayerBlendMode[] = [
   "normal",
@@ -15,38 +17,61 @@ const blendModeTexts = new Map<LayerBlendMode, string>([
   ["multiply", "Multiply"],
 ])
 
-const LayerDetail = observer((props: {layer?: Layer}) => {
-  const {layer} = props
+interface LayerDetailProps {
+  layer: Layer|undefined
+}
 
-  const onBlendModeChange = (e: React.FormEvent<HTMLSelectElement>) => {
+@observer export default
+class LayerDetail extends React.Component<LayerDetailProps, {}> {
+  oldOpacity = 1
+
+  onBlendModeChange = action((e: React.FormEvent<HTMLSelectElement>) => {
+    const {layer} = this.props
     if (layer) {
-      layer.blendMode = e.target.value as LayerBlendMode
+      const {picture} = layer
+      const blendMode = e.target.value as LayerBlendMode
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), {blendMode}))
     }
-  }
-  const onOpacityChange = (value: number) => {
+  })
+  onOpaictyChangeBegin = action(() => {
+    const {layer} = this.props
+    this.oldOpacity =  layer ? layer.opacity : 1
+  })
+  onOpacityChange = action((value: number) => {
+    const {layer} = this.props
     if (layer) {
       layer.opacity = value / 100
     }
+  })
+  onOpacityChangeEnd = action((value: number) => {
+    const {layer} = this.props
+    if (layer) {
+      const {picture} = layer
+      const opacity = value / 100
+      layer.opacity = this.oldOpacity
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), {opacity}))
+    }
+  })
+
+  render() {
+    const {layer} = this.props
+    const blendMode = layer ? layer.blendMode : "normal"
+    const opacity = layer ? layer.opacity : 1
+
+    return (
+      <div className="LayerDetail">
+        <div>
+          <label>Blend</label>
+          <select value={blendMode} onChange={this.onBlendModeChange}>
+            {blendModes.map(mode => <option key={mode} value={mode}>{blendModeTexts.get(mode)}</option>)}
+          </select>
+        </div>
+        <div>
+          <label>Opacity</label>
+          <RangeSlider onChangeBegin={this.onOpaictyChangeBegin} onChange={this.onOpacityChange} onChangeEnd={this.onOpacityChangeEnd} min={0} max={100} value={Math.round(opacity * 100)} />
+          <span>{Math.round(opacity * 100)}%</span>
+        </div>
+      </div>
+    )
   }
-
-  const blendMode = layer ? layer.blendMode : "normal"
-  const opacity = layer ? layer.opacity : 1
-
-  return (
-    <div className="LayerDetail">
-      <div>
-        <label>Blend</label>
-        <select value={blendMode} onChange={onBlendModeChange}>
-          {blendModes.map(mode => <option key={mode} value={mode}>{blendModeTexts.get(mode)}</option>)}
-        </select>
-      </div>
-      <div>
-        <label>Opacity</label>
-        <RangeSlider onChange={onOpacityChange} min={0} max={100} value={Math.round(opacity * 100)} />
-        <span>{Math.round(opacity * 100)}%</span>
-      </div>
-    </div>
-  )
-})
-
-export default LayerDetail
+}
