@@ -28,7 +28,9 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
   onBlendModeChange = action((e: React.FormEvent<HTMLSelectElement>) => {
     const {layer} = this.props
     if (layer) {
-      layer.blendMode = e.target.value as LayerBlendMode
+      const {picture} = layer
+      const blendMode = e.target.value as LayerBlendMode
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), {blendMode}))
     }
   })
   onOpaictyChangeBegin = action(() => {
