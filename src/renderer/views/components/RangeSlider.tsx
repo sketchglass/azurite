@@ -12,8 +12,9 @@ export interface RangeSliderProps {
   max: number
   value: number
   step?: number
+  onChangeBegin?: (value: number) => void
   onChange: (value: number) => void
-  onFinish?: (value: number) => void
+  onChangeEnd?: (value: number) => void
   disabled?: boolean
   backgroundComponent?: React.ComponentClass<any & BackgroundProps> | ((props: any & BackgroundProps) => JSX.Element)
   backgroundComponentProps?: any
@@ -59,24 +60,30 @@ export default class RangeSlider extends React.Component<RangeSliderProps, void>
     const rate = Math.max(0, Math.min(offsetX / rect.width, 1))
     return Math.round(rate * (max - min) + min)
   }
+  onChangeBegin(e: PointerEvent) {
+    if (this.props.onChangeBegin) {
+      this.props.onChangeBegin(this.valueForEvent(e))
+    }
+  }
   onChange(e: PointerEvent) {
     this.props.onChange(this.valueForEvent(e))
   }
-  onFinish(e: PointerEvent) {
-    if (this.props.onFinish) {
-      this.props.onFinish(this.valueForEvent(e))
+  onChangeEnd(e: PointerEvent) {
+    if (this.props.onChangeEnd) {
+      this.props.onChangeEnd(this.valueForEvent(e))
     }
   }
   onPointerDown = (e: PointerEvent) => {
     e.preventDefault()
     this.clicking = true
+    this.onChangeBegin(e)
     this.onChange(e)
     this.slider.setPointerCapture(e.pointerId)
   }
   onPointerUp = (e: PointerEvent) => {
     e.preventDefault()
     if (this.clicking) {
-      this.onFinish(e)
+      this.onChangeEnd(e)
       this.clicking = false
     }
   }
