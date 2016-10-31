@@ -1,4 +1,4 @@
-import {observable, action, autorun} from "mobx"
+import {observable, action, autorun, computed} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Texture, TextureDrawTarget, Color} from "paintgl"
 import Waypoint from "../models/Waypoint"
@@ -98,19 +98,22 @@ abstract class BaseBrushTool extends Tool {
   }
 
   renderRect(rect: Rect) {
+    if (!this.picture) {
+      return
+    }
     this.picture.layerBlender.render(rect)
     this.renderer.render(rect)
   }
 
-  currentLayerContent(): ImageLayerContent|undefined {
-    const layer = this.picture.currentLayer
+  @computed get currentLayerContent(): ImageLayerContent|undefined {
+    const layer = this.currentLayer
     if (layer && layer.content.type == "image") {
       return layer.content
     }
   }
 
   start(waypoint: Waypoint) {
-    const content = this.currentLayerContent()
+    const content = this.currentLayerContent
     if (!content) {
       return
     }
@@ -134,7 +137,7 @@ abstract class BaseBrushTool extends Tool {
   @action end() {
     this.stabilizeEnd()
     this.pushUndoStack()
-    const content = this.currentLayerContent()
+    const content = this.currentLayerContent
     if (content) {
       content.updateThumbnail()
     }
@@ -231,7 +234,7 @@ abstract class BaseBrushTool extends Tool {
       return
     }
     this.editedRect = undefined
-    const content = this.currentLayerContent()
+    const content = this.currentLayerContent
     if (!content) {
       return
     }
@@ -254,8 +257,10 @@ abstract class BaseBrushTool extends Tool {
     drawTarget.dispose()
     texture.dispose()
 
-    const command = new ChangeLayerImageCommand(this.picture, content.layer.path(), rect, oldData, newData)
-    this.picture.undoStack.push(command)
+    const {layer} = content
+    const {picture} = layer
+    const command = new ChangeLayerImageCommand(picture, layer.path(), rect, oldData, newData)
+    picture.undoStack.push(command)
   }
 
   brushSize(waypoint: Waypoint) {
