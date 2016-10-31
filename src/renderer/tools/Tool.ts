@@ -10,7 +10,9 @@ abstract class Tool {
   constructor(public appState: AppState) {
   }
 
-  @observable picture: Picture|undefined
+  @computed get picture() {
+    return this.appState.currentPicture
+  }
   @computed get currentLayer() {
     if (this.picture) {
       return this.picture.currentLayer
