@@ -7,9 +7,7 @@ import React = require("react")
 import {AppViewModel} from "../viewmodels/AppViewModel"
 
 abstract class Tool {
-  @computed get picture() {
-    return AppViewModel.instance.currentPicture
-  }
+  @observable picture: Picture|undefined
   @computed get currentLayer() {
     if (this.picture) {
       return this.picture.currentLayer

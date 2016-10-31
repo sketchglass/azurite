@@ -176,6 +176,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     if (!picture) {
       return
     }
+    tool.picture = picture
     tool.renderer = this.renderer
     const {waypoint, rendererPos} = this.eventToWaypoint(ev)
     const rect = tool.start(waypoint, rendererPos)
