@@ -32,11 +32,8 @@ class TransformLayerTool extends Tool {
 
   @computed get boundingRect() {
     const {active, currentLayer} = this
-    console.log(active, currentLayer)
     if (active && currentLayer && currentLayer.content.type == "image") {
-      const rect = currentLayer.content.tiledTexture.boundingRect()
-      console.log(rect)
-      return rect
+      return currentLayer.content.tiledTexture.boundingRect()
     }
   }
 
