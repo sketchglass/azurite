@@ -17,5 +17,6 @@ abstract class Tool {
   abstract end(): void
   cursorMove(waypoint: Waypoint) {}
   renderSettings(): JSX.Element { return React.createElement("div") }
+  renderOverlayUI(): JSX.Element|undefined { return }
 }
 export default Tool

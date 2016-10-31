@@ -1,3 +1,4 @@
+import * as React from "react"
 import {Vec2, Transform} from "paintvec"
 import Tool from './Tool'
 import Waypoint from "../models/Waypoint"
@@ -13,5 +14,11 @@ class TransformLayerTool extends Tool {
   }
 
   end() {
+  }
+
+  renderOverlayUI() {
+    return (
+      <circle cx={100} cy={100} r={10} fill="red" />
+    )
   }
 }

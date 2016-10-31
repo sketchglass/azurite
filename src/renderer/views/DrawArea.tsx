@@ -44,13 +44,13 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
 
   componentDidMount() {
-    this.element = this.refs["root"] as HTMLElement
-    this.element.appendChild(canvas)
+    const element = this.element!
+    element.insertBefore(canvas, element.firstChild)
     this.updateCursor()
 
-    this.element.addEventListener("pointerdown", this.onPointerDown)
-    this.element.addEventListener("pointermove", this.onPointerMove)
-    this.element.addEventListener("pointerup", this.onPointerUp)
+    element.addEventListener("pointerdown", this.onPointerDown)
+    element.addEventListener("pointermove", this.onPointerMove)
+    element.addEventListener("pointerup", this.onPointerUp)
 
     this.tabletDownSubscription = IPCChannels.tabletDown.listen().subscribe(ev => {
       this.usingTablet = true
@@ -126,8 +126,13 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   render() {
     const style = {visibility: this.props.picture ? "visible" : "hidden"}
+    const overlay = this.tool.renderOverlayUI()
     return (
-      <div ref="root" className="DrawArea" style={style} />
+      <div ref={e => this.element = e} className="DrawArea" style={style}>
+        <svg hidden={!overlay} className="DrawArea_Overlay">
+          {overlay}
+        </svg>
+      </div>
     )
   }
 

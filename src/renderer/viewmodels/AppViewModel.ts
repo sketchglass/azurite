@@ -6,6 +6,7 @@ import WatercolorTool from "../tools/WatercolorTool"
 import PanTool from "../tools/PanTool"
 import {ZoomTool} from "../tools/ZoomTool"
 import RotateTool from "../tools/RotateTool"
+import TransformLayerTool from "../tools/TransformLayerTool"
 import {HSVColor} from "../../lib/Color"
 
 export
@@ -20,7 +21,14 @@ class AppViewModel {
     }
   }
 
-  readonly tools = observable<Tool>([new BrushTool(), new WatercolorTool(), new PanTool(), new ZoomTool(),  new RotateTool()])
+  readonly tools = observable<Tool>([
+    new BrushTool(),
+    new WatercolorTool(),
+    new PanTool(),
+    new ZoomTool(),
+    new RotateTool(),
+    new TransformLayerTool(),
+  ])
   @observable currentTool: Tool = this.tools[0]
   @observable overrideTool: Tool|undefined
 

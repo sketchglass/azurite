@@ -1,0 +1,23 @@
+.DrawArea {
+  position: relative;
+  flex: 1;
+  border: 2px solid var(--default-border-color);
+}
+.DrawArea_Cursor {
+  position: absolute;
+  will-change: left, top, width, height;
+}
+.DrawArea_GLCanvas {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+}
+.DrawArea_Overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
