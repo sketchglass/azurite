@@ -28,10 +28,11 @@ class Tile {
 
     let hasOpaquePixel = false
     let left = 0, right = 0, top = 0, bottom = 0
-    let i = 0
+    let i = 3
     for (let y = 0; y < width; ++y) {
       for (let x = 0; x < width; ++x) {
-        const a = byteAlphaData[i++]
+        const a = byteAlphaData[i]
+        i += 4
         if (a != 0) {
           if (hasOpaquePixel) {
             left = Math.min(left, x)
@@ -218,8 +219,8 @@ const floatData = new Float32Array(Tile.width * Tile.width * 4)
 const floatTile = new Texture(context, {size: Tile.size, pixelType: "float"})
 const floatDrawTarget = new TextureDrawTarget(context, floatTile)
 
-const byteAlphaData = new Uint8Array(Tile.width * Tile.width)
-const byteAlphaTile = new Texture(context, {size: Tile.size, pixelType: "byte", pixelFormat: "alpha"})
+const byteAlphaData = new Uint8Array(Tile.width * Tile.width * 4)
+const byteAlphaTile = new Texture(context, {size: Tile.size, pixelType: "byte"})
 const byteAlphaDrawTarget = new TextureDrawTarget(context, byteAlphaTile)
 
 const tileDrawTarget = new TextureDrawTarget(context)

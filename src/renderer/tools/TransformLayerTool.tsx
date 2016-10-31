@@ -12,8 +12,11 @@ class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}
     const {boundingRect} = tool
     let polygon: JSX.Element|undefined = undefined
     if (boundingRect) {
-      const points = boundingRect.vertices().map(v => `${v.x},${v.y}`).join(" ")
-      polygon = <polygon points={points} />
+      const {topLeft, topRight, bottomLeft, bottomRight} = boundingRect
+      const points = [topLeft, topRight, bottomRight, bottomLeft]
+        .map(v => v.transform(tool.renderer.transformFromPicture).divScalar(devicePixelRatio))
+        .map(v => `${v.x},${v.y}`).join(" ")
+      polygon = <polygon points={points} stroke="#888" fill="transparent" />
     }
     return (
       <g>
