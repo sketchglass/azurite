@@ -36,13 +36,15 @@ class Tile {
         if (a != 0) {
           if (hasOpaquePixel) {
             left = Math.min(left, x)
-            right = Math.max(right, x)
+            right = Math.max(right, x + 1)
             top = Math.min(top, y)
-            bottom = Math.max(bottom, y)
+            bottom = Math.max(bottom, y + 1)
           } else {
             hasOpaquePixel = true
-            left = right = x
-            top = bottom = y
+            left = x
+            right = x + 1
+            top = y
+            bottom = y + 1
           }
         }
       }
