@@ -33,17 +33,23 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     super(props)
     this.renderer = new Renderer()
     this.renderer.picture = props.picture
-    this.tool = props.tool
-    this.tool.active = true
+    this.setTool(props.tool)
     autorun(() => this.updateCursor())
     autorun(() => this.updateCursorGeometry())
   }
 
+  setTool(tool: Tool) {
+    if (this.tool) {
+      this.tool.active = false
+    }
+    this.tool = tool
+    this.tool.renderer = this.renderer
+    this.tool.active = true
+  }
+
   componentWillReceiveProps(nextProps: DrawAreaProps) {
     this.renderer.picture = nextProps.picture
-    this.tool.active = false
-    this.tool = nextProps.tool
-    this.tool.active = true
+    this.setTool(nextProps.tool)
   }
 
   componentDidMount() {
@@ -181,7 +187,6 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
   onDown(ev: {clientX: number, clientY: number, pressure?: number}) {
     const {tool} = this.props
-    tool.renderer = this.renderer
     const {waypoint, rendererPos} = this.eventToWaypoint(ev)
     const rect = tool.start(waypoint, rendererPos)
     this.currentTool = tool
