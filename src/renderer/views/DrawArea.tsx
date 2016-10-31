@@ -180,11 +180,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     ev.preventDefault()
   }
   onDown(ev: {clientX: number, clientY: number, pressure?: number}) {
-    const {tool, picture} = this.props
-    if (!picture) {
-      return
-    }
-    tool.picture = picture
+    const {tool} = this.props
     tool.renderer = this.renderer
     const {waypoint, rendererPos} = this.eventToWaypoint(ev)
     const rect = tool.start(waypoint, rendererPos)
