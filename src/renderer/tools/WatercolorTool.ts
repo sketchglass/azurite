@@ -6,7 +6,6 @@ import BaseBrushTool from "./BaseBrushTool"
 import {context} from "../GLContext"
 import TiledTexture, {Tile} from "../models/TiledTexture"
 import WatercolorSettings from "../views/WatercolorSettings"
-import {AppViewModel} from "../viewmodels/AppViewModel"
 import React = require("react")
 
 enum ShapeClipModes {
@@ -146,7 +145,7 @@ class WatercolorTool extends BaseBrushTool {
       uSampleSize: this.sampleSize,
       uBlending: this.blending,
       uThickness: this.thickness,
-      uColor: AppViewModel.instance.color.toRgb(),
+      uColor: this.appState.color.toRgb(),
       uOpacity: this.opacity,
     }
 

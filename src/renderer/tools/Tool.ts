@@ -4,9 +4,12 @@ import Renderer from "../views/Renderer"
 import Waypoint from "../models/Waypoint"
 import {Vec2} from "paintvec"
 import React = require("react")
-import {AppViewModel} from "../viewmodels/AppViewModel"
+import {AppState} from "../state/AppState"
 
 abstract class Tool {
+  constructor(public appState: AppState) {
+  }
+
   @observable picture: Picture|undefined
   @computed get currentLayer() {
     if (this.picture) {

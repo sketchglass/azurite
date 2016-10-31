@@ -15,7 +15,7 @@ import {DraggablePanel, DraggablePanelContainer} from "./components/DraggablePan
 import {PictureTabBar} from "./PictureTabBar"
 import {HSVColor} from "../../lib/Color"
 import NavigationKeyBinding from "./NavigationKeyBinding"
-import {AppViewModel} from "../viewmodels/AppViewModel"
+import {appState} from "../state/AppState"
 import {remote} from "electron"
 const {Menu, app} = remote
 import "./MenuBar"
@@ -49,43 +49,41 @@ function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool
 class App extends React.Component<{}, {}> {
   constructor() {
     super()
-    const appVM = AppViewModel.instance
 
     new NavigationKeyBinding(klass => {
       if (klass) {
-        for (const tool of appVM.tools) {
+        for (const tool of appState.tools) {
           if (tool instanceof klass) {
-            appVM.overrideTool = tool
+            appState.overrideTool = tool
           }
         }
       } else {
-        appVM.overrideTool = undefined
+        appState.overrideTool = undefined
       }
     })
   }
   render() {
-    const appVM = AppViewModel.instance
-    const {tools, currentTool, overrideTool, color, paletteIndex, palette} = appVM
-    const picture = appVM.currentPicture
+    const {tools, currentTool, overrideTool, color, paletteIndex, palette} = appState
+    const picture = appState.currentPicture
     const onToolChange = (tool: Tool) => {
-      appVM.currentTool = tool
+      appState.currentTool = tool
     }
     const onToolContextMenu = action((selectedTool: Tool, e: React.MouseEvent<Element>) => {
       e.preventDefault()
       const removeTool = action(() => {
-        const index = appVM.tools.indexOf(selectedTool)
-        appVM.tools.splice(index, 1)
+        const index = appState.tools.indexOf(selectedTool)
+        appState.tools.splice(index, 1)
       })
       const appendTool = action((item: Tool) => {
         return () => {
-          const index = appVM.tools.indexOf(selectedTool) + 1
-          appVM.tools.splice(index, 0, item)
+          const index = appState.tools.indexOf(selectedTool) + 1
+          appState.tools.splice(index, 0, item)
         }
       })
       const menuTemplate = [
         {label: '追加', submenu: [
-          {label: "BrushTool", click: appendTool(new BrushTool())},
-          {label: "WatercolorTool", click: appendTool(new WatercolorTool())}
+          {label: "BrushTool", click: appendTool(new BrushTool(appState))},
+          {label: "WatercolorTool", click: appendTool(new WatercolorTool(appState))}
         ]},
         {label: '削除', click: removeTool}
       ]
@@ -93,15 +91,15 @@ class App extends React.Component<{}, {}> {
       menu.popup(remote.getCurrentWindow())
     })
     const onPaletteChange = action((e: React.MouseEvent<Element>, index: number) => {
-      appVM.paletteIndex = index
+      appState.paletteIndex = index
       if(e.shiftKey) {
-        appVM.palette[index] = appVM.color
+        appState.palette[index] = appState.color
       } else {
-        appVM.color = appVM.palette[index]
+        appState.color = appState.palette[index]
       }
     })
     const onColorChange = action((value: HSVColor) => {
-      appVM.color = value
+      appState.color = value
     })
     return (
       <div className="App">

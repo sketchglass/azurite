@@ -10,6 +10,7 @@ import Picture from "../models/Picture"
 import {ChangeLayerImageCommand} from "../commands/LayerCommand"
 import {context} from "../GLContext"
 import {drawTexture} from "../GLUtil"
+import {AppState} from "../state/AppState"
 import {float32ArrayTo16} from "../../lib/Float"
 
 function stabilizeWaypoint(waypoints: Waypoint[], level: number, index: number) {
@@ -57,8 +58,8 @@ abstract class BaseBrushTool extends Tool {
   cursorElement = document.createElement("canvas")
   cursorContext = this.cursorElement.getContext("2d")!
 
-  constructor() {
-    super()
+  constructor(appState: AppState) {
+    super(appState)
     autorun(() => this.updateCursor())
   }
 

@@ -6,7 +6,7 @@ import BaseBrushTool from "./BaseBrushTool";
 import {context} from "../GLContext"
 import BrushSettings from "../views/BrushSettings"
 import TiledTexture, {Tile} from "../models/TiledTexture"
-import {AppViewModel} from "../viewmodels/AppViewModel"
+import {AppState} from "../state/AppState"
 import React = require("react")
 
 class BrushShader extends Shader {
@@ -65,8 +65,8 @@ class BrushTool extends BaseBrushTool {
   name = "Brush"
   @observable eraser = false
 
-  constructor() {
-    super()
+  constructor(appState: AppState) {
+    super(appState)
     this.shape = new Shape(context)
     this.shape.setVec2Attributes("aCenter", [])
     this.model = new Model(context, {shape: this.shape, shader: BrushShader})
@@ -75,7 +75,7 @@ class BrushTool extends BaseBrushTool {
   start(waypoint: Waypoint) {
     this.model.uniforms = {
       uBrushSize: this.width,
-      uColor: AppViewModel.instance.color.toRgb(),
+      uColor: this.appState.color.toRgb(),
       uOpacity: this.opacity,
       uMinWidthRatio: this.minWidthRatio,
       uSpacingRatio: this.spacingRatio,
