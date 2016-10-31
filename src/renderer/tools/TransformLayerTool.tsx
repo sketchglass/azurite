@@ -1,7 +1,19 @@
 import * as React from "react"
+import {observer} from "mobx-react"
 import {Vec2, Transform} from "paintvec"
 import Tool from './Tool'
 import Waypoint from "../models/Waypoint"
+
+@observer
+class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}, {}> {
+  render() {
+    const {tool} = this.props
+    return (
+      <g>
+      </g>
+    )
+  }
+}
 
 export default
 class TransformLayerTool extends Tool {
@@ -17,8 +29,6 @@ class TransformLayerTool extends Tool {
   }
 
   renderOverlayUI() {
-    return (
-      <circle cx={100} cy={100} r={10} fill="red" />
-    )
+    return <TransformLayerOverlayUI tool={this} />
   }
 }
