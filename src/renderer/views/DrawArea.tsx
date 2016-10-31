@@ -34,13 +34,16 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     this.renderer = new Renderer()
     this.renderer.picture = props.picture
     this.tool = props.tool
+    this.tool.didBecomeActive()
     autorun(() => this.updateCursor())
     autorun(() => this.updateCursorGeometry())
   }
 
   componentWillReceiveProps(nextProps: DrawAreaProps) {
     this.renderer.picture = nextProps.picture
+    this.tool.willBecomeInactive()
     this.tool = nextProps.tool
+    this.tool.didBecomeActive()
   }
 
   componentDidMount() {

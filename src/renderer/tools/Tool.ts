@@ -15,6 +15,8 @@ abstract class Tool {
   abstract start(waypoint: Waypoint, rendererPos: Vec2): void
   abstract move(waypoint: Waypoint, rendererPos: Vec2): void
   abstract end(): void
+  didBecomeActive() {}
+  willBecomeInactive() {}
   cursorMove(waypoint: Waypoint) {}
   renderSettings(): JSX.Element { return React.createElement("div") }
   renderOverlayUI(): JSX.Element|undefined { return }
