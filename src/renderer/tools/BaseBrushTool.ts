@@ -1,4 +1,4 @@
-import {observable, action, autorun} from "mobx"
+import {observable, action, autorun, computed} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Texture, TextureDrawTarget, Color} from "paintgl"
 import Waypoint from "../models/Waypoint"
@@ -105,17 +105,15 @@ abstract class BaseBrushTool extends Tool {
     this.renderer.render(rect)
   }
 
-  currentLayerContent(): ImageLayerContent|undefined {
-    if (this.picture) {
-      const layer = this.picture.currentLayer
-      if (layer && layer.content.type == "image") {
-        return layer.content
-      }
+  @computed get currentLayerContent(): ImageLayerContent|undefined {
+    const layer = this.currentLayer
+    if (layer && layer.content.type == "image") {
+      return layer.content
     }
   }
 
   start(waypoint: Waypoint) {
-    const content = this.currentLayerContent()
+    const content = this.currentLayerContent
     if (!content) {
       return
     }
@@ -139,7 +137,7 @@ abstract class BaseBrushTool extends Tool {
   @action end() {
     this.stabilizeEnd()
     this.pushUndoStack()
-    const content = this.currentLayerContent()
+    const content = this.currentLayerContent
     if (content) {
       content.updateThumbnail()
     }
@@ -236,7 +234,7 @@ abstract class BaseBrushTool extends Tool {
       return
     }
     this.editedRect = undefined
-    const content = this.currentLayerContent()
+    const content = this.currentLayerContent
     if (!content) {
       return
     }

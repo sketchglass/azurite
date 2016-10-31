@@ -85,7 +85,7 @@ class BrushTool extends BaseBrushTool {
   }
 
   renderWaypoints(waypoints: Waypoint[], rect: Rect) {
-    const content = this.currentLayerContent()
+    const content = this.currentLayerContent
     if (!content) {
       return
     }
