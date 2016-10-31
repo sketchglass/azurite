@@ -40,6 +40,9 @@ class ZoomInTool extends Tool {
   cursor = "zoom-in"
 
   start(waypoint: Waypoint, rendererPos: Vec2) {
+    if (!this.picture) {
+      return
+    }
     const {navigation} = this.picture
     navigation.scale = nextScaleStep(navigation.scale)
   }
@@ -58,6 +61,9 @@ class ZoomOutTool extends Tool {
   cursor = "zoom-out"
 
   start(waypoint: Waypoint, rendererPos: Vec2) {
+    if (!this.picture) {
+      return
+    }
     const {navigation} = this.picture
     navigation.scale = prevScaleStep(navigation.scale)
   }
@@ -81,12 +87,18 @@ class ZoomTool extends Tool {
   startPos: Vec2
 
   start(waypoint: Waypoint, rendererPos: Vec2) {
+    if (!this.picture) {
+      return
+    }
     const {scale} = this.picture.navigation
     this.originalScale = scale
     this.startPos = rendererPos
   }
 
   move(waypoint: Waypoint, rendererPos: Vec2) {
+    if (!this.picture) {
+      return
+    }
     const offset = rendererPos.sub(this.startPos)
     const distance = Math.pow(2, offset.x / 100)
     const scale = modScale(this.originalScale * distance)

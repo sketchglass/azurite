@@ -6,7 +6,7 @@ import {Vec2} from "paintvec"
 import React = require("react")
 
 abstract class Tool {
-  picture: Picture
+  @observable picture: Picture|undefined
   renderer: Renderer
   abstract name: string
   @observable cursor = "auto"

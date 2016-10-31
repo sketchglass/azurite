@@ -11,12 +11,18 @@ class PanTool extends Tool {
   originalRendererToPicture = new Transform()
 
   start(waypoint: Waypoint, rendererPos: Vec2) {
+    if (!this.picture) {
+      return
+    }
     this.originalRendererToPicture = this.renderer.transformToPicture
     this.originalPos = rendererPos.transform(this.originalRendererToPicture)
     this.originalTranslation = this.picture.navigation.translation
   }
 
   move(waypoint: Waypoint, rendererPos: Vec2) {
+    if (!this.picture) {
+      return
+    }
     const pos = rendererPos.transform(this.originalRendererToPicture)
     const offset = pos.sub(this.originalPos)
     const translation = this.originalTranslation.add(offset)

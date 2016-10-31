@@ -98,14 +98,19 @@ abstract class BaseBrushTool extends Tool {
   }
 
   renderRect(rect: Rect) {
+    if (!this.picture) {
+      return
+    }
     this.picture.layerBlender.render(rect)
     this.renderer.render(rect)
   }
 
   currentLayerContent(): ImageLayerContent|undefined {
-    const layer = this.picture.currentLayer
-    if (layer && layer.content.type == "image") {
-      return layer.content
+    if (this.picture) {
+      const layer = this.picture.currentLayer
+      if (layer && layer.content.type == "image") {
+        return layer.content
+      }
     }
   }
 
@@ -254,8 +259,10 @@ abstract class BaseBrushTool extends Tool {
     drawTarget.dispose()
     texture.dispose()
 
-    const command = new ChangeLayerImageCommand(this.picture, content.layer.path(), rect, oldData, newData)
-    this.picture.undoStack.push(command)
+    const {layer} = content
+    const {picture} = layer
+    const command = new ChangeLayerImageCommand(picture, layer.path(), rect, oldData, newData)
+    picture.undoStack.push(command)
   }
 
   brushSize(waypoint: Waypoint) {
