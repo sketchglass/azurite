@@ -146,6 +146,20 @@ class TiledTexture {
     }
   }
 
+  boundingRect() {
+    const rects: Rect[] = []
+    for (const [keyStr, tile] of this.tiles) {
+      const key = stringToKey(keyStr)
+      const rect = tile.boundingRect()
+      if (rect) {
+        rects.push(rect.translate(key.mul(Tile.size)))
+      } else {
+        // TODO: GC tile
+      }
+    }
+    return Rect.union(...rects)
+  }
+
   static fromData(data: TiledTextureData) {
     if (data.tileSize != Tile.width) {
       throw new Error("tile size incompatible")
