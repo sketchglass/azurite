@@ -53,9 +53,7 @@ abstract class BaseBrushTool extends Tool {
   @observable stabilizingLevel = 2
 
   targetContent: ImageLayerContent|undefined
-
-  oldTiledTexture: TiledTexture|undefined
-  originalTexture = new Texture(context, {size: new Vec2(0), pixelType: "half-float"})
+  newTiledTexture: TiledTexture|undefined
   editedRect: Rect|undefined
 
   cursorElement = document.createElement("canvas")
@@ -109,9 +107,16 @@ abstract class BaseBrushTool extends Tool {
     this.renderer.render(rect)
   }
 
-  hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender){
-    console.log("hooking...")
-    return false
+  hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) {
+    if (this.targetContent && this.newTiledTexture && layer == this.targetContent.layer) {
+      if (this.newTiledTexture.has(tileKey)) {
+        const {blendMode, opacity} = layer
+        tileBlender.blend(this.newTiledTexture.get(tileKey), blendMode, opacity)
+      }
+      return true
+    } else {
+      return false
+    }
   }
 
   start(waypoint: Waypoint) {
@@ -123,10 +128,7 @@ abstract class BaseBrushTool extends Tool {
     this.targetContent = content
     const {tiledTexture} = content
 
-    if (this.oldTiledTexture) {
-      this.oldTiledTexture.dispose()
-    }
-    this.oldTiledTexture = tiledTexture.clone()
+    this.newTiledTexture = tiledTexture.clone() // TODO: avoid cloning whole image
 
     this.lastStabilizeWaypoints = []
     this.lastInterpolateWaypoints = []
@@ -141,11 +143,10 @@ abstract class BaseBrushTool extends Tool {
   @action end() {
     this.stabilizeEnd()
     this.pushUndoStack()
-    const content = this.targetContent
-    if (content) {
-      content.updateThumbnail()
+    if (this.targetContent) {
+      this.targetContent.updateThumbnail()
+      this.targetContent = undefined
     }
-    this.targetContent = undefined
   }
 
   stabilizeMove(waypoint: Waypoint) {
@@ -239,11 +240,16 @@ abstract class BaseBrushTool extends Tool {
       return
     }
     this.editedRect = undefined
+
+    const {newTiledTexture} = this
+    if (!newTiledTexture) {
+      return
+    }
     const content = this.targetContent
     if (!content) {
       return
     }
-    const {tiledTexture} = content
+    const oldTiledTexture = content.tiledTexture
 
     // can't read directly from half float texture so read it to float texture first
 
@@ -251,16 +257,20 @@ abstract class BaseBrushTool extends Tool {
     const drawTarget = new TextureDrawTarget(context, texture)
     const data = new Float32Array(rect.width * rect.height * 4)
 
-    this.oldTiledTexture!.drawToDrawTarget(drawTarget, rect.topLeft.neg(), "src")
+    oldTiledTexture.drawToDrawTarget(drawTarget, rect.topLeft.neg(), "src")
     drawTarget.readPixels(new Rect(new Vec2(0), rect.size), data)
     const oldData = float32ArrayTo16(data)
 
-    tiledTexture!.drawToDrawTarget(drawTarget, rect.topLeft.neg(), "src")
+    newTiledTexture.drawToDrawTarget(drawTarget, rect.topLeft.neg(), "src")
     drawTarget.readPixels(new Rect(new Vec2(0), rect.size), data)
     const newData = float32ArrayTo16(data)
 
     drawTarget.dispose()
     texture.dispose()
+
+    content.tiledTexture = newTiledTexture
+    this.newTiledTexture = undefined
+    oldTiledTexture.dispose()
 
     const {layer} = content
     const {picture} = layer
