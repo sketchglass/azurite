@@ -1,5 +1,5 @@
 import * as zlib from "zlib"
-import {Vec2, Rect} from "paintvec"
+import {Vec2, Rect, Transform} from "paintvec"
 import {Texture, PixelType, DrawTarget, TextureDrawTarget, Model, TextureShader, RectShape, BlendMode} from "paintgl"
 import {context} from "../GLContext"
 import {drawTexture} from "../GLUtil"
@@ -123,16 +123,19 @@ class TiledTexture {
     }
   }
 
-  drawToDrawTarget(dest: DrawTarget, opts: {offset: Vec2, blendMode: BlendMode}) {
-    const {offset, blendMode} = opts
-    const rect = new Rect(offset.neg(), offset.neg().add(dest.size))
+  drawToDrawTarget(dest: DrawTarget, opts: {offset: Vec2, blendMode: BlendMode, transform?: Transform}) {
+    const {offset, blendMode, transform} = opts
+    let rect = new Rect(offset.neg(), offset.neg().add(dest.size))
+    if (transform) {
+      rect = rect.transform(transform.invert()!)
+    }
     for (const key of TiledTexture.keysForRect(rect)) {
       if (blendMode == "src-over") {
         if (!this.has(key)) {
           continue
         }
       }
-      drawTexture(dest, this.get(key).texture, {offset: offset.add(key.mulScalar(Tile.width)), blendMode})
+      drawTexture(dest, this.get(key).texture, {offset: offset.add(key.mulScalar(Tile.width)), blendMode, transform})
     }
   }
 
