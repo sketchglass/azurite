@@ -5,7 +5,8 @@ import Waypoint from "../models/Waypoint"
 import Tool from "./Tool"
 import Layer from "../models/Layer"
 import {ImageLayerContent} from "../models/LayerContent"
-import TiledTexture from "../models/TiledTexture"
+import TiledTexture, {Tile} from "../models/TiledTexture"
+import {TileBlender} from "../models/LayerBlender"
 import Picture from "../models/Picture"
 import {ChangeLayerImageCommand} from "../commands/LayerCommand"
 import {context} from "../GLContext"
@@ -51,8 +52,8 @@ abstract class BaseBrushTool extends Tool {
   // how many neighbor event positions used to stabilize stroke
   @observable stabilizingLevel = 2
 
-  oldTiledTexture: TiledTexture|undefined
-  originalTexture = new Texture(context, {size: new Vec2(0), pixelType: "half-float"})
+  targetContent: ImageLayerContent|undefined
+  newTiledTexture: TiledTexture|undefined
   editedRect: Rect|undefined
 
   cursorElement = document.createElement("canvas")
@@ -106,24 +107,28 @@ abstract class BaseBrushTool extends Tool {
     this.renderer.render(rect)
   }
 
-  @computed get currentLayerContent(): ImageLayerContent|undefined {
-    const layer = this.currentLayer
-    if (layer && layer.content.type == "image") {
-      return layer.content
+  hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) {
+    if (this.targetContent && this.newTiledTexture && layer == this.targetContent.layer) {
+      if (this.newTiledTexture.has(tileKey)) {
+        const {blendMode, opacity} = layer
+        tileBlender.blend(this.newTiledTexture.get(tileKey), blendMode, opacity)
+      }
+      return true
+    } else {
+      return false
     }
   }
 
   start(waypoint: Waypoint) {
-    const content = this.currentLayerContent
-    if (!content) {
+    const layer = this.currentLayer
+    if (!layer || layer.content.type != "image") {
       return
     }
+    const content = layer.content
+    this.targetContent = content
     const {tiledTexture} = content
 
-    if (this.oldTiledTexture) {
-      this.oldTiledTexture.dispose()
-    }
-    this.oldTiledTexture = tiledTexture.clone()
+    this.newTiledTexture = tiledTexture.clone() // TODO: avoid cloning whole image
 
     this.lastStabilizeWaypoints = []
     this.lastInterpolateWaypoints = []
@@ -138,9 +143,9 @@ abstract class BaseBrushTool extends Tool {
   @action end() {
     this.stabilizeEnd()
     this.pushUndoStack()
-    const content = this.currentLayerContent
-    if (content) {
-      content.updateThumbnail()
+    if (this.targetContent) {
+      this.targetContent.updateThumbnail()
+      this.targetContent = undefined
     }
   }
 
@@ -235,11 +240,16 @@ abstract class BaseBrushTool extends Tool {
       return
     }
     this.editedRect = undefined
-    const content = this.currentLayerContent
+
+    const {newTiledTexture} = this
+    if (!newTiledTexture) {
+      return
+    }
+    const content = this.targetContent
     if (!content) {
       return
     }
-    const {tiledTexture} = content
+    const oldTiledTexture = content.tiledTexture
 
     // can't read directly from half float texture so read it to float texture first
 
@@ -247,16 +257,20 @@ abstract class BaseBrushTool extends Tool {
     const drawTarget = new TextureDrawTarget(context, texture)
     const data = new Float32Array(rect.width * rect.height * 4)
 
-    this.oldTiledTexture!.drawToDrawTarget(drawTarget, rect.topLeft.neg(), "src")
+    oldTiledTexture.drawToDrawTarget(drawTarget, rect.topLeft.neg(), "src")
     drawTarget.readPixels(new Rect(new Vec2(0), rect.size), data)
     const oldData = float32ArrayTo16(data)
 
-    tiledTexture!.drawToDrawTarget(drawTarget, rect.topLeft.neg(), "src")
+    newTiledTexture.drawToDrawTarget(drawTarget, rect.topLeft.neg(), "src")
     drawTarget.readPixels(new Rect(new Vec2(0), rect.size), data)
     const newData = float32ArrayTo16(data)
 
     drawTarget.dispose()
     texture.dispose()
+
+    content.tiledTexture = newTiledTexture
+    this.newTiledTexture = undefined
+    oldTiledTexture.dispose()
 
     const {layer} = content
     const {picture} = layer
