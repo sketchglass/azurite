@@ -110,7 +110,7 @@ class TransformLayerTool extends Tool {
 
   hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) {
     const content = this.currentContent
-    if (content && layer == content.layer) {
+    if (this.dragging && content && layer == content.layer) {
       transformedDrawTarget.clear(new Color(0,0,0,0))
       content.tiledTexture.drawToDrawTarget(transformedDrawTarget, {offset: tileKey.mulScalar(-Tile.width), blendMode: "src", transform: this.transform})
       const {blendMode, opacity} = layer
@@ -149,6 +149,8 @@ class TransformlayerCommand {
     const newTiles = content.tiledTexture
     content.tiledTexture = TiledTexture.fromData(this.oldTiledTextureData)
     newTiles.dispose()
+
+    this.picture.updated.next()
   }
 
   redo() {
@@ -178,5 +180,7 @@ class TransformlayerCommand {
     this.oldTiledTextureData = oldTiledTexture.toData()
     content.tiledTexture = tiledTexture
     oldTiledTexture.dispose()
+
+    this.picture.updated.next()
   }
 }
