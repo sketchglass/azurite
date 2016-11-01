@@ -257,11 +257,13 @@ abstract class BaseBrushTool extends Tool {
     const drawTarget = new TextureDrawTarget(context, texture)
     const data = new Float32Array(rect.width * rect.height * 4)
 
-    oldTiledTexture.drawToDrawTarget(drawTarget, rect.topLeft.neg(), "src")
+    const offset = rect.topLeft.neg()
+
+    oldTiledTexture.drawToDrawTarget(drawTarget, {offset, blendMode: "src"})
     drawTarget.readPixels(new Rect(new Vec2(0), rect.size), data)
     const oldData = float32ArrayTo16(data)
 
-    newTiledTexture.drawToDrawTarget(drawTarget, rect.topLeft.neg(), "src")
+    newTiledTexture.drawToDrawTarget(drawTarget, {offset, blendMode: "src"})
     drawTarget.readPixels(new Rect(new Vec2(0), rect.size), data)
     const newData = float32ArrayTo16(data)
 

@@ -1,4 +1,4 @@
-import {Vec2, Rect} from "paintvec"
+import {Vec2, Rect, Transform} from "paintvec"
 import {Model, Texture, RectShape, TextureShader, DrawTarget, TextureDrawTarget, PixelType, BlendMode} from "paintgl"
 import {context} from "./GLContext"
 
@@ -9,17 +9,20 @@ const drawTextureModel = new Model(context, {
 })
 
 export
-function drawTexture(target: DrawTarget, texture: Texture, params: {offset?: Vec2, rect?: Rect, blendMode?: BlendMode}) {
-  let rect: Rect
-  if (params.rect) {
-    rect = params.rect
-  } else {
+function drawTexture(dst: DrawTarget, src: Texture, params: {offset?: Vec2, dstRect?: Rect, srcRect?: Rect, transform?: Transform, blendMode?: BlendMode}) {
+  let {dstRect, srcRect} = params
+  const {size} = src
+  if (!dstRect) {
     const offset = params.offset || new Vec2(0)
-    const {size} = texture
-    rect = new Rect(offset, offset.add(size))
+    dstRect = new Rect(offset, offset.add(size))
   }
-  drawTextureShape.rect = rect
+  const texRect = srcRect
+    ? new Rect(srcRect.topLeft.div(size), srcRect.bottomRight.div(size))
+    : new Rect(new Vec2(0), new Vec2(1))
+  drawTextureShape.rect = dstRect
+  drawTextureShape.texCoords = texRect.vertices()
+  drawTextureModel.transform = params.transform || new Transform()
   drawTextureModel.blendMode = params.blendMode || "src-over"
-  drawTextureModel.uniforms = {texture}
-  target.draw(drawTextureModel)
+  drawTextureModel.uniforms = {texture: src}
+  dst.draw(drawTextureModel)
 }
