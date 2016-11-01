@@ -56,7 +56,7 @@ class ThumbnailGenerator {
     this.texture.generateMipmap()
 
     const rect = new Rect(new Vec2(0), this.thumbnailSize.mul(this.texture.size.div(this.size)))
-    drawTexture(this.thumbnailDrawTarget, this.texture, {rect, blendMode: "src"})
+    drawTexture(this.thumbnailDrawTarget, this.texture, {dstRect: rect, blendMode: "src"})
 
     const {width, height} = rect
     const data = new ImageData(width, height)
