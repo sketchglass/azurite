@@ -134,7 +134,7 @@ class TileBlender {
 const tileBlenders = [new TileBlender()]
 
 export
-type LayerRenderHook = (layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) => boolean
+type LayerBlendHook = (layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) => boolean
 
 export default
 class LayerBlender {
@@ -144,7 +144,7 @@ class LayerBlender {
   })
   drawTarget = new TextureDrawTarget(context, this.blendedTexture)
 
-  hook: LayerRenderHook|undefined
+  hook: LayerBlendHook|undefined
 
   constructor(public picture: Picture) {
   }

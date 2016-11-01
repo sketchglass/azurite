@@ -114,7 +114,7 @@ abstract class BaseBrushTool extends Tool {
     }
   }
 
-  hookLayerRender(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender){
+  hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender){
     console.log("hooking...")
     return false
   }

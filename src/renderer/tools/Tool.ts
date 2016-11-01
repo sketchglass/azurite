@@ -38,6 +38,6 @@ abstract class Tool {
   abstract end(): void
   cursorMove(waypoint: Waypoint) {}
   renderSettings(): JSX.Element { return React.createElement("div") }
-  hookLayerRender(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender){ return false }
+  hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender){ return false }
 }
 export default Tool

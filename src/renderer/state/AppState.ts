@@ -36,7 +36,7 @@ class AppState {
 
   constructor() {
     reaction(() => [this.currentPicture, this.currentTool], () => {
-      const hook = this.currentTool.hookLayerRender.bind(this.currentTool)
+      const hook = this.currentTool.hookLayerBlend.bind(this.currentTool)
       for (const picture of this.pictures) {
         if (picture == this.currentPicture) {
           picture.layerBlender.hook = hook
