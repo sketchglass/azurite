@@ -1,4 +1,4 @@
-import {Vec2, Rect} from "paintvec"
+import {Vec2, Rect, Transform} from "paintvec"
 import {Model, Texture, RectShape, TextureShader, DrawTarget, TextureDrawTarget, PixelType, BlendMode} from "paintgl"
 import {context} from "./GLContext"
 
@@ -9,7 +9,7 @@ const drawTextureModel = new Model(context, {
 })
 
 export
-function drawTexture(dst: DrawTarget, texture: Texture, params: {offset?: Vec2, dstRect?: Rect, srcRect?: Rect, blendMode?: BlendMode}) {
+function drawTexture(dst: DrawTarget, texture: Texture, params: {offset?: Vec2, dstRect?: Rect, srcRect?: Rect, transform?: Transform, blendMode?: BlendMode}) {
   let {dstRect, srcRect} = params
   if (!dstRect) {
     const offset = params.offset || new Vec2(0)
@@ -21,6 +21,7 @@ function drawTexture(dst: DrawTarget, texture: Texture, params: {offset?: Vec2, 
     : new Rect(new Vec2(0), new Vec2(1))
   drawTextureShape.rect = dstRect
   drawTextureShape.texCoords = texRect.vertices()
+  drawTextureModel.transform = params.transform || new Transform()
   drawTextureModel.blendMode = params.blendMode || "src-over"
   drawTextureModel.uniforms = {texture}
   dst.draw(drawTextureModel)
