@@ -164,7 +164,7 @@ class WatercolorTool extends BaseBrushTool {
   }
 
   renderWaypoints(waypoints: Waypoint[], rect: Rect) {
-    const content = this.currentLayerContent
+    const content = this.targetContent
     if (!content) {
       return
     }

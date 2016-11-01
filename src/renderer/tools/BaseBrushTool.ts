@@ -52,6 +52,8 @@ abstract class BaseBrushTool extends Tool {
   // how many neighbor event positions used to stabilize stroke
   @observable stabilizingLevel = 2
 
+  targetContent: ImageLayerContent|undefined
+
   oldTiledTexture: TiledTexture|undefined
   originalTexture = new Texture(context, {size: new Vec2(0), pixelType: "half-float"})
   editedRect: Rect|undefined
@@ -107,23 +109,18 @@ abstract class BaseBrushTool extends Tool {
     this.renderer.render(rect)
   }
 
-  @computed get currentLayerContent(): ImageLayerContent|undefined {
-    const layer = this.currentLayer
-    if (layer && layer.content.type == "image") {
-      return layer.content
-    }
-  }
-
   hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender){
     console.log("hooking...")
     return false
   }
 
   start(waypoint: Waypoint) {
-    const content = this.currentLayerContent
-    if (!content) {
+    const layer = this.currentLayer
+    if (!layer || layer.content.type != "image") {
       return
     }
+    const content = layer.content
+    this.targetContent = content
     const {tiledTexture} = content
 
     if (this.oldTiledTexture) {
@@ -144,10 +141,11 @@ abstract class BaseBrushTool extends Tool {
   @action end() {
     this.stabilizeEnd()
     this.pushUndoStack()
-    const content = this.currentLayerContent
+    const content = this.targetContent
     if (content) {
       content.updateThumbnail()
     }
+    this.targetContent = undefined
   }
 
   stabilizeMove(waypoint: Waypoint) {
@@ -241,7 +239,7 @@ abstract class BaseBrushTool extends Tool {
       return
     }
     this.editedRect = undefined
-    const content = this.currentLayerContent
+    const content = this.targetContent
     if (!content) {
       return
     }
