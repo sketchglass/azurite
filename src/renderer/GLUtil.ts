@@ -9,20 +9,20 @@ const drawTextureModel = new Model(context, {
 })
 
 export
-function drawTexture(dst: DrawTarget, texture: Texture, params: {offset?: Vec2, dstRect?: Rect, srcRect?: Rect, transform?: Transform, blendMode?: BlendMode}) {
+function drawTexture(dst: DrawTarget, src: Texture, params: {offset?: Vec2, dstRect?: Rect, srcRect?: Rect, transform?: Transform, blendMode?: BlendMode}) {
   let {dstRect, srcRect} = params
+  const {size} = src
   if (!dstRect) {
     const offset = params.offset || new Vec2(0)
-    const {size} = texture
     dstRect = new Rect(offset, offset.add(size))
   }
   const texRect = srcRect
-    ? new Rect(srcRect.topLeft.div(texture.size), srcRect.bottomRight.div(texture.size))
+    ? new Rect(srcRect.topLeft.div(size), srcRect.bottomRight.div(size))
     : new Rect(new Vec2(0), new Vec2(1))
   drawTextureShape.rect = dstRect
   drawTextureShape.texCoords = texRect.vertices()
   drawTextureModel.transform = params.transform || new Transform()
   drawTextureModel.blendMode = params.blendMode || "src-over"
-  drawTextureModel.uniforms = {texture}
+  drawTextureModel.uniforms = {texture: src}
   dst.draw(drawTextureModel)
 }
