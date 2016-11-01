@@ -77,6 +77,7 @@ const tileNormalModel = new Model(context, {
   shader: NormalBlendShader,
 })
 
+export
 class TileBlender {
   tiles = [0, 1].map(i => new Tile())
   drawTargets = this.tiles.map(tile => new TextureDrawTarget(context, tile.texture))
@@ -132,6 +133,9 @@ class TileBlender {
 
 const tileBlenders = [new TileBlender()]
 
+export
+type LayerRenderHook = (layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) => boolean
+
 export default
 class LayerBlender {
   blendedTexture = new Texture(context, {
@@ -139,6 +143,8 @@ class LayerBlender {
     pixelType: "half-float",
   })
   drawTarget = new TextureDrawTarget(context, this.blendedTexture)
+
+  hook: LayerRenderHook|undefined
 
   constructor(public picture: Picture) {
   }
@@ -176,11 +182,15 @@ class LayerBlender {
       }
     }
 
-    if (!tile) {
-      return false
+    const tileBlender = tileBlenders[depth]
+    const hooked = this.hook && this.hook(layer, key, tile, tileBlender)
+    if (hooked) {
+      return true
+    } else if (tile) {
+      tileBlender.blend(tile, layer.blendMode, layer.opacity)
+      return true
     }
-    tileBlenders[depth].blend(tile, layer.blendMode, layer.opacity)
-    return true
+    return false
   }
 
   renderLayers(layers: Layer[], key: Vec2, scissor: Rect|undefined, depth: number): boolean {
