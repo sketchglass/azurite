@@ -5,7 +5,8 @@ import Waypoint from "../models/Waypoint"
 import Tool from "./Tool"
 import Layer from "../models/Layer"
 import {ImageLayerContent} from "../models/LayerContent"
-import TiledTexture from "../models/TiledTexture"
+import TiledTexture, {Tile} from "../models/TiledTexture"
+import {TileBlender} from "../models/LayerBlender"
 import Picture from "../models/Picture"
 import {ChangeLayerImageCommand} from "../commands/LayerCommand"
 import {context} from "../GLContext"
@@ -111,6 +112,11 @@ abstract class BaseBrushTool extends Tool {
     if (layer && layer.content.type == "image") {
       return layer.content
     }
+  }
+
+  hookLayerRender(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender){
+    console.log("hooking...")
+    return false
   }
 
   start(waypoint: Waypoint) {
