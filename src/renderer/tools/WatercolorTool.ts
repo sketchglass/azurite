@@ -177,7 +177,7 @@ class WatercolorTool extends BaseBrushTool {
 
       const topLeft = waypoint.pos.floor().sub(new Vec2(this.sampleSize / 2))
 
-      tiledTexture.drawToDrawTarget(this.originalDrawTarget, topLeft.neg(), "src")
+      tiledTexture.drawToDrawTarget(this.originalDrawTarget, {offset: topLeft.neg(), blendMode: "src"})
 
       this.shapeClipModel.uniforms["uOriginalTexture"] = this.originalTexture
 

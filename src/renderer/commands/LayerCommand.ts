@@ -234,7 +234,7 @@ class ChangeLayerImageCommand {
       pixelType: "half-float",
       data
     })
-    content.tiledTexture.drawTexture(texture, this.rect.topLeft, "src")
+    content.tiledTexture.drawTexture(texture, {offset: this.rect.topLeft, blendMode: "src"})
     texture.dispose()
     content.layer.picture.updated.next(this.rect)
     content.updateThumbnail()

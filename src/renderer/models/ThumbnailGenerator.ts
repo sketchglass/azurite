@@ -52,11 +52,11 @@ class ThumbnailGenerator {
 
   generate(tiledTexture: TiledTexture) {
     this.drawTarget.clear(new Color(1,1,1,1))
-    tiledTexture.drawToDrawTarget(this.drawTarget, new Vec2(0), "src-over")
+    tiledTexture.drawToDrawTarget(this.drawTarget, {offset: new Vec2(0), blendMode: "src-over"})
     this.texture.generateMipmap()
 
     const rect = new Rect(new Vec2(0), this.thumbnailSize.mul(this.texture.size.div(this.size)))
-    drawTexture(this.thumbnailDrawTarget, this.texture, {rect, blendMode: "src"})
+    drawTexture(this.thumbnailDrawTarget, this.texture, {dstRect: rect, blendMode: "src"})
 
     const {width, height} = rect
     const data = new ImageData(width, height)
