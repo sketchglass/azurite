@@ -29,7 +29,7 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
     const {layer} = this.props
     if (layer) {
       const {picture} = layer
-      const blendMode = e.target.value as LayerBlendMode
+      const blendMode = (e.target as HTMLSelectElement).value as LayerBlendMode
       picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), {blendMode}))
     }
   })

@@ -58,7 +58,7 @@ const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
   const thumbnail = (content.type == "image") ? content.thumbnail : ""
 
   const onVisibleToggle = (e: React.FormEvent<HTMLInputElement>) => {
-    const visible = e.target.checked
+    const visible = (e.target as HTMLInputElement).checked
     if (layer.visible != visible) {
       picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), {visible}))
     }
