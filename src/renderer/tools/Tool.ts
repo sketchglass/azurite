@@ -1,7 +1,10 @@
 import {observable, computed} from "mobx"
 import Picture from "../models/Picture"
+import Layer from "../models/Layer"
 import Renderer from "../views/Renderer"
 import Waypoint from "../models/Waypoint"
+import {TileBlender} from "../models/LayerBlender"
+import {Tile} from "../models/TiledTexture"
 import {Vec2} from "paintvec"
 import React = require("react")
 import {AppState} from "../state/AppState"
@@ -35,5 +38,6 @@ abstract class Tool {
   abstract end(): void
   cursorMove(waypoint: Waypoint) {}
   renderSettings(): JSX.Element { return React.createElement("div") }
+  hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender){ return false }
 }
 export default Tool

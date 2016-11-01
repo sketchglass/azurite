@@ -1,4 +1,4 @@
-import {observable, computed} from "mobx"
+import {observable, computed, reaction} from "mobx"
 import Picture from "../models/Picture"
 import Tool from "../tools/Tool"
 import BrushTool from "../tools/BrushTool"
@@ -33,6 +33,19 @@ class AppState {
   @observable color = new HSVColor(0, 0, 1)
   @observable paletteIndex: number = 0
   readonly palette = observable<HSVColor>(new Array(100).fill(new HSVColor(0, 0, 1)))
+
+  constructor() {
+    reaction(() => [this.currentPicture, this.currentTool], () => {
+      const hook = this.currentTool.hookLayerBlend.bind(this.currentTool)
+      for (const picture of this.pictures) {
+        if (picture == this.currentPicture) {
+          picture.layerBlender.hook = hook
+        } else {
+          picture.layerBlender.hook = undefined
+        }
+      }
+    })
+  }
 }
 
 export const appState = new AppState()
