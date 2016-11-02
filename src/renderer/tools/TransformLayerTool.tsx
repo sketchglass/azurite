@@ -52,6 +52,12 @@ class TransformLayerTool extends Tool {
     reaction(() => this.currentContent, content => {
       this.boundingRect = content && content.tiledTexture.boundingRect()
     })
+    reaction(() => this.picture && this.picture.lastUpdate, update => {
+      const content = this.currentContent
+      if (update && content) {
+        this.boundingRect = content && content.tiledTexture.boundingRect()
+      }
+    })
   }
 
   get transform() {
@@ -145,7 +151,7 @@ class TransformLayerCommand {
     content.tiledTexture = TiledTexture.fromData(this.oldTiledTextureData)
     newTiles.dispose()
 
-    this.picture.updated.next()
+    this.picture.lastUpdate = {layer: content.layer}
   }
 
   redo() {
@@ -172,6 +178,6 @@ class TransformLayerCommand {
     content.tiledTexture = tiledTexture
     oldTiledTexture.dispose()
 
-    this.picture.updated.next()
+    this.picture.lastUpdate = {layer: content.layer}
   }
 }
