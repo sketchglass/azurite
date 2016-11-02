@@ -168,7 +168,6 @@ class TransformLayerCommand {
     for (const key of TiledTexture.keysForRect(rect)) {
       const tile = new Tile()
       drawTarget.texture = tile.texture
-      drawTarget.clear(new Color(0,0,0,0))
       content.tiledTexture.drawToDrawTarget(drawTarget, {offset: key.mulScalar(-Tile.width), blendMode: "src", transform: this.transform})
       tiledTexture.set(key, tile)
     }
