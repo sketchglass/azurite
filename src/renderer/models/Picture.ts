@@ -4,17 +4,22 @@ import {Vec2, Rect} from "paintvec"
 import {Texture} from "paintgl"
 import Layer, {LayerData} from "./Layer"
 import {GroupLayerContent, ImageLayerContent} from "./LayerContent"
-import {Subject} from "rxjs/Subject"
 import ThumbnailGenerator from "./ThumbnailGenerator"
 import LayerBlender from "./LayerBlender"
 import {UndoStack} from "./UndoStack"
 import Navigation from "./Navigation"
 import PictureParams from "./PictureParams"
+import {frameDebounce} from "../../lib/Debounce"
 
 export
 interface PictureData {
   size: [number, number]
   layers: LayerData[]
+}
+
+interface PictureUpdate {
+  rect?: Rect
+  layer?: Layer
 }
 
 export default
@@ -31,7 +36,7 @@ class Picture {
     rotation: 0,
     horizontalFlip: false
   })
-  readonly updated = new Subject<Rect|undefined>()
+  @observable lastUpdate: PictureUpdate = {}
   @observable filePath = ""
   @observable edited = false
   @computed get fileName() {
@@ -52,12 +57,9 @@ class Picture {
     )
     this.selectedLayers.push(defaultLayer)
 
-    this.updated.forEach(() => {
-      this.layerBlender.render()
-    })
-    reaction(() => this.layers.peek(), () => {
-      this.updated.next()
-    })
+    reaction(() => this.lastUpdate, frameDebounce((update: PictureUpdate) => {
+      this.layerBlender.render(update.rect)
+    }))
     this.layerBlender.render()
     this.undoStack.commands.observe(() => {
       this.edited = true

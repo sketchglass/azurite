@@ -1,5 +1,4 @@
 import {observable, computed, reaction} from "mobx"
-import {Subscription} from "rxjs/Subscription"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Model, RectShape, TextureShader, CanvasDrawTarget, Color} from "paintgl"
 import {context, canvas} from "../GLContext"
@@ -17,7 +16,6 @@ class Renderer {
     shader: TextureShader,
   })
   @observable size = new Vec2(100, 100)
-  updatedSubscription: Subscription|undefined
   disposers: (() => void)[] = []
 
   @computed get pictureSize() {
@@ -50,22 +48,24 @@ class Renderer {
     return this.transformFromPicture.invert()!
   }
 
+  @computed get lastBlend() {
+    if (this.picture) {
+      return this.picture.layerBlender.lastBlend
+    }
+  }
+
   constructor() {
     this.disposers.push(
       reaction(() => this.picture, picture => {
-        if (this.updatedSubscription) {
-          this.updatedSubscription.unsubscribe()
-          this.updatedSubscription = undefined
-        }
         if (picture) {
           this.shape.rect = new Rect(new Vec2(), picture.size)
           this.model.uniforms = {texture: picture.layerBlender.blendedTexture}
-          this.updatedSubscription = picture.updated.subscribe(rect => {
-            this.render(rect)
-          })
         } else {
           this.model.uniforms = {}
         }
+      }),
+      reaction(() => this.lastBlend, blend => {
+        this.render(blend && blend.rect)
       }),
       reaction(() => this.size, size => {
         canvas.width = size.width
@@ -82,9 +82,6 @@ class Renderer {
   dispose() {
     for (const disposer of this.disposers) {
       disposer()
-    }
-    if (this.updatedSubscription) {
-      this.updatedSubscription.unsubscribe()
     }
     this.model.dispose()
     this.shape.dispose()

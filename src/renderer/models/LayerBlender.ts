@@ -1,3 +1,4 @@
+import {observable} from "mobx"
 import Picture from "./Picture"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Model, Texture, TextureDrawTarget, Shader, TextureShader, RectShape, PixelType, Color} from "paintgl"
@@ -146,6 +147,8 @@ class LayerBlender {
 
   hook: LayerBlendHook|undefined
 
+  @observable lastBlend: {rect?: Rect} = {}
+
   constructor(public picture: Picture) {
   }
 
@@ -161,6 +164,7 @@ class LayerBlender {
       this.renderLayers(this.picture.layers, key, tileScissor, 0)
       drawTexture(this.drawTarget, tileBlenders[0].currentTile.texture, {offset, blendMode: "src-over"})
     }
+    this.lastBlend = {rect}
   }
 
   renderLayer(layer: Layer, key: Vec2, scissor: Rect|undefined, depth: number): boolean {
