@@ -28,12 +28,14 @@ abstract class Tool {
       return []
     }
   }
+  @computed get active() {
+    return this.appState.currentTool == this
+  }
   renderer: Renderer
   abstract name: string
   @observable cursor = "auto"
   @observable cursorElement: HTMLElement|undefined
   @observable cursorElementSize = 0
-  @observable active = false
   abstract start(waypoint: Waypoint, rendererPos: Vec2): void
   abstract move(waypoint: Waypoint, rendererPos: Vec2): void
   abstract end(): void

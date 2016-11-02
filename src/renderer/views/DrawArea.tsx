@@ -39,12 +39,8 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
 
   setTool(tool: Tool) {
-    if (this.tool) {
-      this.tool.active = false
-    }
     this.tool = tool
     this.tool.renderer = this.renderer
-    this.tool.active = true
   }
 
   componentWillReceiveProps(nextProps: DrawAreaProps) {
