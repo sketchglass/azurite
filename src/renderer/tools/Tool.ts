@@ -28,6 +28,9 @@ abstract class Tool {
       return []
     }
   }
+  @computed get active() {
+    return this.appState.currentTool == this
+  }
   renderer: Renderer
   abstract name: string
   @observable cursor = "auto"
@@ -38,6 +41,7 @@ abstract class Tool {
   abstract end(): void
   cursorMove(waypoint: Waypoint) {}
   renderSettings(): JSX.Element { return React.createElement("div") }
+  renderOverlayUI(): JSX.Element|undefined { return }
   hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender){ return false }
 }
 export default Tool

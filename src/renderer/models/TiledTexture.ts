@@ -1,5 +1,5 @@
 import * as zlib from "zlib"
-import {Vec2, Rect} from "paintvec"
+import {Vec2, Rect, Transform} from "paintvec"
 import {Texture, PixelType, DrawTarget, TextureDrawTarget, Model, TextureShader, RectShape, BlendMode} from "paintgl"
 import {context} from "../GLContext"
 import {drawTexture} from "../GLUtil"
@@ -20,12 +20,44 @@ class Tile {
     })
   }
 
+  boundingRect() {
+    tileModel.uniforms = {texture: this.texture}
+    byteAlphaDrawTarget.draw(tileModel)
+    const {width, rect} = Tile
+    byteAlphaDrawTarget.readPixels(rect, byteAlphaData)
+
+    let hasOpaquePixel = false
+    let left = 0, right = 0, top = 0, bottom = 0
+    let i = 3
+    for (let y = 0; y < width; ++y) {
+      for (let x = 0; x < width; ++x) {
+        const a = byteAlphaData[i]
+        i += 4
+        if (a != 0) {
+          if (hasOpaquePixel) {
+            left = Math.min(left, x)
+            right = Math.max(right, x + 1)
+            top = Math.min(top, y)
+            bottom = Math.max(bottom, y + 1)
+          } else {
+            hasOpaquePixel = true
+            left = x
+            right = x + 1
+            top = y
+            bottom = y + 1
+          }
+        }
+      }
+    }
+    if (hasOpaquePixel) {
+      return new Rect(new Vec2(left, top), new Vec2(right, bottom))
+    }
+  }
+
   toData() {
     tileModel.uniforms = {texture: this.texture}
     floatDrawTarget.draw(tileModel)
-    const {width, rect} = Tile
-    const floatData = new Float32Array(width * width * 4)
-    floatDrawTarget.readPixels(rect, floatData)
+    floatDrawTarget.readPixels(Tile.rect, floatData)
     return float32ArrayTo16(floatData)
   }
 
@@ -45,6 +77,12 @@ export
 interface TiledTextureData {
   tileSize: number
   tiles: [[number, number], Buffer][]
+}
+
+export
+interface TiledTextureRawData {
+  tileSize: number
+  tiles: [[number, number], Uint16Array][]
 }
 
 export default
@@ -91,16 +129,19 @@ class TiledTexture {
     }
   }
 
-  drawToDrawTarget(dest: DrawTarget, opts: {offset: Vec2, blendMode: BlendMode}) {
-    const {offset, blendMode} = opts
-    const rect = new Rect(offset.neg(), offset.neg().add(dest.size))
+  drawToDrawTarget(dest: DrawTarget, opts: {offset: Vec2, blendMode: BlendMode, transform?: Transform}) {
+    const {offset, blendMode, transform} = opts
+    let rect = new Rect(offset.neg(), offset.neg().add(dest.size))
+    if (transform) {
+      rect = rect.transform(transform.invert()!)
+    }
     for (const key of TiledTexture.keysForRect(rect)) {
       if (blendMode == "src-over") {
         if (!this.has(key)) {
           continue
         }
       }
-      drawTexture(dest, this.get(key).texture, {offset: offset.add(key.mulScalar(Tile.width)), blendMode})
+      drawTexture(dest, this.get(key).texture, {offset: offset.add(key.mulScalar(Tile.width)), blendMode, transform})
     }
   }
 
@@ -119,6 +160,33 @@ class TiledTexture {
     }
   }
 
+  toRawData(): TiledTextureRawData {
+    const tiles = Array.from(this.tiles).map(([key, tile]) => {
+      const {x, y} = stringToKey(key)
+      const data = tile.toData()
+      const elem: [[number, number], Uint16Array] = [[x, y], data]
+      return elem
+    })
+    return {
+      tileSize: Tile.width,
+      tiles,
+    }
+  }
+
+  boundingRect() {
+    const rects: Rect[] = []
+    for (const [keyStr, tile] of this.tiles) {
+      const key = stringToKey(keyStr)
+      const rect = tile.boundingRect()
+      if (rect) {
+        rects.push(rect.translate(key.mul(Tile.size)))
+      } else {
+        // TODO: GC tile
+      }
+    }
+    return Rect.union(...rects)
+  }
+
   static fromData(data: TiledTextureData) {
     if (data.tileSize != Tile.width) {
       throw new Error("tile size incompatible")
@@ -126,6 +194,21 @@ class TiledTexture {
     const tiles = data.tiles.map(([[x, y], compressed]) => {
       const buffer = zlib.inflateSync(compressed)
       const data = new Uint16Array(new Uint8Array(buffer).buffer)
+      const tile = new Tile(data)
+      const key = keyToString(new Vec2(x, y))
+      const kv: [string, Tile] = [key, tile]
+      return kv
+    })
+    const tiledTexture = new TiledTexture()
+    tiledTexture.tiles = new Map(tiles)
+    return tiledTexture
+  }
+
+  static fromRawData(data: TiledTextureRawData) {
+    if (data.tileSize != Tile.width) {
+      throw new Error("tile size incompatible")
+    }
+    const tiles = data.tiles.map(([[x, y], data]) => {
       const tile = new Tile(data)
       const key = keyToString(new Vec2(x, y))
       const kv: [string, Tile] = [key, tile]
@@ -172,7 +255,13 @@ const tileModel = new Model(context, {
   shader: TextureShader,
   blendMode: "src",
 })
+
+const floatData = new Float32Array(Tile.width * Tile.width * 4)
 const floatTile = new Texture(context, {size: Tile.size, pixelType: "float"})
 const floatDrawTarget = new TextureDrawTarget(context, floatTile)
+
+const byteAlphaData = new Uint8Array(Tile.width * Tile.width * 4)
+const byteAlphaTile = new Texture(context, {size: Tile.size, pixelType: "byte"})
+const byteAlphaDrawTarget = new TextureDrawTarget(context, byteAlphaTile)
 
 const tileDrawTarget = new TextureDrawTarget(context)

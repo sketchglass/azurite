@@ -33,24 +33,29 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     super(props)
     this.renderer = new Renderer()
     this.renderer.picture = props.picture
-    this.tool = props.tool
+    this.setTool(props.tool)
     autorun(() => this.updateCursor())
     autorun(() => this.updateCursorGeometry())
   }
 
+  setTool(tool: Tool) {
+    this.tool = tool
+    this.tool.renderer = this.renderer
+  }
+
   componentWillReceiveProps(nextProps: DrawAreaProps) {
     this.renderer.picture = nextProps.picture
-    this.tool = nextProps.tool
+    this.setTool(nextProps.tool)
   }
 
   componentDidMount() {
-    this.element = this.refs["root"] as HTMLElement
-    this.element.appendChild(canvas)
+    const element = this.element!
+    element.insertBefore(canvas, element.firstChild)
     this.updateCursor()
 
-    this.element.addEventListener("pointerdown", this.onPointerDown)
-    this.element.addEventListener("pointermove", this.onPointerMove)
-    this.element.addEventListener("pointerup", this.onPointerUp)
+    element.addEventListener("pointerdown", this.onPointerDown)
+    element.addEventListener("pointermove", this.onPointerMove)
+    element.addEventListener("pointerup", this.onPointerUp)
 
     this.tabletDownSubscription = IPCChannels.tabletDown.listen().subscribe(ev => {
       this.usingTablet = true
@@ -126,8 +131,13 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   render() {
     const style = {visibility: this.props.picture ? "visible" : "hidden"}
+    const overlay = this.tool.renderOverlayUI()
     return (
-      <div ref="root" className="DrawArea" style={style} />
+      <div ref={e => this.element = e} className="DrawArea" style={style}>
+        <svg hidden={!overlay} className="DrawArea_Overlay">
+          {overlay}
+        </svg>
+      </div>
     )
   }
 
@@ -173,7 +183,6 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
   onDown(ev: {clientX: number, clientY: number, pressure?: number}) {
     const {tool} = this.props
-    tool.renderer = this.renderer
     const {waypoint, rendererPos} = this.eventToWaypoint(ev)
     const rect = tool.start(waypoint, rendererPos)
     this.currentTool = tool

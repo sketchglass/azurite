@@ -8,6 +8,7 @@
 @import "./Navigator.css";
 @import "./Palette.css";
 @import "./PictureTabBar.css";
+@import "./DrawArea.css";
 
 /* Components */
 @import "./components/ClickToEdit.css";

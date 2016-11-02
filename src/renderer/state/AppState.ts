@@ -6,6 +6,7 @@ import WatercolorTool from "../tools/WatercolorTool"
 import PanTool from "../tools/PanTool"
 import {ZoomTool} from "../tools/ZoomTool"
 import RotateTool from "../tools/RotateTool"
+import TransformLayerTool from "../tools/TransformLayerTool"
 import {HSVColor} from "../../lib/Color"
 
 export
@@ -26,6 +27,7 @@ class AppState {
     new PanTool(this),
     new ZoomTool(this),
     new RotateTool(this),
+    new TransformLayerTool(this),
   ])
   @observable currentTool: Tool = this.tools[0]
   @observable overrideTool: Tool|undefined
