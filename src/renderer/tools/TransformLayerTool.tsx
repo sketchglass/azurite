@@ -95,8 +95,8 @@ class TransformLayerTool extends Tool {
   }
 
   commit() {
-    if (this.picture && this.currentContent) {
-      const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.transform)
+    if (this.picture && this.currentContent && this.boundingRect) {
+      const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.boundingRect, this.transform)
       this.picture.undoStack.redoAndPush(command)
       this.boundingRect = this.currentContent.tiledTexture.boundingRect()
     }
@@ -120,7 +120,7 @@ export
 class TransformLayerCommand {
   oldTiledTextureData: TiledTextureData
 
-  constructor(public picture: Picture, public path: number[], public transform: Transform) {
+  constructor(public picture: Picture, public path: number[], public boundingRect: Rect, public transform: Transform) {
   }
 
   get content() {
@@ -153,12 +153,8 @@ class TransformLayerCommand {
       return
     }
 
-    const oldRect = content.tiledTexture.boundingRect()
-    if (!oldRect) {
-      return // image is empty
-    }
     const tiledTexture = new TiledTexture()
-    const rect = oldRect.transform(this.transform)
+    const rect = this.boundingRect.transform(this.transform)
 
     const drawTarget = new TextureDrawTarget(context)
 
