@@ -79,6 +79,12 @@ interface TiledTextureData {
   tiles: [[number, number], Buffer][]
 }
 
+export
+interface TiledTextureRawData {
+  tileSize: number
+  tiles: [[number, number], Uint16Array][]
+}
+
 export default
 class TiledTexture {
   tiles = new Map<string, Tile>()
@@ -154,6 +160,19 @@ class TiledTexture {
     }
   }
 
+  toRawData(): TiledTextureRawData {
+    const tiles = Array.from(this.tiles).map(([key, tile]) => {
+      const {x, y} = stringToKey(key)
+      const data = tile.toData()
+      const elem: [[number, number], Uint16Array] = [[x, y], data]
+      return elem
+    })
+    return {
+      tileSize: Tile.width,
+      tiles,
+    }
+  }
+
   boundingRect() {
     const rects: Rect[] = []
     for (const [keyStr, tile] of this.tiles) {
@@ -175,6 +194,21 @@ class TiledTexture {
     const tiles = data.tiles.map(([[x, y], compressed]) => {
       const buffer = zlib.inflateSync(compressed)
       const data = new Uint16Array(new Uint8Array(buffer).buffer)
+      const tile = new Tile(data)
+      const key = keyToString(new Vec2(x, y))
+      const kv: [string, Tile] = [key, tile]
+      return kv
+    })
+    const tiledTexture = new TiledTexture()
+    tiledTexture.tiles = new Map(tiles)
+    return tiledTexture
+  }
+
+  static fromRawData(data: TiledTextureRawData) {
+    if (data.tileSize != Tile.width) {
+      throw new Error("tile size incompatible")
+    }
+    const tiles = data.tiles.map(([[x, y], data]) => {
       const tile = new Tile(data)
       const key = keyToString(new Vec2(x, y))
       const kv: [string, Tile] = [key, tile]

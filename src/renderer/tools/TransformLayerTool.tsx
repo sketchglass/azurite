@@ -5,7 +5,7 @@ import {Vec2, Rect, Transform} from "paintvec"
 import {TextureDrawTarget, Color} from "paintgl"
 import Picture from "../models/Picture"
 import Layer from "../models/Layer"
-import TiledTexture, {Tile, TiledTextureData} from "../models/TiledTexture"
+import TiledTexture, {Tile, TiledTextureRawData} from "../models/TiledTexture"
 import {TileBlender} from "../models/LayerBlender"
 import Waypoint from "../models/Waypoint"
 import Tool from './Tool'
@@ -125,7 +125,7 @@ class TransformLayerTool extends Tool {
 
 export
 class TransformLayerCommand {
-  oldTiledTextureData: TiledTextureData
+  oldTiledTextureData: TiledTextureRawData
 
   constructor(public picture: Picture, public path: number[], public boundingRect: Rect, public transform: Transform) {
   }
@@ -148,7 +148,7 @@ class TransformLayerCommand {
       return
     }
     const newTiles = content.tiledTexture
-    content.tiledTexture = TiledTexture.fromData(this.oldTiledTextureData)
+    content.tiledTexture = TiledTexture.fromRawData(this.oldTiledTextureData)
     newTiles.dispose()
 
     this.picture.lastUpdate = {layer: content.layer}
@@ -174,7 +174,7 @@ class TransformLayerCommand {
     }
 
     const oldTiledTexture = content.tiledTexture
-    this.oldTiledTextureData = oldTiledTexture.toData()
+    this.oldTiledTextureData = oldTiledTexture.toRawData()
     content.tiledTexture = tiledTexture
     oldTiledTexture.dispose()
 
