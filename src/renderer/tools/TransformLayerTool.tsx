@@ -11,6 +11,7 @@ import Waypoint from "../models/Waypoint"
 import Tool from './Tool'
 import {context} from "../GLContext"
 import {AppState} from "../state/AppState"
+import {frameDebounce} from "../../lib/Debounce"
 
 @observer
 class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}, {}> {
@@ -46,8 +47,6 @@ class TransformLayerTool extends Tool {
   @observable translation = new Vec2()
   @observable boundingRect: Rect|undefined
 
-  needsUpdate = false
-
   constructor(appState: AppState) {
     super(appState)
     reaction(() => this.currentContent, content => {
@@ -75,20 +74,15 @@ class TransformLayerTool extends Tool {
   move(waypoint: Waypoint, rendererPos: Vec2) {
     if (this.dragging) {
       this.translation = rendererPos.round().sub(this.originalPos).add(this.originalTranslation)
-      this.needsUpdate = true
-      setImmediate(this.update)
+      this.update()
     }
   }
 
-  update = () => {
-    if (this.needsUpdate) {
-      // skip update when update takes so long and update queue is jammed
-      this.needsUpdate = false
-      if (this.picture) {
-        this.picture.updated.next()
-      }
+  update = frameDebounce(() => {
+    if (this.picture) {
+      this.picture.updated.next()
     }
-  }
+  })
 
   end() {
     this.dragging = false
