@@ -137,10 +137,8 @@ class TiledTexture {
       rect = rect.transform(transform.invert()!)
     }
     for (const key of TiledTexture.keysForRect(rect)) {
-      if (blendMode == "src-over") {
-        if (!this.has(key)) {
-          continue
-        }
+      if (!this.has(key)) {
+        continue
       }
       let transform = Transform.translate(offset.add(key.mulScalar(Tile.width)))
       if (opts.transform) {
