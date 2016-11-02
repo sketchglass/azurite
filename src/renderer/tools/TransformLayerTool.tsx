@@ -44,11 +44,15 @@ class TransformLayerTool extends Tool {
   originalPos = new Vec2()
   originalTranslation = new Vec2()
   @observable translation = new Vec2()
+  @observable boundingRect: Rect|undefined
 
   needsUpdate = false
 
   constructor(appState: AppState) {
     super(appState)
+    reaction(() => this.currentContent, content => {
+      this.boundingRect = content && content.tiledTexture.boundingRect()
+    })
   }
 
   get transform() {
@@ -59,12 +63,6 @@ class TransformLayerTool extends Tool {
     const {active, currentLayer} = this
     if (active && currentLayer && currentLayer.content.type == "image") {
       return currentLayer.content
-    }
-  }
-
-  @computed get boundingRect() {
-    if (this.currentContent) {
-      return this.currentContent.tiledTexture.boundingRect()
     }
   }
 
@@ -106,6 +104,7 @@ class TransformLayerTool extends Tool {
     if (this.picture && this.currentContent) {
       const command = new TransformlayerCommand(this.picture, this.currentContent.layer.path(), this.transform)
       this.picture.undoStack.redoAndPush(command)
+      this.boundingRect = this.currentContent.tiledTexture.boundingRect()
     }
   }
 
