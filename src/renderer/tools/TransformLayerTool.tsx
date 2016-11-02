@@ -80,7 +80,8 @@ class TransformLayerTool extends Tool {
 
   update = frameDebounce(() => {
     if (this.picture) {
-      this.picture.updated.next()
+      this.picture.layerBlender.render()
+      this.renderer.render()
     }
   })
 
