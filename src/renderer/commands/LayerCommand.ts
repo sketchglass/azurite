@@ -229,14 +229,15 @@ class ChangeLayerImageCommand {
       return
     }
 
+    const {rect} = this
     const texture = new Texture(context, {
-      size: this.rect.size,
+      size: rect.size,
       pixelType: "half-float",
       data
     })
-    content.tiledTexture.drawTexture(texture, {offset: this.rect.topLeft, blendMode: "src"})
+    content.tiledTexture.drawTexture(texture, {offset: rect.topLeft, blendMode: "src"})
     texture.dispose()
-    content.layer.picture.updated.next(this.rect)
+    content.layer.picture.lastUpdate = {rect, layer}
     content.updateThumbnail()
   }
 
