@@ -27,7 +27,7 @@ class Layer {
     this.name = name
     this.content = makeContent(this)
     reaction(() => [this.visible, this.blendMode, this.opacity], () => {
-      picture.updated.next()
+      picture.lastUpdate = {layer: this}
     })
   }
 
