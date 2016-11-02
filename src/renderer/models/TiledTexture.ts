@@ -125,7 +125,8 @@ class TiledTexture {
     const rect = new Rect(offset, offset.add(src.size))
     for (const key of TiledTexture.keysForRect(rect)) {
       tileDrawTarget.texture = this.get(key).texture
-      drawTexture(tileDrawTarget, src, {offset: offset.sub(key.mulScalar(Tile.width)), blendMode})
+      const transform = Transform.translate(offset.sub(key.mulScalar(Tile.width)))
+      drawTexture(tileDrawTarget, src, {transform, blendMode})
     }
   }
 
@@ -136,12 +137,14 @@ class TiledTexture {
       rect = rect.transform(transform.invert()!)
     }
     for (const key of TiledTexture.keysForRect(rect)) {
-      if (blendMode == "src-over") {
-        if (!this.has(key)) {
-          continue
-        }
+      if (!this.has(key)) {
+        continue
       }
-      drawTexture(dest, this.get(key).texture, {offset: offset.add(key.mulScalar(Tile.width)), blendMode, transform})
+      let transform = Transform.translate(offset.add(key.mulScalar(Tile.width)))
+      if (opts.transform) {
+        transform = transform.merge(opts.transform)
+      }
+      drawTexture(dest, this.get(key).texture, {transform, blendMode})
     }
   }
 

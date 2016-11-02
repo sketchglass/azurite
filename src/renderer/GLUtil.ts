@@ -9,20 +9,35 @@ const drawTextureModel = new Model(context, {
 })
 
 export
-function drawTexture(dst: DrawTarget, src: Texture, params: {offset?: Vec2, dstRect?: Rect, srcRect?: Rect, transform?: Transform, blendMode?: BlendMode}) {
-  let {dstRect, srcRect} = params
+function drawTexture(dst: DrawTarget, src: Texture, params: {dstRect?: Rect, srcRect?: Rect, transform?: Transform, blendMode?: BlendMode}) {
+  const {srcRect} = params
   const {size} = src
-  if (!dstRect) {
-    const offset = params.offset || new Vec2(0)
-    dstRect = new Rect(offset, offset.add(size))
-  }
+  const dstRect = params.dstRect || new Rect(new Vec2(), size)
   const texRect = srcRect
     ? new Rect(srcRect.topLeft.div(size), srcRect.bottomRight.div(size))
     : new Rect(new Vec2(0), new Vec2(1))
-  drawTextureShape.rect = dstRect
-  drawTextureShape.texCoords = texRect.vertices()
+
+  if (!drawTextureShape.rect.equals(dstRect)) {
+    drawTextureShape.rect = dstRect
+  }
+  const texCoords = texRect.vertices()
+  if (!verticesEquals(drawTextureShape.texCoords, texCoords)) {
+    drawTextureShape.texCoords = texCoords
+  }
   drawTextureModel.transform = params.transform || new Transform()
   drawTextureModel.blendMode = params.blendMode || "src-over"
   drawTextureModel.uniforms = {texture: src}
   dst.draw(drawTextureModel)
+}
+
+function verticesEquals(xs: Vec2[], ys: Vec2[]) {
+  if (xs.length != ys.length) {
+    return false
+  }
+  for (let i = 0; i < xs.length; ++i) {
+    if (!xs[i].equals(ys[i])) {
+      return false
+    }
+  }
+  return true
 }
