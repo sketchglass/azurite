@@ -69,14 +69,14 @@ class TransformLayerTool extends Tool {
   }
 
   start(waypoint: Waypoint, rendererPos: Vec2) {
-    this.originalPos = rendererPos
+    this.originalPos = rendererPos.round()
     this.originalTranslation = this.translation
     this.dragging = true
   }
 
   move(waypoint: Waypoint, rendererPos: Vec2) {
     if (this.dragging) {
-      this.translation = rendererPos.sub(this.originalPos).add(this.originalTranslation)
+      this.translation = rendererPos.round().sub(this.originalPos).add(this.originalTranslation)
       this.needsUpdate = true
       setImmediate(this.update)
     }
@@ -95,6 +95,7 @@ class TransformLayerTool extends Tool {
   end() {
     this.dragging = false
     this.commit()
+    this.translation = new Vec2()
   }
 
   renderOverlayUI() {
