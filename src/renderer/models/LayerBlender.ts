@@ -162,7 +162,7 @@ class LayerBlender {
         ? new Rect(rect.topLeft.sub(offset), rect.bottomRight.sub(offset)).intersection(Tile.rect)
         : undefined
       this.renderLayers(this.picture.layers, key, tileScissor, 0)
-      drawTexture(this.drawTarget, tileBlenders[0].currentTile.texture, {offset, blendMode: "src-over"})
+      drawTexture(this.drawTarget, tileBlenders[0].currentTile.texture, {transform: Transform.translate(offset), blendMode: "src-over"})
     }
     this.lastBlend = {rect}
   }
