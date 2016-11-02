@@ -96,7 +96,7 @@ class TransformLayerTool extends Tool {
 
   commit() {
     if (this.picture && this.currentContent) {
-      const command = new TransformlayerCommand(this.picture, this.currentContent.layer.path(), this.transform)
+      const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.transform)
       this.picture.undoStack.redoAndPush(command)
       this.boundingRect = this.currentContent.tiledTexture.boundingRect()
     }
@@ -117,7 +117,7 @@ class TransformLayerTool extends Tool {
 }
 
 export
-class TransformlayerCommand {
+class TransformLayerCommand {
   oldTiledTextureData: TiledTextureData
 
   constructor(public picture: Picture, public path: number[], public transform: Transform) {
