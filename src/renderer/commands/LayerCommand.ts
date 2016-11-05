@@ -215,20 +215,24 @@ class ChangeLayerPropsCommand {
   }
 }
 
+function getImageContent(picture: Picture, path: number[]) {
+  const layer = picture.layerFromPath(path)
+  if (layer && layer.content.type == "image") {
+    return layer.content
+  }
+}
+
 export
 class ChangeLayerImageCommand {
   constructor(public picture: Picture, public path: number[], public rect: Rect, public oldData: Uint16Array, public newData: Uint16Array) {
   }
 
   replace(data: Uint16Array) {
-    const layer = this.picture.layerFromPath(this.path)
-    if (!layer) {
+    const content = getImageContent(this.picture, this.path)
+    if (!content) {
       return
     }
-    const {content} = layer
-    if (content.type != "image") {
-      return
-    }
+    const {layer} = content
 
     const {rect} = this
     const texture = new Texture(context, {
@@ -255,18 +259,6 @@ class TransformLayerCommand {
   constructor(public picture: Picture, public path: number[], public originalTiledTexture: TiledTexture, public oldTransform: Transform, public newTransform: Transform) {
   }
 
-  get content() {
-    const layer = this.picture.layerFromPath(this.path)
-    if (!layer) {
-      return
-    }
-    const {content} = layer
-    if (content.type != "image") {
-      return
-    }
-    return content
-  }
-
   undo() {
     this.replace(this.originalTiledTexture, this.oldTransform)
   }
@@ -276,7 +268,7 @@ class TransformLayerCommand {
   }
 
   replace(tiledTexture: TiledTexture, transform: Transform) {
-    const {content} = this
+    const content = getImageContent(this.picture, this.path)
     if (!content) {
       return
     }
