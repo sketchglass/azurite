@@ -1,5 +1,22 @@
 :root {
-  --default-background-color: rgba(250, 250, 250, 1);
-  --default-border-color: rgba(240, 240, 240, 1);
+  /* fonts */
+  --default-font-family: LatoWeb;
+  /* colors */
+  --default-color: rgba(199, 201, 209, 1);
+  --default-background-color: rgba(41, 43, 51, 1);
+  --default-border-color: rgba(34, 36, 42, 1);
   --darken-background-color: color(rgba(250, 250, 250, 1) blackness(5%));
+
+  --preview-panel-background-color: rgba(140, 240, 140, 0.2);
+  --preview-panel-border-color: rgba(140, 240, 140, 0.2);
+
+  --tool-selection-background-color: rgba(41, 43, 51, 1);
+  --tool-selection-border-color: rgba(41, 43, 51, 1);
+  --tool-selection-background-color-selected: rgba(34, 36, 42, 1);
+
+  --palette-background-color: rgba(34, 36, 42, 1);
+
+  --picture-tab-background-color-current: rgba(46, 48, 56, 1);
+
+  --range-slider-fill-background-color: #e06008;
 }

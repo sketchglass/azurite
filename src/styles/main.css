@@ -1,3 +1,6 @@
+/* Dependencies */
+@import "../../bundles/fonts/Lato/latofonts.css";
+
 /* Variables */
 @import "./variables.css";
 
@@ -6,12 +9,13 @@
 @import "./LayerDetail.css";
 @import "./LayerList.css";
 @import "./Navigator.css";
-@import "./Palette.css";
 @import "./PictureTabBar.css";
 @import "./DrawArea.css";
+@import "./ToolSelection.css";
 
 /* Components */
 @import "./components/ClickToEdit.css";
+@import "./components/Palette.css";
 @import "./components/DraggablePanel.css";
 @import "./components/RangeSlider.css";
 @import "./components/RGBRangeSliders.css";

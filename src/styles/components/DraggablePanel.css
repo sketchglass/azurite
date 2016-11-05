@@ -5,12 +5,7 @@
   flex-direction: column;
 }
 .DraggablePanel_label {
-  border-top: 2px solid #feccbb;
-  border-left: 1px solid #cccccc;
-  border-right: 1px solid #cccccc;
-  border-top-left-radius: 3px;
-  border-top-right-radius: 3px;
-  background-color: white;
+  font-size: 16px;
   max-width: 80px;
   cursor: move;
   padding: 2px;
@@ -18,17 +13,12 @@
   box-sizing: border-box;
 }
 .DraggablePanel_contents {
-  background-color: #fefefe;
-  border: 1px solid #cccccc;
-  border-bottom-left-radius: 3px;
-  border-bottom-right-radius: 3px;
-  border-top-right-radius: 3px;
   flex: 1;
   box-sizing: border-box;
 }
 .PreviewPanel {
   position: absolute;
-  background-color: rgba(140, 240, 140, 0.2);
-  border: 1px solid rgb(140, 240, 140);
+  background-color: var(--preview-panel-background-color);
+  border: 1px solid var(--preview-panel-border-color);
   box-sizing: border-box;
 }

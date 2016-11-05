@@ -1,8 +1,11 @@
+* {
+  color: var(--default-color);
+}
 body {
   margin: 0;
   background-color: var(--default-background-color);
-  font-family: 'Open Sans', "Hiragino Kaku Gothic ProN", メイリオ, sans-serif;
-  font-size: 11px;
+  font-family: var(--default-font-family);
+  font-size: 12px;
 }
 aside {
   z-index: 100;
@@ -23,27 +26,6 @@ aside {
   align-items: center;
   width: 200px;
   padding: 16px;
-}
-.ToolSelection {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-}
-.ToolSelection_subtools {
-  display: flex;
-  flex-direction: row;
-  width: 100%;
-}
-.ToolSelection_brushes {
-  flex-direction: column;
-}
-.ToolSelection_button {
-  width: 100%;
-  background-color: var(--default-background-color);
-  border: 1px solid var(--default-border-color);
-}
-.ToolSelection_button-selecter {
-  background-color: var(--darken-background-color);
 }
 .RightSidebar {
   width: 200px;

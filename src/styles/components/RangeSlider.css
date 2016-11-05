@@ -2,7 +2,6 @@
   position: relative;
 };
 .RangeSlider_border {
-  background-color: #ffffff;
   border: 1px solid #cccccc;
   border-radius: 2px;
   cursor: pointer;
@@ -12,7 +11,7 @@
   box-sizing: border-box;
 }
 .RangeSlider_fill {
-  background-color: #ccffcc;
+  background-color: var(--range-slider-fill-background-color);
   height: 100%;
   &::after {
     content: "\200B";

@@ -4,6 +4,7 @@
   overflow-y: scroll;
   border-radius: 2px;
   border: 1px solid #dddddd;
+  background-color: var(--palette-background-color);
 }
 .Palette-row {
   display: flex;
@@ -11,4 +12,5 @@
 .Palette-button {
   width: 12px;
   height: 12px;
+  margin: 2px;
 }

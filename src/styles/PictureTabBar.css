@@ -1,32 +1,40 @@
 .PictureTabBar {
   display: flex;
-  padding-top: 20px;
-  height: 20px;
+  height: 40px;
   align-items: flex-end;
   z-index: 100;
+  border-left: 2px solid var(--default-border-color);
+  border-right: 2px solid var(--default-border-color);
+  font-size: 14px;
 }
 .PictureTab {
-  border-top: 2px solid #cccccc;
-  border-left: 1px solid #cccccc;
-  border-right: 1px solid #cccccc;
-  border-top-left-radius: 3px;
-  border-top-right-radius: 3px;
-  padding: 2px 8px;
-  height: 24px;
+  position: relative;
+  height: 40px;
   width: 160px;
   box-sizing: border-box;
-  color: grey;
-  display: flex;
   -webkit-user-select: none;
+  border-bottom: 2px solid var(--default-border-color);
   & * {
     cursor: default;
+    position: absolute;
+    bottom: 8px;
   }
 }
 .PictureTab_title {
+}
+.PictureTab_close {
+  right: 0;
+}
+.PictureTabFill {
   flex: 1;
+  height: 40px;
+  border-bottom: 2px solid var(--default-border-color);
+  &::after {
+    content: "\200B";
+  }
 }
 .PictureTab-current {
-  border-top: 2px solid #feccbb;
-  background-color: white;
-  color: black;
+  height: 40px;
+  background-color: var(--picture-tab-background-color-current);
+  border-bottom: 2px solid var(--picture-tab-background-color-current);
 }

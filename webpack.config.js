@@ -37,6 +37,7 @@ module.exports = {
       require('postcss-import')({
         addDependencyTo: webpack
       }),
+      require('postcss-url'),
       require('postcss-cssnext'),
     ];
   },

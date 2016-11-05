@@ -1,7 +1,8 @@
 .DrawArea {
   position: relative;
   flex: 1;
-  border: 2px solid var(--default-border-color);
+  border-left: 2px solid var(--default-border-color);
+  border-right: 2px solid var(--default-border-color);
 }
 .DrawArea_Cursor {
   position: absolute;
