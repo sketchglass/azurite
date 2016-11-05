@@ -17,6 +17,7 @@ class Renderer {
   })
   @observable size = new Vec2(100, 100)
   disposers: (() => void)[] = []
+  background = new Color(46/255, 48/255, 56/255, 1)
 
   @computed get pictureSize() {
     if (this.picture) {
@@ -92,7 +93,7 @@ class Renderer {
     if (rectInPicture) {
       drawTarget.scissor = rectInPicture.transform(this.transformFromPicture)
     }
-    drawTarget.clear(new Color(240/255, 240/255, 240/255, 1))
+    drawTarget.clear(this.background)
     if (this.picture) {
       drawTarget.transform = this.transformFromPicture
       drawTarget.draw(this.model)

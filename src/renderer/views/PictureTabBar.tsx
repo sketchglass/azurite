@@ -37,6 +37,7 @@ const PictureTabBar = observer(() => {
           return <PictureTab key={i} picture={p} current={current} onClick={onClick} onClose={onClose}/>
         })
       }
+      <div className="PictureTabFill"></div>
     </div>
   )
 })
