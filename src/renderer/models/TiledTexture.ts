@@ -148,6 +148,27 @@ class TiledTexture {
     }
   }
 
+  transform(transform: Transform) {
+    if (transform.equals(new Transform())) {
+      return this.clone()
+    }
+    const result = new TiledTexture()
+    const rect = this.boundingRect()
+    if (!rect) {
+      return result
+    }
+    const newRect = rect.transform(transform)
+    const drawTarget = new TextureDrawTarget(context)
+    for (const key of TiledTexture.keysForRect(newRect)) {
+      const tile = new Tile()
+      drawTarget.texture = tile.texture
+      this.drawToDrawTarget(drawTarget, {offset: key.mulScalar(-Tile.width), blendMode: "src", transform: transform})
+      result.set(key, tile)
+    }
+    result.shrink()
+    return result
+  }
+
   toData(): TiledTextureData {
     const tiles = Array.from(this.tiles).map(([key, tile]) => {
       const {x, y} = stringToKey(key)
@@ -178,16 +199,28 @@ class TiledTexture {
 
   boundingRect() {
     const rects: Rect[] = []
+    const keysToDelete = new Set<string>()
     for (const [keyStr, tile] of this.tiles) {
       const key = stringToKey(keyStr)
       const rect = tile.boundingRect()
       if (rect) {
         rects.push(rect.translate(key.mul(Tile.size)))
       } else {
-        // TODO: GC tile
+        keysToDelete.add(keyStr)
       }
     }
+    for (const keyStr of keysToDelete) {
+      const tile = this.tiles.get(keyStr)
+      if (tile) {
+        tile.dispose()
+      }
+      this.tiles.delete(keyStr)
+    }
     return Rect.union(...rects)
+  }
+
+  shrink() {
+    this.boundingRect()
   }
 
   static fromData(data: TiledTextureData) {

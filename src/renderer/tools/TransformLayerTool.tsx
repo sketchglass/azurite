@@ -12,6 +12,7 @@ import Tool from './Tool'
 import {context} from "../GLContext"
 import {AppState} from "../state/AppState"
 import {frameDebounce} from "../../lib/Debounce"
+import {TransformLayerCommand} from "../commands/LayerCommand"
 
 @observer
 class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}, {}> {
@@ -46,18 +47,22 @@ class TransformLayerTool extends Tool {
   originalTranslation = new Vec2()
   @observable translation = new Vec2()
   @observable boundingRect: Rect|undefined
+  originalTiledTexture = new TiledTexture()
+  oldTransform = new Transform()
 
   constructor(appState: AppState) {
     super(appState)
-    reaction(() => this.currentContent, content => {
+    reaction(() => this.currentContent, () => this.onCurrentContentChange())
+    reaction(() => this.picture && this.picture.lastUpdate, () => this.onCurrentContentChange())
+  }
+
+  onCurrentContentChange() {
+    const content = this.currentContent
+    if (content) {
       this.boundingRect = content && content.tiledTexture.boundingRect()
-    })
-    reaction(() => this.picture && this.picture.lastUpdate, update => {
-      const content = this.currentContent
-      if (update && content) {
-        this.boundingRect = content && content.tiledTexture.boundingRect()
-      }
-    })
+      this.originalTiledTexture = content.tiledTexture.clone()
+      this.oldTransform = new Transform()
+    }
   }
 
   get transform() {
@@ -72,14 +77,14 @@ class TransformLayerTool extends Tool {
   }
 
   start(waypoint: Waypoint, rendererPos: Vec2) {
-    this.originalPos = rendererPos.round()
+    this.originalPos = waypoint.pos.round()
     this.originalTranslation = this.translation
     this.dragging = true
   }
 
   move(waypoint: Waypoint, rendererPos: Vec2) {
     if (this.dragging) {
-      this.translation = rendererPos.round().sub(this.originalPos).add(this.originalTranslation)
+      this.translation = waypoint.pos.round().sub(this.originalPos).add(this.originalTranslation)
       this.update()
     }
   }
@@ -102,8 +107,9 @@ class TransformLayerTool extends Tool {
   }
 
   commit() {
-    if (this.picture && this.currentContent && this.boundingRect) {
-      const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.boundingRect, this.transform)
+    if (this.picture && this.currentContent) {
+      const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.originalTiledTexture, this.oldTransform, this.transform)
+      this.oldTransform = this.transform
       this.picture.undoStack.redoAndPush(command)
       this.boundingRect = this.currentContent.tiledTexture.boundingRect()
     }
@@ -123,60 +129,3 @@ class TransformLayerTool extends Tool {
   }
 }
 
-export
-class TransformLayerCommand {
-  oldTiledTextureData: TiledTextureRawData
-
-  constructor(public picture: Picture, public path: number[], public boundingRect: Rect, public transform: Transform) {
-  }
-
-  get content() {
-    const layer = this.picture.layerFromPath(this.path)
-    if (!layer) {
-      return
-    }
-    const {content} = layer
-    if (content.type != "image") {
-      return
-    }
-    return content
-  }
-
-  undo() {
-    const {content} = this
-    if (!content) {
-      return
-    }
-    const newTiles = content.tiledTexture
-    content.tiledTexture = TiledTexture.fromRawData(this.oldTiledTextureData)
-    newTiles.dispose()
-
-    this.picture.lastUpdate = {layer: content.layer}
-  }
-
-  redo() {
-    const {content} = this
-    if (!content) {
-      return
-    }
-
-    const tiledTexture = new TiledTexture()
-    const rect = this.boundingRect.transform(this.transform)
-
-    const drawTarget = new TextureDrawTarget(context)
-
-    for (const key of TiledTexture.keysForRect(rect)) {
-      const tile = new Tile()
-      drawTarget.texture = tile.texture
-      content.tiledTexture.drawToDrawTarget(drawTarget, {offset: key.mulScalar(-Tile.width), blendMode: "src", transform: this.transform})
-      tiledTexture.set(key, tile)
-    }
-
-    const oldTiledTexture = content.tiledTexture
-    this.oldTiledTextureData = oldTiledTexture.toRawData()
-    content.tiledTexture = tiledTexture
-    oldTiledTexture.dispose()
-
-    this.picture.lastUpdate = {layer: content.layer}
-  }
-}
