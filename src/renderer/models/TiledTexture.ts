@@ -199,15 +199,22 @@ class TiledTexture {
 
   boundingRect() {
     const rects: Rect[] = []
+    const keysToDelete = new Set<string>()
     for (const [keyStr, tile] of this.tiles) {
       const key = stringToKey(keyStr)
       const rect = tile.boundingRect()
       if (rect) {
         rects.push(rect.translate(key.mul(Tile.size)))
       } else {
-        // GC tile
-        this.tiles.delete(keyStr)
+        keysToDelete.add(keyStr)
       }
+    }
+    for (const keyStr of keysToDelete) {
+      const tile = this.tiles.get(keyStr)
+      if (tile) {
+        tile.dispose()
+      }
+      this.tiles.delete(keyStr)
     }
     return Rect.union(...rects)
   }
