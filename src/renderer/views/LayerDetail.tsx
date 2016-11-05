@@ -1,6 +1,7 @@
 import {computed, observable, action} from "mobx"
 import * as React from "react"
 import {observer} from "mobx-react"
+import Picture from  "../models/Picture"
 import Layer, {LayerBlendMode} from "../models/Layer"
 import RangeSlider from "./components/RangeSlider"
 import {ChangeLayerPropsCommand} from "../commands/LayerCommand"
@@ -18,6 +19,7 @@ const blendModeTexts = new Map<LayerBlendMode, string>([
 ])
 
 interface LayerDetailProps {
+  picture: Picture|undefined
   layer: Layer|undefined
 }
 
@@ -26,9 +28,8 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
   oldOpacity = 1
 
   onBlendModeChange = action((e: React.FormEvent<HTMLSelectElement>) => {
-    const {layer} = this.props
-    if (layer) {
-      const {picture} = layer
+    const {picture, layer} = this.props
+    if (picture && layer) {
       const blendMode = (e.target as HTMLSelectElement).value as LayerBlendMode
       picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), {blendMode}))
     }
@@ -38,15 +39,14 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
     this.oldOpacity =  layer ? layer.opacity : 1
   })
   onOpacityChange = action((value: number) => {
-    const {layer} = this.props
+    const {picture, layer} = this.props
     if (layer) {
       layer.opacity = value / 100
     }
   })
   onOpacityChangeEnd = action((value: number) => {
-    const {layer} = this.props
-    if (layer) {
-      const {picture} = layer
+    const {picture, layer} = this.props
+    if (picture && layer) {
       const opacity = value / 100
       layer.opacity = this.oldOpacity
       picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), {opacity}))

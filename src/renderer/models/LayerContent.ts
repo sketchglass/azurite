@@ -2,6 +2,7 @@ import {observable, action, IObservableArray, IArrayChange, IArraySplice} from "
 import Picture from "./Picture"
 import Layer, {LayerData} from "./Layer"
 import TiledTexture, {TiledTextureData} from "./TiledTexture"
+import ThumbnailGenerator from "./ThumbnailGenerator"
 
 export
 interface ImageLayerContentData {
@@ -12,10 +13,12 @@ interface ImageLayerContentData {
 export
 class ImageLayerContent {
   type: "image" = "image"
+  private readonly thumbnailGenerator: ThumbnailGenerator
 
   @observable thumbnail = ""
 
-  constructor(public readonly layer: Layer, public tiledTexture: TiledTexture = new TiledTexture()) {
+  constructor(private readonly picture: Picture, private readonly layer: Layer, public tiledTexture: TiledTexture = new TiledTexture()) {
+    this.thumbnailGenerator = new ThumbnailGenerator(picture.size)
     this.updateThumbnail()
   }
 
@@ -28,20 +31,21 @@ class ImageLayerContent {
   }
 
   clone(layer: Layer) {
-    return new ImageLayerContent(layer, this.tiledTexture.clone())
+    return new ImageLayerContent(this.picture, layer, this.tiledTexture.clone())
   }
 
   dispose() {
+    this.thumbnailGenerator.dispose()
     this.tiledTexture.dispose()
   }
 
-  static fromData(layer: Layer, data: ImageLayerContentData) {
+  static fromData(picture: Picture, layer: Layer, data: ImageLayerContentData) {
     const tiledTexture = TiledTexture.fromData(data.image)
-    return new ImageLayerContent(layer, tiledTexture)
+    return new ImageLayerContent(picture, layer, tiledTexture)
   }
 
   @action updateThumbnail() {
-    this.thumbnail = this.layer.picture.thumbnailGenerator.generate(this.tiledTexture)
+    this.thumbnail = this.thumbnailGenerator.generate(this.tiledTexture)
   }
 }
 
@@ -58,7 +62,7 @@ class GroupLayerContent {
   @observable collapsed = false
   children = observable<Layer>([])
 
-  constructor(public readonly layer: Layer, children: Layer[]) {
+  constructor(private readonly picture: Picture, private readonly layer: Layer, children: Layer[]) {
     this.children.observe(change => this.onChildChange(change))
     this.children.replace(children)
   }
@@ -69,7 +73,7 @@ class GroupLayerContent {
     }
     const onRemoved = (child: Layer) => {
       child.parent = undefined
-      const selected = this.layer.picture.selectedLayers
+      const selected = this.picture.selectedLayers
       for (let i = selected.length - 1; i >= 0; --i) {
         if (selected[i] == child) {
           selected.splice(i, 1)
@@ -83,7 +87,7 @@ class GroupLayerContent {
       onRemoved(change.oldValue)
       onAdded(change.newValue)
     }
-    this.layer.picture.lastUpdate = {}
+    this.picture.lastUpdate = {}
   }
 
   toData(): GroupLayerContentData {
@@ -95,7 +99,7 @@ class GroupLayerContent {
   }
 
   clone(layer: Layer) {
-    return new GroupLayerContent(layer, this.children.map(c => c.clone()))
+    return new GroupLayerContent(this.picture, layer, this.children.map(c => c.clone()))
   }
 
   dispose() {
@@ -104,9 +108,9 @@ class GroupLayerContent {
     }
   }
 
-  static fromData(layer: Layer, data: GroupLayerContentData) {
-    const children = data.children.map(d => Layer.fromData(layer.picture, d))
-    return new GroupLayerContent(layer, children)
+  static fromData(picture: Picture, layer: Layer, data: GroupLayerContentData) {
+    const children = data.children.map(d => Layer.fromData(picture, d))
+    return new GroupLayerContent(picture, layer, children)
   }
 }
 

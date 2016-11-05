@@ -107,8 +107,8 @@ class TransformLayerTool extends Tool {
   }
 
   commit() {
-    if (this.picture && this.currentContent) {
-      const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.originalTiledTexture, this.oldTransform, this.transform)
+    if (this.picture && this.currentContent && this.currentLayer) {
+      const command = new TransformLayerCommand(this.picture, this.currentLayer.path(), this.originalTiledTexture, this.oldTransform, this.transform)
       this.oldTransform = this.transform
       this.picture.undoStack.redoAndPush(command)
       this.boundingRect = this.currentContent.tiledTexture.boundingRect()
@@ -117,7 +117,7 @@ class TransformLayerTool extends Tool {
 
   hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) {
     const content = this.currentContent
-    if (this.dragging && content && layer == content.layer) {
+    if (this.dragging && content && layer == this.currentLayer) {
       transformedDrawTarget.clear(new Color(0,0,0,0))
       content.tiledTexture.drawToDrawTarget(transformedDrawTarget, {offset: tileKey.mulScalar(-Tile.width), blendMode: "src", transform: this.transform})
       const {blendMode, opacity} = layer
@@ -128,4 +128,3 @@ class TransformLayerTool extends Tool {
     }
   }
 }
-
