@@ -127,7 +127,7 @@ class GroupLayerCommand {
       const src = srcSiblings.splice(srcIndex, 1)[0]
       srcs.unshift(src)
     }
-    const group = new Layer(this.picture, "Group", layer => new GroupLayerContent(layer, srcs))
+    const group = new Layer(this.picture, "Group", layer => new GroupLayerContent(this.picture, layer, srcs))
 
     const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.srcPaths[0])
     dstSiblings.splice(dstIndex, 0, group)
@@ -151,7 +151,7 @@ class AddLayerCommand {
   }
   redo() {
     const [siblings, index] = getSiblingsAndIndex(this.picture, this.path)
-    const layer = new Layer(this.picture, "Layer", layer => new ImageLayerContent(layer))
+    const layer = new Layer(this.picture, "Layer", layer => new ImageLayerContent(this.picture, layer))
     siblings.splice(index, 0, layer)
     this.picture.selectedLayers.replace([layer])
   }
@@ -232,7 +232,7 @@ class ChangeLayerImageCommand {
     if (!content) {
       return
     }
-    const {layer} = content
+    const layer = this.picture.layerFromPath(this.path)
 
     const {rect} = this
     const texture = new Texture(context, {
@@ -242,7 +242,7 @@ class ChangeLayerImageCommand {
     })
     content.tiledTexture.drawTexture(texture, {offset: rect.topLeft, blendMode: "src"})
     texture.dispose()
-    content.layer.picture.lastUpdate = {rect, layer}
+    this.picture.lastUpdate = {rect, layer}
     content.updateThumbnail()
   }
 
@@ -272,9 +272,10 @@ class TransformLayerCommand {
     if (!content) {
       return
     }
+    const layer = this.picture.layerFromPath(this.path)
     const old = content.tiledTexture
     content.tiledTexture = tiledTexture.transform(transform)
     old.dispose()
-    this.picture.lastUpdate = {layer: content.layer}
+    this.picture.lastUpdate = {layer: layer}
   }
 }

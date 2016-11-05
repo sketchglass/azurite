@@ -4,7 +4,6 @@ import {Vec2, Rect} from "paintvec"
 import {Texture} from "paintgl"
 import Layer, {LayerData} from "./Layer"
 import {GroupLayerContent, ImageLayerContent} from "./LayerContent"
-import ThumbnailGenerator from "./ThumbnailGenerator"
 import LayerBlender from "./LayerBlender"
 import {UndoStack} from "./UndoStack"
 import Navigation from "./Navigation"
@@ -25,7 +24,6 @@ interface PictureUpdate {
 export default
 class Picture {
   readonly size = new Vec2(this.params.width, this.params.height)
-  readonly thumbnailGenerator = new ThumbnailGenerator(this.size)
   readonly rootLayer: Layer
   readonly selectedLayers = observable<Layer>([])
   readonly layerBlender = new LayerBlender(this)
@@ -51,9 +49,9 @@ class Picture {
   }
 
   constructor(public params: PictureParams) {
-    const defaultLayer = new Layer(this, "Layer", layer => new ImageLayerContent(layer))
+    const defaultLayer = new Layer(this, "Layer", layer => new ImageLayerContent(this, layer))
     this.rootLayer = new Layer(this, "root", layer =>
-      new GroupLayerContent(layer, [defaultLayer])
+      new GroupLayerContent(this, layer, [defaultLayer])
     )
     this.selectedLayers.push(defaultLayer)
 
@@ -73,7 +71,6 @@ class Picture {
   }
 
   dispose() {
-    this.thumbnailGenerator.dispose()
     this.layerBlender.dispose()
     for (const layer of this.layers) {
       layer.dispose()

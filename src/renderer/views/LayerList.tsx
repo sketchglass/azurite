@@ -44,9 +44,8 @@ function layerToNode(layer: Layer): LayerNode {
   return {key, children, collapsed, layer}
 }
 
-const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
-  const {layer, selected} = props
-  const {picture} = layer
+const LayerListItem = observer((props: {picture: Picture, layer: Layer, selected: boolean}) => {
+  const {picture, layer, selected} = props
 
   const rename = (name: string) => {
     if (layer.name != name) {
@@ -137,13 +136,13 @@ class LayerList extends React.Component<LayerListProps, {}> {
           root={root}
           selectedKeys={new Set(selectedKeys)}
           rowHeight={72}
-          rowContent={({node, selected}) => <LayerListItem layer={node.layer} selected={selected} />}
+          rowContent={({node, selected}) => <LayerListItem picture={picture} layer={node.layer} selected={selected} />}
           onSelectedKeysChange={this.onSelectedKeysChange}
           onCollapsedChange={this.onCollapsedChange}
           onMove={this.onMove}
           onCopy={this.onCopy}
         />
-        <LayerDetail layer={picture && picture.currentLayer} />
+        <LayerDetail picture={picture} layer={picture && picture.currentLayer} />
       </div>
     )
   }

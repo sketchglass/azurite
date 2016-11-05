@@ -108,7 +108,7 @@ abstract class BaseBrushTool extends Tool {
   }
 
   hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) {
-    if (this.targetContent && this.newTiledTexture && layer == this.targetContent.layer) {
+    if (this.targetContent && this.newTiledTexture && layer == this.currentLayer) {
       if (this.newTiledTexture.has(tileKey)) {
         const {blendMode, opacity} = layer
         tileBlender.blend(this.newTiledTexture.get(tileKey), blendMode, opacity)
@@ -246,7 +246,7 @@ abstract class BaseBrushTool extends Tool {
       return
     }
     const content = this.targetContent
-    if (!content) {
+    if (!content || !this.currentLayer || !this.picture) {
       return
     }
     const oldTiledTexture = content.tiledTexture
@@ -274,10 +274,8 @@ abstract class BaseBrushTool extends Tool {
     this.newTiledTexture = undefined
     oldTiledTexture.dispose()
 
-    const {layer} = content
-    const {picture} = layer
-    const command = new ChangeLayerImageCommand(picture, layer.path(), rect, oldData, newData)
-    picture.undoStack.push(command)
+    const command = new ChangeLayerImageCommand(this.picture, this.currentLayer.path(), rect, oldData, newData)
+    this.picture.undoStack.push(command)
   }
 
   brushSize(waypoint: Waypoint) {

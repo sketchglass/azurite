@@ -23,7 +23,7 @@ class Layer {
   parent: Layer|undefined
   public readonly content: LayerContent
 
-  constructor(public picture: Picture, name: string, makeContent: (layer: Layer) => LayerContent) {
+  constructor(private picture: Picture, name: string, makeContent: (layer: Layer) => LayerContent) {
     this.name = name
     this.content = makeContent(this)
     reaction(() => [this.visible, this.blendMode, this.opacity], () => {
@@ -78,9 +78,9 @@ class Layer {
       switch (data.content.type) {
         default:
         case "image":
-          return ImageLayerContent.fromData(layer, data.content)
+          return ImageLayerContent.fromData(picture, layer, data.content)
         case "group":
-          return GroupLayerContent.fromData(layer, data.content)
+          return GroupLayerContent.fromData(picture, layer, data.content)
       }
     }
     const layer = new Layer(picture, data.name, makeContent)
