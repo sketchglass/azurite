@@ -46,18 +46,22 @@ class TransformLayerTool extends Tool {
   originalTranslation = new Vec2()
   @observable translation = new Vec2()
   @observable boundingRect: Rect|undefined
+  originalTiledTexture = new TiledTexture()
+  oldTransform = new Transform()
 
   constructor(appState: AppState) {
     super(appState)
-    reaction(() => this.currentContent, content => {
+    reaction(() => this.currentContent, () => this.onCurrentContentChange())
+    reaction(() => this.picture && this.picture.lastUpdate, () => this.onCurrentContentChange())
+  }
+
+  onCurrentContentChange() {
+    const content = this.currentContent
+    if (content) {
       this.boundingRect = content && content.tiledTexture.boundingRect()
-    })
-    reaction(() => this.picture && this.picture.lastUpdate, update => {
-      const content = this.currentContent
-      if (update && content) {
-        this.boundingRect = content && content.tiledTexture.boundingRect()
-      }
-    })
+      this.originalTiledTexture = content.tiledTexture.clone()
+      this.oldTransform = new Transform()
+    }
   }
 
   get transform() {
@@ -102,8 +106,9 @@ class TransformLayerTool extends Tool {
   }
 
   commit() {
-    if (this.picture && this.currentContent && this.boundingRect) {
-      const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.boundingRect, this.transform)
+    if (this.picture && this.currentContent) {
+      const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.originalTiledTexture, this.oldTransform, this.transform)
+      this.oldTransform = this.transform
       this.picture.undoStack.redoAndPush(command)
       this.boundingRect = this.currentContent.tiledTexture.boundingRect()
     }
@@ -125,9 +130,7 @@ class TransformLayerTool extends Tool {
 
 export
 class TransformLayerCommand {
-  oldTiledTextureData: TiledTextureRawData
-
-  constructor(public picture: Picture, public path: number[], public boundingRect: Rect, public transform: Transform) {
+  constructor(public picture: Picture, public path: number[], public originalTiledTexture: TiledTexture, public oldTransform: Transform, public newTransform: Transform) {
   }
 
   get content() {
@@ -143,40 +146,21 @@ class TransformLayerCommand {
   }
 
   undo() {
-    const {content} = this
-    if (!content) {
-      return
-    }
-    const newTiles = content.tiledTexture
-    content.tiledTexture = TiledTexture.fromRawData(this.oldTiledTextureData)
-    newTiles.dispose()
-
-    this.picture.lastUpdate = {layer: content.layer}
+    this.replace(this.originalTiledTexture, this.oldTransform)
   }
 
   redo() {
+    this.replace(this.originalTiledTexture, this.newTransform)
+  }
+
+  replace(tiledTexture: TiledTexture, transform: Transform) {
     const {content} = this
     if (!content) {
       return
     }
-
-    const tiledTexture = new TiledTexture()
-    const rect = this.boundingRect.transform(this.transform)
-
-    const drawTarget = new TextureDrawTarget(context)
-
-    for (const key of TiledTexture.keysForRect(rect)) {
-      const tile = new Tile()
-      drawTarget.texture = tile.texture
-      content.tiledTexture.drawToDrawTarget(drawTarget, {offset: key.mulScalar(-Tile.width), blendMode: "src", transform: this.transform})
-      tiledTexture.set(key, tile)
-    }
-
-    const oldTiledTexture = content.tiledTexture
-    this.oldTiledTextureData = oldTiledTexture.toRawData()
-    content.tiledTexture = tiledTexture
-    oldTiledTexture.dispose()
-
+    const old = content.tiledTexture
+    content.tiledTexture = tiledTexture.transform(transform)
+    old.dispose()
     this.picture.lastUpdate = {layer: content.layer}
   }
 }
