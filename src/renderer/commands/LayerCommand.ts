@@ -1,9 +1,10 @@
-import {Rect} from "paintvec"
+import {Rect, Transform} from "paintvec"
 import {Texture} from "paintgl"
 import {IObservableArray} from "mobx"
 import Picture from "../models/Picture"
 import Layer, {LayerBlendMode} from "../models/Layer"
 import {ImageLayerContent, GroupLayerContent} from "../models/LayerContent"
+import TiledTexture from "../models/TiledTexture"
 import {context} from "../GLContext"
 
 function getSiblingsAndIndex(picture: Picture, path: number[]): [IObservableArray<Layer>, number] {
@@ -246,5 +247,42 @@ class ChangeLayerImageCommand {
   }
   redo() {
     this.replace(this.newData)
+  }
+}
+
+export
+class TransformLayerCommand {
+  constructor(public picture: Picture, public path: number[], public originalTiledTexture: TiledTexture, public oldTransform: Transform, public newTransform: Transform) {
+  }
+
+  get content() {
+    const layer = this.picture.layerFromPath(this.path)
+    if (!layer) {
+      return
+    }
+    const {content} = layer
+    if (content.type != "image") {
+      return
+    }
+    return content
+  }
+
+  undo() {
+    this.replace(this.originalTiledTexture, this.oldTransform)
+  }
+
+  redo() {
+    this.replace(this.originalTiledTexture, this.newTransform)
+  }
+
+  replace(tiledTexture: TiledTexture, transform: Transform) {
+    const {content} = this
+    if (!content) {
+      return
+    }
+    const old = content.tiledTexture
+    content.tiledTexture = tiledTexture.transform(transform)
+    old.dispose()
+    this.picture.lastUpdate = {layer: content.layer}
   }
 }

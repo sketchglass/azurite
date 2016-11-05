@@ -12,6 +12,7 @@ import Tool from './Tool'
 import {context} from "../GLContext"
 import {AppState} from "../state/AppState"
 import {frameDebounce} from "../../lib/Debounce"
+import {TransformLayerCommand} from "../commands/LayerCommand"
 
 @observer
 class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}, {}> {
@@ -128,39 +129,3 @@ class TransformLayerTool extends Tool {
   }
 }
 
-export
-class TransformLayerCommand {
-  constructor(public picture: Picture, public path: number[], public originalTiledTexture: TiledTexture, public oldTransform: Transform, public newTransform: Transform) {
-  }
-
-  get content() {
-    const layer = this.picture.layerFromPath(this.path)
-    if (!layer) {
-      return
-    }
-    const {content} = layer
-    if (content.type != "image") {
-      return
-    }
-    return content
-  }
-
-  undo() {
-    this.replace(this.originalTiledTexture, this.oldTransform)
-  }
-
-  redo() {
-    this.replace(this.originalTiledTexture, this.newTransform)
-  }
-
-  replace(tiledTexture: TiledTexture, transform: Transform) {
-    const {content} = this
-    if (!content) {
-      return
-    }
-    const old = content.tiledTexture
-    content.tiledTexture = tiledTexture.transform(transform)
-    old.dispose()
-    this.picture.lastUpdate = {layer: content.layer}
-  }
-}
