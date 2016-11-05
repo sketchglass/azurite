@@ -28,7 +28,7 @@ module.exports = {
       },
       {
         test: /\.(jpg|png|woff|woff2|eot|ttf|svg)/,
-        loader: 'url-loader?limit=10000'
+        loader: 'url-loader?limit=1000000'
       }
     ],
   },
@@ -37,6 +37,7 @@ module.exports = {
       require('postcss-import')({
         addDependencyTo: webpack
       }),
+      require('postcss-url'),
       require('postcss-cssnext'),
     ];
   },
