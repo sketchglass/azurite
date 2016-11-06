@@ -2,9 +2,6 @@
   background: var(--default-color);
   width: 30px;
   height: 30px;
-  &::after {
-    content: "\200B";
-  }
   &.move {
     mask: url("../../../bundles/icons/flaticon/svg/move.svg");
   }
