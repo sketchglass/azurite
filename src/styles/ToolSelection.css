@@ -11,6 +11,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 1px; /* workaround for Retina */
 }
 .ToolSelection_button-selected {
   background-color: var(--tool-selection-background-color-selected);
