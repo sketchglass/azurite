@@ -53,11 +53,25 @@ class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}
 const transformedTile = new Tile()
 const transformedDrawTarget = new TextureDrawTarget(context, transformedTile.texture)
 
+enum DragType {
+  None,
+  Translate,
+  MoveTopLeft,
+  MoveTopCenter,
+  MoveTopRight,
+  MoveCenterRight,
+  MoveBottomRight,
+  MoveBottomCenter,
+  MoveBottomLeft,
+  MoveCenterLeft,
+  Rotate,
+}
+
 export default
 class TransformLayerTool extends Tool {
   name = "Move"
 
-  dragging = false
+  dragType = DragType.None
   originalPos = new Vec2()
   originalTranslation = new Vec2()
   @observable translation = new Vec2()
@@ -92,13 +106,36 @@ class TransformLayerTool extends Tool {
   }
 
   start(waypoint: Waypoint, rendererPos: Vec2) {
-    this.originalPos = waypoint.pos.round()
+    if (!this.boundingRect) {
+      return
+    }
+    const pos = this.originalPos = waypoint.pos.round()
     this.originalTranslation = this.translation
-    this.dragging = true
+
+    const rect = this.boundingRect
+    const {topLeft, topRight, bottomLeft, bottomRight} = rect
+
+    const handlePoints = new Map<DragType, Vec2>([
+      [DragType.MoveTopLeft, topLeft],
+      [DragType.MoveTopCenter, topLeft.add(topRight).divScalar(2)],
+      [DragType.MoveTopRight, topRight],
+      [DragType.MoveCenterRight, topRight.add(bottomRight).divScalar(2)],
+      [DragType.MoveBottomRight, bottomRight],
+      [DragType.MoveBottomCenter, bottomRight.add(bottomLeft).divScalar(2)],
+      [DragType.MoveBottomLeft, bottomLeft],
+      [DragType.MoveCenterLeft, bottomLeft.add(topLeft).divScalar(2)],
+    ])
+
+    for (const [dragType, handlePos] of handlePoints) {
+      if (pos.sub(handlePos).length() <= 4) {
+        this.dragType = dragType
+        return
+      }
+    }
   }
 
   move(waypoint: Waypoint, rendererPos: Vec2) {
-    if (this.dragging) {
+    if (this.dragType == DragType.Translate) {
       this.translation = waypoint.pos.round().sub(this.originalPos).add(this.originalTranslation)
       this.update()
     }
@@ -112,7 +149,7 @@ class TransformLayerTool extends Tool {
   })
 
   end() {
-    this.dragging = false
+    this.dragType = DragType.None
     this.commit()
     this.translation = new Vec2()
   }
@@ -132,7 +169,7 @@ class TransformLayerTool extends Tool {
 
   hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) {
     const content = this.currentContent
-    if (this.dragging && content && layer == content.layer) {
+    if (this.dragType != DragType.None && content && layer == content.layer) {
       transformedDrawTarget.clear(new Color(0,0,0,0))
       content.tiledTexture.drawToDrawTarget(transformedDrawTarget, {offset: tileKey.mulScalar(-Tile.width), blendMode: "src", transform: this.transform})
       const {blendMode, opacity} = layer
