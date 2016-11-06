@@ -19,17 +19,32 @@ class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}
   render() {
     const {tool} = this.props
     const {boundingRect} = tool
-    let polygon: JSX.Element|undefined = undefined
-    if (boundingRect) {
-      const {topLeft, topRight, bottomLeft, bottomRight} = boundingRect
-      const points = [topLeft, topRight, bottomRight, bottomLeft]
-        .map(v => v.transform(tool.transform).transform(tool.renderer.transformFromPicture).divScalar(devicePixelRatio))
-        .map(v => `${v.x},${v.y}`).join(" ")
-      polygon = <polygon points={points} stroke="#888" fill="transparent" />
+
+    const transformPos = (pos: Vec2) => {
+      return pos.transform(tool.transform).transform(tool.renderer.transformFromPicture).divScalar(devicePixelRatio)
     }
+
+    if (!boundingRect) {
+      return <g />
+    }
+    const {topLeft, topRight, bottomLeft, bottomRight} = boundingRect
+    const polygonPoints = [topLeft, topRight, bottomRight, bottomLeft]
+      .map(transformPos)
+      .map(v => `${v.x},${v.y}`).join(" ")
+    const handlePositions = [
+      topLeft,
+      topRight,
+      bottomRight,
+      bottomLeft,
+      topLeft.add(topRight).divScalar(2),
+      topRight.add(bottomRight).divScalar(2),
+      bottomRight.add(bottomLeft).divScalar(2),
+      bottomLeft.add(topLeft).divScalar(2),
+    ].map(transformPos)
     return (
       <g>
-        {polygon}
+        <polygon points={polygonPoints} stroke="#888" fill="transparent" />
+        {handlePositions.map(pos => <circle cx={pos.x} cy={pos.y} r="4" stroke="#888" fill="#FFF" />)}
       </g>
     )
   }
