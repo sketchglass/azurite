@@ -11,9 +11,6 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  &::before {
-    margin: 0;
-  }
 }
 .ToolSelection_button-selected {
   background-color: var(--tool-selection-background-color-selected);
