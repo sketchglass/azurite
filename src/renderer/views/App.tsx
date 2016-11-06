@@ -21,26 +21,35 @@ const {Menu, app} = remote
 import "./MenuBar"
 import "../../styles/main.css"
 
+const toolToIcon = (tool: Tool) => {
+  const map = {
+    "Watercolor": "flaticon-paint-brush",
+    "Brush": "flaticon-pen",
+    "Pan": "flaticon-move",
+    "Rotate": "flaticon-rotate",
+    "Move": "flaticon-transform",
+    "Zoom": "flaticon-search",
+  }
+  return map[tool.name]
+}
 function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool: Tool) => void, onContextMenu: (tool: Tool, e: React.MouseEvent<Element>) => void}) {
   return (
-    <div className="ToolSelection">
-      <div className="ToolSelection_subtools">{
+    <div className="ToolSelection">{
         props.tools.filter(tool => { return !(tool instanceof BaseBrushTool) }).map((tool, i) => {
           const selected = tool === props.currentTool
           const className = (selected) ? "ToolSelection_button ToolSelection_button-selected" : "ToolSelection_button"
           const onClick = () => props.onChange(tool)
-          return <button key={i} onClick={onClick} className={className}>{tool.name}</button>
+          return <button key={i} onClick={onClick} className={[className, toolToIcon(tool)].join(" ")}></button>
         })
-      }</div>
-      <div className="ToolSelection_brushes">{
+      }{
         props.tools.filter(tool => { return tool instanceof BaseBrushTool }).map((tool, i) => {
           const onContextMenu = (e: React.MouseEvent<Element>) => props.onContextMenu(tool, e)
           const selected = tool === props.currentTool
           const className = (selected) ? "ToolSelection_button ToolSelection_button-selected" : "ToolSelection_button"
           const onClick = () => props.onChange(tool)
-          return <button key={i} onContextMenu={onContextMenu} onClick={onClick} className={className}>{tool.name}</button>
+          return <button key={i} onContextMenu={onContextMenu} onClick={onClick} className={[className, toolToIcon(tool)].join(" ")}></button>
         })
-      }</div>
+      }
     </div>
   )
 }
@@ -103,33 +112,35 @@ class App extends React.Component<{}, {}> {
     })
     return (
       <div className="App">
-        <aside className="LeftSidebar">
-          <DraggablePanelContainer top={20} left={18} margin={14} labelHeight={20}>
-            <DraggablePanel label="Color" width={200} height={200}>
-              <ColorPicker color={color} onChange={onColorChange} />
-            </DraggablePanel>
-            <DraggablePanel label="Slider" width={200} height={70}>
-              <RGBRangeSliders color={color} onChange={onColorChange} />
-            </DraggablePanel>
-            <DraggablePanel label="Palette" width={200} height={80}>
-              <Palette palette={palette} paletteIndex={paletteIndex} onChange={onPaletteChange} />
-            </DraggablePanel>
-            <DraggablePanel label="Tools" width={200} height={80}>
-              <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
-            </DraggablePanel>
-            <DraggablePanel label="Settings" width={200} height={200}>
-              {currentTool.renderSettings()}
-            </DraggablePanel>
-          </DraggablePanelContainer>
-        </aside>
-        <div className="CenterArea">
-          <PictureTabBar />
-          <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
+        <div className="AppItem">
+          <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
         </div>
-        <aside className="RightSidebar">
-          <Navigator picture={picture} />
-          <LayerList picture={picture} />
-        </aside>
+        <div className="AppItem">
+          <aside className="LeftSidebar">
+            <DraggablePanelContainer top={70} left={18} margin={14} labelHeight={20}>
+              <DraggablePanel label="Color" width={200} height={200}>
+                <ColorPicker color={color} onChange={onColorChange} />
+              </DraggablePanel>
+              <DraggablePanel label="Slider" width={200} height={70}>
+                <RGBRangeSliders color={color} onChange={onColorChange} />
+              </DraggablePanel>
+              <DraggablePanel label="Palette" width={200} height={80}>
+                <Palette palette={palette} paletteIndex={paletteIndex} onChange={onPaletteChange} />
+              </DraggablePanel>
+              <DraggablePanel label="Settings" width={200} height={200}>
+                {currentTool.renderSettings()}
+              </DraggablePanel>
+            </DraggablePanelContainer>
+          </aside>
+          <div className="CenterArea">
+            <PictureTabBar />
+            <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
+          </div>
+          <aside className="RightSidebar">
+            <Navigator picture={picture} />
+            <LayerList picture={picture} />
+          </aside>
+        </div>
       </div>
     )
   }
