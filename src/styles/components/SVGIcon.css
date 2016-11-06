@@ -6,21 +6,21 @@
     content: "\200B";
   }
   &.move {
-    mask: url("../../../bundles/icons/flaticon/svg/move.svg") no-repeat;
+    mask: url("../../../bundles/icons/flaticon/svg/move.svg");
   }
   &.paint-brush {
-    mask: url("../../../bundles/icons/flaticon/svg/paint-brush.svg") no-repeat;
+    mask: url("../../../bundles/icons/flaticon/svg/paint-brush.svg");
   }
   &.pen {
-    mask: url("../../../bundles/icons/flaticon/svg/pen.svg") no-repeat;
+    mask: url("../../../bundles/icons/flaticon/svg/pen.svg");
   }
   &.rotate {
-    mask: url("../../../bundles/icons/flaticon/svg/rotate.svg") no-repeat;
+    mask: url("../../../bundles/icons/flaticon/svg/rotate.svg");
   }
   &.search {
-    mask: url("../../../bundles/icons/flaticon/svg/search.svg") no-repeat;
+    mask: url("../../../bundles/icons/flaticon/svg/search.svg");
   }
   &.transform {
-    mask: url("../../../bundles/icons/flaticon/svg/transform.svg") no-repeat;
+    mask: url("../../../bundles/icons/flaticon/svg/transform.svg");
   }
 }
