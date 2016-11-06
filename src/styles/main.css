@@ -1,6 +1,5 @@
 /* Dependencies */
 @import "../../bundles/fonts/Lato/latofonts.css";
-@import "../../bundles/fonts/flaticon/font/flaticon.css";
 
 /* Variables */
 @import "./variables.css";
@@ -20,3 +19,4 @@
 @import "./components/DraggablePanel.css";
 @import "./components/RangeSlider.css";
 @import "./components/RGBRangeSliders.css";
+@import "./components/SVGIcon.css";

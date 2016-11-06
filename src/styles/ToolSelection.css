@@ -8,6 +8,9 @@
   height: 50px;
   background-color: var(--tool-selection-background-color);
   border: 1px solid var(--tool-selection-border-color);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   &::before {
     margin: 0;
   }

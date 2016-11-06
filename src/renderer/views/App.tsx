@@ -17,20 +17,21 @@ import {HSVColor} from "../../lib/Color"
 import NavigationKeyBinding from "./NavigationKeyBinding"
 import {appState} from "../state/AppState"
 import {remote} from "electron"
+import SVGIcon from "./components/SVGIcon"
 const {Menu, app} = remote
 import "./MenuBar"
 import "../../styles/main.css"
 
 const toolToIcon = (tool: Tool) => {
   const map = {
-    "Watercolor": "flaticon-paint-brush",
-    "Brush": "flaticon-pen",
-    "Pan": "flaticon-move",
-    "Rotate": "flaticon-rotate",
-    "Move": "flaticon-transform",
-    "Zoom": "flaticon-search",
+    "Watercolor": "paint-brush",
+    "Brush": "pen",
+    "Pan": "move",
+    "Rotate": "rotate",
+    "Move": "transform",
+    "Zoom": "search",
   }
-  return map[tool.name]
+  return <SVGIcon className={map[tool.name]} />
 }
 function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool: Tool) => void, onContextMenu: (tool: Tool, e: React.MouseEvent<Element>) => void}) {
   return (
@@ -39,7 +40,7 @@ function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool
           const selected = tool === props.currentTool
           const className = (selected) ? "ToolSelection_button ToolSelection_button-selected" : "ToolSelection_button"
           const onClick = () => props.onChange(tool)
-          return <button key={i} onClick={onClick} className={[className, toolToIcon(tool)].join(" ")}></button>
+          return <button key={i} onClick={onClick} className={className}>{toolToIcon(tool)}</button>
         })
       }{
         props.tools.filter(tool => { return tool instanceof BaseBrushTool }).map((tool, i) => {
@@ -47,7 +48,7 @@ function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool
           const selected = tool === props.currentTool
           const className = (selected) ? "ToolSelection_button ToolSelection_button-selected" : "ToolSelection_button"
           const onClick = () => props.onChange(tool)
-          return <button key={i} onContextMenu={onContextMenu} onClick={onClick} className={[className, toolToIcon(tool)].join(" ")}></button>
+          return <button key={i} onContextMenu={onContextMenu} onClick={onClick} className={className}>{toolToIcon(tool)}</button>
         })
       }
     </div>
