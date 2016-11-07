@@ -14,6 +14,8 @@ import {AppState} from "../state/AppState"
 import {frameDebounce} from "../../lib/Debounce"
 import {TransformLayerCommand} from "../commands/LayerCommand"
 
+const HANDLE_RADIUS = 4
+
 @observer
 class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}, {}> {
   render() {
@@ -47,7 +49,7 @@ class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}
     return (
       <g>
         <polygon points={polygonPoints} stroke="#888" fill="transparent" />
-        {handlePositions.map((pos, i) => <circle key={i} cx={pos.x} cy={pos.y} r="4" stroke="#888" fill="#FFF" />)}
+        {handlePositions.map((pos, i) => <circle key={i} cx={pos.x} cy={pos.y} r={HANDLE_RADIUS} stroke="#888" fill="#FFF" />)}
       </g>
     )
   }
@@ -113,7 +115,7 @@ class TransformLayerTool extends Tool {
   }
 
   @action start(waypoint: Waypoint, rendererPos: Vec2) {
-    if (!this.rect) {
+    if (!this.rect || !this.picture) {
       this.dragType = DragType.None
       return
     }
@@ -135,7 +137,7 @@ class TransformLayerTool extends Tool {
     ])
 
     for (const [dragType, handlePos] of handlePoints) {
-      if (pos.sub(handlePos).length() <= 4 * devicePixelRatio) {
+      if (pos.sub(handlePos).length() <= HANDLE_RADIUS * devicePixelRatio * this.picture.navigation.scale) {
         this.dragType = dragType
         return
       }
