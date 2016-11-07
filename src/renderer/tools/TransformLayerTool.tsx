@@ -78,6 +78,7 @@ class TransformLayerTool extends Tool {
   dragType = DragType.None
   originalPos = new Vec2()
   originalTranslation = new Vec2()
+  originalScale = new Vec2(1)
   @observable translation = new Vec2()
   @observable scale = new Vec2(1)
   @observable boundingRect: Rect|undefined
@@ -86,16 +87,17 @@ class TransformLayerTool extends Tool {
 
   constructor(appState: AppState) {
     super(appState)
-    reaction(() => this.currentContent, () => this.onCurrentContentChange())
-    reaction(() => this.picture && this.picture.lastUpdate, () => this.onCurrentContentChange())
+    reaction(() => this.currentContent, () => this.reset())
   }
 
-  onCurrentContentChange() {
+  reset() {
     const content = this.currentContent
     if (content) {
       this.boundingRect = content && content.tiledTexture.boundingRect()
       this.originalTiledTexture = content.tiledTexture.clone()
       this.oldTransform = new Transform()
+      this.translation = new Vec2()
+      this.scale = new Vec2(1)
     }
   }
 
@@ -122,8 +124,9 @@ class TransformLayerTool extends Tool {
     }
     const pos = this.originalPos = waypoint.pos.round()
     this.originalTranslation = this.translation
+    this.originalScale = this.scale
 
-    const {topLeft, topRight, bottomLeft, bottomRight} = this.boundingRect
+    const [topLeft, topRight, bottomRight, bottomLeft] = this.boundingRect.vertices().map(v => v.transform(this.transform))
 
     const handlePoints = new Map<DragType, Vec2>([
       [DragType.MoveTopLeft, topLeft],
@@ -142,7 +145,8 @@ class TransformLayerTool extends Tool {
         return
       }
     }
-    if (this.boundingRect.includes(pos)) {
+    const invertedTransform = this.transform.invert()
+    if (invertedTransform && this.boundingRect.includes(pos.transform(invertedTransform))) {
       this.dragType = DragType.Translate
     } else {
       this.dragType = DragType.Rotate
@@ -175,8 +179,8 @@ class TransformLayerTool extends Tool {
     if (!this.boundingRect) {
       return
     }
-    this.scale = newRect.size.div(this.boundingRect.size)
-    this.translation = newRect.center.sub(this.boundingRect.center)
+    this.scale = newRect.size.div(this.boundingRect.size).mul(this.originalScale)
+    this.translation = newRect.center.sub(this.boundingRect.center).add(this.originalTranslation)
   }
 
   update = frameDebounce(() => {
@@ -189,8 +193,6 @@ class TransformLayerTool extends Tool {
   end() {
     this.dragType = DragType.None
     this.commit()
-    this.translation = new Vec2()
-    this.scale = new Vec2(1)
   }
 
   renderOverlayUI() {
@@ -202,7 +204,6 @@ class TransformLayerTool extends Tool {
       const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.originalTiledTexture, this.oldTransform, this.transform)
       this.oldTransform = this.transform
       this.picture.undoStack.redoAndPush(command)
-      this.boundingRect = this.currentContent.tiledTexture.boundingRect()
     }
   }
 
@@ -210,7 +211,7 @@ class TransformLayerTool extends Tool {
     const content = this.currentContent
     if (this.dragType != DragType.None && content && layer == content.layer) {
       transformedDrawTarget.clear(new Color(0,0,0,0))
-      content.tiledTexture.drawToDrawTarget(transformedDrawTarget, {offset: tileKey.mulScalar(-Tile.width), blendMode: "src", transform: this.transform})
+      this.originalTiledTexture.drawToDrawTarget(transformedDrawTarget, {offset: tileKey.mulScalar(-Tile.width), blendMode: "src", transform: this.transform})
       const {blendMode, opacity} = layer
       tileBlender.blend(transformedTile, blendMode, opacity)
       return true
