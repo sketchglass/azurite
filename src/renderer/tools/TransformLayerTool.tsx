@@ -18,20 +18,19 @@ import {TransformLayerCommand} from "../commands/LayerCommand"
 class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}, {}> {
   render() {
     const {tool} = this.props
-    const {boundingRect} = tool
+    const {rect} = tool
 
-    if (!boundingRect) {
+    if (!rect) {
       return <g />
     }
 
     const transformPos = (pos: Vec2) => {
       return pos
-        .transform(tool.transform)
         .transform(tool.renderer.transformFromPicture)
         .divScalar(devicePixelRatio)
     }
 
-    const {topLeft, topRight, bottomLeft, bottomRight} = boundingRect
+    const {topLeft, topRight, bottomLeft, bottomRight} = rect
     const polygonPoints = [topLeft, topRight, bottomRight, bottomLeft]
       .map(transformPos)
       .map(v => `${v.x},${v.y}`).join(" ")
@@ -77,13 +76,11 @@ class TransformLayerTool extends Tool {
 
   dragType = DragType.None
   originalPos = new Vec2()
-  originalTranslation = new Vec2()
-  originalScale = new Vec2(1)
-  @observable translation = new Vec2()
-  @observable scale = new Vec2(1)
-  @observable boundingRect: Rect|undefined
+  originalRect: Rect|undefined
   originalTiledTexture = new TiledTexture()
-  oldTransform = new Transform()
+  lastRect: Rect|undefined
+  @observable rect: Rect|undefined
+  lastCommitTransform = new Transform()
 
   constructor(appState: AppState) {
     super(appState)
@@ -93,21 +90,19 @@ class TransformLayerTool extends Tool {
   reset() {
     const content = this.currentContent
     if (content) {
-      this.boundingRect = content && content.tiledTexture.boundingRect()
+      this.originalRect = content && content.tiledTexture.boundingRect()
       this.originalTiledTexture = content.tiledTexture.clone()
-      this.oldTransform = new Transform()
-      this.translation = new Vec2()
-      this.scale = new Vec2(1)
+      this.lastCommitTransform = new Transform()
+      this.lastRect = this.originalRect
+      this.rect = this.originalRect
     }
   }
 
   @computed get transform() {
-    if (!this.boundingRect) {
+    if (!this.originalRect || !this.rect) {
       return new Transform()
     }
-    return Transform.translate(this.boundingRect.center.neg())
-      .scale(this.scale)
-      .translate(this.translation.add(this.boundingRect.center))
+    return Transform.rectToRect(this.originalRect, this.rect) || new Transform()
   }
 
   @computed get currentContent() {
@@ -118,15 +113,15 @@ class TransformLayerTool extends Tool {
   }
 
   @action start(waypoint: Waypoint, rendererPos: Vec2) {
-    if (!this.boundingRect) {
+    if (!this.rect) {
       this.dragType = DragType.None
       return
     }
     const pos = this.originalPos = waypoint.pos.round()
-    this.originalTranslation = this.translation
-    this.originalScale = this.scale
 
-    const [topLeft, topRight, bottomRight, bottomLeft] = this.boundingRect.vertices().map(v => v.transform(this.transform))
+    this.lastRect = this.rect
+
+    const {topLeft, topRight, bottomRight, bottomLeft} = this.rect
 
     const handlePoints = new Map<DragType, Vec2>([
       [DragType.MoveTopLeft, topLeft],
@@ -145,8 +140,7 @@ class TransformLayerTool extends Tool {
         return
       }
     }
-    const invertedTransform = this.transform.invert()
-    if (invertedTransform && this.boundingRect.includes(pos.transform(invertedTransform))) {
+    if (this.rect.includes(pos)) {
       this.dragType = DragType.Translate
     } else {
       this.dragType = DragType.Rotate
@@ -154,7 +148,7 @@ class TransformLayerTool extends Tool {
   }
 
   @action move(waypoint: Waypoint, rendererPos: Vec2) {
-    if (!this.boundingRect) {
+    if (!this.lastRect) {
       return
     }
 
@@ -162,25 +156,28 @@ class TransformLayerTool extends Tool {
     const offset = pos.sub(this.originalPos)
 
     switch (this.dragType) {
-    case DragType.None:
-      return
-    case DragType.Translate:
-      this.translation = offset.add(this.originalTranslation)
-      break
-    case DragType.MoveTopLeft:
-      const {topLeft, bottomRight} = this.boundingRect
-      this.resizeRect(new Rect(topLeft.add(offset), bottomRight))
-      break
+      case DragType.None: {
+        return
+      }
+      case DragType.Translate: {
+        const topLeft = this.lastRect.topLeft.add(offset)
+        this.rect = new Rect(topLeft, topLeft.add(this.lastRect.size))
+        break
+      }
+      case DragType.MoveTopLeft: {
+        this.resizeRect(offset.x, offset.y, 0, 0)
+        break
+      }
     }
     this.update()
   }
 
-  resizeRect(newRect: Rect) {
-    if (!this.boundingRect) {
+  resizeRect(leftOffset: number, topOffset: number, rightOffset: number, bottomOffset: number) {
+    if (!this.lastRect) {
       return
     }
-    this.scale = newRect.size.div(this.boundingRect.size).mul(this.originalScale)
-    this.translation = newRect.center.sub(this.boundingRect.center).add(this.originalTranslation)
+    const {left, top, right, bottom} = this.lastRect
+    this.rect = new Rect(new Vec2(left + leftOffset, top + topOffset), new Vec2(right + rightOffset, bottom + bottomOffset))
   }
 
   update = frameDebounce(() => {
@@ -201,8 +198,8 @@ class TransformLayerTool extends Tool {
 
   commit() {
     if (this.picture && this.currentContent) {
-      const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.originalTiledTexture, this.oldTransform, this.transform)
-      this.oldTransform = this.transform
+      const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.originalTiledTexture, this.lastCommitTransform, this.transform)
+      this.lastCommitTransform = this.transform
       this.picture.undoStack.redoAndPush(command)
     }
   }
