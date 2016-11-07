@@ -148,28 +148,49 @@ class TransformLayerTool extends Tool {
   }
 
   @action move(waypoint: Waypoint, rendererPos: Vec2) {
-    if (!this.lastRect) {
-      return
-    }
-
     const pos = waypoint.pos.round()
     const offset = pos.sub(this.originalPos)
 
     switch (this.dragType) {
-      case DragType.None: {
+      case DragType.None:
         return
-      }
-      case DragType.Translate: {
-        const topLeft = this.lastRect.topLeft.add(offset)
-        this.rect = new Rect(topLeft, topLeft.add(this.lastRect.size))
+      case DragType.Translate:
+        this.translateRect(offset)
         break
-      }
-      case DragType.MoveTopLeft: {
+      case DragType.MoveTopLeft:
         this.resizeRect(offset.x, offset.y, 0, 0)
         break
-      }
+      case DragType.MoveTopCenter:
+        this.resizeRect(0, offset.y, 0, 0)
+        break
+      case DragType.MoveTopRight:
+        this.resizeRect(0, offset.y, offset.x, 0)
+        break
+      case DragType.MoveCenterRight:
+        this.resizeRect(0, 0, offset.x, 0)
+        break
+      case DragType.MoveBottomRight:
+        this.resizeRect(0, 0, offset.x, offset.y)
+        break
+      case DragType.MoveBottomCenter:
+        this.resizeRect(0, 0, 0, offset.y)
+        break
+      case DragType.MoveBottomLeft:
+        this.resizeRect(offset.x, 0, 0, offset.y)
+        break
+      case DragType.MoveCenterLeft:
+        this.resizeRect(offset.x, 0, 0, 0)
+        break
     }
     this.update()
+  }
+
+  translateRect(offset: Vec2) {
+    if (!this.lastRect) {
+      return
+    }
+    const topLeft = this.lastRect.topLeft.add(offset)
+    this.rect = new Rect(topLeft, topLeft.add(this.lastRect.size))
   }
 
   resizeRect(leftOffset: number, topOffset: number, rightOffset: number, bottomOffset: number) {
