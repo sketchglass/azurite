@@ -103,11 +103,9 @@ class TransformLayerTool extends Tool {
     if (!this.boundingRect) {
       return new Transform()
     }
-    return Transform.merge(
-      Transform.translate(this.boundingRect.center.neg()),
-      Transform.scale(this.scale),
-      Transform.translate(this.translation.add(this.boundingRect.center)),
-    )
+    return Transform.translate(this.boundingRect.center.neg())
+      .scale(this.scale)
+      .translate(this.translation.add(this.boundingRect.center))
   }
 
   @computed get currentContent() {
