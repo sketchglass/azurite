@@ -1,0 +1,23 @@
+.SVGIcon {
+  background: var(--default-color);
+  width: 30px;
+  height: 30px;
+  &.move {
+    mask: url("../../../bundles/icons/flaticon/svg/move.svg");
+  }
+  &.paint-brush {
+    mask: url("../../../bundles/icons/flaticon/svg/paint-brush.svg");
+  }
+  &.pen {
+    mask: url("../../../bundles/icons/flaticon/svg/pen.svg");
+  }
+  &.rotate {
+    mask: url("../../../bundles/icons/flaticon/svg/rotate.svg");
+  }
+  &.search {
+    mask: url("../../../bundles/icons/flaticon/svg/search.svg");
+  }
+  &.transform {
+    mask: url("../../../bundles/icons/flaticon/svg/transform.svg");
+  }
+}
