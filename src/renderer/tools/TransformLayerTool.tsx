@@ -1,5 +1,5 @@
 import * as React from "react"
-import {reaction, observable, computed} from "mobx"
+import {reaction, observable, computed, action} from "mobx"
 import {observer} from "mobx-react"
 import {Vec2, Rect, Transform} from "paintvec"
 import {TextureDrawTarget, Color} from "paintgl"
@@ -20,13 +20,17 @@ class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}
     const {tool} = this.props
     const {boundingRect} = tool
 
-    const transformPos = (pos: Vec2) => {
-      return pos.transform(tool.transform).transform(tool.renderer.transformFromPicture).divScalar(devicePixelRatio)
-    }
-
     if (!boundingRect) {
       return <g />
     }
+
+    const transformPos = (pos: Vec2) => {
+      return pos
+        .transform(tool.transform)
+        .transform(tool.renderer.transformFromPicture)
+        .divScalar(devicePixelRatio)
+    }
+
     const {topLeft, topRight, bottomLeft, bottomRight} = boundingRect
     const polygonPoints = [topLeft, topRight, bottomRight, bottomLeft]
       .map(transformPos)
@@ -75,6 +79,7 @@ class TransformLayerTool extends Tool {
   originalPos = new Vec2()
   originalTranslation = new Vec2()
   @observable translation = new Vec2()
+  @observable scale = new Vec2(1)
   @observable boundingRect: Rect|undefined
   originalTiledTexture = new TiledTexture()
   oldTransform = new Transform()
@@ -94,8 +99,15 @@ class TransformLayerTool extends Tool {
     }
   }
 
-  get transform() {
-    return Transform.translate(this.translation)
+  @computed get transform() {
+    if (!this.boundingRect) {
+      return new Transform()
+    }
+    return Transform.merge(
+      Transform.translate(this.boundingRect.center.neg()),
+      Transform.scale(this.scale),
+      Transform.translate(this.translation.add(this.boundingRect.center)),
+    )
   }
 
   @computed get currentContent() {
@@ -105,7 +117,7 @@ class TransformLayerTool extends Tool {
     }
   }
 
-  start(waypoint: Waypoint, rendererPos: Vec2) {
+  @action start(waypoint: Waypoint, rendererPos: Vec2) {
     if (!this.boundingRect) {
       this.dragType = DragType.None
       return
@@ -113,8 +125,7 @@ class TransformLayerTool extends Tool {
     const pos = this.originalPos = waypoint.pos.round()
     this.originalTranslation = this.translation
 
-    const rect = this.boundingRect
-    const {topLeft, topRight, bottomLeft, bottomRight} = rect
+    const {topLeft, topRight, bottomLeft, bottomRight} = this.boundingRect
 
     const handlePoints = new Map<DragType, Vec2>([
       [DragType.MoveTopLeft, topLeft],
@@ -128,23 +139,47 @@ class TransformLayerTool extends Tool {
     ])
 
     for (const [dragType, handlePos] of handlePoints) {
-      if (pos.sub(handlePos).length() <= 4) {
+      if (pos.sub(handlePos).length() <= 4 * devicePixelRatio) {
         this.dragType = dragType
         return
       }
     }
-    if (rect.includes(pos)) {
+    if (this.boundingRect.includes(pos)) {
       this.dragType = DragType.Translate
     } else {
       this.dragType = DragType.Rotate
     }
   }
 
-  move(waypoint: Waypoint, rendererPos: Vec2) {
-    if (this.dragType == DragType.Translate) {
-      this.translation = waypoint.pos.round().sub(this.originalPos).add(this.originalTranslation)
-      this.update()
+  @action move(waypoint: Waypoint, rendererPos: Vec2) {
+    if (!this.boundingRect) {
+      return
     }
+
+    const pos = waypoint.pos.round()
+    const offset = pos.sub(this.originalPos)
+
+    switch (this.dragType) {
+    case DragType.None:
+      return
+    case DragType.Translate:
+      this.translation = offset.add(this.originalTranslation)
+      break
+    case DragType.MoveTopLeft:
+      console.log("move topleft")
+      const {topLeft, bottomRight} = this.boundingRect
+      this.resizeRect(new Rect(topLeft.add(offset), bottomRight))
+      break
+    }
+    this.update()
+  }
+
+  resizeRect(newRect: Rect) {
+    if (!this.boundingRect) {
+      return
+    }
+    this.scale = newRect.size.div(this.boundingRect.size)
+    this.translation = newRect.center.sub(this.boundingRect.center)
   }
 
   update = frameDebounce(() => {
@@ -158,6 +193,7 @@ class TransformLayerTool extends Tool {
     this.dragType = DragType.None
     this.commit()
     this.translation = new Vec2()
+    this.scale = new Vec2(1)
   }
 
   renderOverlayUI() {
