@@ -164,7 +164,6 @@ class TransformLayerTool extends Tool {
       this.translation = offset.add(this.originalTranslation)
       break
     case DragType.MoveTopLeft:
-      console.log("move topleft")
       const {topLeft, bottomRight} = this.boundingRect
       this.resizeRect(new Rect(topLeft.add(offset), bottomRight))
       break
