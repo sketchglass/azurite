@@ -44,7 +44,7 @@ class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}
     return (
       <g>
         <polygon points={polygonPoints} stroke="#888" fill="transparent" />
-        {handlePositions.map(pos => <circle cx={pos.x} cy={pos.y} r="4" stroke="#888" fill="#FFF" />)}
+        {handlePositions.map((pos, i) => <circle key={i} cx={pos.x} cy={pos.y} r="4" stroke="#888" fill="#FFF" />)}
       </g>
     )
   }
@@ -107,6 +107,7 @@ class TransformLayerTool extends Tool {
 
   start(waypoint: Waypoint, rendererPos: Vec2) {
     if (!this.boundingRect) {
+      this.dragType = DragType.None
       return
     }
     const pos = this.originalPos = waypoint.pos.round()
@@ -131,6 +132,11 @@ class TransformLayerTool extends Tool {
         this.dragType = dragType
         return
       }
+    }
+    if (rect.includes(pos)) {
+      this.dragType = DragType.Translate
+    } else {
+      this.dragType = DragType.Rotate
     }
   }
 
