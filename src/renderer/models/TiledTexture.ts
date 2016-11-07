@@ -140,10 +140,11 @@ class TiledTexture {
       if (!this.has(key)) {
         continue
       }
-      let transform = Transform.translate(offset.add(key.mulScalar(Tile.width)))
+      let transform = Transform.translate(key.mulScalar(Tile.width))
       if (opts.transform) {
         transform = transform.merge(opts.transform)
       }
+      transform = transform.translate(offset)
       drawTexture(dest, this.get(key).texture, {transform, blendMode})
     }
   }
