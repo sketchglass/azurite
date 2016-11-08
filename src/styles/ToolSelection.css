@@ -1,6 +1,7 @@
 .ToolSelection {
   display: flex;
   flex-direction: row;
+  box-sizing: border-box;
   width: 100%;
   border-bottom: 1px solid var(--default-border-color);
   padding: 0 8px;
