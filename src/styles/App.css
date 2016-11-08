@@ -35,13 +35,16 @@ aside {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 200px;
-  padding: 8px;
+  width: 240px;
+  box-sizing: border-box;
+  border-right: 1px solid var(--default-border-color);
 }
 .RightSidebar {
-  width: 200px;
+  width: 240px;
   display: flex;
   flex-direction: column;
+  box-sizing: border-box;
+  border-left: 1px solid var(--default-border-color);
 }
 .BrushSettings {
   width: 100%;

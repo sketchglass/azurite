@@ -118,17 +118,17 @@ class App extends React.Component<{}, {}> {
         </div>
         <div className="AppItem">
           <aside className="LeftSidebar">
-            <DraggablePanelContainer top={70} left={18} margin={8} labelHeight={24}>
-              <DraggablePanel label="Color" width={200} height={200}>
+            <DraggablePanelContainer top={60} left={12} margin={12} labelHeight={24}>
+              <DraggablePanel label="Color" width={216} height={200}>
                 <ColorPicker color={color} onChange={onColorChange} />
               </DraggablePanel>
-              <DraggablePanel label="Slider" width={200} height={70}>
+              <DraggablePanel label="Slider" width={216} height={70}>
                 <RGBRangeSliders color={color} onChange={onColorChange} />
               </DraggablePanel>
-              <DraggablePanel label="Palette" width={200} height={80}>
+              <DraggablePanel label="Palette" width={216} height={80}>
                 <Palette palette={palette} paletteIndex={paletteIndex} onChange={onPaletteChange} />
               </DraggablePanel>
-              <DraggablePanel label="Settings" width={200} height={200}>
+              <DraggablePanel label="Settings" width={216} height={200}>
                 {currentTool.renderSettings()}
               </DraggablePanel>
             </DraggablePanelContainer>
