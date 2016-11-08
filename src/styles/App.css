@@ -5,6 +5,7 @@ body {
   margin: 0;
   background-color: var(--default-background-color);
   font-family: var(--default-font-family);
+  -webkit-font-smoothing: antialiased;
   font-size: 12px;
 }
 aside {
