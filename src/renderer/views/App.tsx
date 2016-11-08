@@ -118,7 +118,7 @@ class App extends React.Component<{}, {}> {
         </div>
         <div className="AppItem">
           <aside className="LeftSidebar">
-            <DraggablePanelContainer top={70} left={18} margin={14} labelHeight={20}>
+            <DraggablePanelContainer top={70} left={18} margin={8} labelHeight={24}>
               <DraggablePanel label="Color" width={200} height={200}>
                 <ColorPicker color={color} onChange={onColorChange} />
               </DraggablePanel>
