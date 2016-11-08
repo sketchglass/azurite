@@ -3,16 +3,19 @@
   flex-direction: row;
   width: 100%;
   border-bottom: 1px solid var(--default-border-color);
+  padding: 0 8px;
 }
 .ToolSelection_button {
-  width: 48px;
-  height: 48px;
+  width: 40px;
+  height: 40px;
   background-color: transparent;
   border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1px; /* workaround for Retina */
+  margin: 4px;
+  border-radius: 4px;
 }
 .ToolSelection_button-selected {
   background-color: var(--darken-background-color);
