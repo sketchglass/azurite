@@ -14,3 +14,6 @@
   height: 12px;
   margin: 2px;
 }
+.Palette-button-transparent {
+  background-color: #cccccc;
+}
