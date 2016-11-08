@@ -48,16 +48,30 @@ aside {
 }
 .BrushSettings {
   width: 100%;
-  td {
-    min-width: 35px;
+  font-size: 11px;
+  & tbody {
+    display: block;
+  }
+  & tr {
+    display: flex;
+    align-items: center;
+  }
+  & td {
+    display: block;
     &:nth-child(1) {
-      width: 60px;
+      width: 64px;
+      text-align: right;
+    }
+    &:nth-child(2) {
+      flex: 1;
+      margin: 0 8px;
     }
     &:nth-child(3) {
-      width: 35px;
+      width: 32px;
     }
   }
 }
+
 *:focus {
   outline: none
 }

@@ -3,15 +3,15 @@
   box-sizing: border-box;
   display: flex;
   flex-direction: column;
-  top: 50px;
+  top: 48px;
 }
 .DraggablePanel_label {
   font-size: 14px;
   max-width: 80px;
   cursor: move;
   padding: 2px;
-  height: 24px;
-  line-height: 24px;
+  height: 32px;
+  line-height: 32px;
   box-sizing: border-box;
   text-transform: uppercase;
   color: var(--panel-title-color);
