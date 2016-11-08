@@ -31,3 +31,9 @@
   background-color: var(--lighten-background-color);
   border-bottom: 1px solid transparent;
 }
+.PictureTabFill {
+  box-sizing: border-box;
+  flex: 1;
+  height: 32px;
+  border-bottom: 1px solid var(--default-border-color);
+}
