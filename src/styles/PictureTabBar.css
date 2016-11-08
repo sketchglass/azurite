@@ -35,6 +35,6 @@
 }
 .PictureTab-current {
   height: 40px;
-  background-color: var(--picture-tab-background-color-current);
-  border-bottom: 2px solid var(--picture-tab-background-color-current);
+  background-color: var(--lighten-background-color);
+  border-bottom: 2px solid transparent;
 }
