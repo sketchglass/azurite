@@ -3,7 +3,7 @@ import {Subscription} from "rxjs/Subscription"
 import React = require("react")
 import Picture from "../models/Picture"
 import {Vec2, Transform} from "paintvec"
-import Tool from "../tools/Tool"
+import Tool, {ToolPointerEvent} from "../tools/Tool"
 import Waypoint from "../models/Waypoint"
 import {TabletEvent} from "receive-tablet-event"
 import {canvas} from "../GLContext"
@@ -59,10 +59,10 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
     this.tabletDownSubscription = IPCChannels.tabletDown.listen().subscribe(ev => {
       this.usingTablet = true
-      this.onDown(ev)
+      this.onDown(this.toToolEvent(ev))
     })
     this.tabletMoveSubscription = IPCChannels.tabletMove.listen().subscribe(ev => {
-      this.onMove(ev)
+      this.onMove(this.toToolEvent(ev))
       this.cursorPosition = this.offsetPos(ev)
     })
     this.tabletUpSubscription = IPCChannels.tabletUp.listen().subscribe(ev => {
@@ -148,12 +148,13 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     return new Vec2(x, y)
   }
 
-  eventToWaypoint(ev: {clientX: number, clientY: number, pressure?: number}) {
-    const pressure = ev.pressure == undefined ? 1.0 : ev.pressure
+  toToolEvent(ev: PointerEvent | TabletEvent): ToolPointerEvent {
+    const {pressure, button, altKey, ctrlKey, metaKey, shiftKey} = ev
     const rendererPos = this.offsetPos(ev).mulScalar(window.devicePixelRatio)
-    const pos = rendererPos.transform(this.renderer.transformToPicture)
-    const waypoint = new Waypoint(pos, pressure)
-    return {waypoint, rendererPos}
+    const picturePos = rendererPos.transform(this.renderer.transformToPicture)
+    return {
+      rendererPos, picturePos, pressure, button, altKey, ctrlKey, metaKey, shiftKey
+    }
   }
 
   onDocumentPointerMove = (ev: PointerEvent) => {
@@ -164,14 +165,14 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   onPointerDown = (ev: PointerEvent) => {
     if (!this.usingTablet) {
-      this.onDown(ev)
+      this.onDown(this.toToolEvent(ev))
       this.element!.setPointerCapture(ev.pointerId)
     }
     ev.preventDefault()
   }
   onPointerMove = (ev: PointerEvent) => {
     if (!this.usingTablet) {
-      this.onMove(ev)
+      this.onMove(this.toToolEvent(ev))
     }
     ev.preventDefault()
   }
@@ -181,16 +182,14 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     }
     ev.preventDefault()
   }
-  onDown(ev: {clientX: number, clientY: number, pressure?: number}) {
+  onDown(ev: ToolPointerEvent) {
     const {tool} = this.props
-    const {waypoint, rendererPos} = this.eventToWaypoint(ev)
-    const rect = tool.start(waypoint, rendererPos)
+    const rect = tool.start(ev)
     this.currentTool = tool
   }
-  onMove(ev: {clientX: number, clientY: number, pressure?: number}) {
+  onMove(ev: ToolPointerEvent) {
     if (this.currentTool) {
-      const {waypoint, rendererPos} = this.eventToWaypoint(ev)
-      const rect = this.currentTool.move(waypoint, rendererPos)
+      const rect = this.currentTool.move(ev)
     }
   }
   onUp() {

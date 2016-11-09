@@ -9,6 +9,18 @@ import {Vec2} from "paintvec"
 import React = require("react")
 import {AppState} from "../state/AppState"
 
+export
+interface ToolPointerEvent {
+  rendererPos: Vec2
+  picturePos: Vec2
+  pressure: number
+  button: number
+  altKey: boolean
+  ctrlKey: boolean
+  metaKey: boolean
+  shiftKey: boolean
+}
+
 abstract class Tool {
   constructor(public appState: AppState) {
   }
@@ -36,8 +48,8 @@ abstract class Tool {
   @observable cursor = "auto"
   @observable cursorElement: HTMLElement|undefined
   @observable cursorElementSize = 0
-  abstract start(waypoint: Waypoint, rendererPos: Vec2): void
-  abstract move(waypoint: Waypoint, rendererPos: Vec2): void
+  abstract start(event: ToolPointerEvent): void
+  abstract move(event: ToolPointerEvent): void
   abstract end(): void
   cursorMove(waypoint: Waypoint) {}
   renderSettings(): JSX.Element { return React.createElement("div") }

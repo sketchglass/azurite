@@ -8,7 +8,7 @@ import Layer from "../models/Layer"
 import TiledTexture, {Tile, TiledTextureRawData} from "../models/TiledTexture"
 import {TileBlender} from "../models/LayerBlender"
 import Waypoint from "../models/Waypoint"
-import Tool from './Tool'
+import Tool, {ToolPointerEvent} from './Tool'
 import {context} from "../GLContext"
 import {AppState} from "../state/AppState"
 import {frameDebounce} from "../../lib/Debounce"
@@ -114,12 +114,12 @@ class TransformLayerTool extends Tool {
     }
   }
 
-  @action start(waypoint: Waypoint, rendererPos: Vec2) {
+  @action start(ev: ToolPointerEvent) {
     if (!this.rect || !this.picture) {
       this.dragType = DragType.None
       return
     }
-    const pos = this.originalPos = waypoint.pos.round()
+    const pos = this.originalPos = ev.picturePos.round()
 
     this.lastRect = this.rect
 
@@ -149,8 +149,8 @@ class TransformLayerTool extends Tool {
     }
   }
 
-  @action move(waypoint: Waypoint, rendererPos: Vec2) {
-    const pos = waypoint.pos.round()
+  @action move(ev: ToolPointerEvent) {
+    const pos = ev.picturePos.round()
     const offset = pos.sub(this.originalPos)
 
     switch (this.dragType) {
