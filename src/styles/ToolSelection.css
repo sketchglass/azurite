@@ -19,5 +19,5 @@
   border-radius: 4px;
 }
 .ToolSelection_button-selected {
-  background-color: var(--darken-background-color);
+  background-color: var(--selected-background-color);
 }

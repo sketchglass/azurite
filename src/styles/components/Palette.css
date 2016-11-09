@@ -2,7 +2,7 @@
   height: 50px;
   overflow-y: scroll;
   border-radius: 2px;
-  background-color: var(--palette-background-color);
+  background-color: var(--darken-background-color);
   padding: 2px;
 }
 .Palette-row {
