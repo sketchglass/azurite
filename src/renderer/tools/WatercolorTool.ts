@@ -6,6 +6,7 @@ import BaseBrushTool from "./BaseBrushTool"
 import {context} from "../GLContext"
 import TiledTexture, {Tile} from "../models/TiledTexture"
 import WatercolorSettings from "../views/WatercolorSettings"
+import {ToolPointerEvent} from "./Tool"
 import React = require("react")
 
 enum ShapeClipModes {
@@ -138,7 +139,7 @@ class WatercolorTool extends BaseBrushTool {
 
   sampleSize = 0
 
-  start(waypoint: Waypoint) {
+  start(ev: ToolPointerEvent) {
     this.sampleSize = Math.pow(2, Math.ceil(Math.log2(this.width + 2)))
 
     this.model.uniforms = {
@@ -160,7 +161,7 @@ class WatercolorTool extends BaseBrushTool {
     this.shapeClipTexture.size = new Vec2(this.sampleSize * 2, this.sampleSize)
     this.shape.rect = new Rect(new Vec2(), new Vec2(this.sampleSize))
 
-    return super.start(waypoint)
+    return super.start(ev)
   }
 
   renderWaypoints(waypoints: Waypoint[], rect: Rect) {

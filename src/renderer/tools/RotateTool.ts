@@ -1,5 +1,5 @@
 import {Vec2} from "paintvec"
-import Tool from './Tool'
+import Tool, {ToolPointerEvent} from './Tool'
 import Waypoint from "../models/Waypoint"
 
 function modRotation(rotation: number) {
@@ -19,20 +19,20 @@ class RotateTool extends Tool {
   originalAngle = 0
   originalRotation = 0
 
-  start(waypoint: Waypoint, rendererPos: Vec2) {
+  start(ev: ToolPointerEvent) {
     if (!this.picture) {
       return
     }
-    this.originalAngle = this.posAngle(rendererPos)
+    this.originalAngle = this.posAngle(ev.rendererPos)
     this.originalRotation = this.picture.navigation.rotation
   }
 
-  move(waypoint: Waypoint, rendererPos: Vec2) {
+  move(ev: ToolPointerEvent) {
     if (!this.picture) {
       return
     }
     const {translation, scale} = this.picture.navigation
-    const angle = this.posAngle(rendererPos)
+    const angle = this.posAngle(ev.rendererPos)
     const rotation = modRotation(angle - this.originalAngle + this.originalRotation)
     this.picture.navigation.rotation = rotation
   }

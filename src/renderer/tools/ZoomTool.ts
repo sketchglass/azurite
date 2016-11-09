@@ -1,5 +1,5 @@
 import {Vec2} from "paintvec"
-import Tool from './Tool'
+import Tool, {ToolPointerEvent} from './Tool'
 import Waypoint from "../models/Waypoint"
 
 const SCALE_STEPS = [
@@ -39,7 +39,7 @@ class ZoomInTool extends Tool {
   name = "Zoom In"
   cursor = "zoom-in"
 
-  start(waypoint: Waypoint, rendererPos: Vec2) {
+  start(ev: ToolPointerEvent) {
     if (!this.picture) {
       return
     }
@@ -47,7 +47,7 @@ class ZoomInTool extends Tool {
     navigation.scale = nextScaleStep(navigation.scale)
   }
 
-  move(waypoint: Waypoint, rendererPos: Vec2) {
+  move(ev: ToolPointerEvent) {
   }
 
   end() {
@@ -60,7 +60,7 @@ class ZoomOutTool extends Tool {
   name = "Zoom Out"
   cursor = "zoom-out"
 
-  start(waypoint: Waypoint, rendererPos: Vec2) {
+  start(ev: ToolPointerEvent) {
     if (!this.picture) {
       return
     }
@@ -68,7 +68,7 @@ class ZoomOutTool extends Tool {
     navigation.scale = prevScaleStep(navigation.scale)
   }
 
-  move(waypoint: Waypoint, rendererPos: Vec2) {
+  move(ev: ToolPointerEvent) {
   }
 
   end() {
@@ -86,20 +86,20 @@ class ZoomTool extends Tool {
   originalScale = 1.0
   startPos: Vec2
 
-  start(waypoint: Waypoint, rendererPos: Vec2) {
+  start(ev: ToolPointerEvent) {
     if (!this.picture) {
       return
     }
     const {scale} = this.picture.navigation
     this.originalScale = scale
-    this.startPos = rendererPos
+    this.startPos = ev.rendererPos
   }
 
-  move(waypoint: Waypoint, rendererPos: Vec2) {
+  move(ev: ToolPointerEvent) {
     if (!this.picture) {
       return
     }
-    const offset = rendererPos.sub(this.startPos)
+    const offset = ev.rendererPos.sub(this.startPos)
     const distance = Math.pow(2, offset.x / 100)
     const scale = modScale(this.originalScale * distance)
     this.picture.navigation.scale = scale

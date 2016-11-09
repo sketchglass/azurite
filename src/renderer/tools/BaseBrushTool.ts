@@ -2,7 +2,7 @@ import {observable, action, autorun, computed} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Texture, TextureDrawTarget, Color} from "paintgl"
 import Waypoint from "../models/Waypoint"
-import Tool from "./Tool"
+import Tool, {ToolPointerEvent} from "./Tool"
 import Layer from "../models/Layer"
 import {ImageLayerContent} from "../models/LayerContent"
 import TiledTexture, {Tile} from "../models/TiledTexture"
@@ -119,7 +119,7 @@ abstract class BaseBrushTool extends Tool {
     }
   }
 
-  start(waypoint: Waypoint) {
+  start(ev: ToolPointerEvent) {
     const layer = this.currentLayer
     if (!layer || layer.content.type != "image") {
       return
@@ -133,11 +133,11 @@ abstract class BaseBrushTool extends Tool {
     this.lastStabilizeWaypoints = []
     this.lastInterpolateWaypoints = []
 
-    this.stabilizeMove(waypoint)
+    this.stabilizeMove(new Waypoint(ev.picturePos, ev.pressure))
   }
 
-  move(waypoint: Waypoint) {
-    this.stabilizeMove(waypoint)
+  move(ev: ToolPointerEvent) {
+    this.stabilizeMove(new Waypoint(ev.picturePos, ev.pressure))
   }
 
   @action end() {

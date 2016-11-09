@@ -1,5 +1,5 @@
 import {Vec2, Transform} from "paintvec"
-import Tool from './Tool'
+import Tool, {ToolPointerEvent} from './Tool'
 import Waypoint from "../models/Waypoint"
 
 export default
@@ -10,20 +10,20 @@ class PanTool extends Tool {
   originalTranslation = new Vec2(0)
   originalRendererToPicture = new Transform()
 
-  start(waypoint: Waypoint, rendererPos: Vec2) {
+  start(ev: ToolPointerEvent) {
     if (!this.picture) {
       return
     }
     this.originalRendererToPicture = this.renderer.transformToPicture
-    this.originalPos = rendererPos.transform(this.originalRendererToPicture)
+    this.originalPos = ev.rendererPos.transform(this.originalRendererToPicture)
     this.originalTranslation = this.picture.navigation.translation
   }
 
-  move(waypoint: Waypoint, rendererPos: Vec2) {
+  move(ev: ToolPointerEvent) {
     if (!this.picture) {
       return
     }
-    const pos = rendererPos.transform(this.originalRendererToPicture)
+    const pos = ev.rendererPos.transform(this.originalRendererToPicture)
     const offset = pos.sub(this.originalPos)
     const translation = this.originalTranslation.add(offset)
     this.picture.navigation.translation = translation

@@ -7,6 +7,7 @@ import {context} from "../GLContext"
 import BrushSettings from "../views/BrushSettings"
 import TiledTexture, {Tile} from "../models/TiledTexture"
 import {AppState} from "../state/AppState"
+import {ToolPointerEvent} from "./Tool"
 import React = require("react")
 
 class BrushShader extends Shader {
@@ -72,7 +73,7 @@ class BrushTool extends BaseBrushTool {
     this.model = new Model(context, {shape: this.shape, shader: BrushShader})
   }
 
-  start(waypoint: Waypoint) {
+  start(ev: ToolPointerEvent) {
     this.model.uniforms = {
       uBrushSize: this.width,
       uColor: this.appState.color.toRgb(),
@@ -81,7 +82,7 @@ class BrushTool extends BaseBrushTool {
       uSpacingRatio: this.spacingRatio,
       uSoftness: this.softness,
     }
-    return super.start(waypoint)
+    return super.start(ev)
   }
 
   renderWaypoints(waypoints: Waypoint[], rect: Rect) {
