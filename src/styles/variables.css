@@ -10,9 +10,9 @@
 
   --panel-title-color: #C7C9D1;
 
-  --preview-panel-background-color: rgba(140, 240, 140, 0.2);
-  --preview-panel-border-color: rgba(140, 240, 140, 0.2);
+  --preview-panel-background-color: color(#8CF08C alpha(20%));
+  --preview-panel-border-color: color(#8CF08C alpha(20%));
 
-  --palette-background-color: rgba(34, 36, 42, 1);
+  --palette-background-color: #22232A;
   --range-slider-fill-background-color: rgba(255, 109, 28, 1);
 }
