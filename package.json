@@ -62,7 +62,7 @@
     "react": "^15.3.2",
     "react-dom": "^15.3.2",
     "react-draggable-tree": "sketchglass/react-draggable-tree#a375224f0b5637ce50459109dbbf345c53901e91",
-    "receive-tablet-event": "github:seanchas116/receive-tablet-event#b47eb6b856ee642b96f96b98dcf99517b781fb61",
+    "receive-tablet-event": "github:seanchas116/receive-tablet-event#72ea99e935894131c3632380b12f23ee159c4c18",
     "rxjs": "^5.0.0-rc.1"
   }
 }
