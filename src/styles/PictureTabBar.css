@@ -1,19 +1,21 @@
 .PictureTabBar {
   display: flex;
-  height: 40px;
+  height: 32px;
   align-items: flex-end;
   z-index: 100;
-  border-left: 2px solid var(--default-border-color);
-  border-right: 2px solid var(--default-border-color);
-  font-size: 14px;
+  font-size: 13px;
 }
 .PictureTab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
-  height: 40px;
-  width: 160px;
   box-sizing: border-box;
-  -webkit-user-select: none;
-  border-bottom: 2px solid var(--default-border-color);
+  width: 160px;
+  height: 32px;
+  border-right: 1px solid var(--default-border-color);
+  border-bottom: 1px solid var(--default-border-color);
+  user-select: none;
   & * {
     cursor: default;
     position: absolute;
@@ -23,18 +25,15 @@
 .PictureTab_title {
 }
 .PictureTab_close {
-  right: 0;
-}
-.PictureTabFill {
-  flex: 1;
-  height: 40px;
-  border-bottom: 2px solid var(--default-border-color);
-  &::after {
-    content: "\200B";
-  }
+  right: 8px;
 }
 .PictureTab-current {
-  height: 40px;
-  background-color: var(--picture-tab-background-color-current);
-  border-bottom: 2px solid var(--picture-tab-background-color-current);
+  background-color: var(--lighten-background-color);
+  border-bottom: 1px solid transparent;
+}
+.PictureTabFill {
+  box-sizing: border-box;
+  flex: 1;
+  height: 32px;
+  border-bottom: 1px solid var(--default-border-color);
 }

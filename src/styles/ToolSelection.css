@@ -1,18 +1,23 @@
 .ToolSelection {
   display: flex;
   flex-direction: row;
+  box-sizing: border-box;
   width: 100%;
+  border-bottom: 1px solid var(--default-border-color);
+  padding: 0 8px;
 }
 .ToolSelection_button {
-  width: 50px;
-  height: 50px;
-  background-color: var(--tool-selection-background-color);
-  border: 1px solid var(--tool-selection-border-color);
+  width: 40px;
+  height: 40px;
+  background-color: transparent;
+  border: none;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 1px; /* workaround for Retina */
+  margin: 4px;
+  border-radius: 4px;
 }
 .ToolSelection_button-selected {
-  background-color: var(--tool-selection-background-color-selected);
+  background-color: var(--selected-background-color);
 }

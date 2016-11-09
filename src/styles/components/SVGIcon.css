@@ -1,7 +1,7 @@
 .SVGIcon {
   background: var(--default-color);
-  width: 30px;
-  height: 30px;
+  width: 24px;
+  height: 24px;
   &.move {
     mask: url("../../../bundles/icons/flaticon/svg/move.svg");
   }
