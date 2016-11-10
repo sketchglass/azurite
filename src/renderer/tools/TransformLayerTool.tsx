@@ -206,7 +206,12 @@ class TransformLayerTool extends Tool {
         const center = this.lastRect.center.transform(this.lastAdditionalTransform)
         const origAngle = this.startAdditionalTransformPos.sub(center).angle()
         const angle = additionalTransformPos.sub(center).angle()
-        const rotationTransform = Transform.translate(center.neg()).rotate(angle - origAngle).translate(center)
+        let rotation = angle - origAngle
+        if (ev.shiftKey) {
+          const deg45 = Math.PI * 0.25
+          rotation = Math.round(rotation / deg45) * deg45
+        }
+        const rotationTransform = Transform.translate(center.neg()).rotate(rotation).translate(center)
         this.additionalTransform = this.lastAdditionalTransform.merge(rotationTransform)
         break
       }
