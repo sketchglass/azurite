@@ -83,6 +83,7 @@ class TransformLayerTool extends Tool {
   originalRect: Rect|undefined
   originalTiledTexture = new TiledTexture()
   lastRect: Rect|undefined
+  lastQuad: [Vec2, Vec2, Vec2, Vec2]|undefined
   lastRatioWToH = 1
   lastRatioHToW = 1
   lastAdditionalTransform = new Transform()
@@ -134,6 +135,7 @@ class TransformLayerTool extends Tool {
     this.startAdditionalTransformPos = ev.picturePos
 
     this.lastRect = this.rect
+    this.lastQuad = this.rect.vertices().map(v => v.transform(this.additionalTransform)) as [Vec2, Vec2, Vec2, Vec2]
     this.lastRatioWToH = this.rect.height / this.rect.width
     this.lastRatioHToW = this.rect.width / this.rect.height
     this.lastAdditionalTransform = this.additionalTransform
@@ -172,6 +174,9 @@ class TransformLayerTool extends Tool {
       return
     }
 
+    const keepRatio = ev.shiftKey
+    const perspective = ev.ctrlKey || ev.metaKey
+
     switch (this.dragType) {
       case DragType.None:
         return
@@ -179,35 +184,51 @@ class TransformLayerTool extends Tool {
         this.translateRect(offset)
         break
       case DragType.MoveTopLeft:
-        this.resizeRect(-offset.x, -offset.y, new Vec2(0, 0), ev.shiftKey)
+        if (perspective) {
+          this.resizeQuad(0, additionalTransformPos)
+        } else {
+          this.resizeRect(-offset.x, -offset.y, new Vec2(0, 0), keepRatio)
+        }
         break
       case DragType.MoveTopCenter:
-        this.resizeRect(undefined, -offset.y, new Vec2(0.5, 0), ev.shiftKey)
+        this.resizeRect(undefined, -offset.y, new Vec2(0.5, 0), keepRatio)
         break
       case DragType.MoveTopRight:
-        this.resizeRect(offset.x, -offset.y, new Vec2(1, 0), ev.shiftKey)
+        if (perspective) {
+          this.resizeQuad(1, additionalTransformPos)
+        } else {
+          this.resizeRect(offset.x, -offset.y, new Vec2(1, 0), keepRatio)
+        }
         break
       case DragType.MoveCenterRight:
-        this.resizeRect(offset.x, undefined, new Vec2(1, 0.5), ev.shiftKey)
+        this.resizeRect(offset.x, undefined, new Vec2(1, 0.5), keepRatio)
         break
       case DragType.MoveBottomRight:
-        this.resizeRect(offset.x, offset.y, new Vec2(1, 1), ev.shiftKey)
+        if (perspective) {
+          this.resizeQuad(3, additionalTransformPos)
+        } else {
+          this.resizeRect(offset.x, offset.y, new Vec2(1, 1), keepRatio)
+        }
         break
       case DragType.MoveBottomCenter:
-        this.resizeRect(undefined, offset.y, new Vec2(0.5, 1), ev.shiftKey)
+        this.resizeRect(undefined, offset.y, new Vec2(0.5, 1), keepRatio)
         break
       case DragType.MoveBottomLeft:
-        this.resizeRect(-offset.x, offset.y, new Vec2(0, 1), ev.shiftKey)
+        if (perspective) {
+          this.resizeQuad(2, additionalTransformPos)
+        } else {
+          this.resizeRect(-offset.x, offset.y, new Vec2(0, 1), keepRatio)
+        }
         break
       case DragType.MoveCenterLeft:
-        this.resizeRect(-offset.x, undefined, new Vec2(0, 0.5), ev.shiftKey)
+        this.resizeRect(-offset.x, undefined, new Vec2(0, 0.5), keepRatio)
         break
       case DragType.Rotate: {
         const center = this.lastRect.center.transform(this.lastAdditionalTransform)
         const origAngle = this.startAdditionalTransformPos.sub(center).angle()
         const angle = additionalTransformPos.sub(center).angle()
         let rotation = angle - origAngle
-        if (ev.shiftKey) {
+        if (keepRatio) {
           const deg45 = Math.PI * 0.25
           rotation = Math.round(rotation / deg45) * deg45
         }
@@ -246,6 +267,19 @@ class TransformLayerTool extends Tool {
     const bottomRightDiff = diff.mul(origin)
     const {topLeft, bottomRight} = this.lastRect
     this.rect = new Rect(topLeft.sub(topLeftDiff), bottomRight.add(bottomRightDiff))
+  }
+
+  resizeQuad(vertexIndex: number, newVertex: Vec2) {
+    if (!this.lastQuad) {
+      return
+    }
+    const newQuad = [...this.lastQuad]
+    newQuad[vertexIndex] = newVertex
+    const transform = Transform.quadToQuad(this.lastQuad, newQuad as [Vec2, Vec2, Vec2, Vec2])
+    if (!transform) {
+      return
+    }
+    this.additionalTransform = this.lastAdditionalTransform.merge(transform)
   }
 
   update = frameDebounce(() => {
