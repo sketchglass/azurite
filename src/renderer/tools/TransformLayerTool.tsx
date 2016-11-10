@@ -152,7 +152,7 @@ class TransformLayerTool extends Tool {
     ])
 
     for (const [dragType, handlePos] of handlePoints) {
-      if (movePos.sub(handlePos).length() <= HANDLE_RADIUS * devicePixelRatio * this.picture.navigation.scale) {
+      if (movePos.sub(handlePos).length() <= HANDLE_RADIUS * 1.5 * devicePixelRatio * this.picture.navigation.scale) {
         this.dragType = dragType
         return
       }
