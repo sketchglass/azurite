@@ -139,6 +139,7 @@ class TiledTexture {
         return
       }
       rect = rect.transform(inverted)
+      rect = new Rect(rect.topLeft.sub(new Vec2(1)), rect.bottomRight.add(new Vec2(1)))
     }
     for (const key of this.keysForRect(rect)) {
       let transform = Transform.translate(key.mulScalar(Tile.width))
