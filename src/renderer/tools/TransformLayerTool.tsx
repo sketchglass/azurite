@@ -28,6 +28,7 @@ class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}
 
     const transformPos = (pos: Vec2) => {
       return pos
+        .transform(tool.additionalTransform)
         .transform(tool.renderer.transformFromPicture)
         .divScalar(devicePixelRatio)
     }
@@ -77,13 +78,16 @@ class TransformLayerTool extends Tool {
   name = "Move"
 
   dragType = DragType.None
-  originalPos = new Vec2()
+  startRotatePos = new Vec2()
+  startMovePos = new Vec2()
   originalRect: Rect|undefined
   originalTiledTexture = new TiledTexture()
   lastRect: Rect|undefined
   lastRatioWToH = 1
   lastRatioHToW = 1
+  lastAdditionalTransform = new Transform()
   @observable rect: Rect|undefined
+  @observable additionalTransform = new Transform()
   lastCommitTransform = new Transform()
 
   constructor(appState: AppState) {
@@ -102,11 +106,16 @@ class TransformLayerTool extends Tool {
     }
   }
 
+  @computed get additionalTransformInv() {
+    return this.additionalTransform.invert() || new Transform()
+  }
+
   @computed get transform() {
     if (!this.originalRect || !this.rect) {
       return new Transform()
     }
-    return Transform.rectToRect(this.originalRect, this.rect) || new Transform()
+    const rectToRect = Transform.rectToRect(this.originalRect, this.rect) || new Transform()
+    return rectToRect.merge(this.additionalTransform)
   }
 
   @computed get currentContent() {
@@ -121,11 +130,13 @@ class TransformLayerTool extends Tool {
       this.dragType = DragType.None
       return
     }
-    const pos = this.originalPos = ev.picturePos.round()
+    const movePos = this.startMovePos = ev.picturePos.transform(this.additionalTransformInv).round()
+    this.startRotatePos = ev.picturePos
 
     this.lastRect = this.rect
     this.lastRatioWToH = this.rect.height / this.rect.width
     this.lastRatioHToW = this.rect.width / this.rect.height
+    this.lastAdditionalTransform = this.additionalTransform
 
     const {topLeft, topRight, bottomRight, bottomLeft} = this.rect
 
@@ -141,12 +152,12 @@ class TransformLayerTool extends Tool {
     ])
 
     for (const [dragType, handlePos] of handlePoints) {
-      if (pos.sub(handlePos).length() <= HANDLE_RADIUS * devicePixelRatio * this.picture.navigation.scale) {
+      if (movePos.sub(handlePos).length() <= HANDLE_RADIUS * devicePixelRatio * this.picture.navigation.scale) {
         this.dragType = dragType
         return
       }
     }
-    if (this.rect.includes(pos)) {
+    if (this.rect.includes(movePos)) {
       this.dragType = DragType.Translate
     } else {
       this.dragType = DragType.Rotate
@@ -154,8 +165,9 @@ class TransformLayerTool extends Tool {
   }
 
   @action move(ev: ToolPointerEvent) {
-    const pos = ev.picturePos.round()
-    const offset = pos.sub(this.originalPos)
+    const movePos = ev.picturePos.transform(this.additionalTransformInv).round()
+    const rotatePos = ev.picturePos
+    const offset = movePos.sub(this.startMovePos)
     if (!this.lastRect) {
       return
     }
@@ -190,6 +202,14 @@ class TransformLayerTool extends Tool {
       case DragType.MoveCenterLeft:
         this.resizeRect(-offset.x, undefined, new Vec2(0, 0.5), ev.shiftKey)
         break
+      case DragType.Rotate: {
+        const center = this.lastRect.center.transform(this.lastAdditionalTransform)
+        const origAngle = this.startRotatePos.sub(center).angle()
+        const angle = rotatePos.sub(center).angle()
+        const rotationTransform = Transform.translate(center.neg()).rotate(angle - origAngle).translate(center)
+        this.additionalTransform = this.lastAdditionalTransform.merge(rotationTransform)
+        break
+      }
     }
     this.update()
   }
