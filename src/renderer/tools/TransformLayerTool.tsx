@@ -102,8 +102,8 @@ class TransformLayerTool extends Tool {
       this.originalRect = content && content.tiledTexture.boundingRect()
       this.originalTiledTexture = content.tiledTexture.clone()
       this.lastCommitTransform = new Transform()
-      this.lastRect = this.originalRect
       this.rect = this.originalRect
+      this.additionalTransform = new Transform()
     }
   }
 
