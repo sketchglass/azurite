@@ -134,7 +134,11 @@ class TiledTexture {
     const {offset, blendMode, transform} = opts
     let rect = new Rect(offset.neg(), offset.neg().add(dest.size))
     if (transform) {
-      rect = rect.transform(transform.invert()!)
+      const inverted = transform.invert()
+      if (!inverted) {
+        return
+      }
+      rect = rect.transform(inverted)
     }
     for (const key of TiledTexture.keysForRect(rect)) {
       if (!this.has(key)) {
