@@ -14,7 +14,7 @@ class Waypoint {
     const waypoints: Waypoint[] = []
     let last = start
     let nextOffset = offset
-    const pointCount = 100
+    const pointCount = Math.min(100, Math.round(end.pos.sub(start.pos).length() * 2))
 
     for (let i = 1; i <= pointCount; ++i) {
       const t = i / pointCount
