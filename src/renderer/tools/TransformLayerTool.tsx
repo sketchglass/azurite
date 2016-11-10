@@ -78,8 +78,8 @@ class TransformLayerTool extends Tool {
   name = "Move"
 
   dragType = DragType.None
-  startRotatePos = new Vec2()
   startMovePos = new Vec2()
+  startAdditionalTransformPos = new Vec2()
   originalRect: Rect|undefined
   originalTiledTexture = new TiledTexture()
   lastRect: Rect|undefined
@@ -131,7 +131,7 @@ class TransformLayerTool extends Tool {
       return
     }
     const movePos = this.startMovePos = ev.picturePos.transform(this.additionalTransformInv).round()
-    this.startRotatePos = ev.picturePos
+    this.startAdditionalTransformPos = ev.picturePos
 
     this.lastRect = this.rect
     this.lastRatioWToH = this.rect.height / this.rect.width
@@ -166,7 +166,7 @@ class TransformLayerTool extends Tool {
 
   @action move(ev: ToolPointerEvent) {
     const movePos = ev.picturePos.transform(this.additionalTransformInv).round()
-    const rotatePos = ev.picturePos
+    const additionalTransformPos = ev.picturePos
     const offset = movePos.sub(this.startMovePos)
     if (!this.lastRect) {
       return
@@ -204,8 +204,8 @@ class TransformLayerTool extends Tool {
         break
       case DragType.Rotate: {
         const center = this.lastRect.center.transform(this.lastAdditionalTransform)
-        const origAngle = this.startRotatePos.sub(center).angle()
-        const angle = rotatePos.sub(center).angle()
+        const origAngle = this.startAdditionalTransformPos.sub(center).angle()
+        const angle = additionalTransformPos.sub(center).angle()
         const rotationTransform = Transform.translate(center.neg()).rotate(angle - origAngle).translate(center)
         this.additionalTransform = this.lastAdditionalTransform.merge(rotationTransform)
         break
