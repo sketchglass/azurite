@@ -28,6 +28,7 @@ class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}
 
     const transformPos = (pos: Vec2) => {
       return pos
+        .transform(tool.additionalTransform)
         .transform(tool.renderer.transformFromPicture)
         .divScalar(devicePixelRatio)
     }
@@ -77,11 +78,16 @@ class TransformLayerTool extends Tool {
   name = "Move"
 
   dragType = DragType.None
-  originalPos = new Vec2()
+  startMovePos = new Vec2()
+  startAdditionalTransformPos = new Vec2()
   originalRect: Rect|undefined
   originalTiledTexture = new TiledTexture()
   lastRect: Rect|undefined
+  lastRatioWToH = 1
+  lastRatioHToW = 1
+  lastAdditionalTransform = new Transform()
   @observable rect: Rect|undefined
+  @observable additionalTransform = new Transform()
   lastCommitTransform = new Transform()
 
   constructor(appState: AppState) {
@@ -100,11 +106,16 @@ class TransformLayerTool extends Tool {
     }
   }
 
+  @computed get additionalTransformInv() {
+    return this.additionalTransform.invert() || new Transform()
+  }
+
   @computed get transform() {
     if (!this.originalRect || !this.rect) {
       return new Transform()
     }
-    return Transform.rectToRect(this.originalRect, this.rect) || new Transform()
+    const rectToRect = Transform.rectToRect(this.originalRect, this.rect) || new Transform()
+    return rectToRect.merge(this.additionalTransform)
   }
 
   @computed get currentContent() {
@@ -119,9 +130,13 @@ class TransformLayerTool extends Tool {
       this.dragType = DragType.None
       return
     }
-    const pos = this.originalPos = ev.picturePos.round()
+    const movePos = this.startMovePos = ev.picturePos.transform(this.additionalTransformInv).round()
+    this.startAdditionalTransformPos = ev.picturePos
 
     this.lastRect = this.rect
+    this.lastRatioWToH = this.rect.height / this.rect.width
+    this.lastRatioHToW = this.rect.width / this.rect.height
+    this.lastAdditionalTransform = this.additionalTransform
 
     const {topLeft, topRight, bottomRight, bottomLeft} = this.rect
 
@@ -137,12 +152,12 @@ class TransformLayerTool extends Tool {
     ])
 
     for (const [dragType, handlePos] of handlePoints) {
-      if (pos.sub(handlePos).length() <= HANDLE_RADIUS * devicePixelRatio * this.picture.navigation.scale) {
+      if (movePos.sub(handlePos).length() <= HANDLE_RADIUS * 1.5 * devicePixelRatio * this.picture.navigation.scale) {
         this.dragType = dragType
         return
       }
     }
-    if (this.rect.includes(pos)) {
+    if (this.rect.includes(movePos)) {
       this.dragType = DragType.Translate
     } else {
       this.dragType = DragType.Rotate
@@ -150,8 +165,12 @@ class TransformLayerTool extends Tool {
   }
 
   @action move(ev: ToolPointerEvent) {
-    const pos = ev.picturePos.round()
-    const offset = pos.sub(this.originalPos)
+    const movePos = ev.picturePos.transform(this.additionalTransformInv).round()
+    const additionalTransformPos = ev.picturePos
+    const offset = movePos.sub(this.startMovePos)
+    if (!this.lastRect) {
+      return
+    }
 
     switch (this.dragType) {
       case DragType.None:
@@ -160,29 +179,42 @@ class TransformLayerTool extends Tool {
         this.translateRect(offset)
         break
       case DragType.MoveTopLeft:
-        this.resizeRect(offset.x, offset.y, 0, 0)
+        this.resizeRect(-offset.x, -offset.y, new Vec2(0, 0), ev.shiftKey)
         break
       case DragType.MoveTopCenter:
-        this.resizeRect(0, offset.y, 0, 0)
+        this.resizeRect(undefined, -offset.y, new Vec2(0.5, 0), ev.shiftKey)
         break
       case DragType.MoveTopRight:
-        this.resizeRect(0, offset.y, offset.x, 0)
+        this.resizeRect(offset.x, -offset.y, new Vec2(1, 0), ev.shiftKey)
         break
       case DragType.MoveCenterRight:
-        this.resizeRect(0, 0, offset.x, 0)
+        this.resizeRect(offset.x, undefined, new Vec2(1, 0.5), ev.shiftKey)
         break
       case DragType.MoveBottomRight:
-        this.resizeRect(0, 0, offset.x, offset.y)
+        this.resizeRect(offset.x, offset.y, new Vec2(1, 1), ev.shiftKey)
         break
       case DragType.MoveBottomCenter:
-        this.resizeRect(0, 0, 0, offset.y)
+        this.resizeRect(undefined, offset.y, new Vec2(0.5, 1), ev.shiftKey)
         break
       case DragType.MoveBottomLeft:
-        this.resizeRect(offset.x, 0, 0, offset.y)
+        this.resizeRect(-offset.x, offset.y, new Vec2(0, 1), ev.shiftKey)
         break
       case DragType.MoveCenterLeft:
-        this.resizeRect(offset.x, 0, 0, 0)
+        this.resizeRect(-offset.x, undefined, new Vec2(0, 0.5), ev.shiftKey)
         break
+      case DragType.Rotate: {
+        const center = this.lastRect.center.transform(this.lastAdditionalTransform)
+        const origAngle = this.startAdditionalTransformPos.sub(center).angle()
+        const angle = additionalTransformPos.sub(center).angle()
+        let rotation = angle - origAngle
+        if (ev.shiftKey) {
+          const deg45 = Math.PI * 0.25
+          rotation = Math.round(rotation / deg45) * deg45
+        }
+        const rotationTransform = Transform.translate(center.neg()).rotate(rotation).translate(center)
+        this.additionalTransform = this.lastAdditionalTransform.merge(rotationTransform)
+        break
+      }
     }
     this.update()
   }
@@ -195,12 +227,25 @@ class TransformLayerTool extends Tool {
     this.rect = new Rect(topLeft, topLeft.add(this.lastRect.size))
   }
 
-  resizeRect(leftOffset: number, topOffset: number, rightOffset: number, bottomOffset: number) {
+  resizeRect(diffWidth: number|undefined, diffHeight: number|undefined, origin: Vec2, keepRatio: boolean) {
     if (!this.lastRect) {
       return
     }
-    const {left, top, right, bottom} = this.lastRect
-    this.rect = new Rect(new Vec2(left + leftOffset, top + topOffset), new Vec2(right + rightOffset, bottom + bottomOffset))
+    if (keepRatio) {
+      const {width, height} = this.lastRect
+      const newWidth = width + diffWidth
+      const newHeight = height + diffHeight
+      if (diffHeight == undefined || newWidth / width < newHeight / height) {
+        diffHeight = newWidth * this.lastRatioWToH - height
+      } else {
+        diffWidth = newHeight * this.lastRatioHToW - width
+      }
+    }
+    const diff = new Vec2(diffWidth || 0, diffHeight || 0)
+    const topLeftDiff = diff.mul(new Vec2(1).sub(origin))
+    const bottomRightDiff = diff.mul(origin)
+    const {topLeft, bottomRight} = this.lastRect
+    this.rect = new Rect(topLeft.sub(topLeftDiff), bottomRight.add(bottomRightDiff))
   }
 
   update = frameDebounce(() => {
