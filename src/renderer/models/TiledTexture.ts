@@ -140,10 +140,7 @@ class TiledTexture {
       }
       rect = rect.transform(inverted)
     }
-    for (const key of TiledTexture.keysForRect(rect)) {
-      if (!this.has(key)) {
-        continue
-      }
+    for (const key of this.keysForRect(rect)) {
       let transform = Transform.translate(key.mulScalar(Tile.width))
       if (opts.transform) {
         transform = transform.merge(opts.transform)
@@ -276,6 +273,20 @@ class TiledTexture {
     for (let y = top; y <= bottom; ++y) {
       for (let x = left; x <= right; ++x) {
         keys.push(new Vec2(x, y))
+      }
+    }
+    return keys
+  }
+
+  keysForRect(rect: Rect) {
+    const left = Math.floor(rect.left / Tile.width)
+    const right = Math.floor((rect.right - 1) / Tile.width)
+    const top = Math.floor(rect.top / Tile.width)
+    const bottom = Math.floor((rect.bottom - 1) / Tile.width)
+    const keys: Vec2[] = []
+    for (const key of this.keys()) {
+      if (left <= key.x && key.x <= right && top <= key.y && key.y <= bottom) {
+        keys.push(key)
       }
     }
     return keys
