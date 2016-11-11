@@ -3,6 +3,7 @@ const {Menu, app} = remote
 type MenuItem = Electron.MenuItem
 type BrowserWindow = Electron.BrowserWindow
 type MenuItemOptions = Electron.MenuItemOptions
+import {observable, computed, autorun} from "mobx"
 import {appState} from "../state/AppState"
 import Picture from "../models/Picture"
 import PictureParams from "../models/PictureParams"
@@ -13,8 +14,13 @@ import {PictureSave} from "../services/PictureSave"
 
 class MenuBar {
   constructor() {
-    const menu = Menu.buildFromTemplate(this.render())
-    Menu.setApplicationMenu(menu)
+    autorun(() => {
+      const menu = Menu.buildFromTemplate(this.render())
+      Menu.setApplicationMenu(menu)
+    })
+    window.addEventListener("focus", e => {
+      this.isTextInputFocused = isTextInput(document.activeElement)
+    }, true)
   }
 
   get currentPicture() {
@@ -50,8 +56,46 @@ class MenuBar {
     }
   }
 
+  @observable isTextInputFocused = false
+
+  @computed get canUndo() {
+    if (this.isTextInputFocused) {
+      return true
+    } else {
+      return appState.currentPicture && appState.currentPicture.undoStack.isUndoable
+    }
+  }
+
+  @computed get canRedo() {
+    if (this.isTextInputFocused) {
+      return true
+    } else {
+      return appState.currentPicture && appState.currentPicture.undoStack.isRedoable
+    }
+  }
+
+  @computed get undoName() {
+    if (appState.currentPicture) {
+      const {undoCommand} = appState.currentPicture.undoStack
+      if (undoCommand) {
+        return undoCommand.title
+      }
+    }
+    return ""
+  }
+
+  @computed get redoName() {
+    if (appState.currentPicture) {
+      const {redoCommand} = appState.currentPicture.undoStack
+      if (redoCommand) {
+        return redoCommand.title
+      }
+    }
+    return ""
+  }
+
   undo() {
-    if (isTextInput(document.activeElement)) {
+    if (this.isTextInputFocused) {
       remote.getCurrentWebContents().undo()
     } else if (this.currentPicture) {
       this.currentPicture.undoStack.undo()
@@ -59,7 +103,7 @@ class MenuBar {
   }
 
   redo() {
-    if (isTextInput(document.activeElement)) {
+    if (this.isTextInputFocused) {
       remote.getCurrentWebContents().redo()
     } else if (this.currentPicture) {
       this.currentPicture.undoStack.redo()
@@ -134,12 +178,14 @@ class MenuBar {
       label: 'Edit',
       submenu: [
         {
-          label: "Undo",
+          label: `Undo ${this.undoName}`,
+          enabled: this.canUndo,
           click: this.undo.bind(this),
           accelerator: "CmdOrCtrl+Z"
         },
         {
-          label: "Redo",
+          label: `Redo ${this.redoName}`,
+          enabled: this.canRedo,
           accelerator: process.platform === 'darwin' ? 'Shift+Command+Z' : 'Ctrl+Y',
           click: this.redo.bind(this)
         },

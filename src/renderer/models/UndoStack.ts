@@ -12,6 +12,18 @@ class UndoStack {
   readonly commands: IObservableArray<UndoCommand> = observable([])
   @observable doneCount = 0
 
+  @computed get undoCommand() {
+    if (this.isUndoable) {
+      return this.commands[this.doneCount - 1]
+    }
+  }
+
+  @computed get redoCommand() {
+    if (this.isRedoable) {
+      return this.commands[this.doneCount]
+    }
+  }
+
   @computed get isUndoable() {
     return 1 <= this.doneCount
   }
@@ -20,14 +32,16 @@ class UndoStack {
   }
 
   @action undo() {
-    if (this.isUndoable) {
-      this.commands[this.doneCount - 1].undo()
+    const command = this.undoCommand
+    if (command) {
+      command.undo()
       this.doneCount -= 1
     }
   }
   @action redo() {
-    if (this.isRedoable) {
-      this.commands[this.doneCount].redo()
+    const command = this.redoCommand
+    if (command) {
+      command.redo()
       this.doneCount += 1
     }
   }
