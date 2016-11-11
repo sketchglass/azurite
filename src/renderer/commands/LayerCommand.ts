@@ -1,6 +1,7 @@
 import {Rect, Transform} from "paintvec"
 import {Texture} from "paintgl"
 import {IObservableArray} from "mobx"
+import {UndoCommand} from "../models/UndoStack"
 import Picture from "../models/Picture"
 import Layer, {LayerBlendMode} from "../models/Layer"
 import {ImageLayerContent, GroupLayerContent} from "../models/LayerContent"
@@ -43,8 +44,10 @@ function dstPathAfterMove(srcPaths: number[][], dstPath: number[]) {
 }
 
 export
-class MoveLayerCommand {
+class MoveLayerCommand implements UndoCommand {
   dstPathAfter = dstPathAfterMove(this.srcPaths, this.dstPath)
+
+  title = "Move Layers"
 
   constructor(public readonly picture: Picture, public readonly srcPaths: number[][], public readonly dstPath: number[]) {
   }
@@ -75,7 +78,9 @@ class MoveLayerCommand {
 }
 
 export
-class CopyLayerCommand {
+class CopyLayerCommand implements UndoCommand {
+  title = "Copy Layers"
+
   constructor(public readonly picture: Picture, public readonly srcPaths: number[][], public readonly dstPath: number[]) {
   }
 
@@ -98,7 +103,9 @@ class CopyLayerCommand {
 }
 
 export
-class GroupLayerCommand {
+class GroupLayerCommand implements UndoCommand {
+  title = "Group Layers"
+
   constructor(public readonly picture: Picture, public readonly srcPaths: number[][]) {
   }
 
@@ -136,7 +143,9 @@ class GroupLayerCommand {
 }
 
 export
-class AddLayerCommand {
+class AddLayerCommand implements UndoCommand {
+  title = "Add Layer"
+
   constructor(public readonly picture: Picture, public readonly path: number[]) {
   }
 
@@ -158,7 +167,9 @@ class AddLayerCommand {
 }
 
 export
-class RemoveLayerCommand {
+class RemoveLayerCommand implements UndoCommand {
+  title = "Remove Layers"
+
   removedLayers: Layer[] = []
   constructor(public picture: Picture, public paths: number[][]) {
   }
@@ -194,10 +205,10 @@ interface LayerProps {
 }
 
 export
-class ChangeLayerPropsCommand {
+class ChangeLayerPropsCommand implements UndoCommand {
   oldProps: LayerProps
 
-  constructor(public picture: Picture, public path: number[], public props: LayerProps) {
+  constructor(public picture: Picture, public path: number[], public title: string, public props: LayerProps) {
   }
   undo() {
     const layer = this.picture.layerFromPath(this.path)
@@ -223,8 +234,8 @@ function getImageContent(picture: Picture, path: number[]) {
 }
 
 export
-class ChangeLayerImageCommand {
-  constructor(public picture: Picture, public path: number[], public rect: Rect, public oldData: Uint16Array, public newData: Uint16Array) {
+class ChangeLayerImageCommand implements UndoCommand {
+  constructor(public picture: Picture, public path: number[], public title: string, public rect: Rect, public oldData: Uint16Array, public newData: Uint16Array) {
   }
 
   replace(data: Uint16Array) {
@@ -255,7 +266,9 @@ class ChangeLayerImageCommand {
 }
 
 export
-class TransformLayerCommand {
+class TransformLayerCommand implements UndoCommand {
+  title = "Transform Layer"
+
   constructor(public picture: Picture, public path: number[], public originalTiledTexture: TiledTexture, public oldTransform: Transform, public newTransform: Transform) {
   }
 

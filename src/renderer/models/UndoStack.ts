@@ -4,6 +4,7 @@ export
 interface UndoCommand {
   undo(): void
   redo(): void
+  title: string
 }
 
 export

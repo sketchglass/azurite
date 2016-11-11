@@ -30,7 +30,7 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
     if (layer) {
       const {picture} = layer
       const blendMode = (e.target as HTMLSelectElement).value as LayerBlendMode
-      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), {blendMode}))
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), "Change Layer Blend Mode", {blendMode}))
     }
   })
   onOpaictyChangeBegin = action(() => {
@@ -49,7 +49,7 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
       const {picture} = layer
       const opacity = value / 100
       layer.opacity = this.oldOpacity
-      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), {opacity}))
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), "Change Layer Opacity", {opacity}))
     }
   })
 
