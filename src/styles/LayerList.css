@@ -25,5 +25,8 @@
   max-height: 48px;
 }
 .LayerList_layer-current {
-  background-color: grey;
+  background-color: var(--layer-list-layer-background-color-current);
+}
+.ReactDraggableTree_row-selected {
+  background-color: var(--layer-list-layer-background-color-current);
 }

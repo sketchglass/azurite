@@ -15,4 +15,6 @@
   --preview-panel-border-color: color(#8CF08C alpha(20%));
 
   --range-slider-fill-background-color: #FF6D1C;
+
+  --layer-list-layer-background-color-current: #4A90E2;
 }

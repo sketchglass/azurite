@@ -57,9 +57,11 @@ function ToolSelection(props: {tools: Tool[], currentTool: Tool, onChange: (tool
 
 @observer export default
 class App extends React.Component<{}, {}> {
+  rightSidebarLeft: number
   constructor() {
     super()
 
+    window.addEventListener('resize', this.onWindowResize)
     new NavigationKeyBinding(klass => {
       if (klass) {
         for (const tool of appState.tools) {
@@ -71,6 +73,10 @@ class App extends React.Component<{}, {}> {
         appState.overrideTool = undefined
       }
     })
+  }
+  onWindowResize = () => {
+    this.rightSidebarLeft = document.body.getBoundingClientRect().right - 216;
+    this.forceUpdate()
   }
   render() {
     const {tools, currentTool, overrideTool, color, paletteIndex, palette} = appState
@@ -138,8 +144,14 @@ class App extends React.Component<{}, {}> {
             <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
           </div>
           <aside className="RightSidebar">
-            <Navigator picture={picture} />
-            <LayerList picture={picture} />
+            <DraggablePanelContainer top={60} left={this.rightSidebarLeft + 12} margin={12} labelHeight={24}>
+              <DraggablePanel label="Navigator" width={216} height={100}>
+                <Navigator picture={picture} />
+              </DraggablePanel>
+              <DraggablePanel label="Layers" width={216} height={400}>
+                <LayerList picture={picture} />
+              </DraggablePanel>
+            </DraggablePanelContainer>
           </aside>
         </div>
       </div>
