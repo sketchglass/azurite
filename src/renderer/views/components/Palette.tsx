@@ -20,13 +20,17 @@ function Palette(props: PaletteProps) {
   const rowElems = rows.map((row, y) => {
     const buttons = row.map((color, x) => {
       const i = y * rowLength + x
-      const style = {
-        backgroundColor: color.toString(),
-      }
       const onClick = (e: React.MouseEvent<Element>) => {
         props.onChange(e, i)
       }
-      return <div className="Palette-button" style={style} key={x} onClick={onClick} />
+      if (color.equals(HSVColor.transparent)) {
+        return <div className="Palette-button Palette-button-transparent" key={x} onClick={onClick} />
+      } else {
+        const style = {
+          backgroundColor: color.toString(),
+        }
+        return <div className="Palette-button" style={style} key={x} onClick={onClick} />
+      }
     })
     return <div className="Palette-row" key={y}>{buttons}</div>
   })

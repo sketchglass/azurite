@@ -116,4 +116,10 @@ class HSVColor {
     const {r, g, b} = hsv2rgb(h, s, v)
     return new Color(r, g, b, a)
   }
+
+  equals(other: HSVColor) {
+    return this.h === other.h && this.s === other.s && this.v === other.v && this.a === other.a
+  }
+
+  static transparent = new HSVColor(0, 0, 0, 0)
 }
