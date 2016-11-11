@@ -23,12 +23,19 @@ class RotateTool extends Tool {
     if (!this.picture) {
       return
     }
+    if (ev.button == 2) {
+      this.picture.navigation.rotation = 0
+      return
+    }
     this.originalAngle = this.posAngle(ev.rendererPos)
     this.originalRotation = this.picture.navigation.rotation
   }
 
   move(ev: ToolPointerEvent) {
     if (!this.picture) {
+      return
+    }
+    if (ev.button == 2) {
       return
     }
     const {translation, scale} = this.picture.navigation
