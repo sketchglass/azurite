@@ -159,15 +159,23 @@ export class DraggablePanelContainer extends React.Component<DraggablePanelConta
     })
     this.onChildrenOrderUpdate()
   }
-  onChildrenOrderUpdate = () => {
+  calicurateChildrenState(props: DraggablePanelContainerProps) {
     for(let s of this.childrenState) {
       const top = this.childrenState.filter(x => { return x.order < s.order }).map(x => { return x.height }).reduce((a, b) => {
-        return a + b + this.props.labelHeight + this.props.margin
-      }, this.props.top)
-      const left = this.props.left
+        return a + b + props.labelHeight + props.margin
+      }, props.top)
+      const left = props.left
       s.top = s.initialTop = top
       s.left = s.initialLeft = left
     }
+  }
+  componentWillReceiveProps(props: DraggablePanelContainerProps) {
+    this.calicurateChildrenState(props)
+    this.forceUpdate()
+  }
+  onChildrenOrderUpdate = () => {
+    this.calicurateChildrenState(this.props)
+    this.forceUpdate()
   }
   insideSwapArea(childState: ChildState, x: number, y: number) {
     return childState.top <= y && y <= childState.top + this.props.labelHeight
