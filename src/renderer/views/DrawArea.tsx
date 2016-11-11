@@ -9,6 +9,7 @@ import {TabletEvent} from "receive-tablet-event"
 import {canvas} from "../GLContext"
 import Renderer from "./Renderer"
 import Navigation from "../models/Navigation"
+import {frameDebounce} from "../../lib/Debounce"
 import * as IPCChannels from "../../common/IPCChannels"
 
 interface DrawAreaProps {
@@ -110,11 +111,17 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const {cursorElementSize} = this.tool
     if (this.cursorElement) {
       const center = cursorElementSize / 2
-      const {style} = this.cursorElement
-      style.left = `${x - center}px`
-      style.top = `${y - center}px`
+      this.updateCursorStyle(x - center, y - center)
     }
   }
+
+  updateCursorStyle = frameDebounce((left: number, top: number) => {
+    if (this.cursorElement) {
+      const {style} = this.cursorElement
+      style.left = `${left}px`
+      style.top = `${top}px`
+    }
+  })
 
   onResize = () => {
     const rect = this.element!.getBoundingClientRect()

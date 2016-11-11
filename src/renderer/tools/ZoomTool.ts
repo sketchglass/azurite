@@ -90,6 +90,10 @@ class ZoomTool extends Tool {
     if (!this.picture) {
       return
     }
+    if (ev.button == 2) {
+      this.picture.navigation.scale = 1
+      return
+    }
     const {scale} = this.picture.navigation
     this.originalScale = scale
     this.startPos = ev.rendererPos
@@ -97,6 +101,9 @@ class ZoomTool extends Tool {
 
   move(ev: ToolPointerEvent) {
     if (!this.picture) {
+      return
+    }
+    if (ev.button == 2) {
       return
     }
     const offset = ev.rendererPos.sub(this.startPos)

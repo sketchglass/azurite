@@ -13,3 +13,19 @@
   height: 12px;
   margin: 2px;
 }
+.Palette-button-transparent {
+  background-color: #fff;
+  position: relative;
+  &:before {
+    content: "";
+    position: absolute;
+    left: 0; top: 0; width: 6px; height: 6px;
+    background-color: #ccc;
+  }
+  &:after {
+    content: "";
+    position: absolute;
+    right: 0; bottom: 0; width: 6px; height: 6px;
+    background-color: #ccc;
+  }
+}
