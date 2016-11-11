@@ -276,7 +276,7 @@ abstract class BaseBrushTool extends Tool {
 
     const {layer} = content
     const {picture} = layer
-    const command = new ChangeLayerImageCommand(picture, layer.path(), rect, oldData, newData)
+    const command = new ChangeLayerImageCommand(picture, layer.path(), this.name, rect, oldData, newData)
     picture.undoStack.push(command)
   }
 

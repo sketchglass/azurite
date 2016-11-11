@@ -50,7 +50,7 @@ const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
 
   const rename = (name: string) => {
     if (layer.name != name) {
-      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), {name}))
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), "Rename Layer", {name}))
     }
   }
 
@@ -60,7 +60,7 @@ const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
   const onVisibleToggle = (e: React.FormEvent<HTMLInputElement>) => {
     const visible = (e.target as HTMLInputElement).checked
     if (layer.visible != visible) {
-      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), {visible}))
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), "Change Layer Visibility", {visible}))
     }
   }
   const onVisibleClick = (e: React.MouseEvent<HTMLInputElement>) => {
