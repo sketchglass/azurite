@@ -120,6 +120,6 @@ class HSVColor {
   equals(other: HSVColor) {
     return this.h === other.h && this.s === other.s && this.v === other.v && this.a === other.a
   }
-}
 
-export const EmptyColor = new HSVColor(0, 0, 0, 0)
+  static transparent = new HSVColor(0, 0, 0, 0)
+}

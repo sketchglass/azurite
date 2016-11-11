@@ -7,7 +7,7 @@ import PanTool from "../tools/PanTool"
 import {ZoomTool} from "../tools/ZoomTool"
 import RotateTool from "../tools/RotateTool"
 import TransformLayerTool from "../tools/TransformLayerTool"
-import {HSVColor, EmptyColor} from "../../lib/Color"
+import {HSVColor} from "../../lib/Color"
 
 export
 class AppState {
@@ -34,7 +34,7 @@ class AppState {
 
   @observable color = new HSVColor(0, 0, 1)
   @observable paletteIndex: number = 0
-  readonly palette = observable<HSVColor>(new Array(100).fill(EmptyColor))
+  readonly palette = observable<HSVColor>(new Array(100).fill(HSVColor.transparent))
 
   constructor() {
     reaction(() => [this.currentPicture, this.currentTool], () => {

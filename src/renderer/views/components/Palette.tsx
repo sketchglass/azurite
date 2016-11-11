@@ -1,5 +1,5 @@
 import React = require("react")
-import {HSVColor, EmptyColor} from "../../../lib/Color"
+import {HSVColor} from "../../../lib/Color"
 
 interface PaletteProps {
   palette: HSVColor[]
@@ -23,7 +23,7 @@ function Palette(props: PaletteProps) {
       const onClick = (e: React.MouseEvent<Element>) => {
         props.onChange(e, i)
       }
-      if (color.equals(EmptyColor)) {
+      if (color.equals(HSVColor.transparent)) {
         return <div className="Palette-button Palette-button-transparent" key={x} onClick={onClick} />
       } else {
         const style = {
