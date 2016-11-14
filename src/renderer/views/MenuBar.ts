@@ -23,8 +23,20 @@ class MenuBar {
     }, true)
   }
 
-  get currentPicture() {
-    return appState.currentPicture
+  @computed get currentPicture() {
+    const {modal, currentPicture} = appState
+    if (!modal) {
+      return currentPicture
+    }
+  }
+  @computed get undoStack() {
+    const {modal, modalUndoStack, currentPicture} = appState
+    if (modal) {
+      return modalUndoStack
+    }
+    if (currentPicture) {
+      return currentPicture.undoStack
+    }
   }
 
   async newPicture() {
@@ -61,22 +73,24 @@ class MenuBar {
   @computed get canUndo() {
     if (this.isTextInputFocused) {
       return true
-    } else {
-      return appState.currentPicture && appState.currentPicture.undoStack.isUndoable
+    } else if (this.undoStack) {
+      return this.undoStack.isUndoable
     }
+    return false
   }
 
   @computed get canRedo() {
     if (this.isTextInputFocused) {
       return true
-    } else {
-      return appState.currentPicture && appState.currentPicture.undoStack.isRedoable
+    } else if (this.undoStack) {
+      return this.undoStack.isRedoable
     }
+    return false
   }
 
   @computed get undoName() {
-    if (appState.currentPicture) {
-      const {undoCommand} = appState.currentPicture.undoStack
+    if (this.undoStack) {
+      const {undoCommand} = this.undoStack
       if (undoCommand) {
         return undoCommand.title
       }
@@ -85,8 +99,8 @@ class MenuBar {
   }
 
   @computed get redoName() {
-    if (appState.currentPicture) {
-      const {redoCommand} = appState.currentPicture.undoStack
+    if (this.undoStack) {
+      const {redoCommand} = this.undoStack
       if (redoCommand) {
         return redoCommand.title
       }
@@ -97,16 +111,16 @@ class MenuBar {
   undo() {
     if (this.isTextInputFocused) {
       remote.getCurrentWebContents().undo()
-    } else if (this.currentPicture) {
-      this.currentPicture.undoStack.undo()
+    } else if (this.undoStack) {
+      this.undoStack.undo()
     }
   }
 
   redo() {
     if (this.isTextInputFocused) {
       remote.getCurrentWebContents().redo()
-    } else if (this.currentPicture) {
-      this.currentPicture.undoStack.redo()
+    } else if (this.undoStack) {
+      this.undoStack.redo()
     }
   }
 
