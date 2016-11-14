@@ -36,6 +36,13 @@ class AppState {
   @observable paletteIndex: number = 0
   readonly palette = observable<HSVColor>(new Array(100).fill(HSVColor.transparent))
 
+  @computed get modal() {
+    return this.currentTool.modal
+  }
+  @computed get modalUndoStack() {
+    return this.currentTool.modalUndoStack
+  }
+
   constructor() {
     reaction(() => [this.currentPicture, this.currentTool], () => {
       const hook = this.currentTool.hookLayerBlend.bind(this.currentTool)
