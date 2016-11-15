@@ -1,6 +1,5 @@
 import {observer} from "mobx-react"
 import React = require("react")
-import Navigation from "../models/Navigation"
 import Picture from "../models/Picture"
 
 interface NavigatorProps {

@@ -8,7 +8,6 @@ import Waypoint from "../models/Waypoint"
 import {TabletEvent} from "receive-tablet-event"
 import {canvas} from "../GLContext"
 import Renderer from "./Renderer"
-import Navigation from "../models/Navigation"
 import {frameDebounce} from "../../lib/Debounce"
 import * as IPCChannels from "../../common/IPCChannels"
 

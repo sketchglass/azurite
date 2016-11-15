@@ -1,10 +1,49 @@
 import {Vec2} from "paintvec"
+import {observable, action} from "mobx"
 
-interface Navigation {
-  translation: Vec2
-  scale: number
-  rotation: number
-  horizontalFlip: boolean
+const SCALE_STEPS = [
+  0.25,
+  0.33,
+  0.5,
+  0.67,
+  1,
+  1.5,
+  2,
+  4,
+  8,
+  16,
+  32
+]
+
+function nextScaleStep(scale: number) {
+  for (const step of SCALE_STEPS) {
+    if (scale < step) {
+      return step
+    }
+  }
+  return scale
 }
 
-export default Navigation
+function prevScaleStep(scale: number) {
+  for (const step of Array.from(SCALE_STEPS).reverse()) {
+    if (step < scale) {
+      return step
+    }
+  }
+  return scale
+}
+
+export
+class Navigation {
+  @observable translation = new Vec2(0)
+  @observable scale = 1
+  @observable rotation = 0
+  @observable horizontalFlip = false
+
+  @action zoomIn() {
+    this.scale = nextScaleStep(this.scale)
+  }
+  @action zoomOut() {
+    this.scale = prevScaleStep(this.scale)
+  }
+}
