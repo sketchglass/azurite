@@ -127,6 +127,22 @@ class MenuBar {
     this.export("bmp")
   }
 
+  zoomIn() {
+    if (appState.currentPicture) {
+      appState.currentPicture.navigation.zoomIn()
+    }
+  }
+  zoomOut() {
+    if (appState.currentPicture) {
+      appState.currentPicture.navigation.zoomOut()
+    }
+  }
+  resetZoom() {
+    if (appState.currentPicture) {
+      appState.currentPicture.navigation.scale = 1
+    }
+  }
+
   render() {
     const fileMenu: MenuItemOptions = {
       label: "File",
@@ -234,13 +250,19 @@ class MenuBar {
           type: 'separator'
         },
         {
-          role: 'resetzoom'
+          label: "Actual Size",
+          accelerator: "CmdOrCtrl+0",
+          click: () => this.resetZoom(),
         },
         {
-          role: 'zoomin'
+          label: "Zoom In",
+          accelerator: "CmdOrCtrl+Plus",
+          click: () => this.zoomIn(),
         },
         {
-          role: 'zoomout'
+          label: "Zoom Out",
+          accelerator: "CmdOrCtrl+-",
+          click: () => this.zoomOut(),
         },
         {
           type: 'separator'
