@@ -136,13 +136,14 @@ class TransformLayerTool extends Tool {
 
   constructor(appState: AppState) {
     super(appState)
-    reaction(() => this.currentContent, () => this.reset())
+    reaction(() => this.active, () => this.endEditing())
+    reaction(() => [this.currentContent, this.active], () => this.reset())
     reaction(() => appState.currentPicture && appState.currentPicture.lastUpdate, () => this.reset())
   }
 
   reset() {
     const content = this.currentContent
-    if (content) {
+    if (content && this.active) {
       this.originalRect = content.tiledTexture.boundingRect()
       this.originalTiledTexture = content.tiledTexture.clone()
       this.lastRect = this.rect = this.originalRect
@@ -163,8 +164,8 @@ class TransformLayerTool extends Tool {
   }
 
   @computed get currentContent() {
-    const {active, currentLayer} = this
-    if (active && currentLayer && currentLayer.content.type == "image") {
+    const {currentLayer} = this
+    if (currentLayer && currentLayer.content.type == "image") {
       return currentLayer.content
     }
   }
