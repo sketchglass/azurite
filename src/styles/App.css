@@ -6,7 +6,7 @@ body {
   background-color: var(--default-background-color);
   font-family: var(--default-font-family);
   -webkit-font-smoothing: antialiased;
-  font-size: 12px;
+  font-size: 13px;
 }
 aside {
   z-index: 100;
@@ -75,4 +75,22 @@ aside {
 
 *:focus {
   outline: none
+}
+
+.Button {
+  border: none;
+  background-color: var(--ui-background-color);
+  border-radius: 4px;
+  height: 24px;
+}
+
+.Button-primary {
+  background-color: var(--ui-primary-background-color);
+}
+
+.TransformLayerSettings {
+  & .Button {
+    width: 64px;
+    margin-right: 8px;
+  }
 }

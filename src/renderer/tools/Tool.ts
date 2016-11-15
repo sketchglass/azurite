@@ -5,6 +5,7 @@ import Renderer from "../views/Renderer"
 import Waypoint from "../models/Waypoint"
 import {TileBlender} from "../models/LayerBlender"
 import {Tile} from "../models/TiledTexture"
+import {UndoStack} from "../models/UndoStack"
 import {Vec2} from "paintvec"
 import React = require("react")
 import {AppState} from "../state/AppState"
@@ -44,14 +45,21 @@ abstract class Tool {
     return this.appState.currentTool == this
   }
   renderer: Renderer
+
   abstract name: string
+
   @observable cursor = "auto"
   @observable cursorElement: HTMLElement|undefined
   @observable cursorElementSize = 0
+
+  get modal() { return false }
+  get modalUndoStack(): UndoStack|undefined { return }
+
   abstract start(event: ToolPointerEvent): void
   abstract move(event: ToolPointerEvent): void
   abstract end(): void
-  cursorMove(waypoint: Waypoint) {}
+  keyDown(event: React.KeyboardEvent<HTMLElement>) {}
+
   renderSettings(): JSX.Element { return React.createElement("div") }
   renderOverlayUI(): JSX.Element|undefined { return }
   hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender){ return false }

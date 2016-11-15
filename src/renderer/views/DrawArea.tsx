@@ -139,7 +139,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const style = {visibility: this.props.picture ? "visible" : "hidden"}
     const overlay = this.tool.renderOverlayUI()
     return (
-      <div ref={e => this.element = e} className="DrawArea" style={style}>
+      <div ref={e => this.element = e} className="DrawArea" style={style} tabIndex={-1} onKeyDown={this.onKeyDown} >
         <svg hidden={!overlay} className="DrawArea_Overlay">
           {overlay}
         </svg>
@@ -189,6 +189,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     ev.preventDefault()
   }
   onDown(ev: ToolPointerEvent) {
+    this.element && this.element.focus()
     const {tool} = this.props
     const rect = tool.start(ev)
     this.currentTool = tool
@@ -203,5 +204,9 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       const rect = this.currentTool.end()
       this.currentTool = undefined
     }
+  }
+
+  onKeyDown = (ev: React.KeyboardEvent<HTMLElement>) => {
+    this.tool.keyDown(ev)
   }
 }
