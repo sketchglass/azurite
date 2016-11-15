@@ -2,13 +2,14 @@ import * as React from "react"
 import {reaction, observable, computed, action} from "mobx"
 import {observer} from "mobx-react"
 import {Vec2, Rect, Transform} from "paintvec"
-import {TextureDrawTarget, Color} from "paintgl"
+import {TextureDrawTarget, Color, Texture} from "paintgl"
 import Picture from "../models/Picture"
 import Layer from "../models/Layer"
 import TiledTexture, {Tile, TiledTextureRawData} from "../models/TiledTexture"
 import {TileBlender} from "../models/LayerBlender"
 import Waypoint from "../models/Waypoint"
 import Tool, {ToolPointerEvent} from './Tool'
+import {drawTexture} from "../GLUtil"
 import {context} from "../GLContext"
 import {AppState} from "../state/AppState"
 import {frameDebounce} from "../../lib/Debounce"
@@ -116,7 +117,7 @@ class TransformLayerTool extends Tool {
   startMovePos = new Vec2()
   startAdditionalTransformPos = new Vec2()
   originalRect: Rect|undefined
-  originalTiledTexture = new TiledTexture()
+  originalTexture: Texture|undefined
   lastRect: Rect|undefined
   lastRatioWToH = 1
   lastRatioHToW = 1
@@ -145,7 +146,17 @@ class TransformLayerTool extends Tool {
     const content = this.currentContent
     if (content && this.active) {
       this.originalRect = content.tiledTexture.boundingRect()
-      this.originalTiledTexture = content.tiledTexture.clone()
+      if (this.originalRect) {
+        const texture = this.originalTexture = new Texture(context, {size: this.originalRect.size})
+        const drawTarget = new TextureDrawTarget(context, texture)
+        content.tiledTexture.drawToDrawTarget(drawTarget, {offset: this.originalRect.topLeft.neg(), blendMode: "src"})
+        drawTarget.dispose()
+      } else {
+        if (this.originalTexture) {
+          this.originalTexture.dispose()
+        }
+        this.originalTexture = undefined
+      }
       this.lastRect = this.rect = this.originalRect
       this.lastAdditionalTransform = this.additionalTransform = new Transform()
     }
@@ -350,9 +361,12 @@ class TransformLayerTool extends Tool {
 
   hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) {
     const content = this.currentContent
-    if (this.editing && content && layer == content.layer) {
+    if (this.editing && content && layer == content.layer && this.originalRect && this.originalTexture) {
       transformedDrawTarget.clear(new Color(0,0,0,0))
-      this.originalTiledTexture.drawToDrawTarget(transformedDrawTarget, {offset: tileKey.mulScalar(-Tile.width), blendMode: "src", transform: this.transform})
+      const transform = Transform.translate(this.originalRect.topLeft)
+        .merge(this.transform)
+        .translate(tileKey.mulScalar(-Tile.width))
+      drawTexture(transformedDrawTarget, this.originalTexture, {transform, blendMode: "src"})
       const {blendMode, opacity} = layer
       tileBlender.blend(transformedTile, blendMode, opacity)
       return true
