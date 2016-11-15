@@ -123,7 +123,6 @@ class TransformLayerTool extends Tool {
   lastAdditionalTransform = new Transform()
   @observable rect: Rect|undefined
   @observable additionalTransform = new Transform()
-  lastCommitTransform = new Transform()
 
   @observable editing = false
   @observable editUndoStack: UndoStack|undefined
@@ -146,7 +145,6 @@ class TransformLayerTool extends Tool {
     if (content) {
       this.originalRect = content.tiledTexture.boundingRect()
       this.originalTiledTexture = content.tiledTexture.clone()
-      this.lastCommitTransform = new Transform()
       this.lastRect = this.rect = this.originalRect
       this.lastAdditionalTransform = this.additionalTransform = new Transform()
     }
@@ -335,7 +333,6 @@ class TransformLayerTool extends Tool {
   endEditing() {
     if (this.editing && this.picture && this.currentContent) {
       const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.transform)
-      this.lastCommitTransform = this.transform
       this.picture.undoStack.redoAndPush(command)
     }
     this.cancelEditing()
