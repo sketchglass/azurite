@@ -26,13 +26,7 @@ const PictureTabBar = observer(() => {
       {
         pictures.map((p, i) => {
           const onClick = () => appState.currentPictureIndex = i
-          const onClose = () => {
-            const [picture] = appState.pictures.splice(i, 1)
-            picture.dispose()
-            if (appState.pictures.length <= appState.currentPictureIndex) {
-              appState.currentPictureIndex = appState.pictures.length - 1
-            }
-          }
+          const onClose = () => appState.tryClosePicture(i)
           const current = i == currentPictureIndex
           return <PictureTab key={i} picture={p} current={current} onClick={onClick} onClose={onClose}/>
         })

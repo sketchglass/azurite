@@ -19,11 +19,12 @@ class PictureSave {
   async save() {
     if (this.picture.filePath) {
       if (!this.picture.edited) {
-        return
+        return true
       }
       await this.saveToPath(this.picture.filePath)
+      return true
     } else {
-      await this.saveAs()
+      return await this.saveAs()
     }
   }
 
@@ -36,6 +37,9 @@ class PictureSave {
     })
     if (filePath) {
       this.saveToPath(filePath)
+      return true
+    } else {
+      return false
     }
   }
 

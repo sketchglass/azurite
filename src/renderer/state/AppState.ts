@@ -1,4 +1,6 @@
 import {observable, computed, reaction} from "mobx"
+import {remote} from "electron"
+const {dialog} = remote
 import Picture from "../models/Picture"
 import Tool from "../tools/Tool"
 import BrushTool from "../tools/BrushTool"
@@ -8,6 +10,7 @@ import {ZoomTool} from "../tools/ZoomTool"
 import RotateTool from "../tools/RotateTool"
 import TransformLayerTool from "../tools/TransformLayerTool"
 import {HSVColor} from "../../lib/Color"
+import {PictureSave} from "../services/PictureSave"
 
 export
 class AppState {
@@ -54,6 +57,33 @@ class AppState {
         }
       }
     })
+  }
+
+  async tryClosePicture(index: number) {
+    const picture = appState.pictures[index]
+    if (picture.edited) {
+      const result = dialog.showMessageBox(remote.getCurrentWindow(), {
+        buttons: ["Save", "Cancel", "Don't Save"],
+        defaultId: 0,
+        message: `Do you want to save changes of ${picture.fileName}?`,
+        detail: "Your changes will be lost without saving.",
+        cancelId: 1,
+      })
+      if (result == 1) {
+        return
+      }
+      if (result == 0) {
+        const saved = await new PictureSave(picture).save()
+        if (!saved) {
+          return
+        }
+      }
+    }
+    appState.pictures.splice(index, 1)
+    picture.dispose()
+    if (this.pictures.length <= this.currentPictureIndex) {
+      this.currentPictureIndex = this.pictures.length - 1
+    }
   }
 }
 
