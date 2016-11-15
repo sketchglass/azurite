@@ -59,7 +59,7 @@ class AppState {
     })
   }
 
-  async tryClosePicture(index: number) {
+  async closePicture(index: number) {
     const picture = appState.pictures[index]
     if (picture.edited) {
       const result = dialog.showMessageBox(remote.getCurrentWindow(), {
@@ -70,12 +70,12 @@ class AppState {
         cancelId: 1,
       })
       if (result == 1) {
-        return
+        return false
       }
       if (result == 0) {
         const saved = await new PictureSave(picture).save()
         if (!saved) {
-          return
+          return false
         }
       }
     }
@@ -84,7 +84,32 @@ class AppState {
     if (this.pictures.length <= this.currentPictureIndex) {
       this.currentPictureIndex = this.pictures.length - 1
     }
+    return true
+  }
+
+  async closePictures() {
+    for (let i = this.pictures.length - 1; i >= 0; --i) {
+      if (!await this.closePicture(i)) {
+        return false
+      }
+    }
+    return true
+  }
+
+  async quit() {
+    // TODO: save app state
+    if (await appState.closePictures()) {
+      remote.getCurrentWindow().destroy()
+      return true
+    }
+    return false
   }
 }
 
 export const appState = new AppState()
+
+window.addEventListener("beforeunload", e => {
+  // Do not close window immediately https://github.com/electron/electron/blob/master/docs/api/browser-window.md#event-close
+  e.returnValue = false
+  appState.quit()
+})
