@@ -316,6 +316,15 @@ class TransformLayerTool extends Tool {
     }
   }
 
+  keyDown(ev: React.KeyboardEvent<HTMLElement>) {
+    if (ev.key == "Enter") {
+      this.endEditing()
+    }
+    if (ev.key == "Escape") {
+      this.cancelEditing()
+    }
+  }
+
   startEditing() {
     if (!this.editing) {
       this.editing = true
@@ -324,7 +333,7 @@ class TransformLayerTool extends Tool {
   }
 
   endEditing() {
-    if (this.picture && this.currentContent) {
+    if (this.editing && this.picture && this.currentContent) {
       const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.transform)
       this.lastCommitTransform = this.transform
       this.picture.undoStack.redoAndPush(command)
@@ -333,10 +342,12 @@ class TransformLayerTool extends Tool {
   }
 
   cancelEditing() {
-    this.reset()
-    this.editing = false
-    this.editUndoStack = undefined
-    this.update()
+    if (this.editing) {
+      this.reset()
+      this.editing = false
+      this.editUndoStack = undefined
+      this.update()
+    }
   }
 
   hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) {
