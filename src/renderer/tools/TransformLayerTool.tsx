@@ -89,21 +89,21 @@ enum DragType {
 class TransformChangeCommand implements UndoCommand {
   constructor(
     public tool: TransformLayerTool,
-    public oldRect: Rect, public oldRotation: Transform,
-    public newRect: Rect, public newRotation: Transform
+    public oldRect: Rect, public oldAdditionalTransform: Transform,
+    public newRect: Rect, public newAdditionalTransform: Transform
   ) {}
 
   title = "Change Transform"
 
   redo() {
     this.tool.rect = this.newRect
-    this.tool.additionalTransform = this.newRotation
+    this.tool.additionalTransform = this.newAdditionalTransform
     this.tool.update()
   }
 
   undo() {
     this.tool.rect = this.oldRect
-    this.tool.additionalTransform = this.oldRotation
+    this.tool.additionalTransform = this.oldAdditionalTransform
     this.tool.update()
   }
 }
