@@ -6,7 +6,7 @@ type MenuItemOptions = Electron.MenuItemOptions
 import {observable, computed, autorun} from "mobx"
 import {appState} from "../state/AppState"
 import Picture from "../models/Picture"
-import PictureExport from "../services/PictureExport"
+import {PictureExportFormat} from "../services/PictureExport"
 import {isTextInput} from "./util"
 import {PictureSave} from "../services/PictureSave"
 
@@ -111,7 +111,7 @@ class MenuBar {
     }
   }
 
-  async export(format: "png"|"jpeg"|"bmp") {
+  async export(format: PictureExportFormat) {
     if (appState.currentPictureState) {
       appState.currentPictureState.export(format)
     }

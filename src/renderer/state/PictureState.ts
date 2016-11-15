@@ -2,7 +2,7 @@ import {remote} from "electron"
 const {dialog} = remote
 import Picture from "../models/Picture"
 import {PictureSave} from "../services/PictureSave"
-import PictureExport from "../services/PictureExport"
+import {PictureExport, PictureExportFormat} from "../services/PictureExport"
 import {Dialog} from "../views/Dialog"
 import PictureParams from "../models/PictureParams"
 
@@ -41,7 +41,7 @@ class PictureState {
     return new PictureSave(this.picture).saveAs()
   }
 
-  async export(format: "png"|"jpeg"|"bmp") {
+  async export(format: PictureExportFormat) {
     const pictureExport = new PictureExport(this.picture)
     await pictureExport.showExportDialog(format)
     pictureExport.dispose()
