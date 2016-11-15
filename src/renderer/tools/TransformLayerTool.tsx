@@ -13,6 +13,7 @@ import {context} from "../GLContext"
 import {AppState} from "../state/AppState"
 import {frameDebounce} from "../../lib/Debounce"
 import {TransformLayerCommand} from "../commands/LayerCommand"
+import {UndoStack, UndoCommand} from "../models/UndoStack"
 
 const HANDLE_RADIUS = 4
 
@@ -56,6 +57,18 @@ class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}
   }
 }
 
+const TransformLayerSettings = observer((props: {tool: TransformLayerTool}) => {
+  const {tool} = props
+  const onOK = () => tool.endEditing()
+  const onCancel = () => tool.cancelEditing()
+  return (
+    <div hidden={!tool.editing}>
+      <button onClick={onOK}>OK</button>
+      <button onClick={onCancel}>Cancel</button>
+    </div>
+  )
+})
+
 const transformedTile = new Tile()
 const transformedDrawTarget = new TextureDrawTarget(context, transformedTile.texture)
 
@@ -71,6 +84,28 @@ enum DragType {
   MoveBottomLeft,
   MoveCenterLeft,
   Rotate,
+}
+
+class TransformChangeCommand implements UndoCommand {
+  constructor(
+    public tool: TransformLayerTool,
+    public oldRect: Rect, public oldRotation: Transform,
+    public newRect: Rect, public newRotation: Transform
+  ) {}
+
+  title = "Change Transform"
+
+  redo() {
+    this.tool.rect = this.newRect
+    this.tool.additionalTransform = this.newRotation
+    this.tool.update()
+  }
+
+  undo() {
+    this.tool.rect = this.oldRect
+    this.tool.additionalTransform = this.oldRotation
+    this.tool.update()
+  }
 }
 
 export default
@@ -90,19 +125,30 @@ class TransformLayerTool extends Tool {
   @observable additionalTransform = new Transform()
   lastCommitTransform = new Transform()
 
+  @observable editing = false
+  @observable editUndoStack: UndoStack|undefined
+
+  @computed get modal() {
+    return this.editing
+  }
+  @computed get modalUndoStack() {
+    return this.editUndoStack
+  }
+
   constructor(appState: AppState) {
     super(appState)
     reaction(() => this.currentContent, () => this.reset())
+    reaction(() => appState.currentPicture && appState.currentPicture.lastUpdate, () => this.reset())
   }
 
   reset() {
     const content = this.currentContent
     if (content) {
-      this.originalRect = content && content.tiledTexture.boundingRect()
+      this.originalRect = content.tiledTexture.boundingRect()
       this.originalTiledTexture = content.tiledTexture.clone()
       this.lastCommitTransform = new Transform()
-      this.lastRect = this.originalRect
-      this.rect = this.originalRect
+      this.lastRect = this.rect = this.originalRect
+      this.lastAdditionalTransform = this.additionalTransform = new Transform()
     }
   }
 
@@ -130,6 +176,9 @@ class TransformLayerTool extends Tool {
       this.dragType = DragType.None
       return
     }
+
+    this.startEditing()
+
     const movePos = this.startMovePos = ev.picturePos.transform(this.additionalTransformInv).round()
     this.startAdditionalTransformPos = ev.picturePos
 
@@ -257,24 +306,42 @@ class TransformLayerTool extends Tool {
 
   end() {
     this.dragType = DragType.None
-    this.commit()
+    if (this.modalUndoStack && this.lastRect && this.rect) {
+      const command = new TransformChangeCommand(
+        this,
+        this.lastRect, this.lastAdditionalTransform,
+        this.rect, this.additionalTransform
+      )
+      this.modalUndoStack.redoAndPush(command)
+    }
   }
 
-  renderOverlayUI() {
-    return <TransformLayerOverlayUI tool={this} />
+  startEditing() {
+    if (!this.editing) {
+      this.editing = true
+      this.editUndoStack = new UndoStack()
+    }
   }
 
-  commit() {
+  endEditing() {
     if (this.picture && this.currentContent) {
-      const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.originalTiledTexture, this.lastCommitTransform, this.transform)
+      const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.transform)
       this.lastCommitTransform = this.transform
       this.picture.undoStack.redoAndPush(command)
     }
+    this.cancelEditing()
+  }
+
+  cancelEditing() {
+    this.reset()
+    this.editing = false
+    this.editUndoStack = undefined
+    this.update()
   }
 
   hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) {
     const content = this.currentContent
-    if (this.dragType != DragType.None && content && layer == content.layer) {
+    if (this.editing && content && layer == content.layer) {
       transformedDrawTarget.clear(new Color(0,0,0,0))
       this.originalTiledTexture.drawToDrawTarget(transformedDrawTarget, {offset: tileKey.mulScalar(-Tile.width), blendMode: "src", transform: this.transform})
       const {blendMode, opacity} = layer
@@ -283,6 +350,14 @@ class TransformLayerTool extends Tool {
     } else {
       return false
     }
+  }
+
+  renderOverlayUI() {
+    return <TransformLayerOverlayUI tool={this} />
+  }
+
+  renderSettings() {
+    return <TransformLayerSettings tool={this} />
   }
 }
 

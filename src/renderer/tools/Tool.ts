@@ -52,8 +52,8 @@ abstract class Tool {
   @observable cursorElement: HTMLElement|undefined
   @observable cursorElementSize = 0
 
-  @observable modal = false
-  @observable modalUndoStack: UndoStack|undefined
+  get modal() { return false }
+  get modalUndoStack(): UndoStack|undefined { return }
 
   abstract start(event: ToolPointerEvent): void
   abstract move(event: ToolPointerEvent): void

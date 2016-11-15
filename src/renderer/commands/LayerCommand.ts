@@ -268,26 +268,29 @@ class ChangeLayerImageCommand implements UndoCommand {
 export
 class TransformLayerCommand implements UndoCommand {
   title = "Transform Layer"
+  oldTiledTexture: TiledTexture|undefined
 
-  constructor(public picture: Picture, public path: number[], public originalTiledTexture: TiledTexture, public oldTransform: Transform, public newTransform: Transform) {
+  constructor(public picture: Picture, public path: number[], public transform: Transform) {
   }
 
   undo() {
-    this.replace(this.originalTiledTexture, this.oldTransform)
+    const content = getImageContent(this.picture, this.path)
+    if (!content || !this.oldTiledTexture) {
+      return
+    }
+    const transformed = content.tiledTexture
+    content.tiledTexture = this.oldTiledTexture
+    transformed.dispose()
+    this.picture.lastUpdate = {layer: content.layer}
   }
 
   redo() {
-    this.replace(this.originalTiledTexture, this.newTransform)
-  }
-
-  replace(tiledTexture: TiledTexture, transform: Transform) {
     const content = getImageContent(this.picture, this.path)
     if (!content) {
       return
     }
-    const old = content.tiledTexture
-    content.tiledTexture = tiledTexture.transform(transform)
-    old.dispose()
+    this.oldTiledTexture = content.tiledTexture
+    content.tiledTexture = content.tiledTexture.transform(this.transform)
     this.picture.lastUpdate = {layer: content.layer}
   }
 }
