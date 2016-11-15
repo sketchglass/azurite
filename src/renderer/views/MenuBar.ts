@@ -6,10 +6,8 @@ type MenuItemOptions = Electron.MenuItemOptions
 import {observable, computed, autorun} from "mobx"
 import {appState} from "../state/AppState"
 import Picture from "../models/Picture"
-import PictureParams from "../models/PictureParams"
 import PictureExport from "../services/PictureExport"
 import {isTextInput} from "./util"
-import {Dialog} from "./Dialog"
 import {PictureSave} from "../services/PictureSave"
 
 class MenuBar {
@@ -23,55 +21,38 @@ class MenuBar {
     }, true)
   }
 
-  @computed get currentPicture() {
-    const {modal, currentPicture} = appState
-    if (!modal) {
-      return currentPicture
-    }
-  }
   @computed get undoStack() {
-    const {modal, modalUndoStack, currentPicture} = appState
+    const {modal, modalUndoStack, currentPictureState} = appState
     if (modal) {
       return modalUndoStack
     }
-    if (currentPicture) {
-      return currentPicture.undoStack
+    if (currentPictureState) {
+      return currentPictureState.picture.undoStack
     }
   }
 
-  async newPicture() {
-    const dialog = new Dialog<PictureParams>("newPicture")
-    const params = await dialog.open()
-    if (params) {
-      appState.pictures.push(new Picture(params))
-      appState.currentPictureIndex = appState.pictures.length - 1
-    }
+  newPicture() {
+    appState.newPicture()
   }
 
   async save() {
-    if (this.currentPicture) {
-      await new PictureSave(this.currentPicture).save()
+    if (appState.currentPictureState) {
+      appState.currentPictureState.save()
     }
   }
 
   async saveAs() {
-    if (this.currentPicture) {
-      await new PictureSave(this.currentPicture).saveAs()
+    if (appState.currentPictureState) {
+      appState.currentPictureState.saveAs()
     }
   }
 
   async open() {
-    const picture = await PictureSave.open()
-    if (picture) {
-      appState.pictures.push(picture)
-      appState.currentPictureIndex = appState.pictures.length - 1
-    }
+    appState.openPicture()
   }
 
   async close() {
-    if (this.currentPicture) {
-      appState.closePicture(appState.currentPictureIndex)
-    }
+    appState.closePicture(appState.currentPictureIndex)
   }
 
   @observable isTextInputFocused = false
@@ -131,10 +112,8 @@ class MenuBar {
   }
 
   async export(format: "png"|"jpeg"|"bmp") {
-    if (this.currentPicture) {
-      const pictureExport = new PictureExport(this.currentPicture)
-      await pictureExport.showExportDialog(format)
-      pictureExport.dispose()
+    if (appState.currentPictureState) {
+      appState.currentPictureState.export(format)
     }
   }
   exportPng() {
@@ -148,18 +127,18 @@ class MenuBar {
   }
 
   zoomIn() {
-    if (appState.currentPicture) {
-      appState.currentPicture.navigation.zoomIn()
+    if (appState.currentPictureState) {
+      appState.currentPictureState.picture.navigation.zoomIn()
     }
   }
   zoomOut() {
-    if (appState.currentPicture) {
-      appState.currentPicture.navigation.zoomOut()
+    if (appState.currentPictureState) {
+      appState.currentPictureState.picture.navigation.zoomOut()
     }
   }
   resetZoom() {
-    if (appState.currentPicture) {
-      appState.currentPicture.navigation.scale = 1
+    if (appState.currentPictureState) {
+      appState.currentPictureState.picture.navigation.scale = 1
     }
   }
 
