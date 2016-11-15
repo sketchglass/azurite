@@ -65,7 +65,7 @@ class AppState {
       const result = dialog.showMessageBox(remote.getCurrentWindow(), {
         buttons: ["Save", "Cancel", "Don't Save"],
         defaultId: 0,
-        message: `Do you want to save changes of ${picture.fileName}?`,
+        message: `Do you want to save changes to ${picture.fileName}?`,
         detail: "Your changes will be lost without saving.",
         cancelId: 1,
       })
