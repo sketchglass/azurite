@@ -62,17 +62,17 @@ class AppState {
   async closePicture(index: number) {
     const picture = appState.pictures[index]
     if (picture.edited) {
-      const result = dialog.showMessageBox(remote.getCurrentWindow(), {
+      const resultIndex = dialog.showMessageBox(remote.getCurrentWindow(), {
         buttons: ["Save", "Cancel", "Don't Save"],
         defaultId: 0,
         message: `Do you want to save changes to ${picture.fileName}?`,
         detail: "Your changes will be lost without saving.",
         cancelId: 1,
       })
-      if (result == 1) {
+      if (resultIndex == 1) {
         return false
       }
-      if (result == 0) {
+      if (resultIndex == 0) {
         const saved = await new PictureSave(picture).save()
         if (!saved) {
           return false
