@@ -3,7 +3,6 @@ import {Vec2, Rect, Transform} from "paintvec"
 import {Model, RectShape, TextureShader, CanvasDrawTarget, Color} from "paintgl"
 import {context, canvas} from "../GLContext"
 import Picture from "../models/Picture"
-import Navigation from "../models/Navigation"
 
 export default
 class Renderer {

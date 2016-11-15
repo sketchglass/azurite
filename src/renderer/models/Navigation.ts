@@ -1,10 +1,10 @@
 import {Vec2} from "paintvec"
+import {observable} from "mobx"
 
-interface Navigation {
-  translation: Vec2
-  scale: number
-  rotation: number
-  horizontalFlip: boolean
+export
+class Navigation {
+  @observable translation = new Vec2(0)
+  @observable scale = 1
+  @observable rotation = 0
+  @observable horizontalFlip = false
 }
-
-export default Navigation

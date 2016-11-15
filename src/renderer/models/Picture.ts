@@ -7,7 +7,7 @@ import {GroupLayerContent, ImageLayerContent} from "./LayerContent"
 import ThumbnailGenerator from "./ThumbnailGenerator"
 import LayerBlender from "./LayerBlender"
 import {UndoStack} from "./UndoStack"
-import Navigation from "./Navigation"
+import {Navigation} from "./Navigation"
 import PictureParams from "./PictureParams"
 import {frameDebounce} from "../../lib/Debounce"
 
@@ -30,12 +30,7 @@ class Picture {
   readonly selectedLayers = observable<Layer>([])
   readonly layerBlender = new LayerBlender(this)
   readonly undoStack = new UndoStack()
-  readonly navigation = observable({
-    translation: new Vec2(0),
-    scale: 1,
-    rotation: 0,
-    horizontalFlip: false
-  })
+  readonly navigation = new Navigation()
   @observable lastUpdate: PictureUpdate = {}
   @observable filePath = ""
   @observable edited = false
