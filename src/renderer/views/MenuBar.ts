@@ -68,6 +68,12 @@ class MenuBar {
     }
   }
 
+  async close() {
+    if (this.currentPicture) {
+      appState.closePicture(appState.currentPictureIndex)
+    }
+  }
+
   @observable isTextInputFocused = false
 
   @computed get canUndo() {
@@ -200,6 +206,14 @@ class MenuBar {
               click: () => this.exportBmp(),
             },
           ],
+        },
+        {
+          type: "separator",
+        },
+        {
+          label: "Close",
+          accelerator: "CmdOrCtrl+W",
+          click: () => this.close(),
         },
       ],
     }
