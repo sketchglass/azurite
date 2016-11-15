@@ -8,7 +8,6 @@ import {appState} from "../state/AppState"
 import Picture from "../models/Picture"
 import {PictureExportFormat} from "../services/PictureExport"
 import {isTextInput} from "./util"
-import {PictureSave} from "../services/PictureSave"
 
 class MenuBar {
   constructor() {

@@ -1,6 +1,5 @@
 import {observable, computed, reaction} from "mobx"
 import {remote} from "electron"
-const {dialog} = remote
 import Picture from "../models/Picture"
 import Tool from "../tools/Tool"
 import BrushTool from "../tools/BrushTool"
@@ -10,7 +9,6 @@ import {ZoomTool} from "../tools/ZoomTool"
 import RotateTool from "../tools/RotateTool"
 import TransformLayerTool from "../tools/TransformLayerTool"
 import {HSVColor} from "../../lib/Color"
-import {PictureSave} from "../services/PictureSave"
 import {PictureState} from "./PictureState"
 
 export
