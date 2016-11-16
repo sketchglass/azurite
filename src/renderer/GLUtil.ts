@@ -48,7 +48,6 @@ function drawTexture(dst: DrawTarget, src: Texture, params: DrawTextureParams) {
   dst.draw(drawTextureModel)
 }
 
-export
 function verticesEquals(xs: Vec2[], ys: Vec2[]) {
   if (xs.length != ys.length) {
     return false
@@ -132,8 +131,6 @@ const inverseBilinearModel = new Model(context, {
   shader: InverseBilinearTextureShader,
 })
 
-
-export
 function drawTextureInverseBilinear(dst: DrawTarget, src: Texture, opts: {
   srcRect: Rect
   quad: Quad
