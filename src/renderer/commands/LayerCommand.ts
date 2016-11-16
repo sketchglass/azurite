@@ -251,7 +251,7 @@ class ChangeLayerImageCommand implements UndoCommand {
       pixelType: "half-float",
       data
     })
-    content.tiledTexture.drawTexture(texture, {offset: rect.topLeft, blendMode: "src"})
+    content.tiledTexture.drawTexture(texture, {transform: Transform.translate(rect.topLeft), blendMode: "src"})
     texture.dispose()
     content.layer.picture.lastUpdate = {rect, layer}
     content.updateThumbnail()

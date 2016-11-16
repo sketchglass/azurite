@@ -120,10 +120,8 @@ class TiledTexture {
     return cloned
   }
 
-  drawTexture(src: Texture, opts: {offset?: Vec2, transform?: Transform, blendMode: BlendMode}) {
-    const {blendMode} = opts
-    const offset = opts.offset || new Vec2()
-    const transform = (opts.transform || new Transform()).translate(offset)
+  drawTexture(src: Texture, opts: {transform: Transform, blendMode: BlendMode}) {
+    const {blendMode, transform} = opts
     const rect = new Rect(new Vec2(), src.size).transform(transform)
     for (const key of TiledTexture.keysForRect(rect)) {
       tileDrawTarget.texture = this.get(key).texture
