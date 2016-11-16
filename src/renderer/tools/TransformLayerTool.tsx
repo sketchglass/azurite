@@ -35,10 +35,10 @@ class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}
         .divScalar(devicePixelRatio)
     }
 
-    const {topLeft, topRight, bottomLeft, bottomRight} = rect
-    const polygonPoints = [topLeft, topRight, bottomRight, bottomLeft]
-      .map(transformPos)
-      .map(v => `${v.x},${v.y}`).join(" ")
+    const vertices = rect.vertices().map(transformPos)
+
+    const polygonPoints = vertices.map(v => `${v.x},${v.y}`).join(" ")
+    const [topLeft, topRight, bottomRight, bottomLeft] = vertices
     const handlePositions = [
       topLeft,
       topRight,
@@ -48,7 +48,7 @@ class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}
       topRight.add(bottomRight).divScalar(2),
       bottomRight.add(bottomLeft).divScalar(2),
       bottomLeft.add(topLeft).divScalar(2),
-    ].map(transformPos)
+    ]
     return (
       <g>
         <polygon points={polygonPoints} stroke="#888" fill="transparent" />
@@ -199,7 +199,9 @@ class TransformLayerTool extends Tool {
     this.lastRatioHToW = this.rect.width / this.rect.height
     this.lastAdditionalTransform = this.additionalTransform
 
-    const {topLeft, topRight, bottomRight, bottomLeft} = this.rect
+    const [topLeft, topRight, bottomRight, bottomLeft] = this.rect.vertices().map(
+      v => v.transform(this.additionalTransform).transform(this.renderer.transformFromPicture)
+    )
 
     const handlePoints = new Map<DragType, Vec2>([
       [DragType.MoveTopLeft, topLeft],
@@ -213,7 +215,7 @@ class TransformLayerTool extends Tool {
     ])
 
     for (const [dragType, handlePos] of handlePoints) {
-      if (movePos.sub(handlePos).length() <= HANDLE_RADIUS * 1.5 * devicePixelRatio * this.picture.navigation.scale) {
+      if (ev.rendererPos.sub(handlePos).length() <= HANDLE_RADIUS * 1.5 * devicePixelRatio) {
         this.dragType = dragType
         return
       }
