@@ -1,6 +1,6 @@
 import {observable, computed, reaction} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
-import {Model, RectShape, TextureShader, CanvasDrawTarget, Color} from "paintgl"
+import {Model, RectShape, TextureShader, CanvasDrawTarget, Color, TextureFilter} from "paintgl"
 import {context, canvas} from "../GLContext"
 import Picture from "../models/Picture"
 
@@ -94,6 +94,11 @@ class Renderer {
     }
     drawTarget.clear(this.background)
     if (this.picture) {
+      const filter: TextureFilter = this.picture.navigation.scale < 2 ? "bilinear" : "nearest"
+      const texture = this.picture.layerBlender.blendedTexture
+      if (texture.filter != filter) {
+        texture.filter = filter
+      }
       drawTarget.transform = this.transformFromPicture
       drawTarget.draw(this.model)
     }
