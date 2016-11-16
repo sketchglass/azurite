@@ -9,7 +9,7 @@ import TiledTexture, {Tile, TiledTextureRawData} from "../models/TiledTexture"
 import {TileBlender} from "../models/LayerBlender"
 import Waypoint from "../models/Waypoint"
 import Tool, {ToolPointerEvent} from './Tool'
-import {transformTexture} from "../gl/Transformtexture"
+import {drawTexture, drawTextureInverseBilinear} from "../GLUtil"
 import {context} from "../GLContext"
 import {AppState} from "../state/AppState"
 import {frameDebounce} from "../../lib/Debounce"
@@ -397,12 +397,12 @@ class TransformLayerTool extends Tool {
 
   hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) {
     const content = this.currentContent
-    if (this.editing && content && layer == content.layer && this.rect && this.originalTexture) {
+    if (this.editing && content && layer == content.layer && this.originalRect && this.originalTexture) {
       transformedDrawTarget.clear(new Color(0,0,0,0))
-      transformTexture(transformedDrawTarget, this.originalTexture, {
-        srcQuad: this.rect.vertices().map(v => v.transform(this.additionalTransform)) as [Vec2, Vec2, Vec2, Vec2],
-        offset: tileKey.mulScalar(-Tile.width)
-      })
+      const transform = Transform.translate(this.originalRect.topLeft)
+        .merge(this.transform)
+        .translate(tileKey.mulScalar(-Tile.width))
+      drawTexture(transformedDrawTarget, this.originalTexture, {transform, blendMode: "src"})
       const {blendMode, opacity} = layer
       tileBlender.blend(transformedTile, blendMode, opacity)
       return true
