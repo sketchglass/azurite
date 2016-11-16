@@ -45,8 +45,8 @@ function verticesEquals(xs: Vec2[], ys: Vec2[]) {
 class TransformTextureShader extends Shader {
   get fragmentShader() {
     return `
-      precision mediump float;
-      varying highp vec2 vTexCoord;
+      precision highp float;
+      varying vec2 vPosition;
       uniform sampler2D texture;
       uniform vec2 a;
       uniform vec2 b;
@@ -90,8 +90,8 @@ class TransformTextureShader extends Shader {
       }
 
       void main(void) {
-        vec2 uv = invBilinear(p, a, b, c, d);
-        vec4 color = (uv.x > -0.5) ? texture2D(texture, uv) : vec4(0.0);
+        vec2 uv = invBilinear(vPosition, a, b, c, d);
+        mediump vec4 color = (uv.x > -0.5) ? texture2D(texture, uv) : vec4(0.0);
         gl_FragColor = color;
       }
     `
