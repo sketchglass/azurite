@@ -361,10 +361,10 @@ class TransformLayerTool extends Tool {
 
   hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) {
     const content = this.currentContent
-    if (this.editing && content && layer == content.layer && this.originalRect && this.originalTexture) {
+    if (this.editing && content && layer == content.layer && this.rect && this.originalTexture) {
       transformedDrawTarget.clear(new Color(0,0,0,0))
       transformTexture(transformedDrawTarget, this.originalTexture, {
-        srcQuad: this.originalRect.vertices().map(v => v.transform(this.transform)) as [Vec2, Vec2, Vec2, Vec2],
+        srcQuad: this.rect.vertices().map(v => v.transform(this.additionalTransform)) as [Vec2, Vec2, Vec2, Vec2],
         offset: tileKey.mulScalar(-Tile.width)
       })
       const {blendMode, opacity} = layer
