@@ -9,7 +9,7 @@ import TiledTexture, {Tile, TiledTextureRawData} from "../models/TiledTexture"
 import {TileBlender} from "../models/LayerBlender"
 import Waypoint from "../models/Waypoint"
 import Tool, {ToolPointerEvent} from './Tool'
-import {transformTexture} from "../GLUtil"
+import {transformTexture} from "../gl/Transformtexture"
 import {context} from "../GLContext"
 import {AppState} from "../state/AppState"
 import {frameDebounce} from "../../lib/Debounce"
