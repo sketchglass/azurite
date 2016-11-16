@@ -1,6 +1,5 @@
 import {observable, computed, reaction} from "mobx"
 import {remote} from "electron"
-const {dialog} = remote
 import Picture from "../models/Picture"
 import Tool from "../tools/Tool"
 import BrushTool from "../tools/BrushTool"
@@ -10,18 +9,22 @@ import {ZoomTool} from "../tools/ZoomTool"
 import RotateTool from "../tools/RotateTool"
 import TransformLayerTool from "../tools/TransformLayerTool"
 import {HSVColor} from "../../lib/Color"
-import {PictureSave} from "../services/PictureSave"
+import {PictureState} from "./PictureState"
 
 export
 class AppState {
-  readonly pictures = observable<Picture>([])
+  readonly pictureStates = observable<PictureState>([])
   @observable currentPictureIndex = 0
 
-  @computed get currentPicture(): Picture|undefined {
+  @computed get currentPictureState() {
     const i = this.currentPictureIndex
-    if (i < this.pictures.length) {
-      return this.pictures[i]
+    if (i < this.pictureStates.length) {
+      return this.pictureStates[i]
     }
+  }
+
+  @computed get currentPicture() {
+    return this.currentPictureState && this.currentPictureState.picture
   }
 
   readonly tools = observable<Tool>([
@@ -47,49 +50,56 @@ class AppState {
   }
 
   constructor() {
-    reaction(() => [this.currentPicture, this.currentTool], () => {
+    reaction(() => [this.currentPictureState, this.currentTool], () => {
       const hook = this.currentTool.hookLayerBlend.bind(this.currentTool)
-      for (const picture of this.pictures) {
-        if (picture == this.currentPicture) {
-          picture.layerBlender.hook = hook
+      for (const pictureState of this.pictureStates) {
+        if (pictureState == this.currentPictureState) {
+          pictureState.picture.layerBlender.hook = hook
         } else {
-          picture.layerBlender.hook = undefined
+          pictureState.picture.layerBlender.hook = undefined
         }
       }
     })
   }
 
-  async closePicture(index: number) {
-    const picture = appState.pictures[index]
-    if (picture.edited) {
-      const resultIndex = dialog.showMessageBox(remote.getCurrentWindow(), {
-        buttons: ["Save", "Cancel", "Don't Save"],
-        defaultId: 0,
-        message: `Do you want to save changes to ${picture.fileName}?`,
-        detail: "Your changes will be lost without saving.",
-        cancelId: 1,
-      })
-      if (resultIndex == 1) {
-        return false
-      }
-      if (resultIndex == 0) {
-        const saved = await new PictureSave(picture).save()
-        if (!saved) {
-          return false
-        }
-      }
+  addPictureState(pictureState: PictureState) {
+    this.pictureStates.push(pictureState)
+    this.currentPictureIndex = this.pictureStates.length - 1
+  }
+
+  async newPicture() {
+    const pictureState = await PictureState.new()
+    if (pictureState) {
+      this.addPictureState(pictureState)
     }
-    appState.pictures.splice(index, 1)
-    picture.dispose()
-    if (this.pictures.length <= this.currentPictureIndex) {
-      this.currentPictureIndex = this.pictures.length - 1
+  }
+
+  async openPicture() {
+    const pictureState = await PictureState.open()
+    if (pictureState) {
+      this.addPictureState(pictureState)
+    }
+  }
+
+  async closePicture(index: number) {
+    if (this.pictureStates.length <= index) {
+      return
+    }
+    const pictureState = this.pictureStates[index]
+    if (!pictureState.confirmClose()) {
+      return
+    }
+    this.pictureStates.splice(index, 1)
+    pictureState.dispose()
+    if (this.pictureStates.length <= this.currentPictureIndex) {
+      this.currentPictureIndex = this.pictureStates.length - 1
     }
     return true
   }
 
   async closePictures() {
-    for (let i = this.pictures.length - 1; i >= 0; --i) {
-      if (!await this.closePicture(i)) {
+    for (const pictureState of this.pictureStates) {
+      if (!await pictureState.confirmClose()) {
         return false
       }
     }

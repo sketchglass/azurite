@@ -5,12 +5,9 @@ type BrowserWindow = Electron.BrowserWindow
 type MenuItemOptions = Electron.MenuItemOptions
 import {observable, computed, autorun} from "mobx"
 import {appState} from "../state/AppState"
+import {undoState} from "../state/UndoState"
 import Picture from "../models/Picture"
-import PictureParams from "../models/PictureParams"
-import PictureExport from "../services/PictureExport"
-import {isTextInput} from "./util"
-import {Dialog} from "./Dialog"
-import {PictureSave} from "../services/PictureSave"
+import {PictureExportFormat} from "../services/PictureExport"
 
 class MenuBar {
   constructor() {
@@ -18,123 +15,35 @@ class MenuBar {
       const menu = Menu.buildFromTemplate(this.render())
       Menu.setApplicationMenu(menu)
     })
-    window.addEventListener("focus", e => {
-      this.isTextInputFocused = isTextInput(document.activeElement)
-    }, true)
   }
 
-  @computed get currentPicture() {
-    const {modal, currentPicture} = appState
-    if (!modal) {
-      return currentPicture
-    }
-  }
-  @computed get undoStack() {
-    const {modal, modalUndoStack, currentPicture} = appState
-    if (modal) {
-      return modalUndoStack
-    }
-    if (currentPicture) {
-      return currentPicture.undoStack
-    }
-  }
-
-  async newPicture() {
-    const dialog = new Dialog<PictureParams>("newPicture")
-    const params = await dialog.open()
-    if (params) {
-      appState.pictures.push(new Picture(params))
-      appState.currentPictureIndex = appState.pictures.length - 1
-    }
+  newPicture() {
+    appState.newPicture()
   }
 
   async save() {
-    if (this.currentPicture) {
-      await new PictureSave(this.currentPicture).save()
+    if (appState.currentPictureState) {
+      appState.currentPictureState.save()
     }
   }
 
   async saveAs() {
-    if (this.currentPicture) {
-      await new PictureSave(this.currentPicture).saveAs()
+    if (appState.currentPictureState) {
+      appState.currentPictureState.saveAs()
     }
   }
 
   async open() {
-    const picture = await PictureSave.open()
-    if (picture) {
-      appState.pictures.push(picture)
-      appState.currentPictureIndex = appState.pictures.length - 1
-    }
+    appState.openPicture()
   }
 
   async close() {
-    if (this.currentPicture) {
-      appState.closePicture(appState.currentPictureIndex)
-    }
+    appState.closePicture(appState.currentPictureIndex)
   }
 
-  @observable isTextInputFocused = false
-
-  @computed get canUndo() {
-    if (this.isTextInputFocused) {
-      return true
-    } else if (this.undoStack) {
-      return this.undoStack.isUndoable
-    }
-    return false
-  }
-
-  @computed get canRedo() {
-    if (this.isTextInputFocused) {
-      return true
-    } else if (this.undoStack) {
-      return this.undoStack.isRedoable
-    }
-    return false
-  }
-
-  @computed get undoName() {
-    if (this.undoStack) {
-      const {undoCommand} = this.undoStack
-      if (undoCommand) {
-        return undoCommand.title
-      }
-    }
-    return ""
-  }
-
-  @computed get redoName() {
-    if (this.undoStack) {
-      const {redoCommand} = this.undoStack
-      if (redoCommand) {
-        return redoCommand.title
-      }
-    }
-    return ""
-  }
-
-  undo() {
-    if (this.isTextInputFocused) {
-      remote.getCurrentWebContents().undo()
-    } else if (this.undoStack) {
-      this.undoStack.undo()
-    }
-  }
-
-  redo() {
-    if (this.isTextInputFocused) {
-      remote.getCurrentWebContents().redo()
-    } else if (this.undoStack) {
-      this.undoStack.redo()
-    }
-  }
-
-  async export(format: "png"|"jpeg"|"bmp") {
-    if (this.currentPicture) {
-      const pictureExport = new PictureExport(this.currentPicture)
-      await pictureExport.showExportDialog(format)
-      pictureExport.dispose()
+  async export(format: PictureExportFormat) {
+    if (appState.currentPictureState) {
+      appState.currentPictureState.export(format)
     }
   }
   exportPng() {
@@ -148,18 +57,18 @@ class MenuBar {
   }
 
   zoomIn() {
-    if (appState.currentPicture) {
-      appState.currentPicture.navigation.zoomIn()
+    if (appState.currentPictureState) {
+      appState.currentPictureState.picture.navigation.zoomIn()
     }
   }
   zoomOut() {
-    if (appState.currentPicture) {
-      appState.currentPicture.navigation.zoomOut()
+    if (appState.currentPictureState) {
+      appState.currentPictureState.picture.navigation.zoomOut()
     }
   }
   resetZoom() {
-    if (appState.currentPicture) {
-      appState.currentPicture.navigation.scale = 1
+    if (appState.currentPictureState) {
+      appState.currentPictureState.picture.navigation.scale = 1
     }
   }
 
@@ -222,16 +131,16 @@ class MenuBar {
       label: 'Edit',
       submenu: [
         {
-          label: `Undo ${this.undoName}`,
-          enabled: this.canUndo,
-          click: this.undo.bind(this),
-          accelerator: "CmdOrCtrl+Z"
+          label: `Undo ${undoState.undoName}`,
+          accelerator: "CmdOrCtrl+Z",
+          enabled: undoState.canUndo,
+          click: () => undoState.undo(),
         },
         {
-          label: `Redo ${this.redoName}`,
-          enabled: this.canRedo,
+          label: `Redo ${undoState.redoName}`,
           accelerator: process.platform === 'darwin' ? 'Shift+Command+Z' : 'Ctrl+Y',
-          click: this.redo.bind(this)
+          enabled: undoState.canRedo,
+          click: () => undoState.redo(),
         },
         {
           type: 'separator'

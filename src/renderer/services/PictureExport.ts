@@ -20,16 +20,17 @@ async function blobToBuffer(blob: Blob) {
   })
 }
 
-type Format = "png"|"jpeg"|"bmp"
+export
+type PictureExportFormat = "png"|"jpeg"|"bmp"
 
-export default
+export
 class PictureExport {
   textureToCanvas = new TextureToCanvas(this.picture.size)
 
   constructor(public picture: Picture) {
   }
 
-  async showExportDialog(format: Format) {
+  async showExportDialog(format: PictureExportFormat) {
     const filter = (() => {
       switch (format) {
         default:
@@ -52,7 +53,7 @@ class PictureExport {
     }
   }
 
-  async export(fileName: string, format: Format) {
+  async export(fileName: string, format: PictureExportFormat) {
     this.textureToCanvas.loadTexture(this.picture.layerBlender.blendedTexture, new Vec2(0))
     this.textureToCanvas.updateCanvas()
     const blob = await this.getBlob(`image/${format}`)
