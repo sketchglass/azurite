@@ -20,15 +20,15 @@ const PictureTab = observer((props: {picture: Picture, current: boolean, onClick
 
 export
 const PictureTabBar = observer(() => {
-  const {pictures, currentPictureIndex} = appState
+  const {pictureStates, currentPictureIndex} = appState
   return (
     <div className="PictureTabBar">
       {
-        pictures.map((p, i) => {
+        pictureStates.map((p, i) => {
           const onClick = () => appState.currentPictureIndex = i
           const onClose = () => appState.closePicture(i)
           const current = i == currentPictureIndex
-          return <PictureTab key={i} picture={p} current={current} onClick={onClick} onClose={onClose}/>
+          return <PictureTab key={i} picture={p.picture} current={current} onClick={onClick} onClose={onClose}/>
         })
       }
       <div className="PictureTabFill"></div>
