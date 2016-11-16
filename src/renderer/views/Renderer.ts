@@ -18,6 +18,10 @@ class Renderer {
   disposers: (() => void)[] = []
   background = new Color(46/255, 48/255, 56/255, 1)
 
+  @computed get logicalSize() {
+    return this.size.mulScalar(window.devicePixelRatio)
+  }
+
   @computed get pictureSize() {
     if (this.picture) {
       return this.picture.size
@@ -44,6 +48,10 @@ class Renderer {
       .merge(Transform.translate(viewportCenter))
   }
 
+  @computed get transformToLogicalPixels() {
+    return this.transformFromPicture.scale(new Vec2(window.devicePixelRatio))
+  }
+
   @computed get transformToPicture() {
     return this.transformFromPicture.invert()!
   }
@@ -67,7 +75,7 @@ class Renderer {
       reaction(() => this.lastBlend, blend => {
         this.render(blend && blend.rect)
       }),
-      reaction(() => this.size, size => {
+      reaction(() => this.logicalSize, size => {
         canvas.width = size.width
         canvas.height = size.height
       }),
@@ -90,11 +98,11 @@ class Renderer {
   render(rectInPicture?: Rect) {
     const drawTarget = new CanvasDrawTarget(context)
     if (rectInPicture) {
-      drawTarget.scissor = rectInPicture.transform(this.transformFromPicture)
+      drawTarget.scissor = rectInPicture.transform(this.transformToLogicalPixels)
     }
     drawTarget.clear(this.background)
     if (this.picture) {
-      drawTarget.transform = this.transformFromPicture
+      drawTarget.transform = this.transformToLogicalPixels
       drawTarget.draw(this.model)
     }
   }

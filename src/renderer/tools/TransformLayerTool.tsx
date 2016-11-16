@@ -32,7 +32,6 @@ class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}
       return pos
         .transform(tool.transform)
         .transform(tool.renderer.transformFromPicture)
-        .divScalar(devicePixelRatio)
     }
 
     const vertices = originalRect.vertices().map(transformPos)
@@ -221,7 +220,7 @@ class TransformLayerTool extends Tool {
     ])
 
     for (const [dragType, handlePos] of handlePoints) {
-      if (ev.rendererPos.sub(handlePos).length() <= HANDLE_RADIUS * 1.5 * devicePixelRatio) {
+      if (ev.rendererPos.sub(handlePos).length() <= HANDLE_RADIUS * 1.5) {
         this.dragType = dragType
         return
       }
