@@ -110,19 +110,32 @@ const transformTextureModel = new Model(context, {
   shader: TransformTextureShader,
 })
 
+type Quad = [Vec2, Vec2, Vec2, Vec2]
+
 export
 function transformTexture(dst: DrawTarget, src: Texture, opts: {
-  srcQuad: [Vec2, Vec2, Vec2, Vec2],
+  srcQuad: Quad,
   offset: Vec2
 }) {
   const {srcQuad, offset} = opts
-  if (!verticesEquals(transformTextureShape.positions, srcQuad)) {
-    transformTextureShape.positions = srcQuad
+
+  // normalize quad to reduce errors in invBilinear as possible
+  const [normalizedQuad, transformToOriginal] = normalizeQuad(srcQuad)
+  if (!verticesEquals(transformTextureShape.positions, normalizedQuad)) {
+    transformTextureShape.positions = normalizedQuad
   }
-  transformTextureModel.transform = Transform.translate(offset)
-  const [a, b, c, d] = srcQuad
+  transformTextureModel.transform = transformToOriginal.translate(offset)
+  const [a, b, c, d] = normalizedQuad
   transformTextureModel.uniforms = {
     texture: src, a, b, c, d
   }
   dst.draw(transformTextureModel)
+}
+
+function normalizeQuad(quad: Quad): [Quad, Transform] {
+  const rect = Rect.fromQuad(quad)
+  const transformToOriginal = Transform.scale(rect.size).translate(rect.center)
+  const transformToNormalized = transformToOriginal.invert() || new Transform()
+  const retQuad = quad.map(q => q.transform(transformToNormalized)) as [Vec2, Vec2, Vec2, Vec2]
+  return [retQuad, transformToOriginal]
 }
