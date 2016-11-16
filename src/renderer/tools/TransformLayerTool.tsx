@@ -22,20 +22,20 @@ const HANDLE_RADIUS = 4
 class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}, {}> {
   render() {
     const {tool} = this.props
-    const {rect} = tool
+    const {originalRect} = tool
 
-    if (!rect) {
+    if (!originalRect) {
       return <g />
     }
 
     const transformPos = (pos: Vec2) => {
       return pos
-        .transform(tool.additionalTransform)
+        .transform(tool.transform)
         .transform(tool.renderer.transformFromPicture)
         .divScalar(devicePixelRatio)
     }
 
-    const vertices = rect.vertices().map(transformPos)
+    const vertices = originalRect.vertices().map(transformPos)
 
     const polygonPoints = vertices.map(v => `${v.x},${v.y}`).join(" ")
     const [topLeft, topRight, bottomRight, bottomLeft] = vertices
@@ -118,11 +118,13 @@ class TransformLayerTool extends Tool {
   startAdditionalTransformPos = new Vec2()
   originalRect: Rect|undefined
   originalTexture: Texture|undefined
+  lastTranslation = new Vec2()
   lastRect: Rect|undefined
   lastQuad: [Vec2, Vec2, Vec2, Vec2]|undefined
   lastRatioWToH = 1
   lastRatioHToW = 1
   lastAdditionalTransform = new Transform()
+  @observable translation = new Vec2()
   @observable rect: Rect|undefined
   @observable additionalTransform = new Transform()
 
@@ -158,6 +160,7 @@ class TransformLayerTool extends Tool {
         }
         this.originalTexture = undefined
       }
+      this.lastTranslation = this.translation = new Vec2()
       this.lastRect = this.rect = this.originalRect
       this.lastAdditionalTransform = this.additionalTransform = new Transform()
     }
@@ -172,7 +175,7 @@ class TransformLayerTool extends Tool {
       return new Transform()
     }
     const rectToRect = Transform.rectToRect(this.originalRect, this.rect) || new Transform()
-    return rectToRect.merge(this.additionalTransform)
+    return rectToRect.merge(this.additionalTransform).translate(this.translation)
   }
 
   @computed get currentContent() {
@@ -193,6 +196,7 @@ class TransformLayerTool extends Tool {
     const movePos = this.startMovePos = ev.picturePos.transform(this.additionalTransformInv).round()
     this.startAdditionalTransformPos = ev.picturePos
 
+    this.lastTranslation = this.translation
     this.lastRect = this.rect
     this.lastQuad = this.rect.vertices().map(v => v.transform(this.additionalTransform)) as [Vec2, Vec2, Vec2, Vec2]
     this.lastRatioWToH = this.rect.height / this.rect.width
@@ -241,9 +245,11 @@ class TransformLayerTool extends Tool {
     switch (this.dragType) {
       case DragType.None:
         return
-      case DragType.Translate:
-        this.translateRect(offset)
+      case DragType.Translate: {
+        const translateOffset = additionalTransformPos.round().sub(this.startAdditionalTransformPos.round())
+        this.translation = this.lastTranslation.add(translateOffset)
         break
+      }
       case DragType.MoveTopLeft:
         if (perspective) {
           this.resizeQuad(0, additionalTransformPos)
@@ -299,14 +305,6 @@ class TransformLayerTool extends Tool {
       }
     }
     this.update()
-  }
-
-  translateRect(offset: Vec2) {
-    if (!this.lastRect) {
-      return
-    }
-    const topLeft = this.lastRect.topLeft.add(offset)
-    this.rect = new Rect(topLeft, topLeft.add(this.lastRect.size))
   }
 
   resizeRect(diffWidth: number|undefined, diffHeight: number|undefined, origin: Vec2, keepRatio: boolean) {
