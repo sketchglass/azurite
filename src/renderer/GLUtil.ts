@@ -74,6 +74,12 @@ class TransformTextureShader extends Shader {
 
           w = sqrt( w );
 
+          if (abs(k2) < 0.001) {
+            float v = -k0/k1;
+            float u = (h.x - f.x*v)/(e.x + g.x*v);
+            return vec2(u, v);
+          }
+
           float v1 = (-k1 - w)/(2.0*k2);
           float v2 = (-k1 + w)/(2.0*k2);
           float u1 = (h.x - f.x*v1)/(e.x + g.x*v1);
