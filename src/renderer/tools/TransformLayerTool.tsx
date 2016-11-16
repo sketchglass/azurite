@@ -264,7 +264,7 @@ class TransformLayerTool extends Tool {
         break
       case DragType.MoveBottomRight:
         if (perspective) {
-          this.resizeQuad(3, additionalTransformPos)
+          this.resizeQuad(2, additionalTransformPos)
         } else {
           this.resizeRect(offset.x, offset.y, new Vec2(1, 1), keepRatio)
         }
@@ -274,7 +274,7 @@ class TransformLayerTool extends Tool {
         break
       case DragType.MoveBottomLeft:
         if (perspective) {
-          this.resizeQuad(2, additionalTransformPos)
+          this.resizeQuad(3, additionalTransformPos)
         } else {
           this.resizeRect(-offset.x, offset.y, new Vec2(0, 1), keepRatio)
         }
