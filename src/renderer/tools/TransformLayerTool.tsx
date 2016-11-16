@@ -9,7 +9,7 @@ import TiledTexture, {Tile, TiledTextureRawData} from "../models/TiledTexture"
 import {TileBlender} from "../models/LayerBlender"
 import Waypoint from "../models/Waypoint"
 import Tool, {ToolPointerEvent} from './Tool'
-import {drawTexture} from "../GLUtil"
+import {transformTexture} from "../GLUtil"
 import {context} from "../GLContext"
 import {AppState} from "../state/AppState"
 import {frameDebounce} from "../../lib/Debounce"
@@ -363,10 +363,10 @@ class TransformLayerTool extends Tool {
     const content = this.currentContent
     if (this.editing && content && layer == content.layer && this.originalRect && this.originalTexture) {
       transformedDrawTarget.clear(new Color(0,0,0,0))
-      const transform = Transform.translate(this.originalRect.topLeft)
-        .merge(this.transform)
-        .translate(tileKey.mulScalar(-Tile.width))
-      drawTexture(transformedDrawTarget, this.originalTexture, {transform, blendMode: "src"})
+      transformTexture(transformedDrawTarget, this.originalTexture, {
+        srcQuad: this.originalRect.vertices().map(v => v.transform(this.transform)) as [Vec2, Vec2, Vec2, Vec2],
+        offset: tileKey.mulScalar(-Tile.width)
+      })
       const {blendMode, opacity} = layer
       tileBlender.blend(transformedTile, blendMode, opacity)
       return true
