@@ -226,7 +226,7 @@ class TransformLayerTool extends Tool {
         return
       }
     }
-    if (this.rect.includes(rectPos)) {
+    if (normalizeFlippedRect(this.rect).includes(rectPos)) {
       this.dragType = DragType.Translate
     } else {
       this.dragType = DragType.Rotate
@@ -424,3 +424,11 @@ class TransformLayerTool extends Tool {
   }
 }
 
+function normalizeFlippedRect(rect: Rect) {
+  const {left, right, top, bottom} = rect
+  const trueLeft = Math.min(left, right)
+  const trueRight = Math.max(left, right)
+  const trueTop = Math.min(top, bottom)
+  const trueBottom = Math.max(top, bottom)
+  return new Rect(new Vec2(trueLeft, trueTop), new Vec2(trueRight, trueBottom))
+}
