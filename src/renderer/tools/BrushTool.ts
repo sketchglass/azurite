@@ -93,7 +93,7 @@ class BrushTool extends BaseBrushTool {
 
     const relIndices = [
       0, 1, 2,
-      1, 2, 3
+      2, 3, 0
     ]
 
     const positions: Vec2[] = []

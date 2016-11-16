@@ -1,11 +1,11 @@
-import {Rect, Transform} from "paintvec"
+import {Vec2, Rect, Transform} from "paintvec"
 import {Texture} from "paintgl"
 import {IObservableArray} from "mobx"
 import {UndoCommand} from "../models/UndoStack"
 import Picture from "../models/Picture"
 import Layer, {LayerBlendMode} from "../models/Layer"
 import {ImageLayerContent, GroupLayerContent} from "../models/LayerContent"
-import TiledTexture from "../models/TiledTexture"
+import TiledTexture, {Tile} from "../models/TiledTexture"
 import {context} from "../GLContext"
 
 function getSiblingsAndIndex(picture: Picture, path: number[]): [IObservableArray<Layer>, number] {
@@ -251,7 +251,7 @@ class ChangeLayerImageCommand implements UndoCommand {
       pixelType: "half-float",
       data
     })
-    content.tiledTexture.drawTexture(texture, {offset: rect.topLeft, blendMode: "src"})
+    content.tiledTexture.drawTexture(texture, {transform: Transform.translate(rect.topLeft), blendMode: "src"})
     texture.dispose()
     content.layer.picture.lastUpdate = {rect, layer}
     content.updateThumbnail()
@@ -270,7 +270,7 @@ class TransformLayerCommand implements UndoCommand {
   title = "Transform Layer"
   oldTiledTexture: TiledTexture|undefined
 
-  constructor(public picture: Picture, public path: number[], public transform: Transform) {
+  constructor(public picture: Picture, public path: number[], public sourceTexture: Texture,  public transform: Transform) {
   }
 
   undo() {
@@ -290,7 +290,9 @@ class TransformLayerCommand implements UndoCommand {
       return
     }
     this.oldTiledTexture = content.tiledTexture
-    content.tiledTexture = content.tiledTexture.transform(this.transform)
+    const newTiledTexture = new TiledTexture()
+    newTiledTexture.drawTexture(this.sourceTexture, {transform: this.transform, blendMode: "src"})
+    content.tiledTexture = newTiledTexture
     this.picture.lastUpdate = {layer: content.layer}
   }
 }
