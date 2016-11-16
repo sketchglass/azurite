@@ -380,8 +380,11 @@ class TransformLayerTool extends Tool {
   }
 
   endEditing() {
-    if (this.editing && this.picture && this.currentContent) {
-      const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.transform)
+    if (this.editing && this.picture && this.currentContent && this.originalTexture && this.originalRect) {
+      const command = new TransformLayerCommand(
+        this.picture, this.currentContent.layer.path(),
+        this.originalTexture, Transform.translate(this.originalRect.topLeft).merge(this.transform)
+      )
       this.picture.undoStack.redoAndPush(command)
     }
     this.cancelEditing()
