@@ -58,7 +58,7 @@
     "mobx-react": "^3.5.8",
     "msgpack-lite": "^0.1.26",
     "paintgl": "github:sketchglass/paintgl#196ca5290ec2564df01f2f600bc085e46db2205e",
-    "paintvec": "github:sketchglass/paintvec#90e194d325ad1d1cbc6e88bcf4ae7f227c6045bb",
+    "paintvec": "github:sketchglass/paintvec#69739f8b1235ab72ac82f644bd3a6b24360f61e9",
     "react": "^15.3.2",
     "react-dom": "^15.3.2",
     "react-draggable-tree": "sketchglass/react-draggable-tree#a375224f0b5637ce50459109dbbf345c53901e91",
