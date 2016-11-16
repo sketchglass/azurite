@@ -114,8 +114,9 @@ class TransformLayerTool extends Tool {
   name = "Move"
 
   dragType = DragType.None
-  startMovePos = new Vec2()
-  startAdditionalTransformPos = new Vec2()
+  startRectPos = new Vec2()
+  startQuadPos = new Vec2()
+  startTranslatePos = new Vec2()
   originalRect: Rect|undefined
   originalTexture: Texture|undefined
   lastTranslation = new Vec2()
@@ -166,8 +167,8 @@ class TransformLayerTool extends Tool {
     }
   }
 
-  @computed get additionalTransformInv() {
-    return this.additionalTransform.invert() || new Transform()
+  @computed get transformToRect() {
+    return this.additionalTransform.translate(this.translation).invert() || new Transform()
   }
 
   @computed get transform() {
@@ -186,15 +187,16 @@ class TransformLayerTool extends Tool {
   }
 
   @action start(ev: ToolPointerEvent) {
-    if (!this.rect || !this.picture) {
+    if (!this.rect || !this.picture || !this.originalRect) {
       this.dragType = DragType.None
       return
     }
 
     this.startEditing()
 
-    const movePos = this.startMovePos = ev.picturePos.transform(this.additionalTransformInv).round()
-    this.startAdditionalTransformPos = ev.picturePos
+    const rectPos = this.startRectPos = ev.picturePos.transform(this.transformToRect).round()
+    this.startTranslatePos = ev.picturePos
+    this.startQuadPos = ev.picturePos.sub(this.translation)
 
     this.lastTranslation = this.translation
     this.lastRect = this.rect
@@ -203,8 +205,8 @@ class TransformLayerTool extends Tool {
     this.lastRatioHToW = this.rect.width / this.rect.height
     this.lastAdditionalTransform = this.additionalTransform
 
-    const [topLeft, topRight, bottomRight, bottomLeft] = this.rect.vertices().map(
-      v => v.transform(this.additionalTransform).transform(this.renderer.transformFromPicture)
+    const [topLeft, topRight, bottomRight, bottomLeft] = this.originalRect.vertices().map(
+      v => v.transform(this.transform).transform(this.renderer.transformFromPicture)
     )
 
     const handlePoints = new Map<DragType, Vec2>([
@@ -224,7 +226,7 @@ class TransformLayerTool extends Tool {
         return
       }
     }
-    if (this.rect.includes(movePos)) {
+    if (this.rect.includes(rectPos)) {
       this.dragType = DragType.Translate
     } else {
       this.dragType = DragType.Rotate
@@ -232,12 +234,13 @@ class TransformLayerTool extends Tool {
   }
 
   @action move(ev: ToolPointerEvent) {
-    const movePos = ev.picturePos.transform(this.additionalTransformInv).round()
-    const additionalTransformPos = ev.picturePos
-    const offset = movePos.sub(this.startMovePos)
+    const rectPos = ev.picturePos.transform(this.transformToRect).round()
+    const rectOffset = rectPos.sub(this.startRectPos)
     if (!this.lastRect) {
       return
     }
+    const quadPos = ev.picturePos.sub(this.lastTranslation)
+    const translatePos = ev.picturePos
 
     const keepRatio = ev.shiftKey
     const perspective = ev.ctrlKey || ev.metaKey
@@ -246,54 +249,54 @@ class TransformLayerTool extends Tool {
       case DragType.None:
         return
       case DragType.Translate: {
-        const translateOffset = additionalTransformPos.round().sub(this.startAdditionalTransformPos.round())
+        const translateOffset = translatePos.round().sub(this.startTranslatePos.round())
         this.translation = this.lastTranslation.add(translateOffset)
         break
       }
       case DragType.MoveTopLeft:
         if (perspective) {
-          this.resizeQuad(0, additionalTransformPos)
+          this.resizeQuad(0, quadPos)
         } else {
-          this.resizeRect(-offset.x, -offset.y, new Vec2(0, 0), keepRatio)
+          this.resizeRect(-rectOffset.x, -rectOffset.y, new Vec2(0, 0), keepRatio)
         }
         break
       case DragType.MoveTopCenter:
-        this.resizeRect(undefined, -offset.y, new Vec2(0.5, 0), keepRatio)
+        this.resizeRect(undefined, -rectOffset.y, new Vec2(0.5, 0), keepRatio)
         break
       case DragType.MoveTopRight:
         if (perspective) {
-          this.resizeQuad(1, additionalTransformPos)
+          this.resizeQuad(1, quadPos)
         } else {
-          this.resizeRect(offset.x, -offset.y, new Vec2(1, 0), keepRatio)
+          this.resizeRect(rectOffset.x, -rectOffset.y, new Vec2(1, 0), keepRatio)
         }
         break
       case DragType.MoveCenterRight:
-        this.resizeRect(offset.x, undefined, new Vec2(1, 0.5), keepRatio)
+        this.resizeRect(rectOffset.x, undefined, new Vec2(1, 0.5), keepRatio)
         break
       case DragType.MoveBottomRight:
         if (perspective) {
-          this.resizeQuad(2, additionalTransformPos)
+          this.resizeQuad(2, quadPos)
         } else {
-          this.resizeRect(offset.x, offset.y, new Vec2(1, 1), keepRatio)
+          this.resizeRect(rectOffset.x, rectOffset.y, new Vec2(1, 1), keepRatio)
         }
         break
       case DragType.MoveBottomCenter:
-        this.resizeRect(undefined, offset.y, new Vec2(0.5, 1), keepRatio)
+        this.resizeRect(undefined, rectOffset.y, new Vec2(0.5, 1), keepRatio)
         break
       case DragType.MoveBottomLeft:
         if (perspective) {
-          this.resizeQuad(3, additionalTransformPos)
+          this.resizeQuad(3, quadPos)
         } else {
-          this.resizeRect(-offset.x, offset.y, new Vec2(0, 1), keepRatio)
+          this.resizeRect(-rectOffset.x, rectOffset.y, new Vec2(0, 1), keepRatio)
         }
         break
       case DragType.MoveCenterLeft:
-        this.resizeRect(-offset.x, undefined, new Vec2(0, 0.5), keepRatio)
+        this.resizeRect(-rectOffset.x, undefined, new Vec2(0, 0.5), keepRatio)
         break
       case DragType.Rotate: {
         const center = this.lastRect.center.transform(this.lastAdditionalTransform)
-        const origAngle = this.startAdditionalTransformPos.sub(center).angle()
-        const angle = additionalTransformPos.sub(center).angle()
+        const origAngle = this.startQuadPos.sub(center).angle()
+        const angle = quadPos.sub(center).angle()
         let rotation = angle - origAngle
         if (keepRatio) {
           const deg45 = Math.PI * 0.25
