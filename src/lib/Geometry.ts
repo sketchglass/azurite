@@ -75,28 +75,24 @@ class BilinearTransform {
     if (w<0.0) {
       return
     }
-
     w = Math.sqrt(w)
 
+    let v: number
     if (Math.abs(k2) < 0.0001 * Math.max(size.x, size.y)) {
-      const v = -k0/k1
-      const u = (h.x - f.x*v)/(e.x + g.x*v)
-      return new Vec2(u, v)
+      v = -k0/k1
+    } else {
+      const v1 = (-k1 - w)/(2.0*k2)
+      const v2 = (-k1 + w)/(2.0*k2)
+      if (Math.abs(v1 - 0.5) < Math.abs(v2 - 0.5)) {
+        v = v1
+      } else {
+        v = v2
+      }
     }
 
-    const v1 = (-k1 - w)/(2.0*k2)
-    const v2 = (-k1 + w)/(2.0*k2)
-    const u1 = (h.x - f.x*v1)/(e.x + g.x*v1)
-    const u2 = (h.x - f.x*v2)/(e.x + g.x*v2)
-    const b1 = v1>0.0 && v1<1.0 && u1>0.0 && u1<1.0
-    const b2 = v2>0.0 && v2<1.0 && u2>0.0 && u2<1.0
+    const u = (h.x - f.x*v)/(e.x + g.x*v)
 
-    if(b1 && !b2) {
-      return new Vec2(u1, v1)
-    }
-    if(!b1 &&  b2) {
-      return new Vec2(u2, v2)
-    }
+    return new Vec2(u, v)
   }
 
   transform(p: Vec2) {
