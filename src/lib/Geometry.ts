@@ -1,4 +1,4 @@
-import {Vec2, Rect} from "paintvec"
+import {Vec2} from "paintvec"
 
 export
 class CubicPolynomial {
@@ -52,68 +52,4 @@ export function centripetalCatmullRom(p0: Vec2, p1: Vec2, p2: Vec2, p3: Vec2): [
     nonUniformCatmullRom(p0.x, p1.x, p2.x, p3.x, dt0, dt1, dt2),
     nonUniformCatmullRom(p0.y, p1.y, p2.y, p3.y, dt0, dt1, dt2),
   ]
-}
-
-export
-class BilinearTransform {
-  constructor(public from: Rect, public to: [Vec2, Vec2, Vec2, Vec2]) {
-  }
-
-  inverseBilinear(p: Vec2) {
-    const [a, b, c, d] = this.to
-    const size = Rect.fromQuad(this.to).size
-    const e = b.sub(a)
-    const f = d.sub(a)
-    const g = a.sub(b).add(c).sub(d)
-    const h = p.sub(a)
-
-    const k2 = g.cross(f)
-    const k1 = e.cross(f) + h.cross(g)
-    const k0 = h.cross(e)
-
-    let w = k1*k1 - 4.0*k0*k2
-    if (w<0.0) {
-      return
-    }
-
-    w = Math.sqrt(w)
-
-    if (Math.abs(k2) < 0.0001 * Math.max(size.x, size.y)) {
-      const v = -k0/k1
-      const u = (h.x - f.x*v)/(e.x + g.x*v)
-      return new Vec2(u, v)
-    }
-
-    const v1 = (-k1 - w)/(2.0*k2)
-    const v2 = (-k1 + w)/(2.0*k2)
-    const u1 = (h.x - f.x*v1)/(e.x + g.x*v1)
-    const u2 = (h.x - f.x*v2)/(e.x + g.x*v2)
-    const b1 = v1>0.0 && v1<1.0 && u1>0.0 && u1<1.0
-    const b2 = v2>0.0 && v2<1.0 && u2>0.0 && u2<1.0
-
-    if(b1 && !b2) {
-      return new Vec2(u1, v1)
-    }
-    if(!b1 &&  b2) {
-      return new Vec2(u2, v2)
-    }
-  }
-
-  transform(p: Vec2) {
-    const {left, top, right, bottom} = this.from
-    const s = (p.x - left) / (right - left)
-    const t = (p.y - top) / (bottom - top)
-    const [a, b, c, d] = this.to
-    const ab = a.mix(b, s)
-    const cd = d.mix(c, s)
-    return ab.mix(cd, t)
-  }
-
-  transformBack(p: Vec2) {
-    const uv = this.inverseBilinear(p)
-    if (uv) {
-      const {topLeft, size} = this.from
-      return topLeft.add(size.mul(uv))
-    }
-  }
 }
