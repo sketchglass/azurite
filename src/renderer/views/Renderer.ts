@@ -13,8 +13,8 @@ class BoxShadowShader extends Shader {
     return `
       precision mediump float;
       varying vec2 vPosition;
-      uniform mat3 transformToPicture;
       uniform vec2 pictureSize;
+      uniform float boxShadowRadius;
 
       // This approximates the error function, needed for the gaussian integral
       vec4 erf(vec4 x) {
@@ -32,8 +32,7 @@ class BoxShadowShader extends Shader {
       }
 
       void main(void) {
-        vec2 pos = (transformToPicture * vec3(vPosition, 1.0)).xy;
-        float a = boxShadow(vec2(0.0), pictureSize, pos, ${BOX_SHADOW_RADIUS.toFixed(1)});
+        float a = boxShadow(vec2(boxShadowRadius), pictureSize + boxShadowRadius, vPosition, boxShadowRadius);
         gl_FragColor = vec4(0.0, 0.0, 0.0, a * ${BOX_SHADOW_OPACITY});
       }
     `
@@ -54,11 +53,11 @@ class Renderer {
   disposers: (() => void)[] = []
   background = new Color(46/255, 48/255, 56/255, 1)
 
-  readonly wholeShape = new RectShape(context, {
+  readonly boxShadowShape = new RectShape(context, {
     usage: "static",
   })
   readonly boxShadowModel = new Model(context, {
-    shape: this.wholeShape,
+    shape: this.boxShadowShape,
     shader: BoxShadowShader,
   })
 
@@ -102,8 +101,10 @@ class Renderer {
     this.disposers.push(
       reaction(() => this.picture, picture => {
         if (picture) {
-          this.shape.rect = new Rect(new Vec2(), picture.size)
+          const rect = new Rect(new Vec2(), picture.size)
+          this.shape.rect = rect
           this.model.uniforms = {texture: picture.layerBlender.blendedTexture}
+          this.boxShadowShape.rect = rect.inflate(BOX_SHADOW_RADIUS)
         } else {
           this.model.uniforms = {}
         }
@@ -114,7 +115,6 @@ class Renderer {
       reaction(() => this.size, size => {
         canvas.width = size.width
         canvas.height = size.height
-        this.wholeShape.rect = new Rect(new Vec2(), size)
       }),
       reaction(() => [this.size, this.transformToPicture], () => {
         requestAnimationFrame(() => {
@@ -141,8 +141,9 @@ class Renderer {
     if (this.picture) {
       this.boxShadowModel.uniforms = {
         pictureSize: this.picture.size,
-        transformToPicture: this.transformToPicture,
+        boxShadowRadius: BOX_SHADOW_RADIUS / this.picture.navigation.scale
       }
+      this.boxShadowModel.transform = this.transformFromPicture
       drawTarget.draw(this.boxShadowModel)
 
       const filter: TextureFilter = this.picture.navigation.scale < 2 ? "bilinear" : "nearest"
