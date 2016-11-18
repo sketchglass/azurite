@@ -150,15 +150,16 @@ class TransformLayerTool extends Tool {
     const content = this.currentContent
     if (content && this.active) {
       this.originalRect = content.tiledTexture.boundingRect()
+      if (this.originalTexture) {
+        this.originalTexture.dispose()
+      }
       if (this.originalRect) {
         const texture = this.originalTexture = new Texture(context, {size: this.originalRect.size})
+        texture.filter = "bilinear"
         const drawTarget = new TextureDrawTarget(context, texture)
         content.tiledTexture.drawToDrawTarget(drawTarget, {offset: this.originalRect.topLeft.neg(), blendMode: "src"})
         drawTarget.dispose()
       } else {
-        if (this.originalTexture) {
-          this.originalTexture.dispose()
-        }
         this.originalTexture = undefined
       }
       this.lastTranslation = this.translation = new Vec2()
