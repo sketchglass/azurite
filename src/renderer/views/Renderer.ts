@@ -139,7 +139,6 @@ class Renderer {
     }
     drawTarget.clear(this.background)
     if (this.picture) {
-      console.log(this.picture.size)
       this.boxShadowModel.uniforms = {
         pictureSize: this.picture.size,
         transformToPicture: this.transformToPicture,
