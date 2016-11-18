@@ -406,7 +406,7 @@ class TransformLayerTool extends Tool {
       const transform = Transform.translate(this.originalRect.topLeft)
         .merge(this.transform)
         .translate(tileKey.mulScalar(-Tile.width))
-      drawTexture(transformedDrawTarget, this.originalTexture, {transform, blendMode: "src"})
+      drawTexture(transformedDrawTarget, this.originalTexture, {transform, blendMode: "src", bicubic: true})
       const {blendMode, opacity} = layer
       tileBlender.blend(transformedTile, blendMode, opacity)
       return true

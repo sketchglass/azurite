@@ -78,6 +78,7 @@ interface DrawTextureParams {
   transform?: Transform
   blendMode?: BlendMode
   nonAffine?: "inverse-bilinear" // TODO: "perspective"
+  bicubic?: boolean
 }
 
 type Quad = [Vec2, Vec2, Vec2, Vec2]
@@ -88,10 +89,15 @@ function drawTexture(dst: DrawTarget, src: Texture, params: DrawTextureParams) {
   const srcRect = params.srcRect || new Rect(new Vec2(), size)
   const dstRect = params.dstRect || new Rect(new Vec2(), size)
   const transform = params.transform || new Transform()
+  const {bicubic} = params
+
+  if (bicubic && src.filter != "bilinear") {
+    console.warn("src texture filter must be bilinear")
+  }
 
   if (!transform.isAffine()) {
     const quad = dstRect.vertices().map(v => v.transform(transform)) as Quad
-    drawTextureInverseBilinear(dst, src, {quad, srcRect})
+    drawTextureInverseBilinear(dst, src, {quad, srcRect, bicubic})
     return
   }
 
@@ -106,16 +112,16 @@ function drawTexture(dst: DrawTarget, src: Texture, params: DrawTextureParams) {
   if (!verticesEquals(drawTextureShape.texCoords, texCoords)) {
     drawTextureShape.texCoords = texCoords
   }
-  if (isTransformIntTranslation(transform)) {
-    drawTextureModel.transform = transform
-    drawTextureModel.blendMode = params.blendMode || "src-over"
-    drawTextureModel.uniforms = {texture: src}
-    dst.draw(drawTextureModel)
-  } else {
+  if (bicubic && !isTransformIntTranslation(transform)) {
     drawTextureBicubicModel.transform = transform
     drawTextureBicubicModel.blendMode = params.blendMode || "src-over"
     drawTextureBicubicModel.uniforms = {texture: src, texSize: src.size}
     dst.draw(drawTextureBicubicModel)
+  } else {
+    drawTextureModel.transform = transform
+    drawTextureModel.blendMode = params.blendMode || "src-over"
+    drawTextureModel.uniforms = {texture: src}
+    dst.draw(drawTextureModel)
   }
 }
 
@@ -143,6 +149,7 @@ class InverseBilinearTextureShader extends Shader {
       varying vec2 vPosition;
       uniform sampler2D texture;
       uniform vec2 texSize;
+      uniform float useBicubic;
       uniform vec2 a;
       uniform vec2 b;
       uniform vec2 c;
@@ -197,7 +204,7 @@ class InverseBilinearTextureShader extends Shader {
 
       void main(void) {
         vec2 uv = uvOffset + invBilinear(vPosition, a, b, c, d) * uvSize;
-        mediump vec4 color = (uv.x > -0.5) ? textureBicubic(texture, texSize, uv) : vec4(0.0);
+        mediump vec4 color = (useBicubic == 1.0) ? textureBicubic(texture, texSize, uv) : texture2D(texture, uv);
         gl_FragColor = color;
       }
     `
@@ -213,6 +220,7 @@ const inverseBilinearModel = new Model(context, {
 function drawTextureInverseBilinear(dst: DrawTarget, src: Texture, opts: {
   srcRect: Rect
   quad: Quad
+  bicubic?: boolean
 }) {
   const {quad, srcRect} = opts
   const uvOffset = srcRect.topLeft.div(src.size)
@@ -226,7 +234,10 @@ function drawTextureInverseBilinear(dst: DrawTarget, src: Texture, opts: {
   inverseBilinearModel.transform = transformToOriginal
   const [a, b, c, d] = normalizedQuad
   inverseBilinearModel.uniforms = {
-    texture: src, texSize: src.size, a, b, c, d, uvOffset, uvSize
+    texture: src,
+    texSize: src.size,
+    useBicubic: opts.bicubic ? 1 : 0,
+    a, b, c, d, uvOffset, uvSize
   }
   dst.draw(inverseBilinearModel)
 }
