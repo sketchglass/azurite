@@ -91,7 +91,7 @@ function drawTexture(dst: DrawTarget, src: Texture, params: DrawTextureParams) {
   const transform = params.transform || new Transform()
   const {bicubic} = params
 
-  if (bicubic && src.filter != "bilinear") {
+  if (bicubic && src.filter != "bilinear" && src.filter != "mipmap-bilinear") {
     console.warn("src texture filter must be bilinear")
   }
 
