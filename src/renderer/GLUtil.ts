@@ -15,7 +15,7 @@ const textureBicubic = `
     return vec4(x, y, z, w) * (1.0/6.0);
   }
 
-  vec4 textureBicubic(sampler2D sampler, vec2 texSize, vec2 texCoords) {
+  mediump vec4 textureBicubic(sampler2D sampler, vec2 texSize, vec2 texCoords) {
     vec2 invTexSize = 1.0 / texSize;
     texCoords = texCoords * texSize - 0.5;
 
@@ -37,8 +37,8 @@ const textureBicubic = `
     mediump vec4 sample2 = texture2D(sampler, offset.xw);
     mediump vec4 sample3 = texture2D(sampler, offset.yw);
 
-    mediump float sx = s.x / (s.x + s.y);
-    mediump float sy = s.z / (s.z + s.w);
+    float sx = s.x / (s.x + s.y);
+    float sy = s.z / (s.z + s.w);
 
     return mix(
       mix(sample3, sample2, sx), mix(sample1, sample0, sx)
