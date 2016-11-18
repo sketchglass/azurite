@@ -8,12 +8,22 @@ const BOX_SHADOW_RADIUS = 4
 const BOX_SHADOW_OPACITY = 0.5
 
 class BoxShadowShader extends Shader {
+  get additionalVertexShader() {
+    return `
+      varying mediump vec2 vPicturePos;
+      uniform mat3 transformToPicture;
+
+      void paintgl_additional() {
+        vPicturePos = (transformToPicture * vec3(aPosition, 1.0)).xy;
+      }
+    `
+  }
+
   // http://madebyevan.com/shaders/fast-rounded-rectangle-shadows/
   get fragmentShader() {
     return `
       precision mediump float;
-      varying vec2 vPosition;
-      uniform mat3 transformToPicture;
+      varying vec2 vPicturePos;
       uniform vec2 pictureSize;
 
       // This approximates the error function, needed for the gaussian integral
@@ -32,8 +42,7 @@ class BoxShadowShader extends Shader {
       }
 
       void main(void) {
-        vec2 pos = (transformToPicture * vec3(vPosition, 1.0)).xy;
-        float a = boxShadow(vec2(0.0), pictureSize, pos, ${BOX_SHADOW_RADIUS.toFixed(1)});
+        float a = boxShadow(vec2(0.0), pictureSize, vPicturePos, ${BOX_SHADOW_RADIUS.toFixed(1)});
         gl_FragColor = vec4(0.0, 0.0, 0.0, a * ${BOX_SHADOW_OPACITY});
       }
     `
