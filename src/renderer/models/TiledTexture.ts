@@ -120,15 +120,16 @@ class TiledTexture {
     return cloned
   }
 
-  drawTexture(src: Texture, opts: {transform: Transform, blendMode: BlendMode, bicubic?: boolean}) {
-    const {blendMode, transform, bicubic} = opts
+  drawTexture(src: Texture, opts: {transform: Transform, blendMode: BlendMode, bicubic?: boolean, srcRect?: Rect}) {
+    const {blendMode, transform, bicubic, srcRect} = opts
     const rect = new Rect(new Vec2(), src.size).transform(transform)
     for (const key of TiledTexture.keysForRect(rect)) {
       tileDrawTarget.texture = this.get(key).texture
       drawTexture(tileDrawTarget, src, {
         transform: transform.translate(key.mulScalar(-Tile.width)),
         blendMode,
-        bicubic
+        bicubic,
+        srcRect
       })
     }
   }

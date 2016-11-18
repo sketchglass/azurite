@@ -270,7 +270,7 @@ class TransformLayerCommand implements UndoCommand {
   title = "Transform Layer"
   oldTiledTexture: TiledTexture|undefined
 
-  constructor(public picture: Picture, public path: number[], public sourceTexture: Texture,  public transform: Transform) {
+  constructor(public picture: Picture, public path: number[], public sourceTexture: Texture, public sourceTextureSubrect: Rect,  public transform: Transform) {
   }
 
   undo() {
@@ -291,7 +291,7 @@ class TransformLayerCommand implements UndoCommand {
     }
     this.oldTiledTexture = content.tiledTexture
     const newTiledTexture = new TiledTexture()
-    newTiledTexture.drawTexture(this.sourceTexture, {transform: this.transform, blendMode: "src", bicubic: true})
+    newTiledTexture.drawTexture(this.sourceTexture, {transform: this.transform, blendMode: "src", bicubic: true, srcRect: this.sourceTextureSubrect})
     content.tiledTexture = newTiledTexture
     this.picture.lastUpdate = {layer: content.layer}
   }

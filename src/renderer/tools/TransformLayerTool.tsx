@@ -119,6 +119,7 @@ class TransformLayerTool extends Tool {
   startTranslatePos = new Vec2()
   originalRect: Rect|undefined
   originalTexture: Texture|undefined
+  originalTextureSubrect = new Rect()
   lastTranslation = new Vec2()
   lastRect: Rect|undefined
   lastQuad: [Vec2, Vec2, Vec2, Vec2]|undefined
@@ -154,10 +155,13 @@ class TransformLayerTool extends Tool {
         this.originalTexture.dispose()
       }
       if (this.originalRect) {
-        const texture = this.originalTexture = new Texture(context, {size: this.originalRect.size})
+        const inflation = 2
+        const textureRect = this.originalRect.inflate(inflation)
+        const texture = this.originalTexture = new Texture(context, {size: textureRect.size})
+        this.originalTextureSubrect = new Rect(new Vec2(), textureRect.size).inflate(-inflation)
         texture.filter = "bilinear"
         const drawTarget = new TextureDrawTarget(context, texture)
-        content.tiledTexture.drawToDrawTarget(drawTarget, {offset: this.originalRect.topLeft.neg(), blendMode: "src"})
+        content.tiledTexture.drawToDrawTarget(drawTarget, {offset: textureRect.topLeft.neg(), blendMode: "src"})
         drawTarget.dispose()
       } else {
         this.originalTexture = undefined
@@ -384,7 +388,7 @@ class TransformLayerTool extends Tool {
     if (this.editing && this.picture && this.currentContent && this.originalTexture && this.originalRect) {
       const command = new TransformLayerCommand(
         this.picture, this.currentContent.layer.path(),
-        this.originalTexture, Transform.translate(this.originalRect.topLeft).merge(this.transform)
+        this.originalTexture, this.originalTextureSubrect, Transform.translate(this.originalRect.topLeft).merge(this.transform)
       )
       this.picture.undoStack.redoAndPush(command)
     }
@@ -407,7 +411,7 @@ class TransformLayerTool extends Tool {
       const transform = Transform.translate(this.originalRect.topLeft)
         .merge(this.transform)
         .translate(tileKey.mulScalar(-Tile.width))
-      drawTexture(transformedDrawTarget, this.originalTexture, {transform, blendMode: "src", bicubic: true})
+      drawTexture(transformedDrawTarget, this.originalTexture, {transform, blendMode: "src", bicubic: true, srcRect: this.originalTextureSubrect})
       const {blendMode, opacity} = layer
       tileBlender.blend(transformedTile, blendMode, opacity)
       return true

@@ -85,8 +85,8 @@ type Quad = [Vec2, Vec2, Vec2, Vec2]
 
 export
 function drawTexture(dst: DrawTarget, src: Texture, params: DrawTextureParams) {
-  const {size} = src
-  const srcRect = params.srcRect || new Rect(new Vec2(), size)
+  const srcRect = params.srcRect || new Rect(new Vec2(), src.size)
+  const {size} = srcRect
   const dstRect = params.dstRect || new Rect(new Vec2(), size)
   const transform = params.transform || new Transform()
   const {bicubic} = params
@@ -102,7 +102,7 @@ function drawTexture(dst: DrawTarget, src: Texture, params: DrawTextureParams) {
   }
 
   const texRect = srcRect
-    ? new Rect(srcRect.topLeft.div(size), srcRect.bottomRight.div(size))
+    ? new Rect(srcRect.topLeft.div(src.size), srcRect.bottomRight.div(src.size))
     : new Rect(new Vec2(0), new Vec2(1))
 
   if (!drawTextureShape.rect.equals(dstRect)) {
