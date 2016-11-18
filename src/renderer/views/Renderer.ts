@@ -4,6 +4,9 @@ import {Model, RectShape, Shader, TextureShader, CanvasDrawTarget, Color, Textur
 import {context, canvas} from "../GLContext"
 import Picture from "../models/Picture"
 
+const BOX_SHADOW_RADIUS = 4
+const BOX_SHADOW_OPACITY = 0.5
+
 class BoxShadowShader extends Shader {
   // http://madebyevan.com/shaders/fast-rounded-rectangle-shadows/
   get fragmentShader() {
@@ -30,8 +33,8 @@ class BoxShadowShader extends Shader {
 
       void main(void) {
         vec2 pos = (transformToPicture * vec3(vPosition, 1.0)).xy;
-        float a = boxShadow(vec2(0.0), pictureSize, pos, 8.0);
-        gl_FragColor = vec4(0.0, 0.0, 0.0, a * 0.5);
+        float a = boxShadow(vec2(0.0), pictureSize, pos, ${BOX_SHADOW_RADIUS.toFixed(1)});
+        gl_FragColor = vec4(0.0, 0.0, 0.0, a * ${BOX_SHADOW_OPACITY});
       }
     `
   }
