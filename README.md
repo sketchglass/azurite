@@ -2,6 +2,8 @@
 
 Casual Painting App in Electron
 
+[![CircleCI](https://circleci.com/gh/sketchglass/azurite.svg?style=svg)](https://circleci.com/gh/sketchglass/azurite)
+
 ## Prerequisites
 
 * Node.js
