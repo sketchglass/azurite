@@ -10,6 +10,7 @@ import RotateTool from "../tools/RotateTool"
 import TransformLayerTool from "../tools/TransformLayerTool"
 import {HSVColor} from "../../lib/Color"
 import {PictureState} from "./PictureState"
+import * as IPCChannels from "../../common/IPCChannels"
 
 export
 class AppState {
@@ -110,6 +111,7 @@ class AppState {
     // TODO: save app state
     if (await appState.closePictures()) {
       remote.getCurrentWindow().destroy()
+      remote.app.quit()
       return true
     }
     return false
@@ -118,8 +120,6 @@ class AppState {
 
 export const appState = new AppState()
 
-window.addEventListener("beforeunload", e => {
-  // Do not close window immediately https://github.com/electron/electron/blob/master/docs/api/browser-window.md#event-close
-  e.returnValue = false
+IPCChannels.quit.listen().forEach(() => {
   appState.quit()
 })

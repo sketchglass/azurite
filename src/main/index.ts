@@ -38,6 +38,11 @@ async function openWindow() {
     IPCChannels.tabletUp.send(win.webContents, ev)
   })
 
+  win.on('close', e => {
+    e.preventDefault()
+    IPCChannels.quit.send(win.webContents, undefined)
+  })
+
   win.on('closed', () => {
     receiver.dispose()
     window = undefined
