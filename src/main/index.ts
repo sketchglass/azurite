@@ -9,7 +9,12 @@ app.commandLine.appendSwitch("enable-experimental-web-platform-features")
 
 let window: BrowserWindow|undefined
 
-function openWindow() {
+async function openWindow() {
+  if (process.env.NODE_ENV == "development") {
+    const {default: installExtension, REACT_DEVELOPER_TOOLS} = require('electron-devtools-installer');
+    await installExtension(REACT_DEVELOPER_TOOLS)
+  }
+
   const win = window = new BrowserWindow({width: 1200, height: 768})
 
   win.loadURL(`${contentBase}/index.html`)
