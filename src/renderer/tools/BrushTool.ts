@@ -87,7 +87,8 @@ class BrushTool extends BaseBrushTool {
 
   renderWaypoints(waypoints: Waypoint[], rect: Rect) {
     const tiledTexture = this.newTiledTexture
-    if (!tiledTexture) {
+    const layer = this.currentLayer
+    if (!tiledTexture || !layer) {
       return
     }
 
@@ -121,7 +122,7 @@ class BrushTool extends BaseBrushTool {
     this.shape.setVec2Attributes("aCenter", centers)
     this.shape.indices = indices
 
-    this.model.blendMode = this.eraser ? "dst-out" : "src-over"
+    this.model.blendMode = this.eraser ? "dst-out" : (layer.preserveOpacity ? "src-atop" : "src-over")
 
     for (const key of TiledTexture.keysForRect(rect)) {
       this.drawTarget.texture = tiledTexture.get(key).texture
