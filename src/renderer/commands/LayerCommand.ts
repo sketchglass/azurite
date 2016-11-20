@@ -202,6 +202,7 @@ interface LayerProps {
   visible?: boolean
   blendMode?: LayerBlendMode
   opacity?: number
+  preserveOpacity?: boolean
 }
 
 export
