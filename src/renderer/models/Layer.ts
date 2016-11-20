@@ -8,6 +8,7 @@ interface LayerData {
   visible: boolean
   blendMode: LayerBlendMode
   opacity: number
+  preserveOpacity: boolean
   content: LayerContentData
 }
 
@@ -20,6 +21,7 @@ class Layer {
   @observable visible = true
   @observable blendMode: LayerBlendMode = "normal"
   @observable opacity = 1
+  @observable preserveOpacity = false
   parent: Layer|undefined
   public readonly content: LayerContent
 
@@ -36,9 +38,9 @@ class Layer {
   }
 
   toData(): LayerData {
-    const {name, visible, blendMode, opacity} = this
+    const {name, visible, blendMode, opacity, preserveOpacity} = this
     const content = this.content.toData()
-    return {name, visible, blendMode, opacity, content}
+    return {name, visible, blendMode, opacity, content, preserveOpacity}
   }
 
   clone(): Layer {
@@ -84,10 +86,11 @@ class Layer {
       }
     }
     const layer = new Layer(picture, data.name, makeContent)
-    const {visible, blendMode, opacity} = data
+    const {visible, blendMode, opacity, preserveOpacity} = data
     layer.visible = visible
     layer.blendMode = blendMode
     layer.opacity = opacity
+    layer.preserveOpacity = preserveOpacity
     return layer
   }
 }
