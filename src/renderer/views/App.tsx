@@ -138,13 +138,32 @@ class App extends React.Component<{}, {}> {
           <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
         </div>
         <div className="AppItem">
-          <DockContainer initData={dockPlacement} renderTab={renderTab}>
+          <DockContainer initData={dockPlacement} renderTab={renderTab} getTabName={getTabName}>
             <PictureTabBar />
             <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
           </DockContainer>
         </div>
       </div>
     )
+  }
+}
+
+const getTabName = (id: string) => {
+  switch (id) {
+    case "color":
+      return "Color"
+    case "slider":
+      return "Slider"
+    case "palette":
+      return "Palette"
+    case "settings":
+      return "Settings"
+    case "navigator":
+      return "Navigator"
+    case "layers":
+      return "Layers"
+    default:
+      return "no such tab"
   }
 }
 

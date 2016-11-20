@@ -1,5 +1,5 @@
 import * as React from "react"
-import {observable} from "mobx"
+import {observable, computed} from "mobx"
 import {observer} from "mobx-react"
 
 class DockTabViewModel {
@@ -12,6 +12,10 @@ class DockTabViewModel {
 
   render() {
     return this.root.renderTab(this.id)
+  }
+
+  @computed get title() {
+    return this.root.getTabName(this.id)
   }
 }
 
@@ -54,6 +58,7 @@ class DockContainerViewModel {
   left = new DockColumnViewModel(this)
   right = new DockColumnViewModel(this)
   @observable renderTab: (id: string) => JSX.Element
+  @observable getTabName: (id: string) => string
 
   loadData(data: DockContainerData) {
     this.left.loadData(data.left)
@@ -83,6 +88,7 @@ interface DockContainerData {
 interface DockContainerProps {
   initData: DockContainerData
   renderTab: (id: string) => JSX.Element
+  getTabName: (id: string) => string
 }
 
 @observer
@@ -102,6 +108,9 @@ class DockRow extends React.Component<{viewModel: DockRowViewModel}, {}> {
     const {tabs} = this.props.viewModel
     return (
       <div className="DockRow">
+        <div className="DockRow_tabs">
+          {tabs.map(t => <h2>{t.title}</h2>)}
+        </div>
         {tabs.map(t => <DockTab key={t.id} viewModel={t} />)}
       </div>
     )
@@ -128,11 +137,13 @@ class DockContainer extends React.Component<DockContainerProps, {}> {
   constructor(props: DockContainerProps) {
     super(props)
     this.viewModel.renderTab = props.renderTab
+    this.viewModel.getTabName = props.getTabName
     this.viewModel.loadData(props.initData)
   }
 
   componentWillReceiveProps(props: DockContainerProps) {
     this.viewModel.renderTab = props.renderTab
+    this.viewModel.getTabName = props.getTabName
   }
 
   render() {
