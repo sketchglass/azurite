@@ -8,9 +8,6 @@ body {
   -webkit-font-smoothing: antialiased;
   font-size: 13px;
 }
-aside {
-  z-index: 100;
-}
 .App {
   display: flex;
   flex-direction: column;
@@ -29,6 +26,13 @@ aside {
 }
 .DockContainer {
   flex: 1;
+}
+.DockCenter {
+  display: flex;
+  flex-direction: column;
+}
+.DockColumn {
+  z-index: 100;
 }
 .BrushSettings {
   width: 100%;
