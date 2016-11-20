@@ -16,6 +16,7 @@
 /* Components */
 @import "./components/ClickToEdit.css";
 @import "./components/Palette.css";
+@import "./components/DockContainer.css";
 @import "./components/DraggablePanel.css";
 @import "./components/RangeSlider.css";
 @import "./components/RGBRangeSliders.css";

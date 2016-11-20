@@ -18,6 +18,7 @@ import NavigationKeyBinding from "./NavigationKeyBinding"
 import {appState} from "../state/AppState"
 import {remote} from "electron"
 import SVGIcon from "./components/SVGIcon"
+import {DockContainer} from "./components/DockContainer"
 const {Menu, app} = remote
 import "./MenuBar"
 import "../../styles/main.css"
@@ -111,38 +112,79 @@ class App extends React.Component<{}, {}> {
     const onColorChange = action((value: HSVColor) => {
       appState.color = value
     })
+
+    const renderTab = (id: string) => {
+      switch (id) {
+        case "color":
+          return <ColorPicker color={color} onChange={onColorChange} />
+        case "slider":
+          return <RGBRangeSliders color={color} onChange={onColorChange} />
+        case "palette":
+          return <Palette palette={palette} paletteIndex={paletteIndex} onChange={onPaletteChange} />
+        case "settings":
+          return currentTool.renderSettings()
+        case "navigator":
+          return <Navigator picture={picture} />
+        case "layers":
+          return <LayerList picture={picture} />
+        default:
+          return <div />
+      }
+    }
+
     return (
       <div className="App">
         <div className="AppItem">
           <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
         </div>
         <div className="AppItem">
-          <aside className="LeftSidebar">
-            <DraggablePanelContainer top={60} left={12} margin={12} labelHeight={24}>
-              <DraggablePanel label="Color" width={216} height={200}>
-                <ColorPicker color={color} onChange={onColorChange} />
-              </DraggablePanel>
-              <DraggablePanel label="Slider" width={216} height={70}>
-                <RGBRangeSliders color={color} onChange={onColorChange} />
-              </DraggablePanel>
-              <DraggablePanel label="Palette" width={216} height={80}>
-                <Palette palette={palette} paletteIndex={paletteIndex} onChange={onPaletteChange} />
-              </DraggablePanel>
-              <DraggablePanel label="Settings" width={216} height={200}>
-                {currentTool.renderSettings()}
-              </DraggablePanel>
-            </DraggablePanelContainer>
-          </aside>
-          <div className="CenterArea">
+          <DockContainer initData={dockPlacement} renderTab={renderTab}>
             <PictureTabBar />
             <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
-          </div>
-          <aside className="RightSidebar">
-            <Navigator picture={picture} />
-            <LayerList picture={picture} />
-          </aside>
+          </DockContainer>
         </div>
       </div>
     )
   }
+}
+
+const dockPlacement = {
+  left: {
+    rows: [
+      {
+        tabs: [{id: "color"}],
+        currentTabIndex: 0,
+        height: 200,
+      },
+      {
+        tabs: [{id: "slider"}],
+        currentTabIndex: 0,
+        height: 70,
+      },
+      {
+        tabs: [{id: "palette"}],
+        currentTabIndex: 0,
+        height: 80,
+      },
+      {
+        tabs: [{id: "settings"}],
+        currentTabIndex: 0,
+        height: 200,
+      },
+    ],
+  },
+  right: {
+    rows: [
+      {
+        tabs: [{id: "navigator"}],
+        currentTabIndex: 0,
+        height: 100,
+      },
+      {
+        tabs: [{id: "layers"}],
+        currentTabIndex: 0,
+        height: 200,
+      }
+    ],
+  },
 }

@@ -27,25 +27,8 @@ aside {
     flex-direction: row;
   }
 }
-.CenterArea {
+.DockContainer {
   flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-.LeftSidebar {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 240px;
-  box-sizing: border-box;
-  border-right: 1px solid var(--default-border-color);
-}
-.RightSidebar {
-  width: 240px;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  border-left: 1px solid var(--default-border-color);
 }
 .BrushSettings {
   width: 100%;

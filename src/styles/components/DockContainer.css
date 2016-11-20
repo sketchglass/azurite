@@ -1,0 +1,13 @@
+.DockContainer {
+  display: flex;
+}
+
+.DockCenter {
+  flex: 1;
+}
+
+.DockColumn {
+  display: flex;
+  flex-direction: column;
+  width: 240px;
+}
