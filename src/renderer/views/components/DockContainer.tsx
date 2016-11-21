@@ -1,9 +1,10 @@
 import * as React from "react"
 import {observable, computed} from "mobx"
 import {observer} from "mobx-react"
+import * as classNames from "classnames"
 
 class DockTabViewModel {
-  constructor(public root: DockContainerViewModel) {}
+  constructor(public root: DockContainerViewModel, public row: DockRowViewModel) {}
   id: string
 
   loadData(data: DockTabData) {
@@ -16,6 +17,10 @@ class DockTabViewModel {
 
   @computed get title() {
     return this.root.getTabName(this.id)
+  }
+
+  @computed get selected() {
+    return this.row.tabs.indexOf(this) == this.row.currentTabIndex
   }
 }
 
@@ -31,7 +36,7 @@ class DockRowViewModel {
 
   loadData(data: DockRowData) {
     for (const tabData of data.tabs) {
-      const tab = new DockTabViewModel(this.root)
+      const tab = new DockTabViewModel(this.root, this)
       tab.loadData(tabData)
       this.tabs.push(tab)
     }
@@ -95,7 +100,7 @@ interface DockContainerProps {
 class DockTab extends React.Component<{viewModel: DockTabViewModel}, {}> {
   render() {
     return (
-      <div className="DockTab">
+      <div className="DockTab" hidden={!this.props.viewModel.selected}>
         {this.props.viewModel.render()}
       </div>
     )
@@ -109,7 +114,13 @@ class DockRow extends React.Component<{viewModel: DockRowViewModel}, {}> {
     return (
       <div className="DockRow" style={{minHeight: `${height}px`}}>
         <div className="DockRow_tabs">
-          {tabs.map(t => <div key={t.title} className="DockRow_tab">{t.title}</div>)}
+          {
+            tabs.map((t, i) => {
+              const className = classNames("DockRow_tab", {"DockRow_tab-selected": t.selected})
+              const onClick = () => this.props.viewModel.currentTabIndex = i
+              return <div key={t.title} className={className} onClick={onClick}>{t.title}</div>
+            })
+          }
         </div>
         {tabs.map(t => <DockTab key={t.id} viewModel={t} />)}
       </div>

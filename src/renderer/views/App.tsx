@@ -171,14 +171,9 @@ const dockPlacement = {
   left: {
     rows: [
       {
-        tabs: [{id: "color"}],
+        tabs: [{id: "color"}, {id: "slider"}],
         currentTabIndex: 0,
         height: 240,
-      },
-      {
-        tabs: [{id: "slider"}],
-        currentTabIndex: 0,
-        height: 96,
       },
       {
         tabs: [{id: "palette"}],

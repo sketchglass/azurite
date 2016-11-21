@@ -2,6 +2,10 @@
   display: flex;
 }
 
+.DockRow_tabs {
+  display: flex;
+}
+
 .DockRow_tab {
   font-size: 14px;
   cursor: move;
@@ -10,6 +14,11 @@
   line-height: 32px;
   text-transform: uppercase;
   color: var(--panel-title-color);
+}
+
+.DockRow_tab-selected {
+  color: var(--panel-title-selected-color);
+
 }
 
 .DockTab {
