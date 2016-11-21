@@ -28,7 +28,7 @@ class DockTabViewModel {
     this.row = row
   }
 
-  @computed get title() {
+  get title() {
     return this.root.getTabName(this.id)
   }
 
@@ -75,8 +75,8 @@ class DockColumnViewModel {
 class DockContainerViewModel {
   left = new DockColumnViewModel(this)
   right = new DockColumnViewModel(this)
-  @observable renderTab: (id: string) => JSX.Element
-  @observable getTabName: (id: string) => string
+  renderTab: (id: string) => JSX.Element
+  getTabName: (id: string) => string
   @observable draggingTab: DockTabViewModel|undefined
 
   loadData(data: DockContainerData) {
@@ -102,12 +102,6 @@ interface DockColumnData {
 interface DockContainerData {
   left: DockColumnData
   right: DockColumnData
-}
-
-interface DockContainerProps {
-  initData: DockContainerData
-  renderTab: (id: string) => JSX.Element
-  getTabName: (id: string) => string
 }
 
 @observer
@@ -212,6 +206,20 @@ class DockColumn extends React.Component<{viewModel: DockColumnViewModel}, {}> {
   }
 }
 
+interface DockPanelProps {
+  id: string
+  title: string
+  flexible?: boolean
+}
+
+export
+class DockPanel extends React.Component<DockPanelProps, {}> {
+}
+
+interface DockContainerProps {
+  initPlacement: DockContainerData
+}
+
 @observer
 export
 class DockContainer extends React.Component<DockContainerProps, {}> {
@@ -219,22 +227,29 @@ class DockContainer extends React.Component<DockContainerProps, {}> {
 
   constructor(props: DockContainerProps) {
     super(props)
-    this.viewModel.renderTab = props.renderTab
-    this.viewModel.getTabName = props.getTabName
-    this.viewModel.loadData(props.initData)
-  }
-
-  componentWillReceiveProps(props: DockContainerProps) {
-    this.viewModel.renderTab = props.renderTab
-    this.viewModel.getTabName = props.getTabName
+    this.viewModel.loadData(props.initPlacement)
   }
 
   render() {
+    const children = React.Children.toArray(this.props.children as React.ReactNode) as React.ReactElement<any>[]
+    const panels = children.filter(c => c.type == DockPanel) as React.ReactElement<DockPanelProps & {children: React.ReactNode}>[]
+    const center = children.filter(c => c.type != DockPanel)
+    const panelMap = new Map<string, DockPanelProps & {children: React.ReactNode}>()
+    for (const panel of panels) {
+      panelMap.set(panel.props.id, panel.props)
+    }
+    this.viewModel.renderTab = (id: string) => {
+      return panelMap.get(id)!.children as JSX.Element
+    }
+    this.viewModel.getTabName = (id: string) => {
+      return panelMap.get(id)!.title
+    }
+
     return (
       <div className="DockContainer">
         <DockColumn viewModel={this.viewModel.left} />
         <div className="DockCenter">
-          {this.props.children}
+          {center}
         </div>
         <DockColumn viewModel={this.viewModel.right} />
       </div>

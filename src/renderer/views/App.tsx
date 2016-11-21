@@ -18,7 +18,7 @@ import NavigationKeyBinding from "./NavigationKeyBinding"
 import {appState} from "../state/AppState"
 import {remote} from "electron"
 import SVGIcon from "./components/SVGIcon"
-import {DockContainer} from "./components/DockContainer"
+import {DockContainer, DockPanel} from "./components/DockContainer"
 const {Menu, app} = remote
 import "./MenuBar"
 import "../../styles/main.css"
@@ -112,58 +112,37 @@ class App extends React.Component<{}, {}> {
     const onColorChange = action((value: HSVColor) => {
       appState.color = value
     })
-
-    const renderTab = (id: string) => {
-      switch (id) {
-        case "color":
-          return <ColorPicker color={color} onChange={onColorChange} />
-        case "slider":
-          return <RGBRangeSliders color={color} onChange={onColorChange} />
-        case "palette":
-          return <Palette palette={palette} paletteIndex={paletteIndex} onChange={onPaletteChange} />
-        case "settings":
-          return currentTool.renderSettings()
-        case "navigator":
-          return <Navigator picture={picture} />
-        case "layers":
-          return <LayerList picture={picture} />
-        default:
-          return <div />
-      }
-    }
-
     return (
       <div className="App">
         <div className="AppItem">
           <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
         </div>
         <div className="AppItem">
-          <DockContainer initData={dockPlacement} renderTab={renderTab} getTabName={getTabName}>
+          <DockContainer initPlacement={dockPlacement}>
+            <DockPanel id="color" title="Color">
+              <ColorPicker color={color} onChange={onColorChange} />
+            </DockPanel>
+            <DockPanel id="slider" title="Slider">
+              <RGBRangeSliders color={color} onChange={onColorChange} />
+            </DockPanel>
+            <DockPanel id="palette" title="Palette">
+              <Palette palette={palette} paletteIndex={paletteIndex} onChange={onPaletteChange} />
+            </DockPanel>
+            <DockPanel id="settings" title="Settings">
+              {currentTool.renderSettings()}
+            </DockPanel>
+            <DockPanel id="navigator" title="Navigator">
+              <Navigator picture={picture} />
+            </DockPanel>
+            <DockPanel id="layers" title="Layers">
+              <LayerList picture={picture} />
+            </DockPanel>
             <PictureTabBar />
             <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
           </DockContainer>
         </div>
       </div>
     )
-  }
-}
-
-const getTabName = (id: string) => {
-  switch (id) {
-    case "color":
-      return "Color"
-    case "slider":
-      return "Slider"
-    case "palette":
-      return "Palette"
-    case "settings":
-      return "Settings"
-    case "navigator":
-      return "Navigator"
-    case "layers":
-      return "Layers"
-    default:
-      return "no such tab"
   }
 }
 
