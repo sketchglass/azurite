@@ -32,6 +32,11 @@
 
 .DockTab {
   padding: 8px;
+  display: flex;
+  flex-direction: column;
+  &[hidden] {
+    display: none;
+  }
 }
 
 .DockCenter {
