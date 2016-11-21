@@ -13,7 +13,7 @@ class DockTabViewModel {
   }
 
   render() {
-    return this.root.renderTab(this.id)
+    return this.root.panelMap.get(this.id)!.children
   }
 
   @action moveToNewRow(row: DockRowViewModel, index: number) {
@@ -29,7 +29,7 @@ class DockTabViewModel {
   }
 
   get title() {
-    return this.root.getTabName(this.id)
+    return this.root.panelMap.get(this.id)!.title
   }
 
   @computed get selected() {
@@ -75,8 +75,7 @@ class DockColumnViewModel {
 class DockContainerViewModel {
   left = new DockColumnViewModel(this)
   right = new DockColumnViewModel(this)
-  renderTab: (id: string) => JSX.Element
-  getTabName: (id: string) => string
+  panelMap: Map<string, DockPanelInfo>
   @observable draggingTab: DockTabViewModel|undefined
 
   loadData(data: DockContainerData) {
@@ -209,8 +208,9 @@ class DockColumn extends React.Component<{viewModel: DockColumnViewModel}, {}> {
 interface DockPanelProps {
   id: string
   title: string
-  flexible?: boolean
 }
+
+type DockPanelInfo = DockPanelProps & {children: JSX.Element}
 
 export
 class DockPanel extends React.Component<DockPanelProps, {}> {
@@ -232,17 +232,11 @@ class DockContainer extends React.Component<DockContainerProps, {}> {
 
   render() {
     const children = React.Children.toArray(this.props.children as React.ReactNode) as React.ReactElement<any>[]
-    const panels = children.filter(c => c.type == DockPanel) as React.ReactElement<DockPanelProps & {children: React.ReactNode}>[]
+    const panels = children.filter(c => c.type == DockPanel) as React.ReactElement<DockPanelInfo>[]
     const center = children.filter(c => c.type != DockPanel)
-    const panelMap = new Map<string, DockPanelProps & {children: React.ReactNode}>()
+    const panelMap = this.viewModel.panelMap = new Map<string, DockPanelInfo>()
     for (const panel of panels) {
       panelMap.set(panel.props.id, panel.props)
-    }
-    this.viewModel.renderTab = (id: string) => {
-      return panelMap.get(id)!.children as JSX.Element
-    }
-    this.viewModel.getTabName = (id: string) => {
-      return panelMap.get(id)!.title
     }
 
     return (
