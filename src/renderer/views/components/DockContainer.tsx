@@ -40,7 +40,7 @@ class DockTabViewModel {
 class DockRowViewModel {
   static id = 0
 
-  constructor(public root: DockContainerViewModel) {}
+  constructor(public root: DockContainerViewModel, public column: DockColumnViewModel) {}
 
   readonly id = DockRowViewModel.id++
   tabs = observable<DockTabViewModel>([])
@@ -65,7 +65,7 @@ class DockColumnViewModel {
 
   loadData(data: DockColumnData) {
     for (const rowData of data.rows) {
-      const row = new DockRowViewModel(this.root)
+      const row = new DockRowViewModel(this.root, this)
       row.loadData(rowData)
       this.rows.push(row)
     }
@@ -137,9 +137,9 @@ class DockRow extends React.Component<{viewModel: DockRowViewModel}, {}> {
         viewModel.root.draggingTab.moveToNewRow(viewModel, index)
       }
     }
-    const onSeparatorMove = (dy: number) => {
-      console.log(dy)
-    }
+    const onSeparatorMove = action((dy: number) => {
+      viewModel.height += dy
+    })
     return (
       <div className="DockRow">
         <div className="DockRow_tabs" ref={e => this.tabsElement = e} onDragOver={onTabsDragOver} onDrop={onTabsDrop}>
