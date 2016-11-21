@@ -2,6 +2,7 @@ import * as React from "react"
 import {observable, computed, action} from "mobx"
 import {observer} from "mobx-react"
 import * as classNames from "classnames"
+import {dropXIndexAt, dropYIndexAt} from "../util"
 
 class DockTabViewModel {
   constructor(public root: DockContainerViewModel, public row: DockRowViewModel) {}
@@ -120,25 +121,6 @@ class DockTab extends React.Component<{viewModel: DockTabViewModel}, {}> {
   }
 }
 
-export
-function dropIndexAt(element: HTMLElement, clientX: number) {
-  const children = Array.from(element.children)
-  for (const [i, child] of children.entries()) {
-    const rect = child.getBoundingClientRect()
-    if (i == 0 && clientX < rect.left) {
-      return 0
-    }
-    if (rect.left <= clientX && clientX <= rect.right) {
-      if (clientX <= rect.left + rect.width / 2) {
-        return i
-      } else {
-        return i + 1
-      }
-    }
-  }
-  return children.length
-}
-
 @observer
 class DockRow extends React.Component<{viewModel: DockRowViewModel}, {}> {
   tabsElement: HTMLElement
@@ -150,8 +132,7 @@ class DockRow extends React.Component<{viewModel: DockRowViewModel}, {}> {
       e.preventDefault()
     }
     const onTabsDrop = (e: React.DragEvent<HTMLElement>) => {
-      const index = dropIndexAt(this.tabsElement, e.clientX)
-      console.log(index)
+      const index = dropXIndexAt(this.tabsElement, e.clientX)
       if (viewModel.root.draggingTab) {
         viewModel.root.draggingTab.moveToNewRow(viewModel, index)
       }

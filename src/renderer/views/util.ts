@@ -17,3 +17,41 @@ function isTextInput(elem: Element) {
   }
   return false
 }
+
+export
+function dropXIndexAt(element: HTMLElement, clientX: number) {
+  const children = Array.from(element.children)
+  for (const [i, child] of children.entries()) {
+    const rect = child.getBoundingClientRect()
+    if (i == 0 && clientX < rect.left) {
+      return 0
+    }
+    if (rect.left <= clientX && clientX <= rect.right) {
+      if (clientX <= rect.left + rect.width / 2) {
+        return i
+      } else {
+        return i + 1
+      }
+    }
+  }
+  return children.length
+}
+
+export
+function dropYIndexAt(element: HTMLElement, clientY: number) {
+  const children = Array.from(element.children)
+  for (const [i, child] of children.entries()) {
+    const rect = child.getBoundingClientRect()
+    if (i == 0 && clientY < rect.top) {
+      return 0
+    }
+    if (rect.top <= clientY && clientY <= rect.bottom) {
+      if (clientY <= rect.left + rect.width / 2) {
+        return i
+      } else {
+        return i + 1
+      }
+    }
+  }
+  return children.length
+}
