@@ -13,12 +13,16 @@
   padding: 0 8px;
   line-height: 32px;
   text-transform: uppercase;
-  color: var(--panel-title-color);
-}
-
-.DockRow_tab-selected {
-  color: var(--panel-title-selected-color);
-
+  color: color(var(--panel-title-color) lightness(-20%));
+  &:hover {
+    color: color(var(--panel-title-color) lightness(-10%));
+  }
+  &-selected {
+    color: var(--panel-title-color);
+    &:hover {
+      color: color(var(--panel-title-color) lightness(+10%));
+    }
+  }
 }
 
 .DockTab {
