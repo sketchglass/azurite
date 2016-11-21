@@ -12,10 +12,6 @@ class DockTabViewModel {
     this.id = data.id
   }
 
-  render() {
-    return this.root.panelMap.get(this.id)!.children
-  }
-
   @action moveToNewRow(row: DockRowViewModel, index: number) {
     const oldIndex = this.row.tabs.indexOf(this)
     this.row.tabs.splice(oldIndex, 1)
@@ -26,10 +22,6 @@ class DockTabViewModel {
     row.tabs.splice(index, 0, this)
     row.currentTabIndex = row.tabs.indexOf(this)
     this.row = row
-  }
-
-  get title() {
-    return this.root.panelMap.get(this.id)!.title
   }
 
   @computed get selected() {
@@ -75,7 +67,6 @@ class DockColumnViewModel {
 class DockContainerViewModel {
   left = new DockColumnViewModel(this)
   right = new DockColumnViewModel(this)
-  panelMap: Map<string, DockPanelInfo>
   @observable draggingTab: DockTabViewModel|undefined
 
   loadData(data: DockContainerData) {
@@ -146,7 +137,8 @@ class DockRow extends React.Component<{viewModel: DockRowViewModel, panels: Map<
                 e.dataTransfer.setData("DockTab", "")
                 this.props.viewModel.root.draggingTab = t
               }
-              return <div key={t.title} className={className} onClick={onClick} onDragStart={onDragStart} draggable={true}>{t.title}</div>
+              const {title} = panels.get(t.id)!
+              return <div key={title} className={className} onClick={onClick} onDragStart={onDragStart} draggable={true}>{title}</div>
             })
           }
         </div>
@@ -237,7 +229,7 @@ class DockContainer extends React.Component<DockContainerProps, {}> {
     const children = React.Children.toArray(this.props.children as React.ReactNode) as React.ReactElement<any>[]
     const panels = children.filter(c => c.type == DockPanel) as React.ReactElement<DockPanelInfo>[]
     const center = children.filter(c => c.type != DockPanel)
-    const panelMap = this.viewModel.panelMap = new Map<string, DockPanelInfo>()
+    const panelMap = new Map<string, DockPanelInfo>()
     for (const panel of panels) {
       panelMap.set(panel.props.id, panel.props)
     }
