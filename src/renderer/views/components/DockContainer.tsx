@@ -105,9 +105,9 @@ class DockTab extends React.Component<{viewModel: DockTabViewModel}, {}> {
 @observer
 class DockRow extends React.Component<{viewModel: DockRowViewModel}, {}> {
   render() {
-    const {tabs} = this.props.viewModel
+    const {tabs, height} = this.props.viewModel
     return (
-      <div className="DockRow">
+      <div className="DockRow" style={{minHeight: `${height}px`}}>
         <div className="DockRow_tabs">
           {tabs.map(t => <div key={t.title} className="DockRow_tab">{t.title}</div>)}
         </div>
