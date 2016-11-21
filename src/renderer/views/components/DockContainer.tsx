@@ -137,6 +137,9 @@ class DockRow extends React.Component<{viewModel: DockRowViewModel}, {}> {
         viewModel.root.draggingTab.moveToNewRow(viewModel, index)
       }
     }
+    const onSeparatorMove = (dy: number) => {
+      console.log(dy)
+    }
     return (
       <div className="DockRow" style={{minHeight: `${height}px`}}>
         <div className="DockRow_tabs" ref={e => this.tabsElement = e} onDragOver={onTabsDragOver} onDrop={onTabsDrop}>
@@ -153,8 +156,45 @@ class DockRow extends React.Component<{viewModel: DockRowViewModel}, {}> {
           }
         </div>
         {tabs.map(t => <DockTab key={t.id} viewModel={t} />)}
+        <DockRowSeparator onMove={onSeparatorMove} />
       </div>
     )
+  }
+}
+
+class DockRowSeparator extends React.Component<{onMove: (dy: number) => void}, {}> {
+  element: HTMLElement
+  dragged = false
+  lastY: number
+
+  onPointerDown = (e: PointerEvent) => {
+    this.dragged = true
+    this.lastY = Math.round(e.clientY)
+    this.element.setPointerCapture(e.pointerId)
+  }
+  onPointerMove = (e: PointerEvent) => {
+    if (this.dragged) {
+      const y = Math.round(e.clientY)
+      this.props.onMove(y - this.lastY)
+      this.lastY = y
+    }
+  }
+  onPointerUp = () => {
+    this.dragged = false
+  }
+
+  componentDidMount() {
+    this.element.addEventListener("pointerdown", this.onPointerDown)
+    this.element.addEventListener("pointermove", this.onPointerMove)
+    this.element.addEventListener("pointerup", this.onPointerUp)
+  }
+  componentWillUnmount() {
+    this.element.removeEventListener("pointerdown", this.onPointerDown)
+    this.element.removeEventListener("pointermove", this.onPointerMove)
+    this.element.removeEventListener("pointerup", this.onPointerUp)
+  }
+  render() {
+    return <div ref={e => this.element = e} className="DockRowSeparator" />
   }
 }
 
@@ -165,12 +205,7 @@ class DockColumn extends React.Component<{viewModel: DockColumnViewModel}, {}> {
     return (
       <div className="DockColumn">
         {
-          rows.map(r => {
-            return [
-              <DockRow key={r.id} viewModel={r} />,
-              <div className="DockSeparator" />
-            ]
-          })
+          rows.map(r => <DockRow key={r.id} viewModel={r} />)
         }
       </div>
     )

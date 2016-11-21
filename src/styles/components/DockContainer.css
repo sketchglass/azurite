@@ -2,7 +2,7 @@
   display: flex;
 }
 
-.DockSeparator {
+.DockRowSeparator {
   min-height: 4px;
   cursor: row-resize;
 }
