@@ -173,17 +173,17 @@ const dockPlacement = {
       {
         tabs: [{id: "color"}, {id: "slider"}],
         currentTabIndex: 0,
-        height: 240,
+        height: 192,
       },
       {
         tabs: [{id: "palette"}],
         currentTabIndex: 0,
-        height: 96,
+        height: 64,
       },
       {
         tabs: [{id: "settings"}],
         currentTabIndex: 0,
-        height: 240,
+        height: 192,
       },
     ],
   },
@@ -192,7 +192,7 @@ const dockPlacement = {
       {
         tabs: [{id: "navigator"}],
         currentTabIndex: 0,
-        height: 128,
+        height: 64,
       },
       {
         tabs: [{id: "layers"}],

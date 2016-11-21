@@ -111,10 +111,10 @@ interface DockContainerProps {
 }
 
 @observer
-class DockTab extends React.Component<{viewModel: DockTabViewModel}, {}> {
+class DockTab extends React.Component<{viewModel: DockTabViewModel, height: number}, {}> {
   render() {
     return (
-      <div className="DockTab" hidden={!this.props.viewModel.selected}>
+      <div className="DockTab" hidden={!this.props.viewModel.selected} style={{height: this.props.height + "px"}}>
         {this.props.viewModel.render()}
       </div>
     )
@@ -141,7 +141,7 @@ class DockRow extends React.Component<{viewModel: DockRowViewModel}, {}> {
       console.log(dy)
     }
     return (
-      <div className="DockRow" style={{minHeight: `${height}px`}}>
+      <div className="DockRow">
         <div className="DockRow_tabs" ref={e => this.tabsElement = e} onDragOver={onTabsDragOver} onDrop={onTabsDrop}>
           {
             tabs.map((t, i) => {
@@ -155,7 +155,7 @@ class DockRow extends React.Component<{viewModel: DockRowViewModel}, {}> {
             })
           }
         </div>
-        {tabs.map(t => <DockTab key={t.id} viewModel={t} />)}
+        {tabs.map(t => <DockTab key={t.id} viewModel={t} height={height} />)}
         <DockRowSeparator onMove={onSeparatorMove} />
       </div>
     )
