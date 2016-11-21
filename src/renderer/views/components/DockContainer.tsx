@@ -104,22 +104,24 @@ interface DockContainerData {
 }
 
 @observer
-class DockTab extends React.Component<{viewModel: DockTabViewModel, height: number}, {}> {
+class DockTab extends React.Component<{viewModel: DockTabViewModel, height: number, panels: Map<string, DockPanelInfo>}, {}> {
   render() {
+    const {viewModel, height, panels} = this.props
+    const panel = panels.get(viewModel.id)!.children
     return (
-      <div className="DockTab" hidden={!this.props.viewModel.selected} style={{height: this.props.height + "px"}}>
-        {this.props.viewModel.render()}
+      <div className="DockTab" hidden={!viewModel.selected} style={{height: height + "px"}}>
+        {panel}
       </div>
     )
   }
 }
 
 @observer
-class DockRow extends React.Component<{viewModel: DockRowViewModel}, {}> {
+class DockRow extends React.Component<{viewModel: DockRowViewModel, panels: Map<string, DockPanelInfo>}, {}> {
   tabsElement: HTMLElement
 
   render() {
-    const {viewModel} = this.props
+    const {viewModel, panels} = this.props
     const {tabs, height} = viewModel
     const onTabsDragOver = (e: React.DragEvent<HTMLElement>) => {
       e.preventDefault()
@@ -148,7 +150,7 @@ class DockRow extends React.Component<{viewModel: DockRowViewModel}, {}> {
             })
           }
         </div>
-        {tabs.map(t => <DockTab key={t.id} viewModel={t} height={height} />)}
+        {tabs.map(t => <DockTab key={t.id} viewModel={t} height={height} panels={panels} />)}
         <DockRowSeparator onMove={onSeparatorMove} />
       </div>
     )
@@ -192,13 +194,14 @@ class DockRowSeparator extends React.Component<{onMove: (dy: number) => void}, {
 }
 
 @observer
-class DockColumn extends React.Component<{viewModel: DockColumnViewModel}, {}> {
+class DockColumn extends React.Component<{viewModel: DockColumnViewModel, panels: Map<string, DockPanelInfo>}, {}> {
   render() {
+    const {panels} = this.props
     const {rows} = this.props.viewModel
     return (
       <div className="DockColumn">
         {
-          rows.map(r => <DockRow key={r.id} viewModel={r} />)
+          rows.map(r => <DockRow key={r.id} viewModel={r} panels={panels} />)
         }
       </div>
     )
@@ -241,11 +244,11 @@ class DockContainer extends React.Component<DockContainerProps, {}> {
 
     return (
       <div className="DockContainer">
-        <DockColumn viewModel={this.viewModel.left} />
+        <DockColumn viewModel={this.viewModel.left} panels={panelMap} />
         <div className="DockCenter">
           {center}
         </div>
-        <DockColumn viewModel={this.viewModel.right} />
+        <DockColumn viewModel={this.viewModel.right} panels={panelMap} />
       </div>
     )
   }
