@@ -2,6 +2,20 @@
   display: flex;
 }
 
+.DockRow_tab {
+  font-size: 14px;
+  cursor: move;
+  height: 32px;
+  padding: 0 8px;
+  line-height: 32px;
+  text-transform: uppercase;
+  color: var(--panel-title-color);
+}
+
+.DockTab {
+  padding: 8px;
+}
+
 .DockCenter {
   flex: 1;
 }

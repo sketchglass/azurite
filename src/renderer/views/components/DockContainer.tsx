@@ -109,7 +109,7 @@ class DockRow extends React.Component<{viewModel: DockRowViewModel}, {}> {
     return (
       <div className="DockRow">
         <div className="DockRow_tabs">
-          {tabs.map(t => <h2>{t.title}</h2>)}
+          {tabs.map(t => <div key={t.title} className="DockRow_tab">{t.title}</div>)}
         </div>
         {tabs.map(t => <DockTab key={t.id} viewModel={t} />)}
       </div>
