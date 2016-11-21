@@ -164,7 +164,14 @@ class DockColumn extends React.Component<{viewModel: DockColumnViewModel}, {}> {
     const {rows} = this.props.viewModel
     return (
       <div className="DockColumn">
-        {rows.map(r => <DockRow key={r.id} viewModel={r} />)}
+        {
+          rows.map(r => {
+            return [
+              <DockRow key={r.id} viewModel={r} />,
+              <div className="DockSeparator" />
+            ]
+          })
+        }
       </div>
     )
   }

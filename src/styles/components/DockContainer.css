@@ -2,6 +2,11 @@
   display: flex;
 }
 
+.DockSeparator {
+  min-height: 4px;
+  cursor: row-resize;
+}
+
 .DockRow_tabs {
   display: flex;
 }
