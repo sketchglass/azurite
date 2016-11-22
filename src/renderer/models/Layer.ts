@@ -77,18 +77,6 @@ class Layer {
     }
   }
 
-  get clipSource() {
-    if (this.clippingGroup && this.parent && this.parent.content.type == "group") {
-      const siblings = this.parent.content.children
-      const index = siblings.indexOf(this)
-      for (let i = index + 1; i < siblings.length; ++i) {
-        if (!siblings[i].clippingGroup) {
-          return siblings[i]
-        }
-      }
-    }
-  }
-
   static fromData(picture: Picture, data: LayerData): Layer {
     const makeContent: (layer: Layer) => LayerContent = layer => {
       switch (data.content.type) {
