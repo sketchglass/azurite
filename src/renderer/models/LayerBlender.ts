@@ -164,7 +164,7 @@ class LayerBlender {
 
   @observable lastBlend: {rect?: Rect} = {}
 
-  private clipTile: Tile|undefined
+  private clipTiles: Tile|undefined[] = []
 
   constructor(public picture: Picture) {
   }
@@ -186,7 +186,10 @@ class LayerBlender {
 
   renderLayer(layer: Layer, key: Vec2, scissor: Rect|undefined, depth: number): boolean {
     if (!layer.visible) {
-      this.clipTile = undefined
+      this.clipTiles[depth] = undefined
+      return false
+    }
+    if (layer.clippingGroup && !this.clipTiles[depth]) {
       return false
     }
     const {content} = layer
@@ -204,17 +207,12 @@ class LayerBlender {
       }
     }
 
-    if (layer.clippingGroup) {
-      if (!this.clipTile) {
-        // clipped out
-        return false
-      }
-    } else {
-      this.clipTile = tile
+    if (!layer.clippingGroup) {
+      this.clipTiles[depth] = tile
     }
 
     const tileBlender = tileBlenders[depth]
-    const clipTile = layer.clippingGroup ? this.clipTile : undefined
+    const clipTile = layer.clippingGroup ? this.clipTiles[depth] : undefined
     const hooked = this.hook && this.hook(layer, key, tile, clipTile, tileBlender)
     if (hooked) {
       return true
@@ -231,7 +229,7 @@ class LayerBlender {
     }
     tileBlenders[depth].setScissor(scissor)
     tileBlenders[depth].clear()
-    this.clipTile = undefined
+    this.clipTiles[depth] = undefined
     let rendered = false
     for (let i = layers.length - 1; i >= 0; --i) {
       const childRendered = this.renderLayer(layers[i], key, scissor, depth)
