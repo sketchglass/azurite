@@ -30,7 +30,7 @@ class Layer {
   constructor(public picture: Picture, name: string, makeContent: (layer: Layer) => LayerContent) {
     this.name = name
     this.content = makeContent(this)
-    reaction(() => [this.visible, this.blendMode, this.opacity], () => {
+    reaction(() => [this.visible, this.blendMode, this.opacity, this.clippingGroup], () => {
       picture.lastUpdate = {layer: this}
     })
   }
