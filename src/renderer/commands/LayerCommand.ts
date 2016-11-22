@@ -203,6 +203,7 @@ interface LayerProps {
   blendMode?: LayerBlendMode
   opacity?: number
   preserveOpacity?: boolean
+  clippingGroup?: boolean
 }
 
 export
