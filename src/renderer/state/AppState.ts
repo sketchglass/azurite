@@ -111,7 +111,6 @@ class AppState {
     // TODO: save app state
     if (await appState.closePictures()) {
       remote.getCurrentWindow().destroy()
-      remote.app.quit()
       return true
     }
     return false
