@@ -13,9 +13,15 @@ class NormalBlendShader extends Shader {
       precision mediump float;
       varying highp vec2 vTexCoord;
       uniform sampler2D srcTexture;
+      uniform sampler2D clipTexture;
+      uniform bool clipEnabled;
       uniform float opacity;
       void main(void) {
-        gl_FragColor = texture2D(srcTexture, vTexCoord) * opacity;
+        vec4 color = texture2D(srcTexture, vTexCoord) * opacity;
+        if (clipEnabled) {
+          color *= texture2D(clipTexture, vTexCoord).a;
+        }
+        gl_FragColor = color;
       }
     `
   }
@@ -30,6 +36,8 @@ abstract class BlendShader extends Shader {
       varying highp vec2 vTexCoord;
       uniform sampler2D srcTexture;
       uniform sampler2D dstTexture;
+      uniform sampler2D clipTexture;
+      uniform bool clipEnabled;
       uniform float opacity;
       vec3 blendOp(vec3 src, vec3 dst) {
         ${this.blendOp}
@@ -39,6 +47,9 @@ abstract class BlendShader extends Shader {
       }
       void main(void) {
         vec4 src = texture2D(srcTexture, vTexCoord) * opacity;
+        if (clipEnabled) {
+          src *= texture2D(clipTexture, vTexCoord).a;
+        }
         vec4 dst = texture2D(dstTexture, vTexCoord);
         vec4 blended = vec4(clamp(blendOp(getColor(src), getColor(dst)), 0.0, 1.0), 1.0);
         gl_FragColor = blended * src.a * dst.a + src * (1.0 - dst.a) + dst * (1.0 - src.a);
@@ -102,19 +113,23 @@ class TileBlender {
     return this.drawTargets[[1, 0][this.currentIndex]]
   }
 
-  blend(tile: Tile, mode: LayerBlendMode, opacity: number) {
+  blend(tile: Tile, mode: LayerBlendMode, opacity: number, clipTile: Tile|undefined) {
     const model = tileBlendModels.get(mode)
     if (model) {
       this.swapCurrent()
       model.uniforms = {
         srcTexture: tile.texture,
         dstTexture: this.previousTile.texture,
+        clipTexture: (clipTile && clipTile.texture)!,
+        clipEnabled: !!clipTile,
         opacity
       }
       this.currentDrawTarget.draw(model)
     } else {
       tileNormalModel.uniforms = {
         srcTexture: tile.texture,
+        clipTexture: (clipTile && clipTile.texture)!,
+        clipEnabled: !!clipTile,
         opacity
       }
       this.currentDrawTarget.draw(tileNormalModel)
@@ -135,7 +150,7 @@ class TileBlender {
 const tileBlenders = [new TileBlender()]
 
 export
-type LayerBlendHook = (layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) => boolean
+type LayerBlendHook = (layer: Layer, tileKey: Vec2, tile: Tile|undefined, clipTile: Tile|undefined, tileBlender: TileBlender) => boolean
 
 export default
 class LayerBlender {
@@ -148,6 +163,8 @@ class LayerBlender {
   hook: LayerBlendHook|undefined
 
   @observable lastBlend: {rect?: Rect} = {}
+
+  private clipTile: Tile|undefined
 
   constructor(public picture: Picture) {
   }
@@ -169,6 +186,7 @@ class LayerBlender {
 
   renderLayer(layer: Layer, key: Vec2, scissor: Rect|undefined, depth: number): boolean {
     if (!layer.visible) {
+      this.clipTile = undefined
       return false
     }
     const {content} = layer
@@ -186,12 +204,21 @@ class LayerBlender {
       }
     }
 
+    if (layer.clippingGroup) {
+      if (!this.clipTile) {
+        // clipped out
+        return false
+      }
+    } else {
+      this.clipTile = tile
+    }
+
     const tileBlender = tileBlenders[depth]
-    const hooked = this.hook && this.hook(layer, key, tile, tileBlender)
+    const hooked = this.hook && this.hook(layer, key, tile, this.clipTile, tileBlender)
     if (hooked) {
       return true
     } else if (tile) {
-      tileBlender.blend(tile, layer.blendMode, layer.opacity)
+      tileBlender.blend(tile, layer.blendMode, layer.opacity, this.clipTile)
       return true
     }
     return false
