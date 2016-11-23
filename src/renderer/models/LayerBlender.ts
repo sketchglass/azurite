@@ -13,15 +13,18 @@ class NormalBlendShader extends Shader {
       precision mediump float;
       varying highp vec2 vTexCoord;
       uniform sampler2D srcTexture;
+      uniform sampler2D dstTexture;
       uniform sampler2D clipTexture;
       uniform bool clipEnabled;
       uniform float opacity;
       void main(void) {
-        vec4 color = texture2D(srcTexture, vTexCoord) * opacity;
+        vec4 src = texture2D(srcTexture, vTexCoord) * opacity;
+        vec4 dst = texture2D(dstTexture, vTexCoord);
+        float clip = 1.0;
         if (clipEnabled) {
-          color *= texture2D(clipTexture, vTexCoord).a;
+          clip = texture2D(clipTexture, vTexCoord).a;
         }
-        gl_FragColor = color;
+        gl_FragColor = src * clip + dst * (1.0 - src.a);
       }
     `
   }
@@ -47,12 +50,13 @@ abstract class BlendShader extends Shader {
       }
       void main(void) {
         vec4 src = texture2D(srcTexture, vTexCoord) * opacity;
+        float clip = 1.0;
         if (clipEnabled) {
-          src *= texture2D(clipTexture, vTexCoord).a;
+          clip = texture2D(clipTexture, vTexCoord).a;
         }
         vec4 dst = texture2D(dstTexture, vTexCoord);
         vec4 blended = vec4(clamp(blendOp(getColor(src), getColor(dst)), 0.0, 1.0), 1.0);
-        gl_FragColor = blended * src.a * dst.a + src * (1.0 - dst.a) + dst * (1.0 - src.a);
+        gl_FragColor = blended * (src.a * clip * dst.a) + src * (clip * (1.0 - dst.a)) + dst * (1.0 - src.a);
       }
     `
   }
@@ -87,6 +91,7 @@ const tileBlendModels = new Map(Array.from(blendOps).map(([type, op]) => {
 const tileNormalModel = new Model(context, {
   shape: tileShape,
   shader: NormalBlendShader,
+  blendMode: "src",
 })
 
 export
@@ -132,8 +137,10 @@ class TileBlender {
       }
       this.currentDrawTarget.draw(model)
     } else {
+      this.swapCurrent()
       tileNormalModel.uniforms = {
         srcTexture: tile.texture,
+        dstTexture: this.previousTile.texture,
         clipTexture: this.clipTile.texture,
         clipEnabled: clip,
         opacity
