@@ -47,6 +47,24 @@ abstract class BlendShader extends Shader {
   }
 }
 
+class MixShader extends Shader {
+  get fragmentShader() {
+    return `
+      precision highp float;
+      varying vec2 vTexCoord;
+      uniform sampler2D textureA;
+      uniform sampler2D textureB;
+      uniform sampler2D textureRate;
+      void main(void) {
+        vec4 a = texture2D(textureA, vTexCoord);
+        vec4 b = texture2D(textureB, vTexCoord);
+        float rate = texture2D(textureRate, vTexCoord).a;
+        gl_FragColor = mix(a, b, rate);
+      }
+    `
+  }
+}
+
 const blendOps = new Map<LayerBlendMode, string>([
   ["plus", `
     return src + dst;
@@ -78,10 +96,22 @@ const tileNormalModel = new Model(context, {
   shader: NormalBlendShader,
 })
 
+const mixModel = new Model(context, {
+  shape: tileShape,
+  shader: MixShader,
+  blendMode: "src",
+})
+
 export
 class TileBlender {
   tiles = [0, 1].map(i => new Tile())
   drawTargets = this.tiles.map(tile => new TextureDrawTarget(context, tile.texture))
+  clipBaseTile = new Tile()
+  clipBaseDrawTarget = new TextureDrawTarget(context, this.clipBaseTile.texture)
+  clipTile = new Tile()
+  clipDrawTarget = new TextureDrawTarget(context, this.clipTile.texture)
+  clipping = false
+  hasClipTile = false
 
   currentIndex = 0
 
@@ -102,7 +132,21 @@ class TileBlender {
     return this.drawTargets[[1, 0][this.currentIndex]]
   }
 
+  startClip(tile: Tile|undefined) {
+    this.clipping = true
+    if (tile) {
+      this.hasClipTile = true
+      drawTexture(this.clipBaseDrawTarget, this.currentTile.texture, {blendMode: "src"})
+      drawTexture(this.clipDrawTarget, tile.texture, {blendMode: "src"})
+    } else {
+      this.hasClipTile = false
+    }
+  }
+
   blend(tile: Tile, mode: LayerBlendMode, opacity: number) {
+    if (this.clipping && !this.hasClipTile) {
+      return
+    }
     const model = tileBlendModels.get(mode)
     if (model) {
       this.swapCurrent()
@@ -118,6 +162,22 @@ class TileBlender {
         opacity
       }
       this.currentDrawTarget.draw(tileNormalModel)
+    }
+  }
+
+  applyClip() {
+    if (!this.clipping) {
+      return
+    }
+    this.clipping = false
+    if (this.hasClipTile) {
+      this.swapCurrent()
+      mixModel.uniforms = {
+        textureA: this.clipBaseTile.texture,
+        textureB: this.previousTile.texture,
+        textureRate: this.clipTile.texture,
+      }
+      this.currentDrawTarget.draw(mixModel)
     }
   }
 
@@ -167,34 +227,44 @@ class LayerBlender {
     this.lastBlend = {rect}
   }
 
-  renderLayer(layer: Layer, key: Vec2, scissor: Rect|undefined, depth: number): boolean {
-    if (!layer.visible) {
-      return false
-    }
+  renderLayer(layer: Layer, nextLayer: Layer|undefined, key: Vec2, scissor: Rect|undefined, depth: number): boolean {
     const {content} = layer
     let tile: Tile|undefined = undefined
 
-    if (content.type == "image") {
-      if (content.tiledTexture.has(key)) {
-        tile = content.tiledTexture.get(key)
-      }
-    } else {
-      const {children} = content
-      const rendered = this.renderLayers(children, key, scissor, depth + 1)
-      if (rendered) {
-        tile = tileBlenders[depth + 1].currentTile
+    if (layer.visible) {
+      if (content.type == "image") {
+        if (content.tiledTexture.has(key)) {
+          tile = content.tiledTexture.get(key)
+        }
+      } else {
+        const {children} = content
+        const rendered = this.renderLayers(children, key, scissor, depth + 1)
+        if (rendered) {
+          tile = tileBlenders[depth + 1].currentTile
+        }
       }
     }
 
     const tileBlender = tileBlenders[depth]
+
+    if (!layer.clippingGroup && nextLayer && nextLayer.clippingGroup) {
+      tileBlender.startClip(tile)
+    }
+
+    let rendered = false
     const hooked = this.hook && this.hook(layer, key, tile, tileBlender)
+
     if (hooked) {
-      return true
+      rendered = true
     } else if (tile) {
       tileBlender.blend(tile, layer.blendMode, layer.opacity)
-      return true
+      rendered = true
     }
-    return false
+
+    if (layer.clippingGroup && !(nextLayer && nextLayer.clippingGroup)) {
+      tileBlender.applyClip()
+    }
+    return rendered
   }
 
   renderLayers(layers: Layer[], key: Vec2, scissor: Rect|undefined, depth: number): boolean {
@@ -205,7 +275,7 @@ class LayerBlender {
     tileBlenders[depth].clear()
     let rendered = false
     for (let i = layers.length - 1; i >= 0; --i) {
-      const childRendered = this.renderLayer(layers[i], key, scissor, depth)
+      const childRendered = this.renderLayer(layers[i], layers[i-1], key, scissor, depth)
       rendered = rendered || childRendered
     }
     return rendered
