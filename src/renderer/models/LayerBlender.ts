@@ -125,16 +125,28 @@ class TileBlender {
     if (clip && this.clipCleared) {
       return
     }
-    const model = tileBlendModels.get(mode) || tileNormalModel
-    this.swapCurrent()
-    model.uniforms = {
-      srcTexture: tile.texture,
-      dstTexture: this.previousTile.texture,
-      clipTexture: this.clipTile.texture,
-      clipEnabled: clip,
-      opacity
+    const model = tileBlendModels.get(mode)
+    if (model) {
+      this.swapCurrent()
+      model.uniforms = {
+        srcTexture: tile.texture,
+        dstTexture: this.previousTile.texture,
+        clipTexture: this.clipTile.texture,
+        clipEnabled: clip,
+        opacity
+      }
+      this.currentDrawTarget.draw(model)
+    } else {
+      this.swapCurrent()
+      tileNormalModel.uniforms = {
+        srcTexture: tile.texture,
+        dstTexture: this.previousTile.texture,
+        clipTexture: this.clipTile.texture,
+        clipEnabled: clip,
+        opacity
+      }
+      this.currentDrawTarget.draw(tileNormalModel)
     }
-    this.currentDrawTarget.draw(model)
   }
 
   clear() {
