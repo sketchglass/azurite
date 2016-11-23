@@ -21,6 +21,7 @@ class NormalBlendShader extends Shader {
   }
 }
 
+// Nice reference: https://www.w3.org/TR/SVGCompositing/#alphaCompositing
 abstract class BlendShader extends Shader {
   abstract get blendOp(): string
 
@@ -31,6 +32,7 @@ abstract class BlendShader extends Shader {
       uniform sampler2D srcTexture;
       uniform sampler2D dstTexture;
       uniform float opacity;
+      uniform bool clipping;
       vec3 blendOp(vec3 src, vec3 dst) {
         ${this.blendOp}
       }
@@ -41,7 +43,13 @@ abstract class BlendShader extends Shader {
         vec4 src = texture2D(srcTexture, vTexCoord) * opacity;
         vec4 dst = texture2D(dstTexture, vTexCoord);
         vec4 blended = vec4(clamp(blendOp(getColor(src), getColor(dst)), 0.0, 1.0), 1.0);
-        gl_FragColor = blended * src.a * dst.a + src * (1.0 - dst.a) + dst * (1.0 - src.a);
+        if (clipping) {
+          // src-atop
+          gl_FragColor = blended * src.a * dst.a + dst * (1.0 - src.a);
+        } else {
+          // src-over
+          gl_FragColor = blended * src.a * dst.a + src * (1.0 - dst.a) + dst * (1.0 - src.a);
+        }
       }
     `
   }
@@ -108,10 +116,7 @@ class TileBlender {
   drawTargets = this.tiles.map(tile => new TextureDrawTarget(context, tile.texture))
   clipBaseTile = new Tile()
   clipBaseDrawTarget = new TextureDrawTarget(context, this.clipBaseTile.texture)
-  clipTile = new Tile()
-  clipDrawTarget = new TextureDrawTarget(context, this.clipTile.texture)
   clipping = false
-  hasClipTile = false
 
   currentIndex = 0
 
@@ -134,25 +139,22 @@ class TileBlender {
 
   startClip(tile: Tile|undefined) {
     this.clipping = true
+    drawTexture(this.clipBaseDrawTarget, this.currentTile.texture, {blendMode: "src"})
     if (tile) {
-      this.hasClipTile = true
-      drawTexture(this.clipBaseDrawTarget, this.currentTile.texture, {blendMode: "src"})
-      drawTexture(this.clipDrawTarget, tile.texture, {blendMode: "src"})
+      drawTexture(this.currentDrawTarget, tile.texture, {blendMode: "src"})
     } else {
-      this.hasClipTile = false
+      this.currentDrawTarget.clear(new Color(0, 0, 0, 0))
     }
   }
 
   blend(tile: Tile, mode: LayerBlendMode, opacity: number) {
-    if (this.clipping && !this.hasClipTile) {
-      return
-    }
     const model = tileBlendModels.get(mode)
     if (model) {
       this.swapCurrent()
       model.uniforms = {
         srcTexture: tile.texture,
         dstTexture: this.previousTile.texture,
+        clipping: this.clipping,
         opacity
       }
       this.currentDrawTarget.draw(model)
@@ -161,6 +163,7 @@ class TileBlender {
         srcTexture: tile.texture,
         opacity
       }
+      tileNormalModel.blendMode = this.clipping ? "src-atop" : "src-over"
       this.currentDrawTarget.draw(tileNormalModel)
     }
   }
@@ -170,15 +173,9 @@ class TileBlender {
       return
     }
     this.clipping = false
-    if (this.hasClipTile) {
-      this.swapCurrent()
-      mixModel.uniforms = {
-        textureA: this.clipBaseTile.texture,
-        textureB: this.previousTile.texture,
-        textureRate: this.clipTile.texture,
-      }
-      this.currentDrawTarget.draw(mixModel)
-    }
+    this.swapCurrent()
+    drawTexture(this.currentDrawTarget, this.clipBaseTile.texture, {blendMode: "src"})
+    drawTexture(this.currentDrawTarget, this.previousTile.texture, {blendMode: "src-over"})
   }
 
   clear() {
