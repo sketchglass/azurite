@@ -37,7 +37,7 @@ abstract class BlendShader extends Shader {
         ${this.blendOp}
       }
       vec3 getColor(vec4 pixel) {
-        return pixel.a == 0.0 ? vec3(0.0) : pixel.rgb / pixel.a;
+        return pixel.a < 0.0001 ? vec3(0.0) : pixel.rgb / pixel.a;
       }
       void main(void) {
         vec4 src = texture2D(srcTexture, vTexCoord) * opacity;
@@ -45,10 +45,10 @@ abstract class BlendShader extends Shader {
         vec4 blended = vec4(clamp(blendOp(getColor(src), getColor(dst)), 0.0, 1.0), 1.0);
         if (clipping) {
           // src-atop
-          gl_FragColor = blended * src.a * dst.a + dst * (1.0 - src.a);
+          gl_FragColor = blended * (src.a * dst.a) + dst * (1.0 - src.a);
         } else {
           // src-over
-          gl_FragColor = blended * src.a * dst.a + src * (1.0 - dst.a) + dst * (1.0 - src.a);
+          gl_FragColor = blended * (src.a * dst.a) + src * (1.0 - dst.a) + dst * (1.0 - src.a);
         }
       }
     `
