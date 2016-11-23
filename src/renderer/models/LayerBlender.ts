@@ -214,12 +214,11 @@ class LayerBlender {
     }
 
     const tileBlender = tileBlenders[depth]
-    const clipTile = layer.clippingGroup ? this.clipTile : undefined
-    const hooked = this.hook && this.hook(layer, key, tile, clipTile, tileBlender)
+    const hooked = this.hook && this.hook(layer, key, tile, this.clipTile, tileBlender)
     if (hooked) {
       return true
     } else if (tile) {
-      tileBlender.blend(tile, layer.blendMode, layer.opacity, clipTile)
+      tileBlender.blend(tile, layer.blendMode, layer.opacity, this.clipTile)
       return true
     }
     return false
@@ -231,7 +230,6 @@ class LayerBlender {
     }
     tileBlenders[depth].setScissor(scissor)
     tileBlenders[depth].clear()
-    this.clipTile = undefined
     let rendered = false
     for (let i = layers.length - 1; i >= 0; --i) {
       const childRendered = this.renderLayer(layers[i], key, scissor, depth)
