@@ -93,6 +93,9 @@ export
 class TileBlender {
   tiles = [0, 1].map(i => new Tile())
   drawTargets = this.tiles.map(tile => new TextureDrawTarget(context, tile.texture))
+  clipTile = new Tile()
+  clipDrawTarget = new TextureDrawTarget(context, this.clipTile.texture)
+  clipCleared = true
 
   currentIndex = 0
 
@@ -113,23 +116,26 @@ class TileBlender {
     return this.drawTargets[[1, 0][this.currentIndex]]
   }
 
-  blend(tile: Tile, mode: LayerBlendMode, opacity: number, clipTile: Tile|undefined) {
+  blend(tile: Tile, mode: LayerBlendMode, opacity: number, clip: boolean) {
+    if (clip && this.clipCleared) {
+      return
+    }
     const model = tileBlendModels.get(mode)
     if (model) {
       this.swapCurrent()
       model.uniforms = {
         srcTexture: tile.texture,
         dstTexture: this.previousTile.texture,
-        clipTexture: (clipTile && clipTile.texture)!,
-        clipEnabled: !!clipTile,
+        clipTexture: this.clipTile.texture,
+        clipEnabled: clip,
         opacity
       }
       this.currentDrawTarget.draw(model)
     } else {
       tileNormalModel.uniforms = {
         srcTexture: tile.texture,
-        clipTexture: (clipTile && clipTile.texture)!,
-        clipEnabled: !!clipTile,
+        clipTexture: this.clipTile.texture,
+        clipEnabled: clip,
         opacity
       }
       this.currentDrawTarget.draw(tileNormalModel)
@@ -137,6 +143,7 @@ class TileBlender {
   }
 
   clear() {
+    this.clipCleared = true
     this.currentDrawTarget.clear(new Color(0, 0, 0, 0))
   }
 
@@ -150,7 +157,7 @@ class TileBlender {
 const tileBlenders = [new TileBlender()]
 
 export
-type LayerBlendHook = (layer: Layer, tileKey: Vec2, tile: Tile|undefined, clipTile: Tile|undefined, tileBlender: TileBlender) => boolean
+type LayerBlendHook = (layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) => boolean
 
 export default
 class LayerBlender {
@@ -163,8 +170,6 @@ class LayerBlender {
   hook: LayerBlendHook|undefined
 
   @observable lastBlend: {rect?: Rect} = {}
-
-  private clipTiles: Tile|undefined[] = []
 
   constructor(public picture: Picture) {
   }
@@ -185,11 +190,9 @@ class LayerBlender {
   }
 
   renderLayer(layer: Layer, key: Vec2, scissor: Rect|undefined, depth: number): boolean {
+    const tileBlender = tileBlenders[depth]
     if (!layer.visible) {
-      this.clipTiles[depth] = undefined
-      return false
-    }
-    if (layer.clippingGroup && !this.clipTiles[depth]) {
+      tileBlender.clipCleared = true
       return false
     }
     const {content} = layer
@@ -208,16 +211,19 @@ class LayerBlender {
     }
 
     if (!layer.clippingGroup) {
-      this.clipTiles[depth] = tile
+      if (tile) {
+        tileBlender.clipCleared = false
+        drawTexture(tileBlender.clipDrawTarget, tile.texture, {blendMode: "src"})
+      } else {
+        tileBlender.clipCleared = true
+      }
     }
 
-    const tileBlender = tileBlenders[depth]
-    const clipTile = layer.clippingGroup ? this.clipTiles[depth] : undefined
-    const hooked = this.hook && this.hook(layer, key, tile, clipTile, tileBlender)
+    const hooked = this.hook && this.hook(layer, key, tile, tileBlender)
     if (hooked) {
       return true
     } else if (tile) {
-      tileBlender.blend(tile, layer.blendMode, layer.opacity, clipTile)
+      tileBlender.blend(tile, layer.blendMode, layer.opacity, layer.clippingGroup)
       return true
     }
     return false
@@ -229,7 +235,6 @@ class LayerBlender {
     }
     tileBlenders[depth].setScissor(scissor)
     tileBlenders[depth].clear()
-    this.clipTiles[depth] = undefined
     let rendered = false
     for (let i = layers.length - 1; i >= 0; --i) {
       const childRendered = this.renderLayer(layers[i], key, scissor, depth)
