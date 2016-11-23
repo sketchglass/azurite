@@ -107,11 +107,11 @@ abstract class BaseBrushTool extends Tool {
     this.renderer.render(rect)
   }
 
-  hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) {
+  hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, clipTile: Tile|undefined, tileBlender: TileBlender) {
     if (this.targetContent && this.newTiledTexture && layer == this.targetContent.layer) {
       if (this.newTiledTexture.has(tileKey)) {
-        const {blendMode, opacity, clippingGroup} = layer
-        tileBlender.blend(this.newTiledTexture.get(tileKey), blendMode, opacity, clippingGroup)
+        const {blendMode, opacity} = layer
+        tileBlender.blend(this.newTiledTexture.get(tileKey), blendMode, opacity, clipTile)
       }
       return true
     } else {

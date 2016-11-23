@@ -404,7 +404,7 @@ class TransformLayerTool extends Tool {
     }
   }
 
-  hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) {
+  hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, clipTile: Tile|undefined, tileBlender: TileBlender) {
     const content = this.currentContent
     if (this.editing && content && layer == content.layer && this.originalRect && this.originalTexture) {
       transformedDrawTarget.clear(new Color(0,0,0,0))
@@ -412,8 +412,8 @@ class TransformLayerTool extends Tool {
         .merge(this.transform)
         .translate(tileKey.mulScalar(-Tile.width))
       drawTexture(transformedDrawTarget, this.originalTexture, {transform, blendMode: "src", bicubic: true, srcRect: this.originalTextureSubrect})
-      const {blendMode, opacity, clippingGroup} = layer
-      tileBlender.blend(transformedTile, blendMode, opacity, clippingGroup)
+      const {blendMode, opacity} = layer
+      tileBlender.blend(transformedTile, blendMode, opacity, clipTile)
       return true
     } else {
       return false
