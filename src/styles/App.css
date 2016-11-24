@@ -1,5 +1,9 @@
 * {
   color: var(--default-color);
+  user-select: none;
+}
+div {
+  cursor: default;
 }
 body {
   margin: 0;
