@@ -33,6 +33,7 @@ abstract class BlendShader extends Shader {
       uniform sampler2D dstTexture;
       uniform float opacity;
       uniform bool clipping;
+      uniform bool startClipping;
       vec3 blendOp(vec3 src, vec3 dst) {
         ${this.blendOp}
       }
@@ -43,11 +44,14 @@ abstract class BlendShader extends Shader {
         vec4 src = texture2D(srcTexture, vTexCoord) * opacity;
         vec4 dst = texture2D(dstTexture, vTexCoord);
         vec4 blended = vec4(clamp(blendOp(getColor(src), getColor(dst)), 0.0, 1.0), 1.0);
-        if (clipping) {
-          // src-atop
+        if (startClipping) {
+          // clip to src
+          gl_FragColor = blended * (src.a * dst.a) + src * (1.0 - dst.a);
+        } else if (clipping) {
+          // clip to dst
           gl_FragColor = blended * (src.a * dst.a) + dst * (1.0 - src.a);
         } else {
-          // src-over
+          // normal blending
           gl_FragColor = blended * (src.a * dst.a) + src * (1.0 - dst.a) + dst * (1.0 - src.a);
         }
       }
@@ -137,45 +141,47 @@ class TileBlender {
     return this.drawTargets[[1, 0][this.currentIndex]]
   }
 
-  startClip(tile: Tile|undefined) {
-    this.clipping = true
-    drawTexture(this.clipBaseDrawTarget, this.currentTile.texture, {blendMode: "src"})
+  blend(tile: Tile|undefined, layer: Layer, nextLayer: Layer|undefined) {
+    const {opacity, blendMode} = layer
+    const model = tileBlendModels.get(blendMode)
+    let startClipping = !!(!layer.clippingGroup && nextLayer && nextLayer.clippingGroup)
+    let endClipping = !!(layer.clippingGroup && !(nextLayer && nextLayer.clippingGroup))
+    if (startClipping) {
+      this.clipping = true
+      drawTexture(this.clipBaseDrawTarget, this.currentTile.texture, {blendMode: "src"})
+    }
+
     if (tile) {
-      drawTexture(this.currentDrawTarget, tile.texture, {blendMode: "src"})
+      if (model) {
+        this.swapCurrent()
+        model.uniforms = {
+          srcTexture: tile.texture,
+          dstTexture: this.previousTile.texture,
+          clipping: this.clipping,
+          startClipping,
+          opacity,
+        }
+        this.currentDrawTarget.draw(model)
+      } else {
+        tileNormalModel.uniforms = {
+          srcTexture: tile.texture,
+          opacity,
+        }
+        tileNormalModel.blendMode = startClipping ? "src" : (this.clipping ? "src-atop" : "src-over")
+        this.currentDrawTarget.draw(tileNormalModel)
+      }
     } else {
-      this.currentDrawTarget.clear(new Color(0, 0, 0, 0))
+      if (startClipping) {
+        this.currentDrawTarget.clear(new Color(0, 0, 0, 0))
+      }
     }
-  }
 
-  blend(tile: Tile, mode: LayerBlendMode, opacity: number) {
-    const model = tileBlendModels.get(mode)
-    if (model) {
+    if (endClipping) {
+      this.clipping = false
       this.swapCurrent()
-      model.uniforms = {
-        srcTexture: tile.texture,
-        dstTexture: this.previousTile.texture,
-        clipping: this.clipping,
-        opacity
-      }
-      this.currentDrawTarget.draw(model)
-    } else {
-      tileNormalModel.uniforms = {
-        srcTexture: tile.texture,
-        opacity
-      }
-      tileNormalModel.blendMode = this.clipping ? "src-atop" : "src-over"
-      this.currentDrawTarget.draw(tileNormalModel)
+      drawTexture(this.currentDrawTarget, this.clipBaseTile.texture, {blendMode: "src"})
+      drawTexture(this.currentDrawTarget, this.previousTile.texture, {blendMode: "src-over"})
     }
-  }
-
-  applyClip() {
-    if (!this.clipping) {
-      return
-    }
-    this.clipping = false
-    this.swapCurrent()
-    drawTexture(this.currentDrawTarget, this.clipBaseTile.texture, {blendMode: "src"})
-    drawTexture(this.currentDrawTarget, this.previousTile.texture, {blendMode: "src-over"})
   }
 
   clear() {
@@ -251,20 +257,8 @@ class LayerBlender {
       }
     }
 
-    if (!layer.clippingGroup && nextLayer && nextLayer.clippingGroup) {
-      tileBlender.startClip(tile)
-    }
-
-    let rendered = false
-    if (tile) {
-      tileBlender.blend(tile, layer.blendMode, layer.opacity)
-      rendered = true
-    }
-
-    if (layer.clippingGroup && !(nextLayer && nextLayer.clippingGroup)) {
-      tileBlender.applyClip()
-    }
-    return rendered
+    tileBlender.blend(tile, layer, nextLayer)
+    return !!tile
   }
 
   renderLayers(layers: Layer[], key: Vec2, scissor: Rect|undefined, depth: number): boolean {
