@@ -52,12 +52,12 @@ class AppState {
 
   constructor() {
     reaction(() => [this.currentPictureState, this.currentTool], () => {
-      const hook = this.currentTool.hookLayerBlend.bind(this.currentTool)
+      const replaceTile = this.currentTool.replaceTile.bind(this.currentTool)
       for (const pictureState of this.pictureStates) {
         if (pictureState == this.currentPictureState) {
-          pictureState.picture.layerBlender.hook = hook
+          pictureState.picture.layerBlender.replaceTile = replaceTile
         } else {
-          pictureState.picture.layerBlender.hook = undefined
+          pictureState.picture.layerBlender.replaceTile = undefined
         }
       }
     })

@@ -135,7 +135,7 @@ class TileBlender {
 const tileBlenders = [new TileBlender()]
 
 export
-type LayerBlendHook = (layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) => boolean
+type ReplaceTile = (layer: Layer, tileKey: Vec2) => {replaced: boolean, tile?: Tile}
 
 export default
 class LayerBlender {
@@ -145,7 +145,7 @@ class LayerBlender {
   })
   drawTarget = new TextureDrawTarget(context, this.blendedTexture)
 
-  hook: LayerBlendHook|undefined
+  replaceTile: ReplaceTile|undefined
 
   @observable lastBlend: {rect?: Rect} = {}
 
@@ -187,10 +187,13 @@ class LayerBlender {
     }
 
     const tileBlender = tileBlenders[depth]
-    const hooked = this.hook && this.hook(layer, key, tile, tileBlender)
-    if (hooked) {
-      return true
-    } else if (tile) {
+    if (this.replaceTile) {
+      const {replaced, tile: replacedTile} = this.replaceTile(layer, key)
+      if (replaced) {
+        tile = replacedTile
+      }
+    }
+    if (tile) {
       tileBlender.blend(tile, layer.blendMode, layer.opacity)
       return true
     }
