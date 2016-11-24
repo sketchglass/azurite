@@ -7,6 +7,7 @@ import Picture from "../models/Picture"
 import Layer from "../models/Layer"
 import {MoveLayerCommand, CopyLayerCommand, GroupLayerCommand, AddLayerCommand, RemoveLayerCommand, ChangeLayerPropsCommand} from "../commands/LayerCommand"
 import ClickToEdit from "./components/ClickToEdit"
+import SVGIcon from "./components/SVGIcon"
 import LayerDetail from "./LayerDetail"
 const classNames = require("classnames")
 import {mouseOffsetPos} from "./util"
@@ -129,11 +130,6 @@ class LayerList extends React.Component<LayerListProps, {}> {
 
     return (
       <div className="LayerList">
-        <div className="LayerList_buttons">
-          <button onClick={this.addLayer.bind(this)}>Add</button>
-          <button onClick={this.groupLayer.bind(this)}>Group</button>
-          <button onClick={this.removeLayer.bind(this)}>Remove</button>
-        </div>
         <div className="LayerList_scroll">
           <LayerTree
             root={root}
@@ -145,6 +141,11 @@ class LayerList extends React.Component<LayerListProps, {}> {
             onMove={this.onMove}
             onCopy={this.onCopy}
           />
+        </div>
+        <div className="LayerList_buttons">
+          <button onClick={this.addLayer.bind(this)}><SVGIcon className="add" /></button>
+          <button onClick={this.groupLayer.bind(this)}><SVGIcon className="folder" /></button>
+          <button onClick={this.removeLayer.bind(this)}><SVGIcon className="subtract" /></button>
         </div>
         <LayerDetail layer={picture && picture.currentLayer} />
       </div>
