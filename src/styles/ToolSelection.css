@@ -6,6 +6,7 @@
   height: 100%;
   border-right: 1px solid var(--default-border-color);
   padding: 8px 0;
+  background-color: var(--default-background-color);
 }
 .ToolSelection_button {
   width: 40px;

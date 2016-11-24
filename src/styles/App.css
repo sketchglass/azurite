@@ -32,6 +32,7 @@ body {
   width: 240px;
   box-sizing: border-box;
   overflow-y: scroll;
+  background-color: var(--default-background-color);
 }
 .Sidebar-left {
   border-right: 1px solid var(--default-border-color);
