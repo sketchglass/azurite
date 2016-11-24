@@ -8,9 +8,6 @@ body {
   -webkit-font-smoothing: antialiased;
   font-size: 13px;
 }
-aside {
-  z-index: 100;
-}
 .App {
   display: flex;
   flex-direction: column;
@@ -32,20 +29,28 @@ aside {
   display: flex;
   flex-direction: column;
 }
-.LeftSidebar {
+.Sidebar {
+  z-index: 100;
   display: flex;
   flex-direction: column;
-  align-items: center;
   width: 240px;
+  padding: 12px;
   box-sizing: border-box;
   border-right: 1px solid var(--default-border-color);
+  overflow-y: scroll;
 }
-.RightSidebar {
-  width: 240px;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
-  border-left: 1px solid var(--default-border-color);
+.RGBRangeSliders {
+  margin: 8px 0;
+}
+.Palette {
+  margin: 8px 0;
+}
+.PanelTitle {
+  font-size: 14px;
+  height: 24px;
+  line-height: 24px;
+  text-transform: uppercase;
+  color: var(--panel-title-color);
 }
 .BrushSettings {
   width: 100%;

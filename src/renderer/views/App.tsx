@@ -117,27 +117,19 @@ class App extends React.Component<{}, {}> {
           <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
         </div>
         <div className="AppItem">
-          <aside className="LeftSidebar">
-            <DraggablePanelContainer top={60} left={12} margin={12} labelHeight={24}>
-              <DraggablePanel label="Color" width={216} height={200}>
-                <ColorPicker color={color} onChange={onColorChange} />
-              </DraggablePanel>
-              <DraggablePanel label="Slider" width={216} height={70}>
-                <RGBRangeSliders color={color} onChange={onColorChange} />
-              </DraggablePanel>
-              <DraggablePanel label="Palette" width={216} height={80}>
-                <Palette palette={palette} paletteIndex={paletteIndex} onChange={onPaletteChange} />
-              </DraggablePanel>
-              <DraggablePanel label="Settings" width={216} height={200}>
-                {currentTool.renderSettings()}
-              </DraggablePanel>
-            </DraggablePanelContainer>
+          <aside className="Sidebar">
+            <div className="PanelTitle">Color</div>
+            <ColorPicker color={color} onChange={onColorChange} />
+            <RGBRangeSliders color={color} onChange={onColorChange} />
+            <Palette palette={palette} paletteIndex={paletteIndex} onChange={onPaletteChange} />
+            <div className="PanelTitle">Tool</div>
+            {currentTool.renderSettings()}
           </aside>
           <div className="CenterArea">
             <PictureTabBar />
             <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
           </div>
-          <aside className="RightSidebar">
+          <aside className="Sidebar">
             <Navigator picture={picture} />
             <LayerList picture={picture} />
           </aside>
