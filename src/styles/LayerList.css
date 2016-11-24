@@ -14,6 +14,15 @@
   display: flex;
   align-items: center;
   flex: 1;
+  &-clipped {
+    &:before {
+      content: "";
+      width: 4px;
+      height: 100%;
+      margin-right: 8px;
+      background-color: var(--ui-primary-background-color);
+    }
+  }
 }
 .LayerList_layer .ClickToEdit {
   flex: 1;

@@ -9,6 +9,7 @@ interface LayerData {
   blendMode: LayerBlendMode
   opacity: number
   preserveOpacity: boolean
+  clippingGroup: boolean
   content: LayerContentData
 }
 
@@ -22,13 +23,14 @@ class Layer {
   @observable blendMode: LayerBlendMode = "normal"
   @observable opacity = 1
   @observable preserveOpacity = false
+  @observable clippingGroup = false
   parent: Layer|undefined
   public readonly content: LayerContent
 
   constructor(public picture: Picture, name: string, makeContent: (layer: Layer) => LayerContent) {
     this.name = name
     this.content = makeContent(this)
-    reaction(() => [this.visible, this.blendMode, this.opacity], () => {
+    reaction(() => [this.visible, this.blendMode, this.opacity, this.clippingGroup], () => {
       picture.lastUpdate = {layer: this}
     })
   }
@@ -38,9 +40,9 @@ class Layer {
   }
 
   toData(): LayerData {
-    const {name, visible, blendMode, opacity, preserveOpacity} = this
+    const {name, visible, blendMode, opacity, preserveOpacity, clippingGroup} = this
     const content = this.content.toData()
-    return {name, visible, blendMode, opacity, content, preserveOpacity}
+    return {name, visible, blendMode, opacity, content, preserveOpacity, clippingGroup}
   }
 
   clone(): Layer {
@@ -86,11 +88,12 @@ class Layer {
       }
     }
     const layer = new Layer(picture, data.name, makeContent)
-    const {visible, blendMode, opacity, preserveOpacity} = data
+    const {visible, blendMode, opacity, preserveOpacity, clippingGroup} = data
     layer.visible = visible
     layer.blendMode = blendMode
     layer.opacity = opacity
     layer.preserveOpacity = preserveOpacity
+    layer.clippingGroup = clippingGroup
     return layer
   }
 }

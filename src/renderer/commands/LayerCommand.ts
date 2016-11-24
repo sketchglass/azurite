@@ -203,6 +203,7 @@ interface LayerProps {
   blendMode?: LayerBlendMode
   opacity?: number
   preserveOpacity?: boolean
+  clippingGroup?: boolean
 }
 
 export
@@ -220,8 +221,8 @@ class ChangeLayerPropsCommand implements UndoCommand {
   redo() {
     const layer = this.picture.layerFromPath(this.path)
     if (layer) {
-      const {name, visible, blendMode, opacity} = layer
-      this.oldProps = {name, visible, blendMode, opacity}
+      const {name, visible, blendMode, opacity, preserveOpacity, clippingGroup} = layer
+      this.oldProps = {name, visible, blendMode, opacity, preserveOpacity, clippingGroup}
       Object.assign(layer, this.props)
     }
   }

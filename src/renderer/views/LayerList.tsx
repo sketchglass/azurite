@@ -66,9 +66,10 @@ const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
   const onVisibleClick = (e: React.MouseEvent<HTMLInputElement>) => {
     e.stopPropagation()
   }
+  const className = classNames("LayerList_layer", {"LayerList_layer-clipped": layer.clippingGroup})
 
   return (
-    <div className="LayerList_layer">
+    <div className={className}>
       <img src={thumbnail} />
       <ClickToEdit text={layer.name} onChange={rename} editable={selected}/>
       <input type="checkbox" checked={layer.visible} onChange={onVisibleToggle} onClick={onVisibleClick} />

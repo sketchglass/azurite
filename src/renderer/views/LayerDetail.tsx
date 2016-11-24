@@ -57,7 +57,15 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
     if (layer) {
       const {picture} = layer
       const preserveOpacity = (e.target as HTMLInputElement).checked
-      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), "Change Layer Blend Mode", {preserveOpacity}))
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), "Change Layer Preserve Opacity", {preserveOpacity}))
+    }
+  })
+  onClippingGroupChange = action((e: React.FormEvent<HTMLInputElement>) => {
+    const {layer} = this.props
+    if (layer) {
+      const {picture} = layer
+      const clippingGroup = (e.target as HTMLInputElement).checked
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), "Change Layer Clipping Group", {clippingGroup}))
     }
   })
 
@@ -66,6 +74,7 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
     const blendMode = layer ? layer.blendMode : "normal"
     const opacity = layer ? layer.opacity : 1
     const preserveOpacity = layer ? layer.preserveOpacity : false
+    const clippingGroup = layer ? layer.clippingGroup : false
 
     return (
       <div className="LayerDetail">
@@ -85,6 +94,13 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
           <label>
             <input type="checkbox" onChange={this.onPreserveOpacityChange} checked={preserveOpacity} />
             Preserve Opacity
+          </label>
+        </div>
+        <div>
+          <label></label>
+          <label>
+            <input type="checkbox" onChange={this.onClippingGroupChange} checked={clippingGroup} />
+            Clipping Group
           </label>
         </div>
       </div>
