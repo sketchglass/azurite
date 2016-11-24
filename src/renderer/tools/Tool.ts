@@ -62,8 +62,8 @@ abstract class Tool {
 
   renderSettings(): JSX.Element { return React.createElement("div") }
   renderOverlayUI(): JSX.Element|undefined { return }
-  hookLayerRender(layer: Layer, tileKey: Vec2): {hooked: boolean, tile?: Tile} {
-    return {hooked: false}
+  replaceTile(layer: Layer, tileKey: Vec2): {replaced: boolean, tile?: Tile} {
+    return {replaced: false}
   }
 }
 export default Tool

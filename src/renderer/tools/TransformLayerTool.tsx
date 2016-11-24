@@ -404,7 +404,7 @@ class TransformLayerTool extends Tool {
     }
   }
 
-  hookLayerRender(layer: Layer, tileKey: Vec2): {hooked: boolean, tile?: Tile} {
+  replaceTile(layer: Layer, tileKey: Vec2): {replaced: boolean, tile?: Tile} {
     const content = this.currentContent
     if (this.editing && content && layer == content.layer && this.originalRect && this.originalTexture) {
       transformedDrawTarget.clear(new Color(0,0,0,0))
@@ -412,9 +412,9 @@ class TransformLayerTool extends Tool {
         .merge(this.transform)
         .translate(tileKey.mulScalar(-Tile.width))
       drawTexture(transformedDrawTarget, this.originalTexture, {transform, blendMode: "src", bicubic: true, srcRect: this.originalTextureSubrect})
-      return {hooked: true, tile: transformedTile}
+      return {replaced: true, tile: transformedTile}
     } else {
-      return {hooked: false}
+      return {replaced: false}
     }
   }
 

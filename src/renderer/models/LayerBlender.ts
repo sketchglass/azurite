@@ -135,7 +135,7 @@ class TileBlender {
 const tileBlenders = [new TileBlender()]
 
 export
-type RenderLayerHook = (layer: Layer, tileKey: Vec2) => {hooked: boolean, tile?: Tile}
+type ReplaceTile = (layer: Layer, tileKey: Vec2) => {replaced: boolean, tile?: Tile}
 
 export default
 class LayerBlender {
@@ -145,7 +145,7 @@ class LayerBlender {
   })
   drawTarget = new TextureDrawTarget(context, this.blendedTexture)
 
-  renderLayerHook: RenderLayerHook|undefined
+  replaceTile: ReplaceTile|undefined
 
   @observable lastBlend: {rect?: Rect} = {}
 
@@ -187,10 +187,10 @@ class LayerBlender {
     }
 
     const tileBlender = tileBlenders[depth]
-    if (this.renderLayerHook) {
-      const {hooked, tile: hookedTile} = this.renderLayerHook(layer, key)
-      if (hooked) {
-        tile = hookedTile
+    if (this.replaceTile) {
+      const {replaced, tile: replacedTile} = this.replaceTile(layer, key)
+      if (replaced) {
+        tile = replacedTile
       }
     }
     if (tile) {
