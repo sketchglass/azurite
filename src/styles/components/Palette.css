@@ -9,23 +9,26 @@
   display: flex;
 }
 .Palette-button {
+  display: flex;
+}
+.Palette-color {
   width: 16px;
   height: 16px;
   margin: 2px;
-}
-.Palette-button-transparent {
-  background-color: #fff;
-  position: relative;
-  &:before {
-    content: "";
-    position: absolute;
-    left: 0; top: 0; width: 8px; height: 8px;
-    background-color: #ccc;
-  }
-  &:after {
-    content: "";
-    position: absolute;
-    right: 0; bottom: 0; width: 8px; height: 8px;
-    background-color: #ccc;
+  &-transparent {
+    background-color: #fff;
+    position: relative;
+    &:before {
+      content: "";
+      position: absolute;
+      left: 0; top: 0; width: 8px; height: 8px;
+      background-color: #ccc;
+    }
+    &:after {
+      content: "";
+      position: absolute;
+      right: 0; bottom: 0; width: 8px; height: 8px;
+      background-color: #ccc;
+    }
   }
 }

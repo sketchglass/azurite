@@ -1,4 +1,5 @@
 import React = require("react")
+import {observer} from "mobx-react"
 import {HSVColor} from "../../../lib/Color"
 
 interface PaletteProps {
@@ -7,8 +8,7 @@ interface PaletteProps {
   onChange: (event: React.MouseEvent<Element>, index: number) => void
 }
 
-export default
-function Palette(props: PaletteProps) {
+const Palette = observer((props: PaletteProps) => {
   const {palette, paletteIndex} = props
 
   const rowLength = 10
@@ -23,14 +23,10 @@ function Palette(props: PaletteProps) {
       const onClick = (e: React.MouseEvent<Element>) => {
         props.onChange(e, i)
       }
-      if (color.equals(HSVColor.transparent)) {
-        return <div className="Palette-button Palette-button-transparent" key={x} onClick={onClick} />
-      } else {
-        const style = {
-          backgroundColor: color.toString(),
-        }
-        return <div className="Palette-button" style={style} key={x} onClick={onClick} />
-      }
+      const colorElem = color.equals(HSVColor.transparent)
+        ? <div className="Palette-color Palette-color-transparent" />
+        : <div className="Palette-color" style={{backgroundColor: color.toString()}} />
+      return <div className="Palette-button" key={x} onClick={onClick}>{colorElem}</div>
     })
     return <div className="Palette-row" key={y}>{buttons}</div>
   })
@@ -40,4 +36,5 @@ function Palette(props: PaletteProps) {
       {rowElems}
     </div>
   )
-}
+})
+export default Palette
