@@ -59,24 +59,6 @@ abstract class BlendShader extends Shader {
   }
 }
 
-class MixShader extends Shader {
-  get fragmentShader() {
-    return `
-      precision highp float;
-      varying vec2 vTexCoord;
-      uniform sampler2D textureA;
-      uniform sampler2D textureB;
-      uniform sampler2D textureRate;
-      void main(void) {
-        vec4 a = texture2D(textureA, vTexCoord);
-        vec4 b = texture2D(textureB, vTexCoord);
-        float rate = texture2D(textureRate, vTexCoord).a;
-        gl_FragColor = mix(a, b, rate);
-      }
-    `
-  }
-}
-
 const blendOps = new Map<LayerBlendMode, string>([
   ["plus", `
     return src + dst;
@@ -106,12 +88,6 @@ const tileBlendModels = new Map(Array.from(blendOps).map(([type, op]) => {
 const tileNormalModel = new Model(context, {
   shape: tileShape,
   shader: NormalBlendShader,
-})
-
-const mixModel = new Model(context, {
-  shape: tileShape,
-  shader: MixShader,
-  blendMode: "src",
 })
 
 export
