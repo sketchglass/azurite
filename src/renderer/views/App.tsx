@@ -114,7 +114,7 @@ class App extends React.Component<{}, {}> {
     return (
       <div className="App">
         <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
-        <aside className="Sidebar">
+        <aside className="Sidebar Sidebar-left">
           <div className="PanelTitle">Color</div>
           <ColorPicker color={color} onChange={onColorChange} />
           <RGBRangeSliders color={color} onChange={onColorChange} />
@@ -126,7 +126,7 @@ class App extends React.Component<{}, {}> {
           <PictureTabBar />
           <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
         </div>
-        <aside className="Sidebar">
+        <aside className="Sidebar Sidebar-right">
           <div className="PanelTitle">Navigator</div>
           <Navigator picture={picture} />
           <div className="PanelTitle">Layers</div>
