@@ -62,6 +62,8 @@ abstract class Tool {
 
   renderSettings(): JSX.Element { return React.createElement("div") }
   renderOverlayUI(): JSX.Element|undefined { return }
-  hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender){ return false }
+  hookLayerRender(layer: Layer, tileKey: Vec2): {hooked: boolean, tile?: Tile} {
+    return {hooked: false}
+  }
 }
 export default Tool
