@@ -127,7 +127,9 @@ class App extends React.Component<{}, {}> {
           <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
         </div>
         <aside className="Sidebar">
+          <div className="PanelTitle">Navigator</div>
           <Navigator picture={picture} />
+          <div className="PanelTitle">Layers</div>
           <LayerList picture={picture} />
         </aside>
       </div>
