@@ -5,7 +5,7 @@
 }
 .LayerList_scroll {
   flex: 1;
-  overflow-y: scroll;
+  overflow-y: auto;
   background-color: var(--darken-background-color);
   & .ReactDraggableTree_row-selected {
     background-color: var(--ui-primary-background-color);

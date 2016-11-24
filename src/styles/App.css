@@ -31,7 +31,7 @@ body {
   flex-direction: column;
   width: 240px;
   box-sizing: border-box;
-  overflow-y: scroll;
+  overflow-y: auto;
   background-color: var(--default-background-color);
 }
 .Sidebar-left {
