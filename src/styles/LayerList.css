@@ -2,13 +2,17 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  & .ReactDraggableTree {
-    flex: 1;
-    overflow-y: scroll;
-    background-color: var(--darken-background-color);
-  }
+}
+.LayerList_scroll {
+  flex: 1;
+  overflow-y: scroll;
+  background-color: var(--darken-background-color);
   & .ReactDraggableTree_row-selected {
     background-color: var(--ui-primary-background-color);
+  }
+  & .ReactDraggableTree_toggler:before {
+    border-right-color: var(--default-color);
+    border-bottom-color: var(--default-color);
   }
 }
 .LayerList_layer {

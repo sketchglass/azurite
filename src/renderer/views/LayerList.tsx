@@ -134,16 +134,18 @@ class LayerList extends React.Component<LayerListProps, {}> {
           <button onClick={this.groupLayer.bind(this)}>Group</button>
           <button onClick={this.removeLayer.bind(this)}>Remove</button>
         </div>
-        <LayerTree
-          root={root}
-          selectedKeys={new Set(selectedKeys)}
-          rowHeight={72}
-          rowContent={({node, selected}) => <LayerListItem layer={node.layer} selected={selected} />}
-          onSelectedKeysChange={this.onSelectedKeysChange}
-          onCollapsedChange={this.onCollapsedChange}
-          onMove={this.onMove}
-          onCopy={this.onCopy}
-        />
+        <div className="LayerList_scroll">
+          <LayerTree
+            root={root}
+            selectedKeys={new Set(selectedKeys)}
+            rowHeight={72}
+            rowContent={({node, selected}) => <LayerListItem layer={node.layer} selected={selected} />}
+            onSelectedKeysChange={this.onSelectedKeysChange}
+            onCollapsedChange={this.onCollapsedChange}
+            onMove={this.onMove}
+            onCopy={this.onCopy}
+          />
+        </div>
         <LayerDetail layer={picture && picture.currentLayer} />
       </div>
     )
