@@ -122,6 +122,7 @@ class TileBlender {
     const model = tileBlendModels.get(blendMode)
     let startClipping = !!(!layer.clippingGroup && nextLayer && nextLayer.clippingGroup)
     let endClipping = !!(layer.clippingGroup && !(nextLayer && nextLayer.clippingGroup))
+
     if (startClipping) {
       this.clipping = true
       drawTexture(this.clipBaseDrawTarget, this.currentTile.texture, {blendMode: "src"})
@@ -154,9 +155,7 @@ class TileBlender {
 
     if (endClipping) {
       this.clipping = false
-      this.swapCurrent()
-      drawTexture(this.currentDrawTarget, this.clipBaseTile.texture, {blendMode: "src"})
-      drawTexture(this.currentDrawTarget, this.previousTile.texture, {blendMode: "src-over"})
+      drawTexture(this.currentDrawTarget, this.clipBaseTile.texture, {blendMode: "dst-over"})
     }
   }
 
