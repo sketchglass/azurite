@@ -34,21 +34,25 @@ body {
   display: flex;
   flex-direction: column;
   width: 240px;
-  padding: 12px;
   box-sizing: border-box;
   border-right: 1px solid var(--default-border-color);
   overflow-y: scroll;
 }
+.ColorPicker {
+  margin: 6px 12px;
+  align-self: center;
+}
 .RGBRangeSliders {
-  margin: 8px 0;
+  margin: 6px 12px;
 }
 .Palette {
-  margin: 8px 0;
+  margin: 6px 0;
 }
 .PanelTitle {
   font-size: 14px;
-  height: 24px;
-  line-height: 24px;
+  height: 32px;
+  line-height: 32px;
+  padding: 0 12px;
   text-transform: uppercase;
   color: var(--panel-title-color);
 }
