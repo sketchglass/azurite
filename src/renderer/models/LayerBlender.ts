@@ -192,7 +192,7 @@ class TileBlender {
 const tileBlenders = [new TileBlender()]
 
 export
-type LayerBlendHook = (layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) => boolean
+type ReplaceTile = (layer: Layer, tileKey: Vec2) => {replaced: boolean, tile?: Tile}
 
 export default
 class LayerBlender {
@@ -202,7 +202,7 @@ class LayerBlender {
   })
   drawTarget = new TextureDrawTarget(context, this.blendedTexture)
 
-  hook: LayerBlendHook|undefined
+  replaceTile: ReplaceTile|undefined
 
   @observable lastBlend: {rect?: Rect} = {}
 
@@ -244,16 +244,19 @@ class LayerBlender {
 
     const tileBlender = tileBlenders[depth]
 
+    if (this.replaceTile) {
+      const {replaced, tile: replacedTile} = this.replaceTile(layer, key)
+      if (replaced) {
+        tile = replacedTile
+      }
+    }
+
     if (!layer.clippingGroup && nextLayer && nextLayer.clippingGroup) {
       tileBlender.startClip(tile)
     }
 
     let rendered = false
-    const hooked = this.hook && this.hook(layer, key, tile, tileBlender)
-
-    if (hooked) {
-      rendered = true
-    } else if (tile) {
+    if (tile) {
       tileBlender.blend(tile, layer.blendMode, layer.opacity)
       rendered = true
     }
