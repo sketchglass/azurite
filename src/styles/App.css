@@ -10,19 +10,11 @@ body {
 }
 .App {
   display: flex;
-  flex-direction: column;
   width: 100vw;
   height: 100vh;
 }
-.AppItem {
-  &:nth-child(1) {
-    z-index: 200;
-  }
-  &:nth-child(2) {
-    display: flex;
-    flex: 1;
-    flex-direction: row;
-  }
+.ToolSelection {
+  z-index: 200;
 }
 .CenterArea {
   flex: 1;

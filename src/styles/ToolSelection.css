@@ -1,10 +1,11 @@
 .ToolSelection {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   box-sizing: border-box;
-  width: 100%;
-  border-bottom: 1px solid var(--default-border-color);
-  padding: 0 8px;
+  width: 48px;
+  height: 100%;
+  border-right: 1px solid var(--default-border-color);
+  padding: 8px 0;
 }
 .ToolSelection_button {
   width: 40px;
@@ -15,7 +16,7 @@
   align-items: center;
   justify-content: center;
   padding: 1px; /* workaround for Retina */
-  margin: 4px;
+  margin: 0 4px;
   border-radius: 4px;
 }
 .ToolSelection_button-selected {

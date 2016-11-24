@@ -113,27 +113,23 @@ class App extends React.Component<{}, {}> {
     })
     return (
       <div className="App">
-        <div className="AppItem">
-          <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
+        <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
+        <aside className="Sidebar">
+          <div className="PanelTitle">Color</div>
+          <ColorPicker color={color} onChange={onColorChange} />
+          <RGBRangeSliders color={color} onChange={onColorChange} />
+          <Palette palette={palette} paletteIndex={paletteIndex} onChange={onPaletteChange} />
+          <div className="PanelTitle">Tool</div>
+          {currentTool.renderSettings()}
+        </aside>
+        <div className="CenterArea">
+          <PictureTabBar />
+          <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
         </div>
-        <div className="AppItem">
-          <aside className="Sidebar">
-            <div className="PanelTitle">Color</div>
-            <ColorPicker color={color} onChange={onColorChange} />
-            <RGBRangeSliders color={color} onChange={onColorChange} />
-            <Palette palette={palette} paletteIndex={paletteIndex} onChange={onPaletteChange} />
-            <div className="PanelTitle">Tool</div>
-            {currentTool.renderSettings()}
-          </aside>
-          <div className="CenterArea">
-            <PictureTabBar />
-            <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
-          </div>
-          <aside className="Sidebar">
-            <Navigator picture={picture} />
-            <LayerList picture={picture} />
-          </aside>
-        </div>
+        <aside className="Sidebar">
+          <Navigator picture={picture} />
+          <LayerList picture={picture} />
+        </aside>
       </div>
     )
   }
