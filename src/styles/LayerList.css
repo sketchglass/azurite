@@ -3,9 +3,17 @@
   flex-direction: column;
   flex: 1;
 }
-.LayerList .ReactDraggableTree {
+.LayerList_scroll {
   flex: 1;
-  overflow-y: scroll;
+  overflow-y: auto;
+  background-color: var(--darken-background-color);
+  & .ReactDraggableTree_row-selected {
+    background-color: var(--ui-primary-background-color);
+  }
+  & .ReactDraggableTree_toggler:before {
+    border-right-color: var(--default-color);
+    border-bottom-color: var(--default-color);
+  }
 }
 .LayerList_layer {
   height: 48px;
@@ -35,4 +43,16 @@
 }
 .LayerList_layer-current {
   background-color: grey;
+}
+.LayerList_buttons {
+  margin: 4px 8px;
+  & button {
+    border: none;
+    background: none;
+    padding: 4px;
+  }
+  & .SVGIcon {
+    width: 16px;
+    height: 16px;
+  }
 }

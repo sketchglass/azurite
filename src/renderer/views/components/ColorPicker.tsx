@@ -59,7 +59,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
   render() {
     this.update()
     return (
-      <canvas ref="canvas" width={wheelSize} height={wheelSize} style={{width: logicalWheelSize, height: logicalWheelSize}}/>
+      <canvas className="ColorPicker" ref="canvas" width={wheelSize} height={wheelSize} style={{width: logicalWheelSize, height: logicalWheelSize}}/>
     )
   }
 

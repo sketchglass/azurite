@@ -1,5 +1,9 @@
 * {
   color: var(--default-color);
+  user-select: none;
+}
+div {
+  cursor: default;
 }
 body {
   margin: 0;
@@ -8,44 +12,51 @@ body {
   -webkit-font-smoothing: antialiased;
   font-size: 13px;
 }
-aside {
-  z-index: 100;
-}
 .App {
   display: flex;
-  flex-direction: column;
   width: 100vw;
   height: 100vh;
 }
-.AppItem {
-  &:nth-child(1) {
-    z-index: 200;
-  }
-  &:nth-child(2) {
-    display: flex;
-    flex: 1;
-    flex-direction: row;
-  }
+.ToolSelection {
+  z-index: 200;
 }
 .CenterArea {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
-.LeftSidebar {
+.Sidebar {
+  z-index: 100;
   display: flex;
   flex-direction: column;
-  align-items: center;
   width: 240px;
   box-sizing: border-box;
+  overflow-y: auto;
+  background-color: var(--default-background-color);
+}
+.Sidebar-left {
   border-right: 1px solid var(--default-border-color);
 }
-.RightSidebar {
-  width: 240px;
-  display: flex;
-  flex-direction: column;
-  box-sizing: border-box;
+.Sidebar-right {
   border-left: 1px solid var(--default-border-color);
+}
+.ColorPicker {
+  margin: 6px 12px;
+  align-self: center;
+}
+.RGBRangeSliders {
+  margin: 6px 12px;
+}
+.Palette {
+  margin: 6px 0;
+}
+.PanelTitle {
+  font-size: 14px;
+  height: 48px;
+  line-height: 48px;
+  padding: 0 12px;
+  text-transform: uppercase;
+  color: var(--panel-title-color);
 }
 .BrushSettings {
   width: 100%;

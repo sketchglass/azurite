@@ -20,4 +20,13 @@
   &.transform {
     mask: url("../../../bundles/icons/flaticon/svg/transform.svg");
   }
+  &.add {
+    mask: url("../../../bundles/icons/flaticon/svg/add.svg");
+  }
+  &.folder {
+    mask: url("../../../bundles/icons/flaticon/svg/folder-2.svg");
+  }
+  &.subtract {
+    mask: url("../../../bundles/icons/flaticon/svg/subtract.svg");
+  }
 }

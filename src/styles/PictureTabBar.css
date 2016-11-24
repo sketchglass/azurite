@@ -4,6 +4,7 @@
   align-items: flex-end;
   z-index: 100;
   font-size: 13px;
+  background-color: var(--default-background-color);
 }
 .PictureTab {
   display: flex;
