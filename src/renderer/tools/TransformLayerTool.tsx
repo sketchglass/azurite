@@ -12,7 +12,6 @@ import Tool, {ToolPointerEvent} from './Tool'
 import {drawTexture} from "../GLUtil"
 import {context} from "../GLContext"
 import {AppState} from "../state/AppState"
-import {frameDebounce} from "../../lib/Debounce"
 import {TransformLayerCommand} from "../commands/LayerCommand"
 import {UndoStack, UndoCommand} from "../models/UndoStack"
 
@@ -349,13 +348,6 @@ class TransformLayerTool extends Tool {
     this.additionalTransform = this.lastAdditionalTransform.merge(transform)
   }
 
-  update = frameDebounce(() => {
-    if (this.picture) {
-      this.picture.layerBlender.render()
-      this.renderer.render()
-    }
-  })
-
   end() {
     this.dragType = DragType.None
     if (this.modalUndoStack && this.lastRect && this.rect) {
@@ -402,6 +394,14 @@ class TransformLayerTool extends Tool {
       this.editUndoStack = undefined
       this.update()
     }
+  }
+
+  update() {
+    if (!this.picture) {
+      return
+    }
+    this.picture.layerBlender.wholeDirty = true
+    this.renderer.update()
   }
 
   replaceTile(layer: Layer, tileKey: Vec2): {replaced: boolean, tile?: Tile} {

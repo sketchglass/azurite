@@ -2,6 +2,7 @@ import {observable, computed, reaction} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Model, RectShape, Shader, TextureShader, CanvasDrawTarget, Color, TextureFilter} from "paintgl"
 import {context, canvas} from "../GLContext"
+import {frameDebounce} from "../../lib/Debounce"
 import Picture from "../models/Picture"
 
 const BOX_SHADOW_RADIUS = 4
@@ -60,7 +61,6 @@ class Renderer {
     shader: TextureShader,
   })
   @observable size = new Vec2(100, 100)
-  disposers: (() => void)[] = []
   background = new Color(46/255, 48/255, 56/255, 1)
 
   readonly wholeShape = new RectShape(context, {
@@ -101,49 +101,42 @@ class Renderer {
     return this.transformFromPicture.invert()!
   }
 
-  @computed get lastBlend() {
-    if (this.picture) {
-      return this.picture.layerBlender.lastBlend
-    }
-  }
+  needsWholeUpdate = true
 
   constructor() {
-    this.disposers.push(
-      reaction(() => this.picture, picture => {
-        if (picture) {
-          this.shape.rect = new Rect(new Vec2(), picture.size)
-          this.model.uniforms = {texture: picture.layerBlender.blendedTexture}
-        } else {
-          this.model.uniforms = {}
-        }
-      }),
-      reaction(() => this.lastBlend, blend => {
-        this.render(blend && blend.rect)
-      }),
-      reaction(() => this.size, size => {
-        canvas.width = size.width
-        canvas.height = size.height
-        this.wholeShape.rect = new Rect(new Vec2(), size)
-      }),
-      reaction(() => [this.size, this.transformToPicture], () => {
-        requestAnimationFrame(() => {
-          this.render()
-        })
-      }),
-    )
+    reaction(() => this.picture, picture => {
+      if (picture) {
+        this.shape.rect = new Rect(new Vec2(), picture.size)
+        this.model.uniforms = {texture: picture.layerBlender.blendedTexture}
+      } else {
+        this.model.uniforms = {}
+      }
+    })
+    reaction(() => this.size, size => {
+      canvas.width = size.width
+      canvas.height = size.height
+      this.wholeShape.rect = new Rect(new Vec2(), size)
+    })
+    reaction(() => [this.size, this.transformToPicture], () => {
+      this.needsWholeUpdate = true
+      this.update()
+    })
   }
 
-  dispose() {
-    for (const disposer of this.disposers) {
-      disposer()
+  update = frameDebounce(() => this.renderNow())
+
+  private renderNow() {
+    let rectInPicture: Rect|undefined = undefined
+    if (this.picture) {
+      rectInPicture = this.picture.layerBlender.dirtyRect
+      this.picture.layerBlender.renderNow()
     }
-    this.model.dispose()
-    this.shape.dispose()
-  }
+    if (!this.needsWholeUpdate && !rectInPicture) {
+      return
+    }
 
-  render(rectInPicture?: Rect) {
     const drawTarget = new CanvasDrawTarget(context)
-    if (rectInPicture) {
+    if (!this.needsWholeUpdate && rectInPicture) {
       drawTarget.scissor = rectInPicture.transform(this.transformFromPicture)
     }
     drawTarget.clear(this.background)
@@ -162,5 +155,6 @@ class Renderer {
       this.model.transform = this.transformFromPicture
       drawTarget.draw(this.model)
     }
+    this.needsWholeUpdate = false
   }
 }

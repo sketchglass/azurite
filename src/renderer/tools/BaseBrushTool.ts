@@ -103,8 +103,8 @@ abstract class BaseBrushTool extends Tool {
     if (!this.picture) {
       return
     }
-    this.picture.layerBlender.render(rect)
-    this.renderer.render(rect)
+    this.picture.layerBlender.addDirtyRect(rect)
+    this.renderer.update()
   }
 
   replaceTile(layer: Layer, tileKey: Vec2): {replaced: boolean, tile?: Tile} {

@@ -53,9 +53,13 @@ class Picture {
     this.selectedLayers.push(defaultLayer)
 
     reaction(() => this.lastUpdate, frameDebounce((update: PictureUpdate) => {
-      this.layerBlender.render(update.rect)
+      if (update.rect) {
+        this.layerBlender.addDirtyRect(update.rect)
+      } else {
+        this.layerBlender.wholeDirty = true
+      }
     }))
-    this.layerBlender.render()
+    this.layerBlender.renderNow()
     this.undoStack.commands.observe(() => {
       this.edited = true
     })

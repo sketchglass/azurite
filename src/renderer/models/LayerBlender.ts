@@ -186,13 +186,30 @@ class LayerBlender {
 
   replaceTile: ReplaceTile|undefined
 
-  @observable lastBlend: {rect?: Rect} = {}
+  wholeDirty = true
+  dirtyRect: Rect|undefined
 
   constructor(public picture: Picture) {
   }
 
-  render(rect?: Rect) {
-    this.drawTarget.scissor = rect
+  addDirtyRect(rect: Rect) {
+    if (this.dirtyRect) {
+      this.dirtyRect = this.dirtyRect.union(rect)
+    } else {
+      this.dirtyRect = rect
+    }
+  }
+
+  renderNow() {
+    const rect = this.dirtyRect
+    if (this.wholeDirty) {
+      this.drawTarget.scissor = undefined
+    } else {
+      if (!rect) {
+        return
+      }
+      this.drawTarget.scissor = rect
+    }
     this.drawTarget.clear(new Color(1, 1, 1, 1))
     const tileKeys = TiledTexture.keysForRect(rect || new Rect(new Vec2(0), this.picture.size))
     for (const key of tileKeys) {
@@ -203,7 +220,8 @@ class LayerBlender {
       this.renderLayers(this.picture.layers, key, tileScissor, 0)
       drawTexture(this.drawTarget, tileBlenders[0].currentTile.texture, {transform: Transform.translate(offset), blendMode: "src-over"})
     }
-    this.lastBlend = {rect}
+    this.dirtyRect = undefined
+    this.wholeDirty = false
   }
 
   renderLayer(layer: Layer, nextLayer: Layer|undefined, key: Vec2, scissor: Rect|undefined, depth: number): boolean {
