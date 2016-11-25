@@ -101,7 +101,8 @@ class Renderer {
     return this.transformFromPicture.invert()!
   }
 
-  needsWholeUpdate = true
+  wholeDirty = true
+  dirtyRect: Rect|undefined
 
   constructor() {
     reaction(() => this.picture, picture => {
@@ -118,26 +119,37 @@ class Renderer {
       this.wholeShape.rect = new Rect(new Vec2(), size)
     })
     reaction(() => [this.size, this.transformToPicture], () => {
-      this.needsWholeUpdate = true
+      this.wholeDirty = true
       this.update()
     })
+  }
+
+  addDirtyRect(rect: Rect) {
+    if (this.dirtyRect) {
+      this.dirtyRect = this.dirtyRect.union(rect)
+    } else {
+      this.dirtyRect = rect
+    }
   }
 
   update = frameDebounce(() => this.renderNow())
 
   private renderNow() {
-    let rectInPicture: Rect|undefined = undefined
     if (this.picture) {
-      rectInPicture = this.picture.layerBlender.dirtyRect
+      const rectInPicture = this.picture.layerBlender.dirtyRect
+      if (rectInPicture) {
+        const rect = rectInPicture.transform(this.transformFromPicture)
+        this.addDirtyRect(rect)
+      }
       this.picture.layerBlender.renderNow()
     }
-    if (!this.needsWholeUpdate && !rectInPicture) {
+    if (!this.wholeDirty && !this.dirtyRect) {
       return
     }
 
     const drawTarget = new CanvasDrawTarget(context)
-    if (!this.needsWholeUpdate && rectInPicture) {
-      drawTarget.scissor = rectInPicture.transform(this.transformFromPicture)
+    if (!this.wholeDirty && this.dirtyRect) {
+      drawTarget.scissor = this.dirtyRect
     }
     drawTarget.clear(this.background)
     if (this.picture) {
@@ -155,6 +167,7 @@ class Renderer {
       this.model.transform = this.transformFromPicture
       drawTarget.draw(this.model)
     }
-    this.needsWholeUpdate = false
+    this.dirtyRect = undefined
+    this.wholeDirty = false
   }
 }
