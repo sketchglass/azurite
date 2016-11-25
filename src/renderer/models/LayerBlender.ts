@@ -179,7 +179,8 @@ export default
 class LayerBlender {
   blendedTexture = new Texture(context, {
     size: this.picture.size,
-    pixelType: "half-float",
+    pixelFormat: "rgb",
+    pixelType: "byte",
   })
   drawTarget = new TextureDrawTarget(context, this.blendedTexture)
 
