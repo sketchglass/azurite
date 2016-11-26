@@ -201,14 +201,13 @@ class LayerBlender {
   }
 
   renderNow() {
-    const rect = this.dirtyRect
+    let rect: Rect|undefined
     if (this.wholeDirty) {
       this.drawTarget.scissor = undefined
+    } else if (this.dirtyRect) {
+      rect = this.drawTarget.scissor = this.dirtyRect
     } else {
-      if (!rect) {
-        return
-      }
-      this.drawTarget.scissor = rect
+      return
     }
     this.drawTarget.clear(new Color(1, 1, 1, 1))
     const tileKeys = TiledTexture.keysForRect(rect || new Rect(new Vec2(0), this.picture.size))
