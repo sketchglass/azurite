@@ -54,7 +54,6 @@ class PictureExport {
   }
 
   async export(fileName: string, format: PictureExportFormat) {
-    this.picture.layerBlender.renderNow()
     this.textureToCanvas.loadTexture(this.picture.layerBlender.getBlendedTexture(), new Vec2(0))
     this.textureToCanvas.updateCanvas()
     const blob = await this.getBlob(`image/${format}`)
