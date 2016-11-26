@@ -140,12 +140,12 @@ class Renderer {
   private renderNow() {
     if (this.picture) {
       const {layerBlender} = this.picture
-      if (layerBlender.dirtyRect) {
+      if (layerBlender.wholeDirty) {
+        this.wholeDirty = true
+        layerBlender.renderNow()
+      } else if (layerBlender.dirtyRect) {
         const rect = layerBlender.dirtyRect.transform(this.transformFromPicture)
         this.addDirtyRect(rect)
-        layerBlender.renderNow()
-      } else if (layerBlender.wholeDirty) {
-        this.wholeDirty = true
         layerBlender.renderNow()
       }
     }

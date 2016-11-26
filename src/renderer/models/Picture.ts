@@ -9,7 +9,6 @@ import LayerBlender from "./LayerBlender"
 import {UndoStack} from "./UndoStack"
 import {Navigation} from "./Navigation"
 import PictureParams from "./PictureParams"
-import {frameDebounce} from "../../lib/Debounce"
 
 export
 interface PictureData {
@@ -52,13 +51,13 @@ class Picture {
     )
     this.selectedLayers.push(defaultLayer)
 
-    reaction(() => this.lastUpdate, frameDebounce((update: PictureUpdate) => {
+    reaction(() => this.lastUpdate, (update: PictureUpdate) => {
       if (update.rect) {
         this.layerBlender.addDirtyRect(update.rect)
       } else {
         this.layerBlender.wholeDirty = true
       }
-    }))
+    })
     this.layerBlender.renderNow()
     this.undoStack.commands.observe(() => {
       this.edited = true
