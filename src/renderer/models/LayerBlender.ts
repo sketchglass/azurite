@@ -177,12 +177,12 @@ type ReplaceTile = (layer: Layer, tileKey: Vec2) => {replaced: boolean, tile?: T
 
 export default
 class LayerBlender {
-  blendedTexture = new Texture(context, {
+  private blendedTexture = new Texture(context, {
     size: this.picture.size,
     pixelFormat: "rgb",
     pixelType: "byte",
   })
-  drawTarget = new TextureDrawTarget(context, this.blendedTexture)
+  private drawTarget = new TextureDrawTarget(context, this.blendedTexture)
 
   replaceTile: ReplaceTile|undefined
 
@@ -223,7 +223,12 @@ class LayerBlender {
     this.wholeDirty = false
   }
 
-  renderLayer(layer: Layer, nextLayer: Layer|undefined, key: Vec2, scissor: Rect|undefined, depth: number): boolean {
+  getBlendedTexture() {
+    this.renderNow()
+    return this.blendedTexture
+  }
+
+  private renderLayer(layer: Layer, nextLayer: Layer|undefined, key: Vec2, scissor: Rect|undefined, depth: number): boolean {
     const {content} = layer
     let tile: Tile|undefined = undefined
 
@@ -254,7 +259,7 @@ class LayerBlender {
     return !!tile
   }
 
-  renderLayers(layers: Layer[], key: Vec2, scissor: Rect|undefined, depth: number): boolean {
+  private renderLayers(layers: Layer[], key: Vec2, scissor: Rect|undefined, depth: number): boolean {
     if (!tileBlenders[depth]) {
       tileBlenders[depth] = new TileBlender()
     }

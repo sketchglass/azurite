@@ -53,20 +53,20 @@ class BoxShadowShader extends Shader {
 export default
 class Renderer {
   @observable picture: Picture|undefined
-  readonly shape = new RectShape(context, {
+  private readonly shape = new RectShape(context, {
     usage: "static",
   })
-  readonly model = new Model(context, {
+  private readonly model = new Model(context, {
     shape: this.shape,
     shader: TextureShader,
   })
   @observable size = new Vec2(100, 100)
   background = new Color(46/255, 48/255, 56/255, 1)
 
-  readonly wholeShape = new RectShape(context, {
+  private readonly wholeShape = new RectShape(context, {
     usage: "static",
   })
-  readonly boxShadowModel = new Model(context, {
+  private readonly boxShadowModel = new Model(context, {
     shape: this.wholeShape,
     shader: BoxShadowShader,
   })
@@ -108,7 +108,7 @@ class Renderer {
     reaction(() => this.picture, picture => {
       if (picture) {
         this.shape.rect = new Rect(new Vec2(), picture.size)
-        this.model.uniforms = {texture: picture.layerBlender.blendedTexture}
+        this.model.uniforms = {texture: picture.layerBlender.getBlendedTexture()}
       } else {
         this.model.uniforms = {}
       }
@@ -166,7 +166,7 @@ class Renderer {
       drawTarget.draw(this.boxShadowModel)
 
       const filter: TextureFilter = this.picture.navigation.scale < 2 ? "bilinear" : "nearest"
-      const texture = this.picture.layerBlender.blendedTexture
+      const texture = this.picture.layerBlender.getBlendedTexture()
       if (texture.filter != filter) {
         texture.filter = filter
       }
