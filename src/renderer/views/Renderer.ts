@@ -122,6 +122,9 @@ class Renderer {
       this.wholeDirty = true
       this.update()
     })
+    reaction(() => this.picture && this.picture.lastUpdate, update => {
+      this.update()
+    })
   }
 
   addDirtyRect(rect: Rect) {
@@ -136,12 +139,15 @@ class Renderer {
 
   private renderNow() {
     if (this.picture) {
-      const rectInPicture = this.picture.layerBlender.dirtyRect
-      if (rectInPicture) {
-        const rect = rectInPicture.transform(this.transformFromPicture)
+      const {layerBlender} = this.picture
+      if (layerBlender.dirtyRect) {
+        const rect = layerBlender.dirtyRect.transform(this.transformFromPicture)
         this.addDirtyRect(rect)
+        layerBlender.renderNow()
+      } else if (layerBlender.wholeDirty) {
+        this.wholeDirty = true
+        layerBlender.renderNow()
       }
-      this.picture.layerBlender.renderNow()
     }
     if (!this.wholeDirty && !this.dirtyRect) {
       return
