@@ -1,4 +1,5 @@
 import * as React from "react"
+import PointerEvents from "./PointerEvents"
 
 interface DraggablePanelProps {
   label: string
@@ -29,18 +30,10 @@ class Panel extends React.Component<PanelProps, void> {
     super()
   }
   componentDidMount() {
-    this.label.addEventListener('pointerup', this.onPointerUp)
-    this.label.addEventListener('pointerdown', this.onPointerDown)
-    this.label.addEventListener('pointermove', this.onPointerMove)
     this.update(this.props)
   }
   componentWillReceiveProps(props: PanelProps) {
     this.update(props)
-  }
-  componentWillUnmount() {
-    this.label.removeEventListener('pointerup', this.onPointerUp)
-    this.label.removeEventListener('pointerdown', this.onPointerDown)
-    this.label.removeEventListener('pointermove', this.onPointerMove)
   }
   update(props: PanelProps) {
     const {height, width, left, top, zIndex} = props
@@ -83,9 +76,11 @@ class Panel extends React.Component<PanelProps, void> {
   render() {
     return (
       <div className="DraggablePanel" ref={w => { this.window = w }}>
-        <div className="DraggablePanel_label" ref={l => { this.label = l }}>
-          {this.props.label}
-        </div>
+        <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
+          <div className="DraggablePanel_label" ref={l => { this.label = l }}>
+            {this.props.label}
+          </div>
+        </PointerEvents>
         <div className="DraggablePanel_contents">
           {this.props.children}
         </div>

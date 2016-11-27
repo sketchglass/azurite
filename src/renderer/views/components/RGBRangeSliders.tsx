@@ -15,15 +15,7 @@ class BaseBackground extends React.Component<RGBRangeSliderProps, void> {
   context: CanvasRenderingContext2D
   componentDidMount() {
     this.context = this.canvas.getContext("2d")!
-    this.canvas.addEventListener('pointerup', this.props.onPointerUp)
-    this.canvas.addEventListener('pointerdown', this.props.onPointerDown)
-    this.canvas.addEventListener('pointermove', this.props.onPointerMove)
     this.update()
-  }
-  componentWillUnmount() {
-    this.canvas.removeEventListener('pointerup', this.props.onPointerUp)
-    this.canvas.removeEventListener('pointerdown', this.props.onPointerDown)
-    this.canvas.removeEventListener('pointermove', this.props.onPointerMove)
   }
   componentWillReceiveProps() {
     this.update()
