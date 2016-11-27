@@ -1,4 +1,5 @@
 import React = require("react")
+import PointerEvents from "./PointerEvents"
 
 export interface BackgroundProps {
   onPointerUp: (e: PointerEvent) => void
@@ -27,31 +28,16 @@ export default class RangeSlider extends React.Component<RangeSliderProps, void>
   backgroundWidth = 200
   backgroundHeight = 20
   slider: HTMLDivElement
-  handle: HTMLDivElement
   constructor() {
     super()
   }
   componentDidMount() {
     const {value} = this.props
-    this.slider.addEventListener("pointerup", this.onPointerUp)
-    this.slider.addEventListener("pointerdown", this.onPointerDown)
-    this.slider.addEventListener("pointermove", this.onPointerMove)
-    this.handle.addEventListener("pointerup", this.onPointerUp)
-    this.handle.addEventListener("pointerdown", this.onPointerDown)
-    this.handle.addEventListener("pointermove", this.onPointerMove)
     this.update(value)
   }
   componentWillReceiveProps(props: RangeSliderProps) {
     const {value} = props
     this.update(value)
-  }
-  componentWillUnmount() {
-    this.slider.removeEventListener("pointerup", this.onPointerUp)
-    this.slider.removeEventListener("pointerdown", this.onPointerDown)
-    this.slider.removeEventListener("pointermove", this.onPointerMove)
-    this.handle.removeEventListener("pointerup", this.onPointerUp)
-    this.handle.removeEventListener("pointerdown", this.onPointerDown)
-    this.handle.removeEventListener("pointermove", this.onPointerMove)
   }
   valueForEvent(e: PointerEvent) {
     const {min, max} = this.props
@@ -119,10 +105,14 @@ export default class RangeSlider extends React.Component<RangeSliderProps, void>
         width={this.backgroundWidth} height={this.backgroundHeight} {...backgroundComponentProps} /> : <div className="RangeSlider_fill" style={fillStyle} />
     return (
       <div className={className}>
-        <div className="RangeSlider_border" ref={s => { this.slider = s }}>
-          { background }
-        </div>
-        <div className="RangeSlider_handle" style={handleStyle} ref={h => { this.handle = h }}/>
+        <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
+          <div className="RangeSlider_border" ref={s => { this.slider = s }}>
+            { background }
+          </div>
+        </PointerEvents>
+        <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
+          <div className="RangeSlider_handle" style={handleStyle} />
+        </PointerEvents>
       </div>
     )
   }
