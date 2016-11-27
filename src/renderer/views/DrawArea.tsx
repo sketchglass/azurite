@@ -10,6 +10,7 @@ import {canvas} from "../GLContext"
 import Renderer from "./Renderer"
 import {frameDebounce} from "../../lib/Debounce"
 import * as IPCChannels from "../../common/IPCChannels"
+import PointerEvents from "./components/PointerEvents"
 
 interface DrawAreaProps {
   tool: Tool
@@ -53,10 +54,6 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     element.insertBefore(canvas, element.firstChild)
     this.updateCursor()
 
-    element.addEventListener("pointerdown", this.onPointerDown)
-    element.addEventListener("pointermove", this.onPointerMove)
-    element.addEventListener("pointerup", this.onPointerUp)
-
     this.tabletDownSubscription = IPCChannels.tabletDown.listen().subscribe(ev => {
       this.usingTablet = true
       this.onDown(this.toToolEvent(ev))
@@ -77,9 +74,6 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   componentWillUnmount() {
     const element = this.element!
-    element.removeEventListener("pointerdown", this.onPointerDown)
-    element.removeEventListener("pointermove", this.onPointerMove)
-    element.removeEventListener("pointerup", this.onPointerUp)
     this.tabletDownSubscription.unsubscribe()
     this.tabletMoveSubscription.unsubscribe()
     this.tabletUpSubscription.unsubscribe()
@@ -139,11 +133,13 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const style = {visibility: this.props.picture ? "visible" : "hidden"}
     const overlay = this.tool.renderOverlayUI()
     return (
-      <div ref={e => this.element = e} className="DrawArea" style={style} tabIndex={-1} onKeyDown={this.onKeyDown} >
-        <svg hidden={!overlay} className="DrawArea_Overlay">
-          {overlay}
-        </svg>
-      </div>
+      <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
+        <div ref={e => this.element = e} className="DrawArea" style={style} tabIndex={-1} onKeyDown={this.onKeyDown} >
+          <svg hidden={!overlay} className="DrawArea_Overlay">
+            {overlay}
+          </svg>
+        </div>
+      </PointerEvents>
     )
   }
 
