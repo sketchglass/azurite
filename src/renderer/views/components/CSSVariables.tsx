@@ -1,8 +1,9 @@
 import * as React from "react"
 import ElementContainer from "./ElementContainer"
+const decamelize = require('decamelize')
 
 interface CSSVariablesProps {
-  variables: {[key: string]: string|number}
+  [key: string]: string|number
 }
 
 export default
@@ -12,15 +13,17 @@ class CSSVariables extends ElementContainer<CSSVariablesProps, {}> {
   }
 
   componentDidMount() {
-    this.setProperties(this.props.variables)
+    this.setProperties(this.props)
   }
   componentWillReceiveProps(props: CSSVariablesProps) {
-    this.setProperties(props.variables)
+    this.setProperties(props)
   }
-  private setProperties(variables: {[key: string]: string|number}) {
+  private setProperties(props: {[key: string]: string|number}) {
     if (this.element) {
-      for (const key in variables) {
-        this.element.style.setProperty(key, String(variables[key]))
+      for (const key in props) {
+        if (["key", "ref", "children"].indexOf(key) < 0) {
+          this.element.style.setProperty(`--${decamelize(key, '-')}`, `${props[key]}`)
+        }
       }
     }
   }
