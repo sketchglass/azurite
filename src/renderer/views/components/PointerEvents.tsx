@@ -41,24 +41,24 @@ class PointerEvents extends React.Component<PointerEventsProps, {}> {
   }
 
   render() {
-    let elem: React.ReactElement<any>|undefined
+    const elems: React.ReactElement<any>[] = []
     React.Children.forEach(this.props.children, child => {
       if (typeof child == "object" && typeof child.type == "string") {
         const origRef = child["ref"]
-        elem = React.cloneElement(child, {
+        elems.push(React.cloneElement(child, {
           ref: (elem: Element) => {
             if (origRef) {
               origRef(elem)
             }
             this.element = elem
           }
-        })
+        }))
       }
     })
-    if (elem) {
-      return elem
+    if (elems.length == 1) {
+      return elems[0]
     } else {
-      console.warn("child must be DOM element")
+      console.warn("children must be one DOM element")
       return <div />
     }
   }
