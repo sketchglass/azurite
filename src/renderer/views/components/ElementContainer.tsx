@@ -1,29 +1,37 @@
 import * as React from "react"
 
+function hookRef<T>(elem: React.ReactElement<any>, ref: (elem: T) => void) {
+  const origRef = elem["ref"]
+  return React.cloneElement(elem, {
+    ref: (elem: T) => {
+      if (origRef) {
+        origRef(elem)
+      }
+      ref(elem)
+    }
+  })
+}
+
 export default
 class ElementContainer<TProps, TState> extends React.Component<TProps, TState> {
   element: HTMLElement|undefined
 
   render() {
-    const elems: React.ReactElement<any>[] = []
-    React.Children.forEach(this.props.children, child => {
-      if (typeof child == "object" && typeof child.type == "string") {
-        const origRef = child["ref"]
-        elems.push(React.cloneElement(child, {
-          ref: (elem: HTMLElement) => {
-            if (origRef) {
-              origRef(elem)
-            }
-            this.element = elem
+    const child = React.Children.only(this.props.children)
+    if (typeof child == "object") {
+      if (typeof child.type == "function" && child.type.prototype instanceof ElementContainer) {
+        return hookRef<ElementContainer<any, any>>(child, nested => {
+          if (nested) {
+            this.element = nested.element
           }
-        }))
+        })
       }
-    })
-    if (elems.length == 1) {
-      return elems[0]
-    } else {
-      console.warn("children must be one DOM element")
-      return <div />
+      if (typeof child.type == "string") {
+        return hookRef<HTMLElement>(child, elem => {
+          this.element = elem
+        })
+      }
     }
+    throw new Error("child must be DOM element or nested ElementContainer")
   }
 }
