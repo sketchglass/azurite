@@ -1,4 +1,5 @@
 import * as React from "react"
+import ElementContainer from "./ElementContainer"
 
 interface PointerEventsProps {
   onPointerDown?: (ev: PointerEvent) => void
@@ -7,9 +8,7 @@ interface PointerEventsProps {
 }
 
 export default
-class PointerEvents extends React.Component<PointerEventsProps, {}> {
-  element: Element|undefined
-
+class PointerEvents extends ElementContainer<PointerEventsProps, {}> {
   componentDidMount() {
     if (this.element) {
       this.element.addEventListener("pointerup", this.onPointerUp)
@@ -37,29 +36,6 @@ class PointerEvents extends React.Component<PointerEventsProps, {}> {
   onPointerDown = (e: PointerEvent) => {
     if (this.props.onPointerDown) {
       this.props.onPointerDown(e)
-    }
-  }
-
-  render() {
-    const elems: React.ReactElement<any>[] = []
-    React.Children.forEach(this.props.children, child => {
-      if (typeof child == "object" && typeof child.type == "string") {
-        const origRef = child["ref"]
-        elems.push(React.cloneElement(child, {
-          ref: (elem: Element) => {
-            if (origRef) {
-              origRef(elem)
-            }
-            this.element = elem
-          }
-        }))
-      }
-    })
-    if (elems.length == 1) {
-      return elems[0]
-    } else {
-      console.warn("children must be one DOM element")
-      return <div />
     }
   }
 }
