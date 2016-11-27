@@ -8,6 +8,8 @@ interface CSSVariablesProps {
 
 export default
 class CSSVariables extends ElementContainer<CSSVariablesProps, {}> {
+  private oldProps: CSSVariablesProps = {}
+
   constructor() {
     super()
   }
@@ -22,9 +24,12 @@ class CSSVariables extends ElementContainer<CSSVariablesProps, {}> {
     if (this.element) {
       for (const key in props) {
         if (["key", "ref", "children"].indexOf(key) < 0) {
-          this.element.style.setProperty(`--${decamelize(key, '-')}`, `${props[key]}`)
+          if (this.oldProps[key] != props[key]) {
+            this.element.style.setProperty(`--${decamelize(key, '-')}`, `${props[key]}`)
+          }
         }
       }
+      this.oldProps = props
     }
   }
 }
