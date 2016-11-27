@@ -2,9 +2,6 @@ import React = require("react")
 import PointerEvents from "./PointerEvents"
 
 export interface BackgroundProps {
-  onPointerUp: (e: PointerEvent) => void
-  onPointerDown: (e: PointerEvent) => void
-  onPointerMove: (e: PointerEvent) => void
   width: number
 }
 
@@ -101,19 +98,16 @@ export default class RangeSlider extends React.Component<RangeSliderProps, void>
     }
     const className = this.props.disabled ? "RangeSlider RangeSlider-disabled" : "RangeSlider" // TODO: change behavior
     const background = BackgroundComponent ?
-      <BackgroundComponent onPointerUp={this.onPointerUp} onPointerMove={this.onPointerMove} onPointerDown={this.onPointerDown}
-        width={this.backgroundWidth} height={this.backgroundHeight} {...backgroundComponentProps} /> : <div className="RangeSlider_fill" style={fillStyle} />
+      <BackgroundComponent width={this.backgroundWidth} height={this.backgroundHeight} {...backgroundComponentProps} /> : <div className="RangeSlider_fill" style={fillStyle} />
     return (
-      <div className={className}>
-        <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
+      <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
+        <div className={className}>
           <div className="RangeSlider_border" ref={s => { this.slider = s }}>
             { background }
           </div>
-        </PointerEvents>
-        <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
           <div className="RangeSlider_handle" style={handleStyle} />
-        </PointerEvents>
-      </div>
+        </div>
+      </PointerEvents>
     )
   }
 }
