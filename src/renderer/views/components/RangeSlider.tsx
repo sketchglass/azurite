@@ -1,5 +1,6 @@
 import React = require("react")
 import PointerEvents from "./PointerEvents"
+import CSSVariables from "./CSSVariables"
 
 export interface BackgroundProps {
   width: number
@@ -89,24 +90,20 @@ export default class RangeSlider extends React.Component<RangeSliderProps, void>
   render() {
     const {value, min, max, backgroundComponentProps} = this.props
     const BackgroundComponent = this.props.backgroundComponent
-    const fillStyle = {
-      width: `${this.fillWidth}%`
-    }
-    const handleStyle = {
-      top: "0px",
-      left: `${this.handleLeft - 4}px`,
-    }
+    const ratio = (value - min) / (max - min)
     const className = this.props.disabled ? "RangeSlider RangeSlider-disabled" : "RangeSlider" // TODO: change behavior
     const background = BackgroundComponent ?
-      <BackgroundComponent width={this.backgroundWidth} height={this.backgroundHeight} {...backgroundComponentProps} /> : <div className="RangeSlider_fill" style={fillStyle} />
+      <BackgroundComponent width={this.backgroundWidth} height={this.backgroundHeight} {...backgroundComponentProps} /> : <div className="RangeSlider_fill" />
     return (
       <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
-        <div className={className}>
-          <div className="RangeSlider_border" ref={s => { this.slider = s }}>
-            { background }
+        <CSSVariables sliderRatio={ratio}>
+          <div className={className}>
+            <div className="RangeSlider_border" ref={s => { this.slider = s }}>
+              { background }
+            </div>
+            <div className="RangeSlider_handle" />
           </div>
-          <div className="RangeSlider_handle" style={handleStyle} />
-        </div>
+        </CSSVariables>
       </PointerEvents>
     )
   }

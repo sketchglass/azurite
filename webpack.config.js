@@ -38,7 +38,11 @@ module.exports = {
         addDependencyTo: webpack
       }),
       require('postcss-url'),
-      require('postcss-cssnext'),
+      require('postcss-cssnext')({
+        features: {
+          customProperties: false,
+        },
+      }),
     ];
   },
   devtool: "inline-source-map",
