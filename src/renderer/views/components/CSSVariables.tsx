@@ -10,10 +10,6 @@ export default
 class CSSVariables extends ElementContainer<CSSVariablesProps, {}> {
   private oldProps: CSSVariablesProps = {}
 
-  constructor() {
-    super()
-  }
-
   componentDidMount() {
     this.setProperties(this.props)
   }
