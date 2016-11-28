@@ -36,8 +36,6 @@ abstract class BaseBrushTool extends Tool {
   private lastInterpolateWaypoints: Waypoint[] = []
   private nextDabOffset = 0
 
-  cursor = "crosshair"
-
   // brush width (diameter)
   @observable width = 10
   // brush opacity
@@ -52,12 +50,25 @@ abstract class BaseBrushTool extends Tool {
   // how many neighbor event positions used to stabilize stroke
   @observable stabilizingLevel = 2
 
-  targetContent: ImageLayerContent|undefined
+  @observable targetContent: ImageLayerContent|undefined
   newTiledTexture: TiledTexture|undefined
   editedRect: Rect|undefined
 
-  cursorElement = document.createElement("canvas")
-  cursorContext = this.cursorElement.getContext("2d")!
+  _cursorElement = document.createElement("canvas")
+  _cursorElementSize = 0
+  cursorContext = this._cursorElement.getContext("2d")!
+
+  get cursor() {
+    return "not-allowed"
+  }
+  @computed get cursorElement() {
+    if (this.currentLayer && this.currentLayer.content.type == "image") {
+      return this._cursorElement
+    }
+  }
+  get cursorElementSize() {
+    return this._cursorElementSize
+  }
 
   constructor(appState: AppState) {
     super(appState)
@@ -69,10 +80,10 @@ abstract class BaseBrushTool extends Tool {
     const dpr = window.devicePixelRatio
     const canvasSize = this.width + 4 * dpr
     const center = canvasSize / 2
-    this.cursorElement.width = canvasSize
-    this.cursorElement.height = canvasSize
-    this.cursorElement.style.width = `${canvasSize/dpr}px`
-    this.cursorElement.style.height = `${canvasSize/dpr}px`
+    this._cursorElement.width = canvasSize
+    this._cursorElement.height = canvasSize
+    this._cursorElement.style.width = `${canvasSize/dpr}px`
+    this._cursorElement.style.height = `${canvasSize/dpr}px`
 
     const context = this.cursorContext
 
@@ -88,7 +99,7 @@ abstract class BaseBrushTool extends Tool {
     context.ellipse(center, center, radius + dpr, radius + dpr, 0, 0, 2 * Math.PI)
     context.stroke()
 
-    this.cursorElementSize = canvasSize / dpr
+    this._cursorElementSize = canvasSize / dpr
   }
 
   addEditedRect(rect: Rect) {
