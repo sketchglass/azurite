@@ -188,11 +188,17 @@ class RemoveLayerCommand implements UndoCommand {
       removedLayers.unshift(removed)
     }
     this.removedLayers = removedLayers
-
-    const nextLayer = this.picture.layerFromPath(this.paths[0])
-    if (nextLayer) {
-      this.picture.selectedLayers.replace([nextLayer])
-    }
+    this.reselect()
+  }
+  reselect() {
+    const nextPath = this.paths[0]
+    const parentPath = nextPath.slice(0, -1)
+    const prevPath = [...parentPath, nextPath[nextPath.length - 1] - 1]
+    const nextLayer = this.picture.layerFromPath(nextPath)
+    const prevLayer = this.picture.layerFromPath(prevPath)
+    const parentLayer = this.picture.layerFromPath(parentPath)
+    const selectedLayers = nextLayer? [nextLayer] : prevLayer ? [prevLayer] : parentLayer ? [parentLayer] : []
+    this.picture.selectedLayers.replace(selectedLayers)
   }
 }
 

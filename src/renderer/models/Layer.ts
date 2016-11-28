@@ -71,7 +71,7 @@ class Layer {
     if (this.content.type == "group") {
       const {children} = this.content
       const index = path[0]
-      if (index < children.length) {
+      if (0 <= index && index < children.length) {
         return this.content.children[index].descendantFromPath(path.slice(1))
       }
     }
