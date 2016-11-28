@@ -54,9 +54,9 @@ abstract class BaseBrushTool extends Tool {
   newTiledTexture: TiledTexture|undefined
   editedRect: Rect|undefined
 
-  _cursorElement = document.createElement("canvas")
-  _cursorElementSize = 0
-  cursorContext = this._cursorElement.getContext("2d")!
+  private _cursorElement = document.createElement("canvas")
+  private _cursorElementSize = 0
+  private cursorContext = this._cursorElement.getContext("2d")!
 
   get cursor() {
     return "not-allowed"
