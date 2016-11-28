@@ -64,7 +64,7 @@
     "paintvec": "github:sketchglass/paintvec#69739f8b1235ab72ac82f644bd3a6b24360f61e9",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
-    "react-draggable-tree": "sketchglass/react-draggable-tree#a375224f0b5637ce50459109dbbf345c53901e91",
+    "react-draggable-tree": "sketchglass/react-draggable-tree#9177b1b6de7f5bde9a8e1fe63d25bea0884ffde7",
     "receive-tablet-event": "github:seanchas116/receive-tablet-event#8147b9191c67fb6c818ff9c6eab28e0e6fb699b7",
     "rxjs": "^5.0.0-rc.4"
   }
