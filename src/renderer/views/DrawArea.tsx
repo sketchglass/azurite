@@ -26,13 +26,16 @@ class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined, rendere
 
   renderDebounced() {
     const {picture, renderer} = this.props
-    const pictureSize = (picture ? picture.size : new Vec2()).divScalar(devicePixelRatio)
-    const viewSize = renderer.size.divScalar(devicePixelRatio)
+    if (!picture) {
+      return <div />
+    }
+    const {scale, rotation, translation} = picture.navigation
+    const pictureSize = picture.size.mulScalar(scale)
     const scrollMin = pictureSize.mulScalar(-1.5)
     const scrollMax = pictureSize.mulScalar(1.5)
-    const translation = picture ? picture.navigation.translation : new Vec2()
-    const visibleMin = viewSize.mulScalar(-0.5).sub(translation)
-    const visibleMax = viewSize.mulScalar(0.5).sub(translation)
+    const rendererTranslation = translation.transform(Transform.scale(new Vec2(scale)).rotate(rotation))
+    const visibleMin = renderer.size.mulScalar(-0.5).sub(rendererTranslation)
+    const visibleMax = renderer.size.mulScalar(0.5).sub(rendererTranslation)
 
     return (
       <div>
