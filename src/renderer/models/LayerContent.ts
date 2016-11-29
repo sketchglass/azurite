@@ -41,7 +41,7 @@ class ImageLayerContent {
   }
 
   @action updateThumbnail() {
-    this.thumbnail = this.layer.picture.layerThumbnailGenerator.generate(this.tiledTexture)
+    this.thumbnail = this.layer.picture.layerThumbnailGenerator.generateFromTiledTexture(this.tiledTexture)
   }
 }
 

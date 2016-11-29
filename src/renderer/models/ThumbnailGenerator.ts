@@ -46,9 +46,23 @@ class ThumbnailGenerator {
     this.thumbnail.height = this.thumbnailSize.height
   }
 
-  generate(tiledTexture: TiledTexture) {
-    this.drawTarget.clear(new Color(1,1,1,1))
+  generateFromTiledTexture(tiledTexture: TiledTexture) {
+    this.clear()
     tiledTexture.drawToDrawTarget(this.drawTarget, {offset: new Vec2(0), blendMode: "src-over"})
+    return this.generateFromDrawnTexture()
+  }
+
+  generateFromTexture(texture: Texture) {
+    this.clear()
+    drawTexture(this.drawTarget, texture, {blendMode: "src-over"})
+    return this.generateFromDrawnTexture()
+  }
+
+  private clear() {
+    this.drawTarget.clear(new Color(1,1,1,1))
+  }
+
+  private generateFromDrawnTexture() {
     this.texture.generateMipmap()
 
     const rect = new Rect(new Vec2(0), this.thumbnailSize.mul(this.texture.size.div(this.originalSize)))

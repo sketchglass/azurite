@@ -56,8 +56,10 @@ class Picture {
 
     reaction(() => this.lastUpdate, frameDebounce((update: PictureUpdate) => {
       this.layerBlender.render(update.rect)
+      this.updateNavigatorThumbnail()
     }))
     this.layerBlender.render()
+    this.updateNavigatorThumbnail()
     this.undoStack.commands.observe(() => {
       this.edited = true
     })
@@ -67,6 +69,10 @@ class Picture {
     if (this.selectedLayers.length > 0) {
       return this.selectedLayers[0]
     }
+  }
+
+  private updateNavigatorThumbnail() {
+    this.navigatorThumbnail = this.navigatorThumbnailGenerator.generateFromTexture(this.layerBlender.blendedTexture)
   }
 
   dispose() {
