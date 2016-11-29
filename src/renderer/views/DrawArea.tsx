@@ -13,6 +13,37 @@ import {frameDebounce} from "../../lib/Debounce"
 import * as IPCChannels from "../../common/IPCChannels"
 import PointerEvents from "./components/PointerEvents"
 import ScrollBar, {ScrollBarDirection} from "./components/ScrollBar"
+import FrameDebounced from "./components/FrameDebounced"
+
+@observer
+class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined, renderer: Renderer}, {}> {
+
+  onXScroll = (value: number) => {
+  }
+
+  onYScroll = (value: number) => {
+  }
+
+  renderDebounced() {
+    const {picture, renderer} = this.props
+    const pictureSize = (picture ? picture.size : new Vec2()).divScalar(devicePixelRatio)
+    const viewSize = renderer.size.divScalar(devicePixelRatio)
+    const scrollMin = pictureSize.mulScalar(-1.5)
+    const scrollMax = pictureSize.mulScalar(1.5)
+    const translation = picture ? picture.navigation.translation : new Vec2()
+    const visibleMin = viewSize.mulScalar(-0.5).sub(translation)
+    const visibleMax = viewSize.mulScalar(0.5).sub(translation)
+
+    return (
+      <div>
+        <ScrollBar direction={ScrollBarDirection.Horizontal}
+          min={scrollMin.x} max={scrollMax.x} visibleMin={visibleMin.x} visibleMax={visibleMax.x} onChange={this.onXScroll}/>
+        <ScrollBar direction={ScrollBarDirection.Vertical}
+          min={scrollMin.y} max={scrollMax.y} visibleMin={visibleMin.y} visibleMax={visibleMax.y} onChange={this.onYScroll}/>
+      </div>
+    )
+  }
+}
 
 interface DrawAreaProps {
   tool: Tool
@@ -25,6 +56,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   element: HTMLElement|undefined
   renderer: Renderer
   @observable tool: Tool
+  @observable picture: Picture|undefined
   currentTool: Tool|undefined
   cursorElement: HTMLElement|undefined
   @observable cursorPosition = new Vec2()
@@ -36,7 +68,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   constructor(props: DrawAreaProps) {
     super(props)
     this.renderer = new Renderer()
-    this.renderer.picture = props.picture
+    this.picture = this.renderer.picture = props.picture
     this.setTool(props.tool)
     autorun(() => this.updateCursor())
     autorun(() => this.updateCursorGeometry())
@@ -48,7 +80,8 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
 
   componentWillReceiveProps(nextProps: DrawAreaProps) {
-    this.renderer.picture = nextProps.picture
+    // TODO: stop setting picture and tool manually and find way to use mobx
+    this.picture = this.renderer.picture = nextProps.picture
     this.setTool(nextProps.tool)
   }
 
@@ -132,23 +165,9 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     IPCChannels.setTabletCaptureArea.send(roundRect)
   }
 
-  onXScroll = (value: number) => {
-  }
-
-  onYScroll = (value: number) => {
-  }
-
   render() {
-    const style = {visibility: this.props.picture ? "visible" : "hidden"}
+    const style = {visibility: this.picture ? "visible" : "hidden"}
     const overlay = this.tool.renderOverlayUI()
-
-    const pictureSize = (this.props.picture ? this.props.picture.size : new Vec2()).divScalar(devicePixelRatio)
-    const viewSize = this.renderer.size.divScalar(devicePixelRatio)
-    const scrollMin = pictureSize.mulScalar(-1.5)
-    const scrollMax = pictureSize.mulScalar(1.5)
-    const translation = this.props.picture ? this.props.picture.navigation.translation : new Vec2()
-    const visibleMin = viewSize.mulScalar(-0.5).sub(translation)
-    const visibleMax = viewSize.mulScalar(0.5).sub(translation)
 
     return (
       <div className="DrawArea_wrapper">
@@ -159,10 +178,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
             </svg>
           </div>
         </PointerEvents>
-        <ScrollBar direction={ScrollBarDirection.Horizontal}
-          min={scrollMin.x} max={scrollMax.x} visibleMin={visibleMin.x} visibleMax={visibleMax.x} onChange={this.onXScroll}/>
-        <ScrollBar direction={ScrollBarDirection.Vertical}
-          min={scrollMin.y} max={scrollMax.y} visibleMin={visibleMin.y} visibleMax={visibleMax.y} onChange={this.onYScroll}/>
+        <DrawAreaScroll picture={this.picture} renderer={this.renderer} />
       </div>
     )
   }
