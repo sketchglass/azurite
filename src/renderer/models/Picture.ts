@@ -25,7 +25,8 @@ interface PictureUpdate {
 export default
 class Picture {
   readonly size = new Vec2(this.params.width, this.params.height)
-  readonly thumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(64, 48).mulScalar(window.devicePixelRatio))
+  readonly layerThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(64, 48).mulScalar(window.devicePixelRatio))
+  readonly navigatorThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(128, 128).mulScalar(window.devicePixelRatio))
   readonly rootLayer: Layer
   readonly selectedLayers = observable<Layer>([])
   readonly layerBlender = new LayerBlender(this)
@@ -44,6 +45,7 @@ class Picture {
   @computed get layers() {
     return (this.rootLayer.content as GroupLayerContent).children
   }
+  @observable navigatorThumbnail = ""
 
   constructor(public params: PictureParams) {
     const defaultLayer = new Layer(this, "Layer", layer => new ImageLayerContent(layer))
@@ -68,7 +70,8 @@ class Picture {
   }
 
   dispose() {
-    this.thumbnailGenerator.dispose()
+    this.layerThumbnailGenerator.dispose()
+    this.navigatorThumbnailGenerator.dispose()
     this.layerBlender.dispose()
     for (const layer of this.layers) {
       layer.dispose()
