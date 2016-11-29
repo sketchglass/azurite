@@ -48,6 +48,24 @@ class ScrollBar extends React.Component<ScrollBarProps, {}> {
     this.moving = false
   }
 
+  onClick = (e: React.MouseEvent<HTMLElement>) => {
+    const {visibleMax, visibleMin, direction, max, min, onChange, onChangeBegin} = this.props
+    const current = (visibleMax + visibleMin) / 2
+    const rect = this.element.getBoundingClientRect()
+    let newValue: number
+    if (direction == ScrollBarDirection.Horizontal) {
+      newValue = (e.clientX - rect.left) / rect.width * (max - min) + min
+    } else {
+      newValue = (e.clientY - rect.top) / rect.height * (max - min) + min
+    }
+    onChangeBegin()
+    onChange(newValue - current)
+  }
+
+  onHandleClick = (e: React.MouseEvent<HTMLElement>) => {
+    e.stopPropagation()
+  }
+
   element: HTMLElement
   handle: HTMLElement
 
@@ -62,9 +80,9 @@ class ScrollBar extends React.Component<ScrollBarProps, {}> {
     })
     return (
       <CSSVariables handleStart={handleStart} handleEnd={handleEnd}>
-        <div className={className} ref={e => this.element = e}>
+        <div className={className} ref={e => this.element = e} onClick={this.onClick}>
           <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
-            <div className="ScrollBar_handle" ref={e => this.handle = e} />
+            <div className="ScrollBar_handle" ref={e => this.handle = e} onClick={this.onHandleClick} />
           </PointerEvents>
         </div>
       </CSSVariables>
