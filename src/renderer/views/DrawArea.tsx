@@ -1,4 +1,5 @@
 import {observable, autorun, action, observe} from "mobx"
+import {observer} from "mobx-react"
 import {Subscription} from "rxjs/Subscription"
 import React = require("react")
 import Picture from "../models/Picture"
@@ -18,6 +19,7 @@ interface DrawAreaProps {
   picture: Picture|undefined
 }
 
+@observer
 export default
 class DrawArea extends React.Component<DrawAreaProps, void> {
   element: HTMLElement|undefined
@@ -139,6 +141,15 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   render() {
     const style = {visibility: this.props.picture ? "visible" : "hidden"}
     const overlay = this.tool.renderOverlayUI()
+
+    const pictureSize = (this.props.picture ? this.props.picture.size : new Vec2()).divScalar(devicePixelRatio)
+    const viewSize = this.renderer.size.divScalar(devicePixelRatio)
+    const scrollMin = pictureSize.mulScalar(-1.5)
+    const scrollMax = pictureSize.mulScalar(1.5)
+    const translation = this.props.picture ? this.props.picture.navigation.translation : new Vec2()
+    const visibleMin = viewSize.mulScalar(-0.5).sub(translation)
+    const visibleMax = viewSize.mulScalar(0.5).sub(translation)
+
     return (
       <div className="DrawArea_wrapper">
         <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
@@ -148,8 +159,10 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
             </svg>
           </div>
         </PointerEvents>
-        <ScrollBar direction={ScrollBarDirection.Horizontal} min={0} max={100} value={50} handleLength={100} onChange={this.onXScroll}/>
-        <ScrollBar direction={ScrollBarDirection.Vertical} min={0} max={100} value={50} handleLength={100} onChange={this.onYScroll}/>
+        <ScrollBar direction={ScrollBarDirection.Horizontal}
+          min={scrollMin.x} max={scrollMax.x} visibleMin={visibleMin.x} visibleMax={visibleMax.x} onChange={this.onXScroll}/>
+        <ScrollBar direction={ScrollBarDirection.Vertical}
+          min={scrollMin.y} max={scrollMax.y} visibleMin={visibleMin.y} visibleMax={visibleMax.y} onChange={this.onYScroll}/>
       </div>
     )
   }

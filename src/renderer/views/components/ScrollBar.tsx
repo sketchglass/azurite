@@ -10,18 +10,18 @@ enum ScrollBarDirection {
 
 interface ScrollBarProps {
   direction: ScrollBarDirection
-  value: number
   min: number
   max: number
-  handleLength: number
+  visibleMin: number
+  visibleMax: number
   onChange: (value: number) => void
 }
 
 function ScrollBar(props: ScrollBarProps) {
-  const {direction, value, min, max, handleLength, onChange} = props
-  const length = max - min + handleLength
-  const handleStart = value / length
-  const handleEnd = (value + handleLength) / length
+  const {direction, min, max, visibleMin, visibleMax, onChange} = props
+  const length = max - min
+  const handleStart = (visibleMin - min) / length
+  const handleEnd = (visibleMax - min) / length
   const className = classNames("ScrollBar", {
     "ScrollBar-vertical": direction == ScrollBarDirection.Vertical,
     "ScrollBar-horizontal": direction == ScrollBarDirection.Horizontal,
