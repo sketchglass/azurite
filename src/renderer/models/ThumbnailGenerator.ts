@@ -31,23 +31,19 @@ function getBoundingPowerOf2Size(size: Vec2) {
   return new Vec2(getBoundingPowerOf2(size.width), getBoundingPowerOf2(size.height))
 }
 
-
-const thumbnailSizeMax = new Vec2(64, 48).mulScalar(window.devicePixelRatio)
-
 export default
 class ThumbnailGenerator {
-  thumbnailSize = calcThumbnailSize(this.size, thumbnailSizeMax)
-  texture = new Texture(context, {size: getBoundingPowerOf2Size(this.size), filter: "trilinear"})
+  thumbnailSize = calcThumbnailSize(this.originalSize, this.maxThumbnailSize)
+  texture = new Texture(context, {size: getBoundingPowerOf2Size(this.originalSize), filter: "trilinear"})
   drawTarget = new TextureDrawTarget(context, this.texture)
   thumbnailTexture = new Texture(context, {size: this.thumbnailSize})
   thumbnailDrawTarget = new TextureDrawTarget(context, this.thumbnailTexture)
   thumbnail = document.createElement("canvas")
   thumbnailContext = this.thumbnail.getContext("2d")!
 
-  constructor(public size: Vec2) {
-    const thumbSize = calcThumbnailSize(size, thumbnailSizeMax)
-    this.thumbnail.width = thumbSize.width
-    this.thumbnail.height = thumbSize.height
+  constructor(public originalSize: Vec2, public maxThumbnailSize: Vec2) {
+    this.thumbnail.width = this.thumbnailSize.width
+    this.thumbnail.height = this.thumbnailSize.height
   }
 
   generate(tiledTexture: TiledTexture) {
@@ -55,7 +51,7 @@ class ThumbnailGenerator {
     tiledTexture.drawToDrawTarget(this.drawTarget, {offset: new Vec2(0), blendMode: "src-over"})
     this.texture.generateMipmap()
 
-    const rect = new Rect(new Vec2(0), this.thumbnailSize.mul(this.texture.size.div(this.size)))
+    const rect = new Rect(new Vec2(0), this.thumbnailSize.mul(this.texture.size.div(this.originalSize)))
     drawTexture(this.thumbnailDrawTarget, this.texture, {dstRect: rect, blendMode: "src"})
 
     const {width, height} = rect
