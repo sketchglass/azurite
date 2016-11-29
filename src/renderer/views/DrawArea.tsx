@@ -43,7 +43,7 @@ class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined, rendere
       return
     }
     const {scale, rotation, translation} = picture.navigation
-    const rendererTranslation = this.originalRendererTranslation.add(offset.neg())
+    const rendererTranslation = this.originalRendererTranslation.sub(offset)
     picture.navigation.translation = rendererTranslation.transform(Transform.scale(new Vec2(1 / scale)).rotate(-rotation)).floor()
   }
 
@@ -54,8 +54,8 @@ class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined, rendere
     }
     const {scale, rotation, translation} = picture.navigation
     const pictureSize = picture.size.mulScalar(scale)
-    const scrollMin = pictureSize.mulScalar(-1.5)
-    const scrollMax = pictureSize.mulScalar(1.5)
+    const contentMin = pictureSize.mulScalar(-1.5)
+    const contentMax = pictureSize.mulScalar(1.5)
     const rendererTranslation = translation.transform(Transform.scale(new Vec2(scale)).rotate(rotation))
     const visibleMin = renderer.size.mulScalar(-0.5).sub(rendererTranslation)
     const visibleMax = renderer.size.mulScalar(0.5).sub(rendererTranslation)
@@ -63,9 +63,9 @@ class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined, rendere
     return (
       <div>
         <ScrollBar direction={ScrollBarDirection.Horizontal}
-          min={scrollMin.x} max={scrollMax.x} visibleMin={visibleMin.x} visibleMax={visibleMax.x} onChangeBegin={this.onScrollBegin} onChange={this.onXScroll}/>
+          contentMin={contentMin.x} contentMax={contentMax.x} visibleMin={visibleMin.x} visibleMax={visibleMax.x} onChangeBegin={this.onScrollBegin} onChange={this.onXScroll}/>
         <ScrollBar direction={ScrollBarDirection.Vertical}
-          min={scrollMin.y} max={scrollMax.y} visibleMin={visibleMin.y} visibleMax={visibleMax.y} onChangeBegin={this.onScrollBegin} onChange={this.onYScroll}/>
+          contentMin={contentMin.y} contentMax={contentMax.y} visibleMin={visibleMin.y} visibleMax={visibleMax.y} onChangeBegin={this.onScrollBegin} onChange={this.onYScroll}/>
       </div>
     )
   }
