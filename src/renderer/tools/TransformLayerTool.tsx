@@ -15,12 +15,12 @@ import {AppState} from "../state/AppState"
 import {frameDebounce} from "../../lib/Debounce"
 import {TransformLayerCommand} from "../commands/LayerCommand"
 import {UndoStack, UndoCommand} from "../models/UndoStack"
+import FrameDebounced from "../views/components/FrameDebounced"
 
 const HANDLE_RADIUS = 4
 
-@observer
-class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}, {}> {
-  render() {
+class TransformLayerOverlayUI extends FrameDebounced<{tool: TransformLayerTool}, {}> {
+  renderDebounced() {
     const {tool} = this.props
     const {originalRect} = tool
 
