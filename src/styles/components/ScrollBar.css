@@ -2,6 +2,7 @@
   position: relative;
   background-color: var(--darken-background-color);
   z-index: 100;
+  overflow: hidden;
 }
 .ScrollBar_handle {
   position: absolute;
