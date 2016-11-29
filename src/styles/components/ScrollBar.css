@@ -1,0 +1,22 @@
+.ScrollBar {
+  position: relative;
+  background-color: var(--darken-background-color);
+  z-index: 100;
+  overflow: hidden;
+}
+.ScrollBar_handle {
+  position: absolute;
+  background-color: var(--default-color);
+}
+.ScrollBar-vertical .ScrollBar_handle {
+  left: 0;
+  width: 100%;
+  top: calc(var(--handle-start) * 100%);
+  height: calc((var(--handle-end) - var(--handle-start)) * 100%);
+}
+.ScrollBar-horizontal .ScrollBar_handle {
+  left : calc(var(--handle-start) * 100%);
+  width : calc((var(--handle-end) - var(--handle-start)) * 100%);
+  top: 0;
+  height: 100%;
+}
