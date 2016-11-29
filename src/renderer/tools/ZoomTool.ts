@@ -5,7 +5,9 @@ import Waypoint from "../models/Waypoint"
 export
 class ZoomInTool extends Tool {
   name = "Zoom In"
-  cursor = "zoom-in"
+  get cursor() {
+    return "zoom-in"
+  }
 
   start(ev: ToolPointerEvent) {
     if (!this.picture) {
@@ -24,7 +26,9 @@ class ZoomInTool extends Tool {
 export
 class ZoomOutTool extends Tool {
   name = "Zoom Out"
-  cursor = "zoom-out"
+  get cursor() {
+    return "zoom-out"
+  }
 
   start(ev: ToolPointerEvent) {
     if (!this.picture) {
@@ -47,7 +51,9 @@ const modScale = (scale: number) => {
 export
 class ZoomTool extends Tool {
   name = "Zoom"
-  cursor = "zoom-in"
+  get cursor() {
+    return "zoom-in"
+  }
   originalScale = 1.0
   startPos: Vec2
 

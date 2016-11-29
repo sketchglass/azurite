@@ -48,9 +48,15 @@ abstract class Tool {
 
   abstract name: string
 
-  @observable cursor = "auto"
-  @observable cursorElement: HTMLElement|undefined
-  @observable cursorElementSize = 0
+  get cursor() {
+    return "auto"
+  }
+  get cursorElement(): HTMLElement|undefined {
+    return undefined
+  }
+  get cursorElementSize() {
+    return 0
+  }
 
   get modal() { return false }
   get modalUndoStack(): UndoStack|undefined { return }
