@@ -44,7 +44,7 @@ class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined, rendere
     }
     const {scale, rotation, translation} = picture.navigation
     const rendererTranslation = this.originalRendererTranslation.add(offset.neg())
-    picture.navigation.translation = rendererTranslation.transform(Transform.scale(new Vec2(1 / scale)).rotate(-rotation))
+    picture.navigation.translation = rendererTranslation.transform(Transform.scale(new Vec2(1 / scale)).rotate(-rotation)).floor()
   }
 
   renderDebounced() {
