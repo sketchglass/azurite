@@ -18,10 +18,33 @@ import FrameDebounced from "./components/FrameDebounced"
 @observer
 class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined, renderer: Renderer}, {}> {
 
+  originalRendererTranslation = new Vec2()
+
+  onScrollBegin = () => {
+    const {picture} = this.props
+    if (!picture) {
+      return
+    }
+    const {scale, rotation, translation} = picture.navigation
+    this.originalRendererTranslation = translation.transform(Transform.scale(new Vec2(scale)).rotate(rotation))
+  }
+
   onXScroll = (value: number) => {
+    this.onScroll(new Vec2(value, 0))
   }
 
   onYScroll = (value: number) => {
+    this.onScroll(new Vec2(0, value))
+  }
+
+  onScroll = (offset: Vec2) => {
+    const {picture} = this.props
+    if (!picture) {
+      return
+    }
+    const {scale, rotation, translation} = picture.navigation
+    const rendererTranslation = this.originalRendererTranslation.add(offset.neg())
+    picture.navigation.translation = rendererTranslation.transform(Transform.scale(new Vec2(1 / scale)).rotate(-rotation))
   }
 
   renderDebounced() {
@@ -40,9 +63,9 @@ class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined, rendere
     return (
       <div>
         <ScrollBar direction={ScrollBarDirection.Horizontal}
-          min={scrollMin.x} max={scrollMax.x} visibleMin={visibleMin.x} visibleMax={visibleMax.x} onChange={this.onXScroll}/>
+          min={scrollMin.x} max={scrollMax.x} visibleMin={visibleMin.x} visibleMax={visibleMax.x} onChangeBegin={this.onScrollBegin} onChange={this.onXScroll}/>
         <ScrollBar direction={ScrollBarDirection.Vertical}
-          min={scrollMin.y} max={scrollMax.y} visibleMin={visibleMin.y} visibleMax={visibleMax.y} onChange={this.onYScroll}/>
+          min={scrollMin.y} max={scrollMax.y} visibleMin={visibleMin.y} visibleMax={visibleMax.y} onChangeBegin={this.onScrollBegin} onChange={this.onYScroll}/>
       </div>
     )
   }
