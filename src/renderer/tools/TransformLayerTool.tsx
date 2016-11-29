@@ -90,19 +90,21 @@ enum DragType {
 class TransformChangeCommand implements UndoCommand {
   constructor(
     public tool: TransformLayerTool,
-    public oldRect: Rect, public oldAdditionalTransform: Transform,
-    public newRect: Rect, public newAdditionalTransform: Transform
+    public oldTranslation: Vec2, public oldRect: Rect, public oldAdditionalTransform: Transform,
+    public newTranslation: Vec2, public newRect: Rect, public newAdditionalTransform: Transform
   ) {}
 
   title = "Change Transform"
 
   redo() {
+    this.tool.translation = this.newTranslation
     this.tool.rect = this.newRect
     this.tool.additionalTransform = this.newAdditionalTransform
     this.tool.update()
   }
 
   undo() {
+    this.tool.translation = this.oldTranslation
     this.tool.rect = this.oldRect
     this.tool.additionalTransform = this.oldAdditionalTransform
     this.tool.update()
@@ -361,8 +363,8 @@ class TransformLayerTool extends Tool {
     if (this.modalUndoStack && this.lastRect && this.rect) {
       const command = new TransformChangeCommand(
         this,
-        this.lastRect, this.lastAdditionalTransform,
-        this.rect, this.additionalTransform
+        this.lastTranslation, this.lastRect, this.lastAdditionalTransform,
+        this.translation, this.rect, this.additionalTransform
       )
       this.modalUndoStack.redoAndPush(command)
     }
