@@ -11,6 +11,7 @@ import Renderer from "./Renderer"
 import {frameDebounce} from "../../lib/Debounce"
 import * as IPCChannels from "../../common/IPCChannels"
 import PointerEvents from "./components/PointerEvents"
+import ScrollBar, {ScrollBarDirection} from "./components/ScrollBar"
 
 interface DrawAreaProps {
   tool: Tool
@@ -129,17 +130,27 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     IPCChannels.setTabletCaptureArea.send(roundRect)
   }
 
+  onXScroll = (value: number) => {
+  }
+
+  onYScroll = (value: number) => {
+  }
+
   render() {
     const style = {visibility: this.props.picture ? "visible" : "hidden"}
     const overlay = this.tool.renderOverlayUI()
     return (
-      <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
-        <div ref={e => this.element = e} className="DrawArea" style={style} tabIndex={-1} onKeyDown={this.onKeyDown} >
-          <svg hidden={!overlay} className="DrawArea_Overlay">
-            {overlay}
-          </svg>
-        </div>
-      </PointerEvents>
+      <div className="DrawArea_wrapper">
+        <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
+          <div ref={e => this.element = e} className="DrawArea" style={style} tabIndex={-1} onKeyDown={this.onKeyDown} >
+            <svg hidden={!overlay} className="DrawArea_Overlay">
+              {overlay}
+            </svg>
+          </div>
+        </PointerEvents>
+        <ScrollBar direction={ScrollBarDirection.Horizontal} min={0} max={100} value={50} handleLength={100} onChange={this.onXScroll}/>
+        <ScrollBar direction={ScrollBarDirection.Vertical} min={0} max={100} value={50} handleLength={100} onChange={this.onYScroll}/>
+      </div>
     )
   }
 
