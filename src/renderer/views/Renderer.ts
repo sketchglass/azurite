@@ -137,7 +137,7 @@ class Renderer {
 
   update = frameDebounce(() => this.renderNow())
 
-  private renderNow() {
+  renderNow() {
     if (this.picture) {
       const {layerBlender} = this.picture
       if (layerBlender.wholeDirty) {
