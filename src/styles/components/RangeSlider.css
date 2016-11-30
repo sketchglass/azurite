@@ -12,6 +12,7 @@
 }
 .RangeSlider_fill {
   background-color: var(--range-slider-fill-background-color);
+  width: calc(var(--slider-ratio) * 100%);
   height: 100%;
   &::after {
     content: "\200B";
@@ -26,6 +27,8 @@
   position: absolute;
   width: 8px;
   height: 20px;
+  top: 0px;
+  left: calc(var(--slider-ratio) * 100% - 4px);
   z-index: 20;
   &::after {
     content: "\200B";
