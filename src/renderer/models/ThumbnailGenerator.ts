@@ -34,46 +34,30 @@ function getBoundingPowerOf2Size(size: Vec2) {
 export default
 class ThumbnailGenerator {
   thumbnailSize = calcThumbnailSize(this.originalSize, this.maxThumbnailSize)
-  texture = new Texture(context, {size: getBoundingPowerOf2Size(this.originalSize), filter: "trilinear"})
-  drawTarget = new TextureDrawTarget(context, this.texture)
-  thumbnailTexture = new Texture(context, {size: this.thumbnailSize})
-  thumbnailDrawTarget = new TextureDrawTarget(context, this.thumbnailTexture)
+  private texture = new Texture(context, {size: getBoundingPowerOf2Size(this.originalSize), filter: "trilinear"})
+  private drawTarget = new TextureDrawTarget(context, this.texture)
+  private thumbnailTexture = new Texture(context, {size: this.thumbnailSize})
+  private thumbnailDrawTarget = new TextureDrawTarget(context, this.thumbnailTexture)
   thumbnail = document.createElement("canvas")
-  thumbnailContext = this.thumbnail.getContext("2d")!
+  private thumbnailContext = this.thumbnail.getContext("2d")!
 
   constructor(public originalSize: Vec2, public maxThumbnailSize: Vec2) {
     this.thumbnail.width = this.thumbnailSize.width
     this.thumbnail.height = this.thumbnailSize.height
   }
 
-  generateFromTiledTexture(tiledTexture: TiledTexture) {
+  loadTiledTexture(tiledTexture: TiledTexture) {
     this.clear()
     tiledTexture.drawToDrawTarget(this.drawTarget, {offset: new Vec2(0), blendMode: "src-over"})
-    return this.generateFromDrawnTexture()
   }
 
-  generateFromTexture(texture: Texture) {
+  loadTexture(texture: Texture) {
     this.clear()
     drawTexture(this.drawTarget, texture, {blendMode: "src-over"})
-    return this.generateFromDrawnTexture()
   }
 
   private clear() {
     this.drawTarget.clear(new Color(1,1,1,1))
-  }
-
-  private generateFromDrawnTexture() {
-    this.texture.generateMipmap()
-
-    const rect = new Rect(new Vec2(0), this.thumbnailSize.mul(this.texture.size.div(this.originalSize)))
-    drawTexture(this.thumbnailDrawTarget, this.texture, {dstRect: rect, blendMode: "src"})
-
-    const {width, height} = rect
-    const data = new ImageData(width, height)
-    this.thumbnailDrawTarget.readPixels(rect, new Uint8Array(data.data.buffer))
-    this.thumbnailContext.putImageData(data, 0, 0)
-
-    return this.thumbnail.toDataURL()
   }
 
   dispose() {

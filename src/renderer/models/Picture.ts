@@ -45,7 +45,9 @@ class Picture {
   @computed get layers() {
     return (this.rootLayer.content as GroupLayerContent).children
   }
-  @observable navigatorThumbnail = ""
+  get navigatorThumbnanil() {
+    return this.navigatorThumbnailGenerator.thumbnail
+  }
 
   constructor(public params: PictureParams) {
     const defaultLayer = new Layer(this, "Layer", layer => new ImageLayerContent(layer))
@@ -72,7 +74,7 @@ class Picture {
   }
 
   private updateNavigatorThumbnail() {
-    this.navigatorThumbnail = this.navigatorThumbnailGenerator.generateFromTexture(this.layerBlender.blendedTexture)
+    this.navigatorThumbnailGenerator.loadTexture(this.layerBlender.blendedTexture)
   }
 
   dispose() {
