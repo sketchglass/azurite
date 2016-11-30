@@ -25,7 +25,6 @@ export default
 class Picture {
   readonly size = new Vec2(this.params.width, this.params.height)
   readonly layerThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(64, 48).mulScalar(window.devicePixelRatio))
-  readonly navigatorThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(96, 96).mulScalar(window.devicePixelRatio))
   readonly rootLayer: Layer
   readonly selectedLayers = observable<Layer>([])
   readonly layerBlender = new LayerBlender(this)
@@ -44,7 +43,8 @@ class Picture {
   @computed get layers() {
     return (this.rootLayer.content as GroupLayerContent).children
   }
-  navigatorThumbnailDirty = true
+  private readonly navigatorThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(96, 96).mulScalar(window.devicePixelRatio))
+  private navigatorThumbnailDirty = true
   navigatorThumbnail: HTMLCanvasElement
   navigatorThumbnailScale: number
 
