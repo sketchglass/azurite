@@ -27,7 +27,7 @@
   "homepage": "https://github.com/seanchas116/azurite#readme",
   "private": true,
   "devDependencies": {
-    "@types/electron": "^1.4.27",
+    "@types/electron": "^1.4.29",
     "@types/electron-devtools-installer": "^2.0.2",
     "@types/msgpack-lite": "^0.1.1",
     "@types/node": "^6.0.51",
