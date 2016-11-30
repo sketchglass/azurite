@@ -1,44 +1,114 @@
+import {Transform, Vec2, Rect} from "paintvec"
+import {computed, autorun} from "mobx"
 import {observer} from "mobx-react"
 import React = require("react")
 import Picture from "../models/Picture"
+import {appState} from "../state/AppState"
+import {renderer} from "./Renderer"
 
 interface NavigatorProps {
   picture: Picture|undefined
 }
 
+class NavigatorMinimap extends React.Component<{}, {} > {
+  private minimap: HTMLCanvasElement
+  private disposer: () => void
+
+  @computed get picture() {
+    return appState.currentPicture
+  }
+
+  componentDidMount() {
+    this.disposer = autorun(() => this.redraw())
+  }
+
+  componentWillUnmount() {
+    this.disposer()
+  }
+
+  redraw() {
+    const {width, height} = this.minimap
+    const context = this.minimap.getContext('2d')!
+    context.setTransform(1, 0, 0, 1, 0, 0)
+    context.clearRect(0, 0, width, height)
+
+    if (!this.picture) {
+      return
+    }
+    context.translate(width / 2, height / 2)
+
+    const thumbnail = this.picture.navigatorThumbnail
+    const thumbanilScale = this.picture.navigatorThumbnailScale
+    context.drawImage(thumbnail, -thumbnail.width / 2, -thumbnail.height / 2)
+
+    const {scale, rotation, translation} = this.picture.navigation
+    const transform = Transform.rotate(-rotation).scale(new Vec2(1 / scale)).translate(translation.neg()).scale(new Vec2(thumbanilScale))
+    const rendererSize = renderer.size
+    const rendererTopLeft = rendererSize.divScalar(2).neg()
+    const rendererBottomRight = rendererSize.add(rendererTopLeft)
+    const rendererRect = new Rect(rendererTopLeft, rendererBottomRight)
+    const vertices = rendererRect.vertices().map(p => p.transform(transform))
+
+    context.strokeStyle = "grey"
+    context.beginPath()
+    context.moveTo(vertices[3].x, vertices[3].y)
+    for (const v of vertices) {
+      context.lineTo(v.x, v.y)
+    }
+    context.stroke()
+  }
+
+  render() {
+    const size = 192 * devicePixelRatio
+    return <canvas className="Navigator_minimap" width={size} height={size} ref={e => this.minimap = e} />
+  }
+}
+
 @observer export default
 class Navigator extends React.Component<NavigatorProps, {}> {
+  constructor(props: NavigatorProps) {
+    super(props)
+  }
+
+  private onScaleChange = (ev: React.FormEvent<HTMLInputElement>) => {
+    const {picture} = this.props
+    if (picture) {
+      picture.navigation.scale = parseFloat((ev.target as HTMLInputElement).value) / 100
+    }
+  }
+
+  private onRotationChange = (ev: React.FormEvent<HTMLInputElement>) => {
+    const {picture} = this.props
+    if (picture) {
+      picture.navigation.rotation = parseInt((ev.target as HTMLInputElement).value) / 180 * Math.PI
+    }
+  }
+
+  private onHorizontalFlipChange = (ev: React.FormEvent<HTMLInputElement>) => {
+    const {picture} = this.props
+    if (picture) {
+      picture.navigation.horizontalFlip = (ev.target as HTMLInputElement).checked
+    }
+  }
+
   render() {
     const {picture} = this.props
-    const onScaleChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      if (picture) {
-        picture.navigation.scale = parseFloat((ev.target as HTMLInputElement).value) / 100
-      }
-    }
-    const onRotationChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      if (picture) {
-        picture.navigation.rotation = parseInt((ev.target as HTMLInputElement).value) / 180 * Math.PI
-      }
-    }
+
     const navigation = picture ? picture.navigation : {rotation: 0, scale: 1, horizontalFlip: false}
     const {rotation, scale, horizontalFlip} = navigation
     const rotationDeg = Math.round(rotation / Math.PI * 180)
-    const onHorizontalFlipChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      if (picture) {
-        picture.navigation.horizontalFlip = (ev.target as HTMLInputElement).checked
-      }
-    }
 
     return (
       <div className="Navigator">
+        <NavigatorMinimap />
         <div>
-          Scale: <input type="number" max={1600} onChange={onScaleChange} value={Math.round(scale * 100)} />
+          Scale: <input type="number" max={1600} onChange={this.onScaleChange} value={Math.round(scale * 100)} />
         </div>
         <div>
-          Rotation: <input type="number" min={-180} max={180} onChange={onRotationChange} value={rotationDeg} />
+          Rotation: <input type="number" min={-180} max={180} onChange={this.onRotationChange} value={rotationDeg} />
         </div>
         <div>
-          <label><input type="checkbox" checked={horizontalFlip} onChange={onHorizontalFlipChange} />Flip Horizontally</label>
+          <label><input type="checkbox" checked={horizontalFlip} onChange={this.onHorizontalFlipChange} />Flip Horizontally</label>
         </div>
       </div>
     )

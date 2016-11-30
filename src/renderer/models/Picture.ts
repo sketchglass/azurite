@@ -45,9 +45,8 @@ class Picture {
   @computed get layers() {
     return (this.rootLayer.content as GroupLayerContent).children
   }
-  get navigatorThumbnanil() {
-    return this.navigatorThumbnailGenerator.thumbnail
-  }
+  @observable navigatorThumbnail: HTMLCanvasElement
+  @observable navigatorThumbnailScale: number
 
   constructor(public params: PictureParams) {
     const defaultLayer = new Layer(this, "Layer", layer => new ImageLayerContent(layer))
@@ -75,6 +74,8 @@ class Picture {
 
   private updateNavigatorThumbnail() {
     this.navigatorThumbnailGenerator.loadTexture(this.layerBlender.blendedTexture)
+    this.navigatorThumbnail = this.navigatorThumbnailGenerator.thumbnail
+    this.navigatorThumbnailScale = this.navigatorThumbnailGenerator.scale
   }
 
   dispose() {
