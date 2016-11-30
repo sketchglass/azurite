@@ -6,6 +6,7 @@ import Picture from "../models/Picture"
 import {appState} from "../state/AppState"
 import {renderer} from "./Renderer"
 import {frameDebounce} from "../../lib/Debounce"
+import PointerEvents from "./components/PointerEvents"
 
 interface NavigatorProps {
   picture: Picture|undefined
@@ -14,6 +15,9 @@ interface NavigatorProps {
 class NavigatorMinimap extends React.Component<{}, {} > {
   private minimap: HTMLCanvasElement
   private disposer: () => void
+  private dragging = false
+  private dragStartPos = new Vec2()
+  private originalTranslation = new Vec2()
 
   @computed get picture() {
     return appState.currentPicture
@@ -34,7 +38,7 @@ class NavigatorMinimap extends React.Component<{}, {} > {
     this.disposer()
   }
 
-  redraw() {
+  private redraw() {
     const {width, height} = this.minimap
     const context = this.minimap.getContext('2d')!
     context.setTransform(1, 0, 0, 1, 0, 0)
@@ -67,9 +71,45 @@ class NavigatorMinimap extends React.Component<{}, {} > {
     context.stroke()
   }
 
+  private picturePosForEvent(e: PointerEvent) {
+    if (!this.picture) {
+      return new Vec2()
+    }
+    const {left, top, width, height} = this.minimap.getBoundingClientRect()
+    return new Vec2(e.offsetX - left - width / 2, e.offsetY - top - height / 2).divScalar(this.picture.navigatorThumbnailScale).floor()
+  }
+
+  private onPointerDown = (e: PointerEvent) => {
+    this.dragging = true
+    if (!this.picture) {
+      return
+    }
+    this.minimap.setPointerCapture(e.pointerId)
+    this.dragStartPos = this.picturePosForEvent(e)
+    this.originalTranslation = this.picture.navigation.translation
+  }
+  private onPointerMove = (e: PointerEvent) => {
+    if (!this.dragging) {
+      return
+    }
+    if (!this.picture) {
+      return
+    }
+    const pos = this.picturePosForEvent(e)
+    const offset = this.dragStartPos.sub(pos)
+    this.picture.navigation.translation = this.originalTranslation.add(offset)
+  }
+  private onPointerUp = (e: PointerEvent) => {
+    this.dragging = false
+  }
+
   render() {
     const size = 128 * devicePixelRatio
-    return <canvas className="Navigator_minimap" width={size} height={size} ref={e => this.minimap = e} />
+    return (
+      <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
+        <canvas className="Navigator_minimap" width={size} height={size} ref={e => this.minimap = e} />
+      </PointerEvents>
+    )
   }
 }
 
