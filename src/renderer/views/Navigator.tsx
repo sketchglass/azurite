@@ -71,21 +71,27 @@ class NavigatorMinimap extends React.Component<{}, {} > {
     context.stroke()
   }
 
-  private picturePosForEvent(e: PointerEvent) {
+  private picturePosForEvent(e: {clientX: number, clientY: number}) {
     if (!this.picture) {
       return new Vec2()
     }
     const {left, top, width, height} = this.minimap.getBoundingClientRect()
-    return new Vec2(e.offsetX - left - width / 2, e.offsetY - top - height / 2).divScalar(this.picture.navigatorThumbnailScale).floor()
+    return new Vec2(e.clientX - left - width / 2, e.clientY - top - height / 2).mulScalar(devicePixelRatio).divScalar(this.picture.navigatorThumbnailScale).round()
   }
 
   private onPointerDown = (e: PointerEvent) => {
-    this.dragging = true
     if (!this.picture) {
       return
     }
     this.minimap.setPointerCapture(e.pointerId)
-    this.dragStartPos = this.picturePosForEvent(e)
+    const pos = this.picturePosForEvent(e)
+    const rendererPos = (pos.add(this.picture.size.mulScalar(0.5))).transform(renderer.transformFromPicture)
+    if (!new Rect(new Vec2(), renderer.size).includes(rendererPos)) {
+      this.picture.navigation.translation = pos.neg()
+    }
+
+    this.dragging = true
+    this.dragStartPos = pos
     this.originalTranslation = this.picture.navigation.translation
   }
   private onPointerMove = (e: PointerEvent) => {

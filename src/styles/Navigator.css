@@ -2,7 +2,7 @@
   margin: 8px;
 
   &_minimap {
-    width: 192px;
-    height: 192px;
+    width: 128px;
+    height: 128px;
   }
 }
