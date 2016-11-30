@@ -63,6 +63,7 @@ class NavigatorMinimap extends React.Component<{}, {} > {
     const vertices = rendererRect.vertices().map(p => p.transform(transform))
 
     context.strokeStyle = "grey"
+    context.lineWidth = devicePixelRatio
     context.beginPath()
     context.moveTo(vertices[3].x, vertices[3].y)
     for (const v of vertices) {
