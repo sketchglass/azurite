@@ -9,7 +9,6 @@ import LayerBlender from "./LayerBlender"
 import {UndoStack} from "./UndoStack"
 import {Navigation} from "./Navigation"
 import PictureParams from "./PictureParams"
-import {frameDebounce} from "../../lib/Debounce"
 
 export
 interface PictureData {
@@ -55,11 +54,14 @@ class Picture {
     )
     this.selectedLayers.push(defaultLayer)
 
-    reaction(() => this.lastUpdate, frameDebounce((update: PictureUpdate) => {
-      this.layerBlender.render(update.rect)
-      this.updateNavigatorThumbnail()
-    }))
-    this.layerBlender.render()
+    reaction(() => this.lastUpdate, (update: PictureUpdate) => {
+      if (update.rect) {
+        this.layerBlender.addDirtyRect(update.rect)
+      } else {
+        this.layerBlender.wholeDirty = true
+      }
+    })
+    this.layerBlender.renderNow()
     this.updateNavigatorThumbnail()
     this.undoStack.commands.observe(() => {
       this.edited = true
@@ -73,7 +75,7 @@ class Picture {
   }
 
   private updateNavigatorThumbnail() {
-    this.navigatorThumbnailGenerator.loadTexture(this.layerBlender.blendedTexture)
+    this.navigatorThumbnailGenerator.loadTexture(this.layerBlender.getBlendedTexture())
     this.navigatorThumbnail = this.navigatorThumbnailGenerator.thumbnail
     this.navigatorThumbnailScale = this.navigatorThumbnailGenerator.scale
   }
