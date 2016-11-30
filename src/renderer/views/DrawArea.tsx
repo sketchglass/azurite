@@ -1,4 +1,5 @@
 import {observable, autorun, action, observe} from "mobx"
+import {observer} from "mobx-react"
 import {Subscription} from "rxjs/Subscription"
 import React = require("react")
 import Picture from "../models/Picture"
@@ -7,21 +8,80 @@ import Tool, {ToolPointerEvent} from "../tools/Tool"
 import Waypoint from "../models/Waypoint"
 import {TabletEvent} from "receive-tablet-event"
 import {canvas} from "../GLContext"
-import Renderer from "./Renderer"
+import {renderer} from "./Renderer"
 import {frameDebounce} from "../../lib/Debounce"
 import * as IPCChannels from "../../common/IPCChannels"
 import PointerEvents from "./components/PointerEvents"
+import ScrollBar, {ScrollBarDirection} from "./components/ScrollBar"
+import FrameDebounced from "./components/FrameDebounced"
+
+@observer
+class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined}, {}> {
+
+  originalRendererTranslation = new Vec2()
+
+  onScrollBegin = () => {
+    const {picture} = this.props
+    if (!picture) {
+      return
+    }
+    const {scale, rotation, translation} = picture.navigation
+    this.originalRendererTranslation = translation.transform(Transform.scale(new Vec2(scale)).rotate(rotation))
+  }
+
+  onXScroll = (value: number) => {
+    this.onScroll(new Vec2(value, 0))
+  }
+
+  onYScroll = (value: number) => {
+    this.onScroll(new Vec2(0, value))
+  }
+
+  onScroll = (offset: Vec2) => {
+    const {picture} = this.props
+    if (!picture) {
+      return
+    }
+    const {scale, rotation, translation} = picture.navigation
+    const rendererTranslation = this.originalRendererTranslation.sub(offset)
+    picture.navigation.translation = rendererTranslation.transform(Transform.scale(new Vec2(1 / scale)).rotate(-rotation)).floor()
+  }
+
+  renderDebounced() {
+    const {picture} = this.props
+    if (!picture) {
+      return <div />
+    }
+    const {scale, rotation, translation} = picture.navigation
+    const pictureSize = picture.size.mulScalar(scale)
+    const contentMin = pictureSize.mulScalar(-1.5)
+    const contentMax = pictureSize.mulScalar(1.5)
+    const rendererTranslation = translation.transform(Transform.scale(new Vec2(scale)).rotate(rotation))
+    const visibleMin = renderer.size.mulScalar(-0.5).sub(rendererTranslation)
+    const visibleMax = renderer.size.mulScalar(0.5).sub(rendererTranslation)
+
+    return (
+      <div>
+        <ScrollBar direction={ScrollBarDirection.Horizontal}
+          contentMin={contentMin.x} contentMax={contentMax.x} visibleMin={visibleMin.x} visibleMax={visibleMax.x} onChangeBegin={this.onScrollBegin} onChange={this.onXScroll}/>
+        <ScrollBar direction={ScrollBarDirection.Vertical}
+          contentMin={contentMin.y} contentMax={contentMax.y} visibleMin={visibleMin.y} visibleMax={visibleMax.y} onChangeBegin={this.onScrollBegin} onChange={this.onYScroll}/>
+      </div>
+    )
+  }
+}
 
 interface DrawAreaProps {
   tool: Tool
   picture: Picture|undefined
 }
 
+@observer
 export default
 class DrawArea extends React.Component<DrawAreaProps, void> {
   element: HTMLElement|undefined
-  renderer: Renderer
   @observable tool: Tool
+  @observable picture: Picture|undefined
   currentTool: Tool|undefined
   cursorElement: HTMLElement|undefined
   @observable cursorPosition = new Vec2()
@@ -32,8 +92,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   constructor(props: DrawAreaProps) {
     super(props)
-    this.renderer = new Renderer()
-    this.renderer.picture = props.picture
+    this.picture = renderer.picture = props.picture
     this.setTool(props.tool)
     autorun(() => this.updateCursor())
     autorun(() => this.updateCursorGeometry())
@@ -41,11 +100,12 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   setTool(tool: Tool) {
     this.tool = tool
-    this.tool.renderer = this.renderer
+    this.tool.renderer = renderer
   }
 
   componentWillReceiveProps(nextProps: DrawAreaProps) {
-    this.renderer.picture = nextProps.picture
+    // TODO: stop setting picture and tool manually and find way to use mobx
+    this.picture = renderer.picture = nextProps.picture
     this.setTool(nextProps.tool)
   }
 
@@ -124,22 +184,26 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       width: Math.round(rect.width),
       height: Math.round(rect.height),
     }
-    this.renderer.size = new Vec2(roundRect.width, roundRect.height).mulScalar(window.devicePixelRatio)
+    renderer.size = new Vec2(roundRect.width, roundRect.height).mulScalar(window.devicePixelRatio)
 
     IPCChannels.setTabletCaptureArea.send(roundRect)
   }
 
   render() {
-    const style = {visibility: this.props.picture ? "visible" : "hidden"}
+    const style = {visibility: this.picture ? "visible" : "hidden"}
     const overlay = this.tool.renderOverlayUI()
+
     return (
-      <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
-        <div ref={e => this.element = e} className="DrawArea" style={style} tabIndex={-1} onKeyDown={this.onKeyDown} >
-          <svg hidden={!overlay} className="DrawArea_Overlay">
-            {overlay}
-          </svg>
-        </div>
-      </PointerEvents>
+      <div className="DrawArea_wrapper">
+        <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
+          <div ref={e => this.element = e} className="DrawArea" style={style} tabIndex={-1} onKeyDown={this.onKeyDown} >
+            <svg hidden={!overlay} className="DrawArea_Overlay">
+              {overlay}
+            </svg>
+          </div>
+        </PointerEvents>
+        <DrawAreaScroll picture={this.picture} />
+      </div>
     )
   }
 
@@ -153,7 +217,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   toToolEvent(ev: PointerEvent | TabletEvent): ToolPointerEvent {
     const {pressure, button, altKey, ctrlKey, metaKey, shiftKey} = ev
     const rendererPos = this.offsetPos(ev).mulScalar(window.devicePixelRatio)
-    const picturePos = rendererPos.transform(this.renderer.transformToPicture)
+    const picturePos = rendererPos.transform(renderer.transformToPicture)
     return {
       rendererPos, picturePos, pressure, button, altKey, ctrlKey, metaKey, shiftKey
     }

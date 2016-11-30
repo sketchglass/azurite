@@ -12,15 +12,14 @@ import Tool, {ToolPointerEvent} from './Tool'
 import {drawTexture} from "../GLUtil"
 import {context} from "../GLContext"
 import {AppState} from "../state/AppState"
-import {frameDebounce} from "../../lib/Debounce"
 import {TransformLayerCommand} from "../commands/LayerCommand"
 import {UndoStack, UndoCommand} from "../models/UndoStack"
+import FrameDebounced from "../views/components/FrameDebounced"
 
 const HANDLE_RADIUS = 4
 
-@observer
-class TransformLayerOverlayUI extends React.Component<{tool: TransformLayerTool}, {}> {
-  render() {
+class TransformLayerOverlayUI extends FrameDebounced<{tool: TransformLayerTool}, {}> {
+  renderDebounced() {
     const {tool} = this.props
     const {originalRect} = tool
 
@@ -90,19 +89,21 @@ enum DragType {
 class TransformChangeCommand implements UndoCommand {
   constructor(
     public tool: TransformLayerTool,
-    public oldRect: Rect, public oldAdditionalTransform: Transform,
-    public newRect: Rect, public newAdditionalTransform: Transform
+    public oldTranslation: Vec2, public oldRect: Rect, public oldAdditionalTransform: Transform,
+    public newTranslation: Vec2, public newRect: Rect, public newAdditionalTransform: Transform
   ) {}
 
   title = "Change Transform"
 
   redo() {
+    this.tool.translation = this.newTranslation
     this.tool.rect = this.newRect
     this.tool.additionalTransform = this.newAdditionalTransform
     this.tool.update()
   }
 
   undo() {
+    this.tool.translation = this.oldTranslation
     this.tool.rect = this.oldRect
     this.tool.additionalTransform = this.oldAdditionalTransform
     this.tool.update()
@@ -349,20 +350,13 @@ class TransformLayerTool extends Tool {
     this.additionalTransform = this.lastAdditionalTransform.merge(transform)
   }
 
-  update = frameDebounce(() => {
-    if (this.picture) {
-      this.picture.layerBlender.render()
-      this.renderer.render()
-    }
-  })
-
   end() {
     this.dragType = DragType.None
     if (this.modalUndoStack && this.lastRect && this.rect) {
       const command = new TransformChangeCommand(
         this,
-        this.lastRect, this.lastAdditionalTransform,
-        this.rect, this.additionalTransform
+        this.lastTranslation, this.lastRect, this.lastAdditionalTransform,
+        this.translation, this.rect, this.additionalTransform
       )
       this.modalUndoStack.redoAndPush(command)
     }
@@ -402,6 +396,14 @@ class TransformLayerTool extends Tool {
       this.editUndoStack = undefined
       this.update()
     }
+  }
+
+  update() {
+    if (!this.picture) {
+      return
+    }
+    this.picture.layerBlender.wholeDirty = true
+    this.renderer.update()
   }
 
   replaceTile(layer: Layer, tileKey: Vec2): {replaced: boolean, tile?: Tile} {

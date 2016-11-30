@@ -15,7 +15,9 @@ function modRotation(rotation: number) {
 export default
 class RotateTool extends Tool {
   name = "Rotate"
-  cursor = "ew-resize" // TODO: use more rotate-like cursor
+  get cursor() {
+    return "ew-resize" // TODO: use more rotate-like cursor
+  }
   originalAngle = 0
   originalRotation = 0
 

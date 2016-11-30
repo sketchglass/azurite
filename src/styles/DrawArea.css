@@ -1,6 +1,29 @@
-.DrawArea {
+.DrawArea_wrapper {
   position: relative;
   flex: 1;
+  --scroll-bar-width: 8px;
+
+  & .ScrollBar-vertical {
+    position: absolute;
+    right: 0;
+    top: 0;
+    width: var(--scroll-bar-width);
+    height: 100%;
+  }
+  & .ScrollBar-horizontal {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    height: var(--scroll-bar-width);
+    width: 100%;
+  }
+}
+.DrawArea {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: calc(100% - var(--scroll-bar-width));
+  height: calc(100% - var(--scroll-bar-width));
 }
 .DrawArea_Cursor {
   position: absolute;

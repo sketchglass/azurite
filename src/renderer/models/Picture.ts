@@ -9,7 +9,6 @@ import LayerBlender from "./LayerBlender"
 import {UndoStack} from "./UndoStack"
 import {Navigation} from "./Navigation"
 import PictureParams from "./PictureParams"
-import {frameDebounce} from "../../lib/Debounce"
 
 export
 interface PictureData {
@@ -25,7 +24,7 @@ interface PictureUpdate {
 export default
 class Picture {
   readonly size = new Vec2(this.params.width, this.params.height)
-  readonly thumbnailGenerator = new ThumbnailGenerator(this.size)
+  readonly layerThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(64, 48).mulScalar(window.devicePixelRatio))
   readonly rootLayer: Layer
   readonly selectedLayers = observable<Layer>([])
   readonly layerBlender = new LayerBlender(this)
@@ -44,6 +43,10 @@ class Picture {
   @computed get layers() {
     return (this.rootLayer.content as GroupLayerContent).children
   }
+  private readonly navigatorThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(96, 96).mulScalar(window.devicePixelRatio))
+  private navigatorThumbnailDirty = true
+  navigatorThumbnail: HTMLCanvasElement
+  navigatorThumbnailScale: number
 
   constructor(public params: PictureParams) {
     const defaultLayer = new Layer(this, "Layer", layer => new ImageLayerContent(layer))
@@ -52,10 +55,16 @@ class Picture {
     )
     this.selectedLayers.push(defaultLayer)
 
-    reaction(() => this.lastUpdate, frameDebounce((update: PictureUpdate) => {
-      this.layerBlender.render(update.rect)
-    }))
-    this.layerBlender.render()
+    reaction(() => this.lastUpdate, (update: PictureUpdate) => {
+      if (update.rect) {
+        this.layerBlender.addDirtyRect(update.rect)
+      } else {
+        this.layerBlender.wholeDirty = true
+      }
+      this.navigatorThumbnailDirty = true
+    })
+    this.layerBlender.renderNow()
+    this.updateNavigatorThumbnail()
     this.undoStack.commands.observe(() => {
       this.edited = true
     })
@@ -67,8 +76,18 @@ class Picture {
     }
   }
 
+  updateNavigatorThumbnail() {
+    if (this.navigatorThumbnailDirty) {
+      this.navigatorThumbnailGenerator.loadTexture(this.layerBlender.getBlendedTexture())
+      this.navigatorThumbnail = this.navigatorThumbnailGenerator.thumbnail
+      this.navigatorThumbnailScale = this.navigatorThumbnailGenerator.scale
+      this.navigatorThumbnailDirty = false
+    }
+  }
+
   dispose() {
-    this.thumbnailGenerator.dispose()
+    this.layerThumbnailGenerator.dispose()
+    this.navigatorThumbnailGenerator.dispose()
     this.layerBlender.dispose()
     for (const layer of this.layers) {
       layer.dispose()

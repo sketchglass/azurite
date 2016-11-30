@@ -177,21 +177,38 @@ type ReplaceTile = (layer: Layer, tileKey: Vec2) => {replaced: boolean, tile?: T
 
 export default
 class LayerBlender {
-  blendedTexture = new Texture(context, {
+  private blendedTexture = new Texture(context, {
     size: this.picture.size,
-    pixelType: "half-float",
+    pixelFormat: "rgb",
+    pixelType: "byte",
   })
-  drawTarget = new TextureDrawTarget(context, this.blendedTexture)
+  private drawTarget = new TextureDrawTarget(context, this.blendedTexture)
 
   replaceTile: ReplaceTile|undefined
 
-  @observable lastBlend: {rect?: Rect} = {}
+  wholeDirty = true
+  dirtyRect: Rect|undefined
 
   constructor(public picture: Picture) {
   }
 
-  render(rect?: Rect) {
-    this.drawTarget.scissor = rect
+  addDirtyRect(rect: Rect) {
+    if (this.dirtyRect) {
+      this.dirtyRect = this.dirtyRect.union(rect)
+    } else {
+      this.dirtyRect = rect
+    }
+  }
+
+  renderNow() {
+    let rect: Rect|undefined
+    if (this.wholeDirty) {
+      this.drawTarget.scissor = undefined
+    } else if (this.dirtyRect) {
+      rect = this.drawTarget.scissor = this.dirtyRect
+    } else {
+      return
+    }
     this.drawTarget.clear(new Color(1, 1, 1, 1))
     const tileKeys = TiledTexture.keysForRect(rect || new Rect(new Vec2(0), this.picture.size))
     for (const key of tileKeys) {
@@ -202,10 +219,16 @@ class LayerBlender {
       this.renderLayers(this.picture.layers, key, tileScissor, 0)
       drawTexture(this.drawTarget, tileBlenders[0].currentTile.texture, {transform: Transform.translate(offset), blendMode: "src-over"})
     }
-    this.lastBlend = {rect}
+    this.dirtyRect = undefined
+    this.wholeDirty = false
   }
 
-  renderLayer(layer: Layer, nextLayer: Layer|undefined, key: Vec2, scissor: Rect|undefined, depth: number): boolean {
+  getBlendedTexture() {
+    this.renderNow()
+    return this.blendedTexture
+  }
+
+  private renderLayer(layer: Layer, nextLayer: Layer|undefined, key: Vec2, scissor: Rect|undefined, depth: number): boolean {
     const {content} = layer
     let tile: Tile|undefined = undefined
 
@@ -236,7 +259,7 @@ class LayerBlender {
     return !!tile
   }
 
-  renderLayers(layers: Layer[], key: Vec2, scissor: Rect|undefined, depth: number): boolean {
+  private renderLayers(layers: Layer[], key: Vec2, scissor: Rect|undefined, depth: number): boolean {
     if (!tileBlenders[depth]) {
       tileBlenders[depth] = new TileBlender()
     }
