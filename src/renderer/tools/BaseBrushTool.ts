@@ -290,6 +290,7 @@ abstract class BaseBrushTool extends Tool {
     const {picture} = layer
     const command = new ChangeLayerImageCommand(picture, layer.path(), this.name, rect, oldData, newData)
     picture.undoStack.push(command)
+    picture.lastUpdate = {layer, rect}
   }
 
   brushSize(waypoint: Waypoint) {

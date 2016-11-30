@@ -1,3 +1,8 @@
 .Navigator {
   margin: 8px;
+
+  &_minimap {
+    width: 128px;
+    height: 128px;
+  }
 }

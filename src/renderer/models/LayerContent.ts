@@ -41,7 +41,9 @@ class ImageLayerContent {
   }
 
   @action updateThumbnail() {
-    this.thumbnail = this.layer.picture.thumbnailGenerator.generate(this.tiledTexture)
+    const {layerThumbnailGenerator} = this.layer.picture
+    layerThumbnailGenerator.loadTiledTexture(this.tiledTexture)
+    this.thumbnail = layerThumbnailGenerator.thumbnail.toDataURL()
   }
 }
 

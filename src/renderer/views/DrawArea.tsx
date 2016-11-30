@@ -8,7 +8,7 @@ import Tool, {ToolPointerEvent} from "../tools/Tool"
 import Waypoint from "../models/Waypoint"
 import {TabletEvent} from "receive-tablet-event"
 import {canvas} from "../GLContext"
-import Renderer from "./Renderer"
+import {renderer} from "./Renderer"
 import {frameDebounce} from "../../lib/Debounce"
 import * as IPCChannels from "../../common/IPCChannels"
 import PointerEvents from "./components/PointerEvents"
@@ -16,7 +16,7 @@ import ScrollBar, {ScrollBarDirection} from "./components/ScrollBar"
 import FrameDebounced from "./components/FrameDebounced"
 
 @observer
-class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined, renderer: Renderer}, {}> {
+class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined}, {}> {
 
   originalRendererTranslation = new Vec2()
 
@@ -48,7 +48,7 @@ class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined, rendere
   }
 
   renderDebounced() {
-    const {picture, renderer} = this.props
+    const {picture} = this.props
     if (!picture) {
       return <div />
     }
@@ -80,7 +80,6 @@ interface DrawAreaProps {
 export default
 class DrawArea extends React.Component<DrawAreaProps, void> {
   element: HTMLElement|undefined
-  renderer: Renderer
   @observable tool: Tool
   @observable picture: Picture|undefined
   currentTool: Tool|undefined
@@ -93,8 +92,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   constructor(props: DrawAreaProps) {
     super(props)
-    this.renderer = new Renderer()
-    this.picture = this.renderer.picture = props.picture
+    this.picture = renderer.picture = props.picture
     this.setTool(props.tool)
     autorun(() => this.updateCursor())
     autorun(() => this.updateCursorGeometry())
@@ -102,12 +100,12 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   setTool(tool: Tool) {
     this.tool = tool
-    this.tool.renderer = this.renderer
+    this.tool.renderer = renderer
   }
 
   componentWillReceiveProps(nextProps: DrawAreaProps) {
     // TODO: stop setting picture and tool manually and find way to use mobx
-    this.picture = this.renderer.picture = nextProps.picture
+    this.picture = renderer.picture = nextProps.picture
     this.setTool(nextProps.tool)
   }
 
@@ -186,7 +184,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       width: Math.round(rect.width),
       height: Math.round(rect.height),
     }
-    this.renderer.size = new Vec2(roundRect.width, roundRect.height).mulScalar(window.devicePixelRatio)
+    renderer.size = new Vec2(roundRect.width, roundRect.height).mulScalar(window.devicePixelRatio)
 
     IPCChannels.setTabletCaptureArea.send(roundRect)
   }
@@ -204,7 +202,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
             </svg>
           </div>
         </PointerEvents>
-        <DrawAreaScroll picture={this.picture} renderer={this.renderer} />
+        <DrawAreaScroll picture={this.picture} />
       </div>
     )
   }
@@ -219,7 +217,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   toToolEvent(ev: PointerEvent | TabletEvent): ToolPointerEvent {
     const {pressure, button, altKey, ctrlKey, metaKey, shiftKey} = ev
     const rendererPos = this.offsetPos(ev).mulScalar(window.devicePixelRatio)
-    const picturePos = rendererPos.transform(this.renderer.transformToPicture)
+    const picturePos = rendererPos.transform(renderer.transformToPicture)
     return {
       rendererPos, picturePos, pressure, button, altKey, ctrlKey, metaKey, shiftKey
     }

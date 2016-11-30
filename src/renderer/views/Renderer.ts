@@ -177,3 +177,5 @@ class Renderer {
     this.wholeDirty = false
   }
 }
+
+export const renderer = new Renderer()
