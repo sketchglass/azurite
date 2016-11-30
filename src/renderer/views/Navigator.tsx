@@ -19,7 +19,7 @@ class NavigatorMinimap extends React.Component<{}, {} > {
   private dragStartPos = new Vec2()
   private originalTranslation = new Vec2()
 
-  @computed get picture() {
+  @computed private get picture() {
     return appState.currentPicture
   }
 
