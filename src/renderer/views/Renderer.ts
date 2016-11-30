@@ -2,6 +2,7 @@ import {observable, computed, reaction} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Model, RectShape, Shader, TextureShader, CanvasDrawTarget, Color, TextureFilter} from "paintgl"
 import {context, canvas} from "../GLContext"
+import {frameDebounce} from "../../lib/Debounce"
 import Picture from "../models/Picture"
 
 const BOX_SHADOW_RADIUS = 4
@@ -52,21 +53,20 @@ class BoxShadowShader extends Shader {
 export default
 class Renderer {
   @observable picture: Picture|undefined
-  readonly shape = new RectShape(context, {
+  private readonly shape = new RectShape(context, {
     usage: "static",
   })
-  readonly model = new Model(context, {
+  private readonly model = new Model(context, {
     shape: this.shape,
     shader: TextureShader,
   })
   @observable size = new Vec2(100, 100)
-  disposers: (() => void)[] = []
   background = new Color(46/255, 48/255, 56/255, 1)
 
-  readonly wholeShape = new RectShape(context, {
+  private readonly wholeShape = new RectShape(context, {
     usage: "static",
   })
-  readonly boxShadowModel = new Model(context, {
+  private readonly boxShadowModel = new Model(context, {
     shape: this.wholeShape,
     shader: BoxShadowShader,
   })
@@ -101,50 +101,61 @@ class Renderer {
     return this.transformFromPicture.invert()!
   }
 
-  @computed get lastBlend() {
-    if (this.picture) {
-      return this.picture.layerBlender.lastBlend
-    }
-  }
+  wholeDirty = true
+  dirtyRect: Rect|undefined
 
   constructor() {
-    this.disposers.push(
-      reaction(() => this.picture, picture => {
-        if (picture) {
-          this.shape.rect = new Rect(new Vec2(), picture.size)
-          this.model.uniforms = {texture: picture.layerBlender.blendedTexture}
-        } else {
-          this.model.uniforms = {}
-        }
-      }),
-      reaction(() => this.lastBlend, blend => {
-        this.render(blend && blend.rect)
-      }),
-      reaction(() => this.size, size => {
-        canvas.width = size.width
-        canvas.height = size.height
-        this.wholeShape.rect = new Rect(new Vec2(), size)
-      }),
-      reaction(() => [this.size, this.transformToPicture], () => {
-        requestAnimationFrame(() => {
-          this.render()
-        })
-      }),
-    )
+    reaction(() => this.picture, picture => {
+      if (picture) {
+        this.shape.rect = new Rect(new Vec2(), picture.size)
+        this.model.uniforms = {texture: picture.layerBlender.getBlendedTexture()}
+      } else {
+        this.model.uniforms = {}
+      }
+    })
+    reaction(() => this.size, size => {
+      canvas.width = size.width
+      canvas.height = size.height
+      this.wholeShape.rect = new Rect(new Vec2(), size)
+    })
+    reaction(() => [this.size, this.transformToPicture], () => {
+      this.wholeDirty = true
+      this.update()
+    })
+    reaction(() => this.picture && this.picture.lastUpdate, update => {
+      this.update()
+    })
   }
 
-  dispose() {
-    for (const disposer of this.disposers) {
-      disposer()
+  addDirtyRect(rect: Rect) {
+    if (this.dirtyRect) {
+      this.dirtyRect = this.dirtyRect.union(rect)
+    } else {
+      this.dirtyRect = rect
     }
-    this.model.dispose()
-    this.shape.dispose()
   }
 
-  render(rectInPicture?: Rect) {
+  update = frameDebounce(() => this.renderNow())
+
+  renderNow() {
+    if (this.picture) {
+      const {layerBlender} = this.picture
+      if (layerBlender.wholeDirty) {
+        this.wholeDirty = true
+        layerBlender.renderNow()
+      } else if (layerBlender.dirtyRect) {
+        const rect = layerBlender.dirtyRect.transform(this.transformFromPicture)
+        this.addDirtyRect(rect)
+        layerBlender.renderNow()
+      }
+    }
+    if (!this.wholeDirty && !this.dirtyRect) {
+      return
+    }
+
     const drawTarget = new CanvasDrawTarget(context)
-    if (rectInPicture) {
-      drawTarget.scissor = rectInPicture.transform(this.transformFromPicture)
+    if (!this.wholeDirty && this.dirtyRect) {
+      drawTarget.scissor = this.dirtyRect
     }
     drawTarget.clear(this.background)
     if (this.picture) {
@@ -155,12 +166,14 @@ class Renderer {
       drawTarget.draw(this.boxShadowModel)
 
       const filter: TextureFilter = this.picture.navigation.scale < 2 ? "bilinear" : "nearest"
-      const texture = this.picture.layerBlender.blendedTexture
+      const texture = this.picture.layerBlender.getBlendedTexture()
       if (texture.filter != filter) {
         texture.filter = filter
       }
       this.model.transform = this.transformFromPicture
       drawTarget.draw(this.model)
     }
+    this.dirtyRect = undefined
+    this.wholeDirty = false
   }
 }
