@@ -68,7 +68,7 @@ class NavigatorMinimap extends React.Component<{}, {} > {
   }
 
   render() {
-    const size = 192 * devicePixelRatio
+    const size = 128 * devicePixelRatio
     return <canvas className="Navigator_minimap" width={size} height={size} ref={e => this.minimap = e} />
   }
 }

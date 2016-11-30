@@ -25,7 +25,7 @@ export default
 class Picture {
   readonly size = new Vec2(this.params.width, this.params.height)
   readonly layerThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(64, 48).mulScalar(window.devicePixelRatio))
-  readonly navigatorThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(128, 128).mulScalar(window.devicePixelRatio))
+  readonly navigatorThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(96, 96).mulScalar(window.devicePixelRatio))
   readonly rootLayer: Layer
   readonly selectedLayers = observable<Layer>([])
   readonly layerBlender = new LayerBlender(this)
