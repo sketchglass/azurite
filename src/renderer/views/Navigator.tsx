@@ -1,10 +1,11 @@
 import {Transform, Vec2, Rect} from "paintvec"
-import {computed, autorun} from "mobx"
+import {computed, reaction} from "mobx"
 import {observer} from "mobx-react"
 import React = require("react")
 import Picture from "../models/Picture"
 import {appState} from "../state/AppState"
 import {renderer} from "./Renderer"
+import {frameDebounce} from "../../lib/Debounce"
 
 interface NavigatorProps {
   picture: Picture|undefined
@@ -19,7 +20,14 @@ class NavigatorMinimap extends React.Component<{}, {} > {
   }
 
   componentDidMount() {
-    this.disposer = autorun(() => this.redraw())
+    this.disposer = reaction(() => {
+      const {picture} = this
+      if (picture) {
+        const {scale, translation, rotation} = picture.navigation
+        const {size} = renderer
+        return [picture.lastUpdate, scale, translation, rotation, size]
+      }
+    }, frameDebounce(() => this.redraw()))
   }
 
   componentWillUnmount() {
@@ -37,6 +45,7 @@ class NavigatorMinimap extends React.Component<{}, {} > {
     }
     context.translate(width / 2, height / 2)
 
+    this.picture.updateNavigatorThumbnail()
     const thumbnail = this.picture.navigatorThumbnail
     const thumbanilScale = this.picture.navigatorThumbnailScale
     context.drawImage(thumbnail, -thumbnail.width / 2, -thumbnail.height / 2)
