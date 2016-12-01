@@ -11,17 +11,19 @@
     margin: 0 4px;
   }
   & input[type="range"] {
+    --movable-range: 120px;
+    --handle-size: 12px;
     -webkit-appearance:none;
     margin: 0 4px;
-    width: 132px;
+    width: calc(var(--movable-range) + var(--handle-size));
     height: 4px;
     border-radius: 2px;
     background-color: var(--ui-background-color);
     &::-webkit-slider-thumb {
       -webkit-appearance: none;
-      width: 12px;
-      height: 12px;
-      border-radius: 6px;
+      width: var(--handle-size);
+      height: var(--handle-size);
+      border-radius: 50%;
       background-color: var(--default-color);
     }
   }
