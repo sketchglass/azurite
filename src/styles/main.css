@@ -15,6 +15,7 @@
 
 /* Components */
 @import "./components/ClickToEdit.css";
+@import "./components/ColorSlider.css";
 @import "./components/Palette.css";
 @import "./components/DraggablePanel.css";
 @import "./components/RangeSlider.css";
