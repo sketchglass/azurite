@@ -7,11 +7,13 @@
   &_sliderRow {
     display: flex;
     align-items: center;
+    height: 24px;
     margin: 0 4px;
   }
   & input[type="range"] {
     -webkit-appearance:none;
-    width: 140px;
+    margin: 0 4px;
+    width: 132px;
     height: 4px;
     border-radius: 2px;
     background-color: var(--ui-background-color);
@@ -26,10 +28,26 @@
   & button {
     border: none;
     background: none;
-    padding: 4px;
+    margin: 0;
+    padding: 0;
   }
   & .SVGIcon {
     width: 16px;
     height: 16px;
+  }
+  &_reset {
+    position: relative;
+    width: 16px;
+    height: 16px;
+    &:before {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 6px;
+      width: 4px;
+      height: 4px;
+      border-radius: 2px;
+      background-color: var(--default-color);
+    }
   }
 }

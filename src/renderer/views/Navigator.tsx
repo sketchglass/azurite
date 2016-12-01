@@ -162,6 +162,12 @@ class Navigator extends React.Component<NavigatorProps, {}> {
       picture.navigation.zoomOut()
     }
   }
+  private onZoomReset = () => {
+    const {picture} = this.props
+    if (picture) {
+      picture.navigation.scale = 1
+    }
+  }
   private onRotateLeft = () => {
     const {picture} = this.props
     if (picture) {
@@ -172,6 +178,12 @@ class Navigator extends React.Component<NavigatorProps, {}> {
     const {picture} = this.props
     if (picture) {
       picture.navigation.rotateRight()
+    }
+  }
+  private onRotateReset = () => {
+    const {picture} = this.props
+    if (picture) {
+      picture.navigation.rotation = 0
     }
   }
 
@@ -191,12 +203,14 @@ class Navigator extends React.Component<NavigatorProps, {}> {
           <button onClick={this.onZoomOut}><SVGIcon className="zoom-out" /></button>
           <input type="range" min={-48} max={80} onChange={this.onScaleChange} value={scaleLogBy16} />
           <button onClick={this.onZoomIn}><SVGIcon className="zoom-in" /></button>
+          <button className="Navigator_reset" onClick={this.onZoomReset} />
           {(scale * 100).toFixed(scale < 1 ? 1 : 0)}%
         </div>
         <div className="Navigator_sliderRow">
           <button onClick={this.onRotateLeft}><SVGIcon className="rotate-left" /></button>
           <input type="range" min={-60} max={60} onChange={this.onRotationChange} value={rotationDegPer3} />
           <button onClick={this.onRotateRight}><SVGIcon className="rotate-right" /></button>
+          <button className="Navigator_reset" onClick={this.onRotateReset} />
           {rotationDeg}°
         </div>
         <div>
