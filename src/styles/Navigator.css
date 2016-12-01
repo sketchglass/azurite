@@ -10,7 +10,7 @@
   }
   & input[type="range"] {
     -webkit-appearance:none;
-    width: 120px;
+    width: 128px;
     height: 4px;
     border-radius: 2px;
     background-color: var(--ui-background-color);
