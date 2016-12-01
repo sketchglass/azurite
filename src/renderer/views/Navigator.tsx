@@ -161,13 +161,13 @@ class Navigator extends React.Component<NavigatorProps, {}> {
     return (
       <div className="Navigator">
         <NavigatorMinimap />
-        <div>
+        <div className="Navigator_sliderRow">
           <button><SVGIcon className="zoom-out" /></button>
           <input type="range" max={1600} onChange={this.onScaleChange} value={scalePercent} />
           <button><SVGIcon className="zoom-in" /></button>
           {scalePercent}%
         </div>
-        <div>
+        <div className="Navigator_sliderRow">
           <button><SVGIcon className="rotate-left" /></button>
           <input type="range" min={-60} max={60} onChange={this.onRotationChange} value={rotationDegBy3} />
           <button><SVGIcon className="rotate-right" /></button>
