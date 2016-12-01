@@ -3,6 +3,9 @@
     width: 240px;
     height: 120px;
   }
+  & input[type="range"] {
+    width: 144px;
+  }
 
   & button {
     border: none;

@@ -138,7 +138,7 @@ class Navigator extends React.Component<NavigatorProps, {}> {
   private onRotationChange = (ev: React.FormEvent<HTMLInputElement>) => {
     const {picture} = this.props
     if (picture) {
-      picture.navigation.rotation = parseInt((ev.target as HTMLInputElement).value) / 180 * Math.PI
+      picture.navigation.rotation = parseInt((ev.target as HTMLInputElement).value) * 3 / 180 * Math.PI
     }
   }
 
@@ -156,6 +156,7 @@ class Navigator extends React.Component<NavigatorProps, {}> {
     const {rotation, scale, horizontalFlip} = navigation
     const scalePercent = Math.round(scale * 100)
     const rotationDeg = Math.round(rotation / Math.PI * 180)
+    const rotationDegBy3 = Math.round(rotationDeg / 3)
 
     return (
       <div className="Navigator">
@@ -168,7 +169,7 @@ class Navigator extends React.Component<NavigatorProps, {}> {
         </div>
         <div>
           <button><SVGIcon className="rotate-left" /></button>
-          <input type="range" min={-180} max={180} onChange={this.onRotationChange} value={rotationDeg} />
+          <input type="range" min={-60} max={60} onChange={this.onRotationChange} value={rotationDegBy3} />
           <button><SVGIcon className="rotate-right" /></button>
           {rotationDeg}°
         </div>
