@@ -41,7 +41,7 @@ export default
 class ThumbnailGenerator {
   thumbnailSize = calcThumbnailSize(this.originalSize, this.maxThumbnailSize).size
   scale = calcThumbnailSize(this.originalSize, this.maxThumbnailSize).scale
-  private texture = new Texture(context, {size: getBoundingPowerOf2Size(this.originalSize), filter: "trilinear"})
+  private texture = new Texture(context, {size: getBoundingPowerOf2Size(this.originalSize), filter: "mipmap-bilinear"})
   private drawTarget = new TextureDrawTarget(context, this.texture)
   private thumbnailTexture = new Texture(context, {size: this.thumbnailSize})
   private thumbnailDrawTarget = new TextureDrawTarget(context, this.thumbnailTexture)
