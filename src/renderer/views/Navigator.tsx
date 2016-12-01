@@ -131,7 +131,8 @@ class Navigator extends React.Component<NavigatorProps, {}> {
   private onScaleChange = (ev: React.FormEvent<HTMLInputElement>) => {
     const {picture} = this.props
     if (picture) {
-      picture.navigation.scale = parseFloat((ev.target as HTMLInputElement).value) / 100
+      const scaleLog = parseFloat((ev.target as HTMLInputElement).value) / 16
+      picture.navigation.scale = Math.pow(2, scaleLog)
     }
   }
 
@@ -154,22 +155,22 @@ class Navigator extends React.Component<NavigatorProps, {}> {
 
     const navigation = picture ? picture.navigation : {rotation: 0, scale: 1, horizontalFlip: false}
     const {rotation, scale, horizontalFlip} = navigation
-    const scalePercent = Math.round(scale * 100)
+    const scaleLogBy16 = Math.round(Math.log2(scale) * 16)
     const rotationDeg = Math.round(rotation / Math.PI * 180)
-    const rotationDegBy3 = Math.round(rotationDeg / 3)
+    const rotationDegPer3 = Math.round(rotationDeg / 3)
 
     return (
       <div className="Navigator">
         <NavigatorMinimap />
         <div className="Navigator_sliderRow">
           <button><SVGIcon className="zoom-out" /></button>
-          <input type="range" max={1600} onChange={this.onScaleChange} value={scalePercent} />
+          <input type="range" min={-48} max={80} onChange={this.onScaleChange} value={scaleLogBy16} />
           <button><SVGIcon className="zoom-in" /></button>
-          {scalePercent}%
+          {(scale * 100).toFixed(scale < 1 ? 1 : 0)}%
         </div>
         <div className="Navigator_sliderRow">
           <button><SVGIcon className="rotate-left" /></button>
-          <input type="range" min={-60} max={60} onChange={this.onRotationChange} value={rotationDegBy3} />
+          <input type="range" min={-60} max={60} onChange={this.onRotationChange} value={rotationDegPer3} />
           <button><SVGIcon className="rotate-right" /></button>
           {rotationDeg}°
         </div>

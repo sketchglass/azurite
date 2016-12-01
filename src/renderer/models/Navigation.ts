@@ -2,6 +2,7 @@ import {Vec2} from "paintvec"
 import {observable, action} from "mobx"
 
 const SCALE_STEPS = [
+  0.125,
   0.25,
   0.33,
   0.5,
