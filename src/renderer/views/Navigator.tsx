@@ -150,6 +150,19 @@ class Navigator extends React.Component<NavigatorProps, {}> {
     }
   }
 
+  private onZoomIn = () => {
+    const {picture} = this.props
+    if (picture) {
+      picture.navigation.zoomIn()
+    }
+  }
+  private onZoomOut = () => {
+    const {picture} = this.props
+    if (picture) {
+      picture.navigation.zoomOut()
+    }
+  }
+
   render() {
     const {picture} = this.props
 
@@ -163,9 +176,9 @@ class Navigator extends React.Component<NavigatorProps, {}> {
       <div className="Navigator">
         <NavigatorMinimap />
         <div className="Navigator_sliderRow">
-          <button><SVGIcon className="zoom-out" /></button>
+          <button onClick={this.onZoomOut}><SVGIcon className="zoom-out" /></button>
           <input type="range" min={-48} max={80} onChange={this.onScaleChange} value={scaleLogBy16} />
-          <button><SVGIcon className="zoom-in" /></button>
+          <button onClick={this.onZoomIn}><SVGIcon className="zoom-in" /></button>
           {(scale * 100).toFixed(scale < 1 ? 1 : 0)}%
         </div>
         <div className="Navigator_sliderRow">
