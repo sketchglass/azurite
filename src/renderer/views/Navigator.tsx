@@ -7,6 +7,7 @@ import {appState} from "../state/AppState"
 import {renderer} from "./Renderer"
 import {frameDebounce} from "../../lib/Debounce"
 import PointerEvents from "./components/PointerEvents"
+import SVGIcon from "./components/SVGIcon"
 
 interface NavigatorProps {
   picture: Picture|undefined
@@ -152,16 +153,23 @@ class Navigator extends React.Component<NavigatorProps, {}> {
 
     const navigation = picture ? picture.navigation : {rotation: 0, scale: 1, horizontalFlip: false}
     const {rotation, scale, horizontalFlip} = navigation
+    const scalePercent = Math.round(scale * 100)
     const rotationDeg = Math.round(rotation / Math.PI * 180)
 
     return (
       <div className="Navigator">
         <NavigatorMinimap />
         <div>
-          Scale: <input type="number" max={1600} onChange={this.onScaleChange} value={Math.round(scale * 100)} />
+          <button><SVGIcon className="zoom-out" /></button>
+          <input type="range" max={1600} onChange={this.onScaleChange} value={scalePercent} />
+          <button><SVGIcon className="zoom-in" /></button>
+          {scalePercent}%
         </div>
         <div>
-          Rotation: <input type="number" min={-180} max={180} onChange={this.onRotationChange} value={rotationDeg} />
+          <button><SVGIcon className="rotate-left" /></button>
+          <input type="range" min={-180} max={180} onChange={this.onRotationChange} value={rotationDeg} />
+          <button><SVGIcon className="rotate-right" /></button>
+          {rotationDeg}°
         </div>
         <div>
           <label><input type="checkbox" checked={horizontalFlip} onChange={this.onHorizontalFlipChange} />Flip Horizontally</label>

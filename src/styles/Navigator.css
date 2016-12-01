@@ -5,4 +5,14 @@
     width: 128px;
     height: 128px;
   }
+
+  & button {
+    border: none;
+    background: none;
+    padding: 4px;
+  }
+  & .SVGIcon {
+    width: 16px;
+    height: 16px;
+  }
 }

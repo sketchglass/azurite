@@ -29,4 +29,17 @@
   &.subtract {
     mask: url("../../../bundles/icons/flaticon/svg/subtract.svg");
   }
+  &.zoom-in {
+    mask: url("../../../bundles/icons/flaticon/svg/zoom-in.svg");
+  }
+  &.zoom-out {
+    mask: url("../../../bundles/icons/flaticon/svg/zoom-out.svg");
+  }
+  &.rotate-left {
+    mask: url("../../../bundles/icons/flaticon/svg/circuit-9.svg");
+  }
+  &.rotate-right {
+    mask: url("../../../bundles/icons/flaticon/svg/circuit-9.svg");
+    transform: scaleX(-1);
+  }
 }
