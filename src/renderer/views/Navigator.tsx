@@ -122,9 +122,6 @@ class NavigatorMinimap extends React.Component<{}, {} > {
   }
 }
 
-const ROTATION_DEG_STEP = 3
-const SCALE_LOG2_STEP = 1/8
-
 @observer export default
 class Navigator extends React.Component<NavigatorProps, {}> {
   constructor(props: NavigatorProps) {
@@ -134,7 +131,7 @@ class Navigator extends React.Component<NavigatorProps, {}> {
   private onScaleChange = (ev: React.FormEvent<HTMLInputElement>) => {
     const {picture} = this.props
     if (picture) {
-      const scaleLog = parseFloat((ev.target as HTMLInputElement).value) * SCALE_LOG2_STEP
+      const scaleLog = parseFloat((ev.target as HTMLInputElement).value)
       picture.navigation.scale = Math.pow(2, scaleLog)
     }
   }
@@ -142,7 +139,7 @@ class Navigator extends React.Component<NavigatorProps, {}> {
   private onRotationChange = (ev: React.FormEvent<HTMLInputElement>) => {
     const {picture} = this.props
     if (picture) {
-      picture.navigation.rotation = parseInt((ev.target as HTMLInputElement).value) * ROTATION_DEG_STEP / 180 * Math.PI
+      picture.navigation.rotation = parseInt((ev.target as HTMLInputElement).value) / 180 * Math.PI
     }
   }
 
@@ -195,23 +192,22 @@ class Navigator extends React.Component<NavigatorProps, {}> {
 
     const navigation = picture ? picture.navigation : {rotation: 0, scale: 1, horizontalFlip: false}
     const {rotation, scale, horizontalFlip} = navigation
-    const scaleStep = Math.round(Math.log2(scale) / SCALE_LOG2_STEP)
+    const scaleLog = Math.log2(scale)
     const rotationDeg = Math.round(rotation / Math.PI * 180)
-    const rotationStep = Math.round(rotationDeg / ROTATION_DEG_STEP)
 
     return (
       <div className="Navigator">
         <NavigatorMinimap />
         <div className="Navigator_sliderRow">
           <button onClick={this.onZoomOut}><SVGIcon className="zoom-out" /></button>
-          <input type="range" min={-3 / SCALE_LOG2_STEP} max={5 / SCALE_LOG2_STEP} onChange={this.onScaleChange} value={scaleStep} />
+          <input type="range" min={-3} max={5} step={1/8} onChange={this.onScaleChange} value={scaleLog} />
           <button onClick={this.onZoomIn}><SVGIcon className="zoom-in" /></button>
           <button className="Navigator_reset" onClick={this.onZoomReset} />
           {(scale * 100).toFixed(scale < 1 ? 1 : 0)}%
         </div>
         <div className="Navigator_sliderRow">
           <button onClick={this.onRotateLeft}><SVGIcon className="rotate-left" /></button>
-          <input type="range" min={-180 / ROTATION_DEG_STEP} max={180 / ROTATION_DEG_STEP} onChange={this.onRotationChange} value={rotationStep} />
+          <input type="range" min={-180} max={180} step={3} onChange={this.onRotationChange} value={rotationDeg} />
           <button onClick={this.onRotateRight}><SVGIcon className="rotate-right" /></button>
           <button className="Navigator_reset" onClick={this.onRotateReset} />
           {rotationDeg}°
