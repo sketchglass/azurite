@@ -162,6 +162,18 @@ class Navigator extends React.Component<NavigatorProps, {}> {
       picture.navigation.zoomOut()
     }
   }
+  private onRotateLeft = () => {
+    const {picture} = this.props
+    if (picture) {
+      picture.navigation.rotateLeft()
+    }
+  }
+  private onRotateRight = () => {
+    const {picture} = this.props
+    if (picture) {
+      picture.navigation.rotateRight()
+    }
+  }
 
   render() {
     const {picture} = this.props
@@ -182,9 +194,9 @@ class Navigator extends React.Component<NavigatorProps, {}> {
           {(scale * 100).toFixed(scale < 1 ? 1 : 0)}%
         </div>
         <div className="Navigator_sliderRow">
-          <button><SVGIcon className="rotate-left" /></button>
+          <button onClick={this.onRotateLeft}><SVGIcon className="rotate-left" /></button>
           <input type="range" min={-60} max={60} onChange={this.onRotationChange} value={rotationDegPer3} />
-          <button><SVGIcon className="rotate-right" /></button>
+          <button onClick={this.onRotateRight}><SVGIcon className="rotate-right" /></button>
           {rotationDeg}°
         </div>
         <div>

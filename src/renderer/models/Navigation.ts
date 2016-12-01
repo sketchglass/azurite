@@ -16,6 +16,8 @@ const SCALE_STEPS = [
   32
 ]
 
+const ROTATION_STEP_DEG = 15
+
 function nextScaleStep(scale: number) {
   for (const step of SCALE_STEPS) {
     if (scale < step) {
@@ -46,5 +48,22 @@ class Navigation {
   }
   @action zoomOut() {
     this.scale = prevScaleStep(this.scale)
+  }
+  @action rotateLeft() {
+    const step = Math.round(this.rotation * (180 / Math.PI) / ROTATION_STEP_DEG)
+    this.setNormalizedRotation((step - 1) * ROTATION_STEP_DEG * (Math.PI / 180))
+  }
+  @action rotateRight() {
+    const step = Math.round(this.rotation * (180 / Math.PI) / ROTATION_STEP_DEG)
+    this.setNormalizedRotation((step + 1) * ROTATION_STEP_DEG * (Math.PI / 180))
+  }
+  @action setNormalizedRotation(rotation: number) {
+    while (Math.PI < rotation) {
+      rotation -= 2 * Math.PI
+    }
+    while (rotation < -Math.PI) {
+      rotation += 2 * Math.PI
+    }
+    this.rotation = rotation
   }
 }
