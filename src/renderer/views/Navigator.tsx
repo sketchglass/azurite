@@ -112,10 +112,11 @@ class NavigatorMinimap extends React.Component<{}, {} > {
   }
 
   render() {
-    const size = 128 * devicePixelRatio
+    const width = 240 * devicePixelRatio
+    const height = 120 * devicePixelRatio
     return (
       <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
-        <canvas className="Navigator_minimap" width={size} height={size} ref={e => this.minimap = e} />
+        <canvas className="Navigator_minimap" width={width} height={height} ref={e => this.minimap = e} />
       </PointerEvents>
     )
   }
