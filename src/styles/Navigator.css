@@ -7,8 +7,7 @@
   &_sliderRow {
     display: flex;
     align-items: center;
-    height: 24px;
-    margin: 0 4px;
+    margin: 0 4px 4px;
   }
   & input[type="range"] {
     --movable-range: 120px;
@@ -51,5 +50,10 @@
       border-radius: 2px;
       background-color: var(--default-color);
     }
+  }
+  &_check {
+    margin: 0 4px;
+    display: flex;
+    align-items: center;
   }
 }

@@ -213,9 +213,7 @@ class Navigator extends React.Component<NavigatorProps, {}> {
           <button className="Navigator_reset" onClick={this.onRotateReset} />
           {rotationDeg}°
         </div>
-        <div className="Navigator_sliderRow">
-          <label><input type="checkbox" checked={horizontalFlip} onChange={this.onHorizontalFlipChange} />Flip Horizontally</label>
-        </div>
+        <label className="Navigator_check"><input type="checkbox" checked={horizontalFlip} onChange={this.onHorizontalFlipChange} />Flip Horizontally</label>
       </div>
     )
   }
