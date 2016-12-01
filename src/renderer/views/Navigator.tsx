@@ -193,7 +193,7 @@ class Navigator extends React.Component<NavigatorProps, {}> {
     const navigation = picture ? picture.navigation : {rotation: 0, scale: 1, horizontalFlip: false}
     const {rotation, scale, horizontalFlip} = navigation
     const scaleLog = Math.log2(scale)
-    const rotationDeg = Math.round(rotation / Math.PI * 180)
+    const rotationDeg = rotation / Math.PI * 180
 
     return (
       <div className="Navigator">
@@ -210,7 +210,7 @@ class Navigator extends React.Component<NavigatorProps, {}> {
           <input type="range" min={-180} max={180} step={3} onChange={this.onRotationChange} value={rotationDeg} />
           <button onClick={this.onRotateRight}><SVGIcon className="rotate-right" /></button>
           <button className="Navigator_reset" onClick={this.onRotateReset} />
-          {rotationDeg}°
+          {rotationDeg.toFixed(0)}°
         </div>
         <label className="Navigator_check"><input type="checkbox" checked={horizontalFlip} onChange={this.onHorizontalFlipChange} />Flip Horizontally</label>
       </div>
