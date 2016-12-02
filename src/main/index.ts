@@ -11,7 +11,13 @@ let mainWindow: BrowserWindow|undefined
 let dialogsWindow: BrowserWindow|undefined
 
 function openDialogsWindow() {
-  const win = dialogsWindow = new BrowserWindow({width: 100, height: 100, show: false})
+  const win = dialogsWindow = new BrowserWindow({
+    width: 100,
+    height: 100,
+    show: false,
+    parent: mainWindow,
+    modal: true,
+  })
   win.loadURL(`${contentBase}/dialogs.html`)
   win.on('closed', () => {
     dialogsWindow = undefined
@@ -76,7 +82,7 @@ async function openWindow() {
   })
 }
 
-app.on('ready', () => {
-  openWindow()
+app.on('ready', async () => {
+  await openWindow()
   openDialogsWindow()
 })
