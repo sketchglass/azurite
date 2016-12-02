@@ -11,7 +11,11 @@ window.addEventListener("DOMContentLoaded", () => {
     const {width, height} = container.firstElementChild.getBoundingClientRect()
     const win = remote.getCurrentWindow()
     win.setContentSize(Math.round(width), Math.round(height))
-    win.show()
+    win.center()
+    setImmediate(() => {
+      // delay window show to avoid flicker
+      remote.getCurrentWindow().show()
+    })
   }
   const onOK = (result: any) => {
     remote.getCurrentWindow().hide()
