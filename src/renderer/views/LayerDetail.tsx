@@ -80,7 +80,7 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
       <div className="LayerDetail">
         <div>
           <label>Blend</label>
-          <select value={blendMode} onChange={this.onBlendModeChange}>
+          <select className="Select" value={blendMode} onChange={this.onBlendModeChange}>
             {blendModes.map(mode => <option key={mode} value={mode}>{blendModeTexts.get(mode)}</option>)}
           </select>
         </div>

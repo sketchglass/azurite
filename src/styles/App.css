@@ -99,10 +99,28 @@ body {
   background-color: var(--ui-background-color);
   border-radius: 4px;
   height: 24px;
+  padding: 0 16px;
 }
 
 .Button-primary {
   background-color: var(--ui-primary-background-color);
+}
+
+.Select {
+  border: none;
+  background-color: var(--ui-background-color);
+  border-radius: 4px;
+  height: 20px;
+  padding: 0 8px;
+}
+
+.TextInput {
+  border: none;
+  background-color: var(--default-color);
+  color: var(--default-background-color);
+  border-radius: 4px;
+  height: 20px;
+  padding: 0 8px;
 }
 
 .TransformLayerSettings {

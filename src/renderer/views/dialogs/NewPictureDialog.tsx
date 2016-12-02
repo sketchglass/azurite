@@ -125,7 +125,7 @@ class NewPictureDialog extends React.Component<NewPictureDialogProps, NewPicture
       <form className="NewPictureDialog" ref={e => this.dialog = e}>
         <div className="NewPictureDialog_Row">
           <label>Preset</label>
-          <select value={this.currentPresetIndex()} autoFocus onChange={this.onPresetSelect}>
+          <select className="Select" value={this.currentPresetIndex()} autoFocus onChange={this.onPresetSelect}>
             {sizePresets.map((preset, i) => <option key={i} value={i}>{preset.name}</option>)}
             <option value={-1}>Custom</option>
           </select>
@@ -133,8 +133,8 @@ class NewPictureDialog extends React.Component<NewPictureDialogProps, NewPicture
         <div className="NewPictureDialog_Row">
           <label>Width</label>
           <div className="NewPictureDialog_Value">
-            <input type="number" value={width} min={1} onChange={this.onWidthChange} />
-            <select value={unit} onChange={this.onUnitChange}>
+            <input className="TextInput" type="number" value={width} min={1} onChange={this.onWidthChange} />
+            <select className="Select" value={unit} onChange={this.onUnitChange}>
               <option value="px">px</option>
               <option value="mm">mm</option>
             </select>
@@ -143,8 +143,8 @@ class NewPictureDialog extends React.Component<NewPictureDialogProps, NewPicture
         <div className="NewPictureDialog_Row">
           <label>Height</label>
           <div className="NewPictureDialog_Value">
-            <input type="number" value={height} min={1} onChange={this.onHeightChange} />
-            <select value={unit} onChange={this.onUnitChange}>
+            <input className="TextInput" type="number" value={height} min={1} onChange={this.onHeightChange} />
+            <select className="Select" value={unit} onChange={this.onUnitChange}>
               <option value="px">px</option>
               <option value="mm">mm</option>
             </select>
@@ -153,7 +153,7 @@ class NewPictureDialog extends React.Component<NewPictureDialogProps, NewPicture
         <div className="NewPictureDialog_Row">
           <label>Resolution</label>
           <div className="NewPictureDialog_Value">
-            <input type="number" value={dpi} min={1} onChange={this.onDpiChange} />
+            <input className="TextInput" type="number" value={dpi} min={1} onChange={this.onDpiChange} />
             DPI
           </div>
         </div>
