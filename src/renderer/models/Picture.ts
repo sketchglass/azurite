@@ -24,7 +24,7 @@ interface PictureUpdate {
 export default
 class Picture {
   readonly size = new Vec2(this.params.width, this.params.height)
-  readonly layerThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(64, 48).mulScalar(window.devicePixelRatio))
+  readonly layerThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(40).mulScalar(window.devicePixelRatio))
   readonly rootLayer: Layer
   readonly selectedLayers = observable<Layer>([])
   readonly layerBlender = new LayerBlender(this)
