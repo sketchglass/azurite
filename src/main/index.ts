@@ -18,7 +18,6 @@ function openDialogsWindow() {
     dialogsWindow = undefined
   })
   ipcMain.on("dialogOpen", (ev: Electron.IpcMainEvent, params: any) => {
-    console.log("dialog open", params)
     win.webContents.send("dialogOpen", params)
   })
   ipcMain.on("dialogDone", (ev: Electron.IpcMainEvent, result: any) => {
