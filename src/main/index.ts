@@ -12,7 +12,6 @@ let dialogsWindow: BrowserWindow|undefined
 
 function openDialogsWindow() {
   const win = dialogsWindow = new BrowserWindow({width: 100, height: 100, show: false})
-  win.setMenu(null as any)
   win.loadURL(`${contentBase}/dialogs.html`)
   win.on('closed', () => {
     dialogsWindow = undefined

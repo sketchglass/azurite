@@ -10,6 +10,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const onReadyShow = () => {
     const {width, height} = container.firstElementChild.getBoundingClientRect()
     const win = remote.getCurrentWindow()
+    win.setMenu(null as any)
     win.setContentSize(Math.round(width), Math.round(height))
     win.center()
     setImmediate(() => {
