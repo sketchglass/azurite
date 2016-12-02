@@ -82,10 +82,10 @@ class DimensionSelectState {
   @action setPreset(preset: DimensionPreset) {
     if (preset.unit == "px") {
       const {widthPx, heightPx, dpi, unit} = preset
-      this.setPx(widthPx, heightPx, dpi, unit, this.keepRatio)
+      this.setPx(widthPx, heightPx, dpi, unit, false)
     } else {
       const {widthMm, heightMm, dpi, unit} = preset
-      this.setMm(widthMm, heightMm, dpi, unit, this.keepRatio)
+      this.setMm(widthMm, heightMm, dpi, unit, false)
     }
   }
 
@@ -133,7 +133,7 @@ class DimensionSelectState {
     this.heightMm = heightMm
     this.dpi = dpi
     this.unit = unit
-    this.keepRatio = keepRatio
+    this.ratio = ratio
   }
 
   private setPx(widthPx: number, heightPx: number, dpi: number, unit: DimensionUnit, keepRatio: boolean) {
@@ -146,7 +146,7 @@ class DimensionSelectState {
     this.heightMm = heightMm
     this.dpi = dpi
     this.unit = unit
-    this.keepRatio = keepRatio
+    this.ratio = ratio
   }
 
   @action changeUnit(unit: DimensionUnit) {
@@ -188,8 +188,5 @@ class DimensionSelectState {
 
   @action changeKeepRatio(keepRatio: boolean) {
     this.keepRatio = keepRatio
-    if (keepRatio) {
-      this.ratio = this.heightMm / this.widthMm
-    }
   }
 }
