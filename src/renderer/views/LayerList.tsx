@@ -10,7 +10,6 @@ import ClickToEdit from "./components/ClickToEdit"
 import SVGIcon from "./components/SVGIcon"
 import LayerDetail from "./LayerDetail"
 const classNames = require("classnames")
-import {mouseOffsetPos} from "./util"
 
 interface LayerListProps {
   picture: Picture|undefined

@@ -1,7 +1,6 @@
 import React = require("react")
 import {Vec2} from "paintvec"
 import {HSVColor} from "../../../lib/Color"
-import {mouseOffsetPos} from "../util"
 import PointerEvents from "./PointerEvents"
 
 const wheelWidth = Math.round(16 * devicePixelRatio)
@@ -59,7 +58,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
   onPointerDown = (event: PointerEvent) => {
     event.preventDefault()
     const center = new Vec2(wheelSize / 2, wheelSize / 2)
-    const pos = mouseOffsetPos(event, this.canvas).mulScalar(devicePixelRatio).sub(center)
+    const pos = new Vec2(event.offsetX, event.offsetY).mulScalar(devicePixelRatio).sub(center)
     const r = pos.length()
     if (wheelSize / 2 - wheelWidth <= r && r <= wheelSize / 2) {
       // wheel clicked
@@ -78,7 +77,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
   onPointerMove = (event: PointerEvent) => {
     event.preventDefault()
     const center = new Vec2(wheelSize / 2, wheelSize / 2)
-    const pos = mouseOffsetPos(event, this.canvas).mulScalar(devicePixelRatio).sub(center)
+    const pos = new Vec2(event.offsetX, event.offsetY).mulScalar(devicePixelRatio).sub(center)
     if (this.draggingWheel) {
       this.onHueChanged(this.posToHue(pos))
     } else if (this.draggingSquare) {

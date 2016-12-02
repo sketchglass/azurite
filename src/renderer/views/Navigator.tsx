@@ -73,12 +73,12 @@ class NavigatorMinimap extends React.Component<{}, {} > {
     context.stroke()
   }
 
-  private picturePosForEvent(e: {clientX: number, clientY: number}) {
+  private picturePosForEvent(e: {offsetX: number, offsetY: number}) {
     if (!this.picture) {
       return new Vec2()
     }
-    const {left, top, width, height} = this.minimap.getBoundingClientRect()
-    return new Vec2(e.clientX - left - width / 2, e.clientY - top - height / 2).mulScalar(devicePixelRatio).divScalar(this.picture.navigatorThumbnailScale).round()
+    const {clientWidth, clientHeight} = this.minimap
+    return new Vec2(e.offsetX - clientWidth / 2, e.offsetY - clientHeight / 2).mulScalar(devicePixelRatio).divScalar(this.picture.navigatorThumbnailScale).round()
   }
 
   private onPointerDown = (e: PointerEvent) => {
