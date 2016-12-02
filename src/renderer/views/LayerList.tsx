@@ -134,7 +134,7 @@ class LayerList extends React.Component<LayerListProps, {}> {
           <LayerTree
             root={root}
             selectedKeys={new Set(selectedKeys)}
-            rowHeight={72}
+            rowHeight={48}
             rowContent={({node, selected}) => <LayerListItem layer={node.layer} selected={selected} />}
             onSelectedKeysChange={this.onSelectedKeysChange}
             onCollapsedChange={this.onCollapsedChange}
