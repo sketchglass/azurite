@@ -171,7 +171,7 @@ class NewPictureDialog extends React.Component<NewPictureDialogProps, NewPicture
             <span className="NewPictureDialog_TooLarge" hidden={!tooLarge}>Too Large</span>
           </span>
         </div>
-        <button type="submit" onClick={this.onOK} disabled={!isValid}>OK</button>
+        <button className="Button Button-primary" type="submit" onClick={this.onOK} disabled={!isValid}>OK</button>
       </form>
     )
   }
