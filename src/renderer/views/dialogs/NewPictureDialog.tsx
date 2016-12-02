@@ -1,8 +1,7 @@
 import React = require("react")
 import ReactDOM = require("react-dom")
-import {MAX_PICTURE_SIZE} from "../common/constants"
-import {remote, ipcRenderer} from "electron"
-import "./newPicture.css"
+import {MAX_PICTURE_SIZE} from "../../../common/constants"
+import {PictureDimension} from "../../models/Picture"
 
 type SizeUnits = "px" | "mm"
 
@@ -63,6 +62,11 @@ function pxToMm(px: number, dpi: number) {
   return Math.round(px / dpi * 25.4)
 }
 
+interface NewPictureDialogProps {
+  onReadyShow: () => void
+  onOK: (dimension: PictureDimension) => void
+}
+
 interface NewPictureDialogState {
   widthMm: number
   heightMm: number
@@ -74,7 +78,8 @@ interface NewPictureDialogState {
   keepRatio: boolean
 }
 
-class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
+export default
+class NewPictureDialog extends React.Component<NewPictureDialogProps, NewPictureDialogState> {
   // TODO: save & load last dimension
   state = {
     widthMm: 0,
@@ -106,10 +111,7 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
 
   componentDidMount() {
     this.setPreset(sizePresets[0])
-    const {width, height} = this.dialog.getBoundingClientRect()
-    const win = remote.getCurrentWindow()
-    win.setContentSize(Math.round(width), Math.round(height))
-    win.show()
+    this.props.onReadyShow()
   }
 
   render() {
@@ -251,11 +253,7 @@ class NewPictureDialog extends React.Component<{}, NewPictureDialogState> {
   }
 
   onOK = () => {
-    const {widthPx, heightPx} = this.state
-    ipcRenderer.send("dialogDone", {width: widthPx, height: heightPx})
+    const {widthPx, heightPx, dpi} = this.state
+    this.props.onOK({width: widthPx, height: heightPx, dpi})
   }
 }
-
-window.addEventListener("DOMContentLoaded", () => {
-  ReactDOM.render(<NewPictureDialog />, document.getElementById("app"))
-})

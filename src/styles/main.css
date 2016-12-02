@@ -22,3 +22,6 @@
 @import "./components/RGBRangeSliders.css";
 @import "./components/ScrollBar.css";
 @import "./components/SVGIcon.css";
+
+/* Dialogs */
+@import "./dialogs/NewPictureDialog.css";

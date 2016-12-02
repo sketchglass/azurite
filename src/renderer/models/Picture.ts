@@ -8,11 +8,11 @@ import ThumbnailGenerator from "./ThumbnailGenerator"
 import LayerBlender from "./LayerBlender"
 import {UndoStack} from "./UndoStack"
 import {Navigation} from "./Navigation"
-import PictureParams from "./PictureParams"
 
 export
 interface PictureData {
   size: [number, number]
+  dpi: number
   layers: LayerData[]
 }
 
@@ -21,9 +21,16 @@ interface PictureUpdate {
   layer?: Layer
 }
 
+export
+interface PictureDimension {
+  width: number
+  height: number
+  dpi: number
+}
+
 export default
 class Picture {
-  readonly size = new Vec2(this.params.width, this.params.height)
+  readonly size = new Vec2(this.dimension.width, this.dimension.height)
   readonly layerThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(40).mulScalar(window.devicePixelRatio))
   readonly rootLayer: Layer
   readonly selectedLayers = observable<Layer>([])
@@ -48,7 +55,7 @@ class Picture {
   navigatorThumbnail: HTMLCanvasElement
   navigatorThumbnailScale: number
 
-  constructor(public params: PictureParams) {
+  constructor(public dimension: PictureDimension) {
     const defaultLayer = new Layer(this, "Layer", layer => new ImageLayerContent(layer))
     this.rootLayer = new Layer(this, "root", layer =>
       new GroupLayerContent(layer, [defaultLayer])
@@ -101,13 +108,15 @@ class Picture {
   toData(): PictureData {
     return {
       size: [this.size.width, this.size.height],
+      dpi: this.dimension.dpi,
       layers: this.layers.map(l => l.toData()),
     }
   }
 
   static fromData(data: PictureData) {
     const [width, height] = data.size
-    const picture = new Picture({width, height})
+    const {dpi} = data
+    const picture = new Picture({width, height, dpi})
     const layers = data.layers.map(l => Layer.fromData(picture, l))
     picture.layers.splice(0, 1, ...layers)
     return picture
