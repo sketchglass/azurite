@@ -6,6 +6,7 @@
 
 /* App Styles */
 @import "./App.css";
+@import "./DimensionSelect.css";
 @import "./LayerDetail.css";
 @import "./LayerList.css";
 @import "./Navigator.css";
