@@ -1,7 +1,3 @@
-#app {
-  display: flex;
-  justify-content: center;
-}
 .NewPictureDialog {
   padding: 24px;
   display: flex;

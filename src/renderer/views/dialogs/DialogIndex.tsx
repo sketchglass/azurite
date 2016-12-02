@@ -5,7 +5,7 @@ import NewPictureDialog from "./NewPictureDialog"
 import "../../../styles/main.css"
 
 window.addEventListener("DOMContentLoaded", () => {
-  const container = document.getElementById("app")!
+  const container = document.querySelector(".DialogContainer")!
 
   const onReadyShow = () => {
     const {width, height} = container.firstElementChild.getBoundingClientRect()

@@ -12,6 +12,10 @@ body {
   -webkit-font-smoothing: antialiased;
   font-size: 13px;
 }
+.DialogContainer {
+  display: flex;
+  justify-content: center;
+}
 .App {
   display: flex;
   width: 100vw;
