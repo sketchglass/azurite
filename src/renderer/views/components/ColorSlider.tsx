@@ -21,8 +21,8 @@ class ColorSlider extends React.Component<ColorSliderProps, {}> {
   private dragged = false
 
   private onMove(e: PointerEvent) {
-    const {left, width} = this.element.getBoundingClientRect()
-    const newValue = clamp((e.clientX - left) / width, 0, 1)
+    const {clientWidth} = this.element
+    const newValue = clamp(e.offsetX / clientWidth, 0, 1)
     this.props.onChange(newValue)
   }
   private onPointerDown = (e: PointerEvent) => {
