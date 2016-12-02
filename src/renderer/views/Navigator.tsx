@@ -7,6 +7,7 @@ import {appState} from "../state/AppState"
 import {renderer} from "./Renderer"
 import {frameDebounce} from "../../lib/Debounce"
 import PointerEvents from "./components/PointerEvents"
+import SVGIcon from "./components/SVGIcon"
 
 interface NavigatorProps {
   picture: Picture|undefined
@@ -111,10 +112,11 @@ class NavigatorMinimap extends React.Component<{}, {} > {
   }
 
   render() {
-    const size = 128 * devicePixelRatio
+    const width = 240 * devicePixelRatio
+    const height = 120 * devicePixelRatio
     return (
       <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
-        <canvas className="Navigator_minimap" width={size} height={size} ref={e => this.minimap = e} />
+        <canvas className="Navigator_minimap" width={width} height={height} ref={e => this.minimap = e} />
       </PointerEvents>
     )
   }
@@ -129,7 +131,8 @@ class Navigator extends React.Component<NavigatorProps, {}> {
   private onScaleChange = (ev: React.FormEvent<HTMLInputElement>) => {
     const {picture} = this.props
     if (picture) {
-      picture.navigation.scale = parseFloat((ev.target as HTMLInputElement).value) / 100
+      const scaleLog = parseFloat((ev.target as HTMLInputElement).value)
+      picture.navigation.scale = Math.pow(2, scaleLog)
     }
   }
 
@@ -147,25 +150,69 @@ class Navigator extends React.Component<NavigatorProps, {}> {
     }
   }
 
+  private onZoomIn = () => {
+    const {picture} = this.props
+    if (picture) {
+      picture.navigation.zoomIn()
+    }
+  }
+  private onZoomOut = () => {
+    const {picture} = this.props
+    if (picture) {
+      picture.navigation.zoomOut()
+    }
+  }
+  private onZoomReset = () => {
+    const {picture} = this.props
+    if (picture) {
+      picture.navigation.scale = 1
+    }
+  }
+  private onRotateLeft = () => {
+    const {picture} = this.props
+    if (picture) {
+      picture.navigation.rotateLeft()
+    }
+  }
+  private onRotateRight = () => {
+    const {picture} = this.props
+    if (picture) {
+      picture.navigation.rotateRight()
+    }
+  }
+  private onRotateReset = () => {
+    const {picture} = this.props
+    if (picture) {
+      picture.navigation.rotation = 0
+    }
+  }
+
   render() {
     const {picture} = this.props
 
     const navigation = picture ? picture.navigation : {rotation: 0, scale: 1, horizontalFlip: false}
     const {rotation, scale, horizontalFlip} = navigation
-    const rotationDeg = Math.round(rotation / Math.PI * 180)
+    const scaleLog = Math.log2(scale)
+    const rotationDeg = rotation / Math.PI * 180
 
     return (
       <div className="Navigator">
         <NavigatorMinimap />
-        <div>
-          Scale: <input type="number" max={1600} onChange={this.onScaleChange} value={Math.round(scale * 100)} />
+        <div className="Navigator_sliderRow">
+          <button onClick={this.onZoomOut}><SVGIcon className="zoom-out" /></button>
+          <input type="range" min={-3} max={5} step={1/8} onChange={this.onScaleChange} value={scaleLog} />
+          <button onClick={this.onZoomIn}><SVGIcon className="zoom-in" /></button>
+          <button className="Navigator_reset" onClick={this.onZoomReset} />
+          {(scale * 100).toFixed(scale < 1 ? 1 : 0)}%
         </div>
-        <div>
-          Rotation: <input type="number" min={-180} max={180} onChange={this.onRotationChange} value={rotationDeg} />
+        <div className="Navigator_sliderRow">
+          <button onClick={this.onRotateLeft}><SVGIcon className="rotate-left" /></button>
+          <input type="range" min={-180} max={180} step={3} onChange={this.onRotationChange} value={rotationDeg} />
+          <button onClick={this.onRotateRight}><SVGIcon className="rotate-right" /></button>
+          <button className="Navigator_reset" onClick={this.onRotateReset} />
+          {rotationDeg.toFixed(0)}°
         </div>
-        <div>
-          <label><input type="checkbox" checked={horizontalFlip} onChange={this.onHorizontalFlipChange} />Flip Horizontally</label>
-        </div>
+        <label className="Navigator_check"><input type="checkbox" checked={horizontalFlip} onChange={this.onHorizontalFlipChange} />Flip Horizontally</label>
       </div>
     )
   }
