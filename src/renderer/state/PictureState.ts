@@ -4,6 +4,7 @@ import Picture from "../models/Picture"
 import {PictureSave} from "../services/PictureSave"
 import {PictureExport, PictureExportFormat} from "../services/PictureExport"
 import {dialogLauncher} from "../views/dialogs/DialogLauncher"
+import {FlipPictureCommand} from "../commands/PictureCommand"
 
 export
 class PictureState {
@@ -62,5 +63,9 @@ class PictureState {
     if (picture) {
       return new PictureState(picture)
     }
+  }
+
+  flip(orientation: "horizontal"|"vertical") {
+    this.picture.undoStack.redoAndPush(new FlipPictureCommand(this.picture, orientation))
   }
 }

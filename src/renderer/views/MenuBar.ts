@@ -56,6 +56,17 @@ class MenuBar {
     this.export("bmp")
   }
 
+  flipHorizontally() {
+    if (appState.currentPictureState) {
+      appState.currentPictureState.flip("horizontal")
+    }
+  }
+  flipVertically() {
+    if (appState.currentPictureState) {
+      appState.currentPictureState.flip("vertical")
+    }
+  }
+
   zoomIn() {
     if (appState.currentPictureState) {
       appState.currentPictureState.picture.navigation.zoomIn()
@@ -166,6 +177,20 @@ class MenuBar {
       ]
     }
 
+    const canvasMenu: MenuItemOptions = {
+      label: "Canvas",
+      submenu: [
+        {
+          label: "Flip Canvas Horizontally",
+          click: () => this.flipHorizontally(),
+        },
+        {
+          label: "Flip Canvas Vertically",
+          click: () => this.flipVertically(),
+        },
+      ],
+    }
+
     const viewMenu: MenuItemOptions = {
       label: 'View',
       submenu: [
@@ -233,7 +258,7 @@ class MenuBar {
     }
 
     const template: MenuItemOptions[] = [
-      fileMenu, editMenu, viewMenu, windowMenu, helpMenu
+      fileMenu, editMenu, canvasMenu, viewMenu, windowMenu, helpMenu
     ]
 
     if (process.platform === 'darwin') {
