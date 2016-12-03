@@ -324,7 +324,7 @@ export
 class FlipLayerCommand implements UndoCommand {
   title = "Flip Layer"
 
-  constructor(public picture: Picture, public path: number[], public rect: Rect, public orientation: "vertical"|"horizontal") {
+  constructor(public picture: Picture, public path: number[], public center: Vec2, public orientation: "vertical"|"horizontal") {
   }
 
   flip() {
@@ -332,7 +332,7 @@ class FlipLayerCommand implements UndoCommand {
     if (!content) {
       return
     }
-    const {center} = this.rect
+    const {center} = this
     let transform: Transform
     if (this.orientation == "horizontal") {
       transform = Transform.translate(center.neg()).scale(new Vec2(-1, 1)).translate(center)

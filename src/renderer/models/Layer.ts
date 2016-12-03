@@ -51,10 +51,7 @@ class Layer {
 
   path(): number[] {
     if (this.parent) {
-      if (this.parent.content.type != "group") {
-        throw new Error("invalid parent")
-      }
-      const index = this.parent.content.children.indexOf(this)
+      const index = this.parent.children.indexOf(this)
       if (index < 0) {
         throw new Error("cannot find in children list")
       }
@@ -68,12 +65,25 @@ class Layer {
     if (path.length == 0) {
       return this
     }
+    const {children} = this
+    const index = path[0]
+    if (0 <= index && index < children.length) {
+      return this.children[index].descendantFromPath(path.slice(1))
+    }
+  }
+
+  get children() {
     if (this.content.type == "group") {
-      const {children} = this.content
-      const index = path[0]
-      if (0 <= index && index < children.length) {
-        return this.content.children[index].descendantFromPath(path.slice(1))
-      }
+      return Array.from(this.content.children)
+    } else {
+      return []
+    }
+  }
+
+  forEachDescendant(action: (layer: Layer) => void) {
+    for (const child of this.children) {
+      action(child)
+      child.forEachDescendant(action)
     }
   }
 

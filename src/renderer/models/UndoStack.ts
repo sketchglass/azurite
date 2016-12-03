@@ -8,9 +8,9 @@ interface UndoCommand {
 }
 
 export
-class CompositeUndoCommand implements UndoCommand {
-  constructor(public title: string, public commands: UndoCommand[]) {
-  }
+abstract class CompositeUndoCommand implements UndoCommand {
+  abstract title: string
+  abstract commands: UndoCommand[]
   undo() {
     for (const command of Array.from(this.commands).reverse()) {
       command.undo()
