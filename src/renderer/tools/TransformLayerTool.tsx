@@ -178,7 +178,7 @@ class TransformLayerTool extends Tool {
     if (!this.originalRect || !this.rect) {
       return new Transform()
     }
-    const rectToRect = Transform.rectToRect(this.originalRect, this.rect) || new Transform()
+    const rectToRect = Transform.rectToRect(this.originalRect, this.rect)
     return rectToRect.merge(this.additionalTransform).translate(this.translation)
   }
 
