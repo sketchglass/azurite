@@ -32,6 +32,9 @@ module.exports = {
       }
     ],
   },
+  plugins: [
+    require("webpack-fail-plugin"),
+  ],
   postcss: function(webpack) {
     return [
       require('postcss-import')({
