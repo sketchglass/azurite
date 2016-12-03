@@ -158,12 +158,9 @@ class TransformLayerTool extends Tool {
       if (this.originalRect) {
         const inflation = 2
         const textureRect = this.originalRect.inflate(inflation)
-        const texture = this.originalTexture = new Texture(context, {size: textureRect.size})
+        const texture = this.originalTexture = content.tiledTexture.cropToTexture(textureRect)
         this.originalTextureSubrect = new Rect(new Vec2(), textureRect.size).inflate(-inflation)
         texture.filter = "bilinear"
-        const drawTarget = new TextureDrawTarget(context, texture)
-        content.tiledTexture.drawToDrawTarget(drawTarget, {offset: textureRect.topLeft.neg(), blendMode: "src"})
-        drawTarget.dispose()
       } else {
         this.originalTexture = undefined
       }
@@ -380,10 +377,7 @@ class TransformLayerTool extends Tool {
 
   endEditing() {
     if (this.editing && this.picture && this.currentContent && this.originalTexture && this.originalRect) {
-      const command = new TransformLayerCommand(
-        this.picture, this.currentContent.layer.path(),
-        this.originalTexture, this.originalTextureSubrect, Transform.translate(this.originalRect.topLeft).merge(this.transform)
-      )
+      const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.transform)
       this.picture.undoStack.redoAndPush(command)
     }
     this.cancelEditing()

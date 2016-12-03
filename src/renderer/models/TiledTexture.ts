@@ -153,6 +153,14 @@ class TiledTexture {
     }
   }
 
+  cropToTexture(rect: Rect) {
+    const texture = new Texture(context, {size: rect.size, pixelType: "half-float"})
+    const drawTarget = new TextureDrawTarget(context, texture)
+    this.drawToDrawTarget(drawTarget, {offset: rect.topLeft.neg(), blendMode: "src"})
+    drawTarget.dispose()
+    return texture
+  }
+
   transform(transform: Transform) {
     if (transform.equals(new Transform())) {
       return this.clone()
