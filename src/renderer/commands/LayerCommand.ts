@@ -278,7 +278,7 @@ class TransformLayerCommand implements UndoCommand {
   title = "Transform Layer"
   oldTiledTexture: TiledTexture|undefined
 
-  constructor(public picture: Picture, public path: number[], public sourceTexture: Texture, public sourceTextureSubrect: Rect,  public transform: Transform) {
+  constructor(public picture: Picture, public path: number[], public transform: Transform) {
   }
 
   undo() {
@@ -297,10 +297,24 @@ class TransformLayerCommand implements UndoCommand {
     if (!content) {
       return
     }
+    const rect = content.tiledTexture.boundingRect()
+    if (!rect) {
+      return
+    }
+
+    const textureRect = rect.inflate(2)
+    const texture = content.tiledTexture.cropToTexture(textureRect)
+    const subrect = new Rect(new Vec2(), textureRect.size).inflate(-2)
+    texture.filter = "bilinear"
+
     this.oldTiledTexture = content.tiledTexture
     const newTiledTexture = new TiledTexture()
-    newTiledTexture.drawTexture(this.sourceTexture, {transform: this.transform, blendMode: "src", bicubic: true, srcRect: this.sourceTextureSubrect})
+    const transform = Transform.translate(rect.topLeft).merge(this.transform)
+    newTiledTexture.drawTexture(texture, {transform, blendMode: "src", bicubic: true, srcRect: subrect})
     content.tiledTexture = newTiledTexture
+
+    texture.dispose()
+
     this.picture.lastUpdate = {layer: content.layer}
   }
 }
