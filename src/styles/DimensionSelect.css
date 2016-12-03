@@ -1,0 +1,35 @@
+.DimensionSelect {
+  display: flex;
+  flex-direction: column;
+}
+.DimensionSelect_Row {
+  margin: 4px 0;
+  display: flex;
+  align-items: center;
+  & > * {
+    display: block;
+  }
+  & > :nth-child(1) {
+    text-align: right;
+    margin-right: 8px;
+    width: 64px;
+  }
+}
+.DimensionSelect_Value {
+  display: flex;
+  & > * {
+    display: block;
+  }
+  & > :nth-child(1) {
+    margin-right: 4px;
+    width: 100px;
+  }
+}
+.DimensionSelect_PixelSize {
+  font-size: 11px;
+  color: grey;
+}
+.DimensionSelect_TooLarge {
+  color: red;
+  padding-left: 4px;
+}
