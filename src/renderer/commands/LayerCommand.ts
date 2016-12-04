@@ -318,35 +318,3 @@ class TransformLayerCommand implements UndoCommand {
     this.picture.lastUpdate = {layer: content.layer}
   }
 }
-
-
-export
-class FlipLayerCommand implements UndoCommand {
-  title = this.orientation == "horizontal" ? "Flip Layer Horizontally" : "Flip Layer Vertically"
-
-  constructor(public picture: Picture, public path: number[], public orientation: "vertical"|"horizontal") {
-  }
-
-  flip() {
-    const content = getImageContent(this.picture, this.path)
-    if (!content) {
-      return
-    }
-    const center = this.picture.size.divScalar(2)
-    let transform: Transform
-    if (this.orientation == "horizontal") {
-      transform = Transform.translate(center.neg()).scale(new Vec2(-1, 1)).translate(center)
-    } else {
-      transform = Transform.translate(center.neg()).scale(new Vec2(1, -1)).translate(center)
-    }
-    content.tiledTexture = content.tiledTexture.transform(transform)
-    this.picture.lastUpdate = {layer: content.layer}
-  }
-
-  undo() {
-    this.flip()
-  }
-  redo() {
-    this.flip()
-  }
-}
