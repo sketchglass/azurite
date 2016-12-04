@@ -30,7 +30,7 @@ interface PictureDimension {
 
 export default
 class Picture {
-  readonly layerThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(40).mulScalar(window.devicePixelRatio))
+  layerThumbnailGenerator: ThumbnailGenerator
   readonly rootLayer: Layer
   readonly selectedLayers = observable<Layer>([])
   readonly layerBlender = new LayerBlender(this)
@@ -53,13 +53,14 @@ class Picture {
   @computed get layers() {
     return (this.rootLayer.content as GroupLayerContent).children
   }
-  private readonly navigatorThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(96, 96).mulScalar(window.devicePixelRatio))
+  private navigatorThumbnailGenerator: ThumbnailGenerator
   private navigatorThumbnailDirty = true
   navigatorThumbnail: HTMLCanvasElement
   navigatorThumbnailScale: number
 
   constructor(dimension: PictureDimension) {
     this.dimension = dimension
+    reaction(() => this.size, () => this.resizeThumbnailGenerators())
 
     const defaultLayer = new Layer(this, "Layer", layer => new ImageLayerContent(layer))
     this.rootLayer = new Layer(this, "root", layer =>
@@ -129,5 +130,16 @@ class Picture {
     const layers = data.layers.map(l => Layer.fromData(picture, l))
     picture.layers.splice(0, 1, ...layers)
     return picture
+  }
+
+  private resizeThumbnailGenerators() {
+    if (this.layerThumbnailGenerator) {
+      this.layerThumbnailGenerator.dispose()
+    }
+    if (this.navigatorThumbnailGenerator) {
+      this.navigatorThumbnailGenerator.dispose()
+    }
+    this.layerThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(40).mulScalar(window.devicePixelRatio))
+    this.navigatorThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(96, 96).mulScalar(window.devicePixelRatio))
   }
 }
