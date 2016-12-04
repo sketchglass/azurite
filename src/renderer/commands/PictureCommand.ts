@@ -18,8 +18,12 @@ class FlipPictureCommand {
     const {width, height} = this.picture.size
     let transform: Transform
     if (this.orientation == "horizontal") {
+      // x' = width - x
+      // y' = y
       transform = new Transform(-1, 0, 0, 0, 1, 0, width, 0, 1)
     } else {
+      // x' = x
+      // y' = height - y
       transform = new Transform(1, 0, 0, 0, -1, 0, 0, height, 1)
     }
     content.tiledTexture = content.tiledTexture.transform(transform)
@@ -54,8 +58,12 @@ class Rotate90PictureCommand {
     const {width, height} = this.picture.size
     let transform: Transform
     if (direction == "left") {
+      // x' = y
+      // y' = width - x
       transform = new Transform(0, -1, 0, 1, 0, 0, 0, width, 1)
     } else {
+      // x' = height - y
+      // y' = x
       transform = new Transform(0, 1, 0, -1, 0, 0, height, 0, 1)
     }
     content.tiledTexture = content.tiledTexture.transform(transform)
