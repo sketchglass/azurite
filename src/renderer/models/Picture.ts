@@ -36,7 +36,9 @@ class Picture {
   }
   layerThumbnailGenerator: ThumbnailGenerator
 
-  readonly rootLayer: Layer
+  readonly rootLayer = new Layer(this, "root", layer =>
+    new GroupLayerContent(layer, [])
+  )
   readonly selectedLayers = observable<Layer>([])
   readonly layerBlender = new LayerBlender(this)
   @computed get layers() {
@@ -63,13 +65,11 @@ class Picture {
   navigatorThumbnailScale: number
 
   constructor(dimension: PictureDimension) {
-    reaction(() => this.size, () => this.resizeThumbnailGenerators())
+    reaction(() => this.size, () => this.onResize())
     this.dimension = dimension
 
     const defaultLayer = new Layer(this, "Layer", layer => new ImageLayerContent(layer))
-    this.rootLayer = new Layer(this, "root", layer =>
-      new GroupLayerContent(layer, [defaultLayer])
-    )
+    this.layers.push(defaultLayer)
     this.selectedLayers.push(defaultLayer)
 
     reaction(() => this.lastUpdate, (update: PictureUpdate) => {
@@ -136,7 +136,7 @@ class Picture {
     return picture
   }
 
-  private resizeThumbnailGenerators() {
+  private onResize() {
     if (this.layerThumbnailGenerator) {
       this.layerThumbnailGenerator.dispose()
     }
@@ -145,5 +145,11 @@ class Picture {
     }
     this.layerThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(40).mulScalar(window.devicePixelRatio))
     this.navigatorThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(96, 96).mulScalar(window.devicePixelRatio))
+
+    this.forEachLayer(layer => {
+      if (layer.content.type == "image") {
+        layer.content.updateThumbnail()
+      }
+    })
   }
 }
