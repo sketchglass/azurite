@@ -322,9 +322,9 @@ class TransformLayerCommand implements UndoCommand {
 
 export
 class FlipLayerCommand implements UndoCommand {
-  title = "Flip Layer"
+  title = this.orientation == "horizontal" ? "Flip Layer Horizontally" : "Flip Layer Vertically"
 
-  constructor(public picture: Picture, public path: number[], public center: Vec2, public orientation: "vertical"|"horizontal") {
+  constructor(public picture: Picture, public path: number[], public orientation: "vertical"|"horizontal") {
   }
 
   flip() {
@@ -332,7 +332,7 @@ class FlipLayerCommand implements UndoCommand {
     if (!content) {
       return
     }
-    const {center} = this
+    const center = this.picture.size.divScalar(2)
     let transform: Transform
     if (this.orientation == "horizontal") {
       transform = Transform.translate(center.neg()).scale(new Vec2(-1, 1)).translate(center)
