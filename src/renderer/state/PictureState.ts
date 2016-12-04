@@ -4,7 +4,7 @@ import Picture from "../models/Picture"
 import {PictureSave} from "../services/PictureSave"
 import {PictureExport, PictureExportFormat} from "../services/PictureExport"
 import {dialogLauncher} from "../views/dialogs/DialogLauncher"
-import {FlipPictureCommand, Rotate90PictureCommand} from "../commands/PictureCommand"
+import {FlipPictureCommand, Rotate90PictureCommand, Rotate180PictureCommand} from "../commands/PictureCommand"
 
 export
 class PictureState {
@@ -71,5 +71,9 @@ class PictureState {
 
   rotate90(direction: "left"|"right") {
     this.picture.undoStack.redoAndPush(new Rotate90PictureCommand(this.picture, direction))
+  }
+
+  rotate180() {
+    this.picture.undoStack.redoAndPush(new Rotate180PictureCommand(this.picture))
   }
 }

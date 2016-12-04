@@ -202,6 +202,11 @@ class MenuBar {
           enabled: !!this.pictureState,
           click: () => this.pictureState && this.pictureState.rotate90("right"),
         },
+        {
+          label: "Rotate 180°",
+          enabled: !!this.pictureState,
+          click: () => this.pictureState && this.pictureState.rotate180(),
+        },
       ],
     }
 

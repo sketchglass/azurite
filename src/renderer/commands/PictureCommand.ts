@@ -42,7 +42,6 @@ class FlipPictureCommand {
   }
 }
 
-
 export
 class Rotate90PictureCommand {
   title = this.direction == "left" ? "Rotate Canvas 90° Left": "Rotate Canvas 90° Right"
@@ -81,5 +80,35 @@ class Rotate90PictureCommand {
   }
   redo() {
     this.rotatePicture(this.direction)
+  }
+}
+
+export
+class Rotate180PictureCommand {
+  title = "Rotate Canvas 180°"
+
+  constructor(public picture: Picture) {
+  }
+
+  rotateLayer(layer: Layer) {
+    const content = layer.content
+    if (content.type != "image") {
+      return
+    }
+    const {width, height} = this.picture.size
+    const transform = new Transform(-1, 0, 0, 0, -1, 0, width, height, 1)
+    content.tiledTexture = content.tiledTexture.transform(transform)
+  }
+
+  rotatePicture() {
+    this.picture.forEachLayer(layer => this.rotateLayer(layer))
+    this.picture.lastUpdate = {}
+  }
+
+  undo() {
+    this.rotatePicture()
+  }
+  redo() {
+    this.rotatePicture()
   }
 }
