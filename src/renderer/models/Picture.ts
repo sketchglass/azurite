@@ -1,5 +1,5 @@
 import * as path from "path"
-import {observable, computed, reaction} from "mobx"
+import {observable, computed, reaction, action} from "mobx"
 import {Vec2, Rect} from "paintvec"
 import {Texture} from "paintgl"
 import Layer, {LayerData} from "./Layer"
@@ -30,13 +30,24 @@ interface PictureDimension {
 
 export default
 class Picture {
-  readonly size = new Vec2(this.dimension.width, this.dimension.height)
-  readonly layerThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(40).mulScalar(window.devicePixelRatio))
-  readonly rootLayer: Layer
+  @observable dimension: PictureDimension = {width: 0, height: 0, dpi: 72}
+  @computed get size() {
+    return new Vec2(this.dimension.width, this.dimension.height)
+  }
+  layerThumbnailGenerator: ThumbnailGenerator
+
+  readonly rootLayer = new Layer(this, "root", layer =>
+    new GroupLayerContent(layer, [])
+  )
   readonly selectedLayers = observable<Layer>([])
   readonly layerBlender = new LayerBlender(this)
+  @computed get layers() {
+    return (this.rootLayer.content as GroupLayerContent).children
+  }
+
   readonly undoStack = new UndoStack()
   readonly navigation = new Navigation()
+
   @observable lastUpdate: PictureUpdate = {}
   @observable filePath = ""
   @observable edited = false
@@ -47,19 +58,18 @@ class Picture {
       return "Untitled"
     }
   }
-  @computed get layers() {
-    return (this.rootLayer.content as GroupLayerContent).children
-  }
-  private readonly navigatorThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(96, 96).mulScalar(window.devicePixelRatio))
+
+  private navigatorThumbnailGenerator: ThumbnailGenerator
   private navigatorThumbnailDirty = true
   navigatorThumbnail: HTMLCanvasElement
   navigatorThumbnailScale: number
 
-  constructor(public dimension: PictureDimension) {
+  constructor(dimension: PictureDimension) {
+    reaction(() => this.size, () => this.onResize())
+    this.dimension = dimension
+
     const defaultLayer = new Layer(this, "Layer", layer => new ImageLayerContent(layer))
-    this.rootLayer = new Layer(this, "root", layer =>
-      new GroupLayerContent(layer, [defaultLayer])
-    )
+    this.layers.push(defaultLayer)
     this.selectedLayers.push(defaultLayer)
 
     reaction(() => this.lastUpdate, (update: PictureUpdate) => {
@@ -124,5 +134,22 @@ class Picture {
     const layers = data.layers.map(l => Layer.fromData(picture, l))
     picture.layers.splice(0, 1, ...layers)
     return picture
+  }
+
+  @action private onResize() {
+    if (this.layerThumbnailGenerator) {
+      this.layerThumbnailGenerator.dispose()
+    }
+    if (this.navigatorThumbnailGenerator) {
+      this.navigatorThumbnailGenerator.dispose()
+    }
+    this.layerThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(40).mulScalar(window.devicePixelRatio))
+    this.navigatorThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(96, 96).mulScalar(window.devicePixelRatio))
+
+    this.forEachLayer(layer => {
+      if (layer.content.type == "image") {
+        layer.content.updateThumbnail()
+      }
+    })
   }
 }

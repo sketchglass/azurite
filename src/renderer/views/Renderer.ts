@@ -107,10 +107,14 @@ class Renderer {
   constructor() {
     reaction(() => this.picture, picture => {
       if (picture) {
-        this.shape.rect = new Rect(new Vec2(), picture.size)
         this.model.uniforms = {texture: picture.layerBlender.getBlendedTexture()}
       } else {
         this.model.uniforms = {}
+      }
+    })
+    reaction(() => this.picture && this.picture.size, size => {
+      if (size) {
+        this.shape.rect = new Rect(new Vec2(), size)
       }
     })
     reaction(() => this.size, size => {
