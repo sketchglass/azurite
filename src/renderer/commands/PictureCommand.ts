@@ -37,3 +37,41 @@ class FlipPictureCommand {
     this.flipPicture()
   }
 }
+
+
+export
+class Rotate90PictureCommand {
+  title = this.direction == "left" ? "Rotate Canvas 90° Left": "Rotate Canvas 90° Right"
+
+  constructor(public picture: Picture, public direction: "left"|"right") {
+  }
+
+  rotateLayer(layer: Layer, direction: "left"|"right") {
+    const content = layer.content
+    if (content.type != "image") {
+      return
+    }
+    const {width, height} = this.picture.size
+    let transform: Transform
+    if (direction == "left") {
+      transform = new Transform(0, -1, 0, 1, 0, 0, 0, width, 1)
+    } else {
+      transform = new Transform(0, 1, 0, -1, 0, 0, height, 0, 1)
+    }
+    content.tiledTexture = content.tiledTexture.transform(transform)
+  }
+
+  rotatePicture(direction: "left"|"right") {
+    this.picture.forEachLayer(layer => this.rotateLayer(layer, direction))
+    const {width, height, dpi} = this.picture.dimension
+    this.picture.dimension = {width: height, height: width, dpi}
+    this.picture.lastUpdate = {}
+  }
+
+  undo() {
+    this.rotatePicture(this.direction == "left" ? "right" : "left")
+  }
+  redo() {
+    this.rotatePicture(this.direction)
+  }
+}

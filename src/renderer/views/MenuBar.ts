@@ -10,6 +10,10 @@ import Picture from "../models/Picture"
 import {PictureExportFormat} from "../services/PictureExport"
 
 class MenuBar {
+  @computed get pictureState() {
+    return appState.currentPictureState
+  }
+
   constructor() {
     autorun(() => {
       const menu = Menu.buildFromTemplate(this.render())
@@ -187,6 +191,16 @@ class MenuBar {
         {
           label: "Flip Canvas Vertically",
           click: () => this.flipVertically(),
+        },
+        {
+          label: "Rotate 90° Left",
+          enabled: !!this.pictureState,
+          click: () => this.pictureState && this.pictureState.rotate90("left"),
+        },
+        {
+          label: "Rotate 90° Right",
+          enabled: !!this.pictureState,
+          click: () => this.pictureState && this.pictureState.rotate90("right"),
         },
       ],
     }
