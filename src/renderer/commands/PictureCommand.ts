@@ -15,12 +15,12 @@ class FlipPictureCommand {
     if (content.type != "image") {
       return
     }
-    const center = this.picture.size.divScalar(2)
+    const {width, height} = this.picture.size
     let transform: Transform
     if (this.orientation == "horizontal") {
-      transform = Transform.translate(center.neg()).scale(new Vec2(-1, 1)).translate(center)
+      transform = new Transform(-1, 0, 0, 0, 1, 0, width, 0, 1)
     } else {
-      transform = Transform.translate(center.neg()).scale(new Vec2(1, -1)).translate(center)
+      transform = new Transform(1, 0, 0, 0, -1, 0, 0, height, 1)
     }
     content.tiledTexture = content.tiledTexture.transform(transform)
   }
