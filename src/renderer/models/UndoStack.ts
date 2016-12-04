@@ -8,16 +8,16 @@ interface UndoCommand {
 }
 
 export
-abstract class CompositeUndoCommand implements UndoCommand {
-  abstract title: string
-  abstract subcommands: UndoCommand[]
+class CompositeUndoCommand implements UndoCommand {
+  constructor(public title: string, public commands: UndoCommand[]) {
+  }
   undo() {
-    for (const command of Array.from(this.subcommands).reverse()) {
+    for (const command of Array.from(this.commands).reverse()) {
       command.undo()
     }
   }
   redo() {
-    for (const command of this.subcommands) {
+    for (const command of this.commands) {
       command.redo()
     }
   }
