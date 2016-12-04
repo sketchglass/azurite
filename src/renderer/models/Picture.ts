@@ -105,6 +105,10 @@ class Picture {
     return this.rootLayer.descendantFromPath(path)
   }
 
+  forEachLayer(action: (layer: Layer) => void) {
+    this.rootLayer.forEachDescendant(action)
+  }
+
   toData(): PictureData {
     return {
       size: [this.size.width, this.size.height],
