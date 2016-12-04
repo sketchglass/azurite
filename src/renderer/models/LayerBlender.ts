@@ -1,4 +1,4 @@
-import {observable} from "mobx"
+import {observable, reaction} from "mobx"
 import Picture from "./Picture"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Model, Texture, TextureDrawTarget, Shader, TextureShader, RectShape, PixelType, Color} from "paintgl"
@@ -190,6 +190,9 @@ class LayerBlender {
   dirtyRect: Rect|undefined
 
   constructor(public picture: Picture) {
+    reaction(() => picture.size, size => {
+      this.blendedTexture.size = size
+    })
   }
 
   addDirtyRect(rect: Rect) {

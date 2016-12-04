@@ -30,16 +30,22 @@ interface PictureDimension {
 
 export default
 class Picture {
-  layerThumbnailGenerator: ThumbnailGenerator
-  readonly rootLayer: Layer
-  readonly selectedLayers = observable<Layer>([])
-  readonly layerBlender = new LayerBlender(this)
-  readonly undoStack = new UndoStack()
-  readonly navigation = new Navigation()
-  @observable dimension: PictureDimension
+  @observable dimension: PictureDimension = {width: 0, height: 0, dpi: 72}
   @computed get size() {
     return new Vec2(this.dimension.width, this.dimension.height)
   }
+  layerThumbnailGenerator: ThumbnailGenerator
+
+  readonly rootLayer: Layer
+  readonly selectedLayers = observable<Layer>([])
+  readonly layerBlender = new LayerBlender(this)
+  @computed get layers() {
+    return (this.rootLayer.content as GroupLayerContent).children
+  }
+
+  readonly undoStack = new UndoStack()
+  readonly navigation = new Navigation()
+
   @observable lastUpdate: PictureUpdate = {}
   @observable filePath = ""
   @observable edited = false
@@ -50,17 +56,15 @@ class Picture {
       return "Untitled"
     }
   }
-  @computed get layers() {
-    return (this.rootLayer.content as GroupLayerContent).children
-  }
+
   private navigatorThumbnailGenerator: ThumbnailGenerator
   private navigatorThumbnailDirty = true
   navigatorThumbnail: HTMLCanvasElement
   navigatorThumbnailScale: number
 
   constructor(dimension: PictureDimension) {
-    this.dimension = dimension
     reaction(() => this.size, () => this.resizeThumbnailGenerators())
+    this.dimension = dimension
 
     const defaultLayer = new Layer(this, "Layer", layer => new ImageLayerContent(layer))
     this.rootLayer = new Layer(this, "root", layer =>
