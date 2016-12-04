@@ -30,13 +30,16 @@ interface PictureDimension {
 
 export default
 class Picture {
-  readonly size = new Vec2(this.dimension.width, this.dimension.height)
   readonly layerThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(40).mulScalar(window.devicePixelRatio))
   readonly rootLayer: Layer
   readonly selectedLayers = observable<Layer>([])
   readonly layerBlender = new LayerBlender(this)
   readonly undoStack = new UndoStack()
   readonly navigation = new Navigation()
+  @observable dimension: PictureDimension
+  @computed get size() {
+    return new Vec2(this.dimension.width, this.dimension.height)
+  }
   @observable lastUpdate: PictureUpdate = {}
   @observable filePath = ""
   @observable edited = false
@@ -55,7 +58,9 @@ class Picture {
   navigatorThumbnail: HTMLCanvasElement
   navigatorThumbnailScale: number
 
-  constructor(public dimension: PictureDimension) {
+  constructor(dimension: PictureDimension) {
+    this.dimension = dimension
+
     const defaultLayer = new Layer(this, "Layer", layer => new ImageLayerContent(layer))
     this.rootLayer = new Layer(this, "root", layer =>
       new GroupLayerContent(layer, [defaultLayer])
