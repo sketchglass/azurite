@@ -7,7 +7,7 @@ import DimensionSelectState from "../../state/DimensionSelectState"
 
 interface NewPictureDialogProps {
   onReadyShow: () => void
-  onOK: (dimension: PictureDimension) => void
+  onDone: (dimension?: PictureDimension) => void
 }
 
 @observer
@@ -19,7 +19,10 @@ class NewPictureDialog extends React.Component<NewPictureDialogProps, {}> {
     return (
       <div className="NewPictureDialog">
         <DimensionSelect state={this.dimensionSelectState} />
-        <button className="Button Button-primary" type="submit" onClick={this.onOK} disabled={!this.dimensionSelectState.isValid}>OK</button>
+        <div className="NewPictureDialog_buttons">
+          <button className="Button" onClick={this.onCancel}>Cancel</button>
+          <button className="Button Button-primary" onClick={this.onOK} disabled={!this.dimensionSelectState.isValid}>New</button>
+        </div>
       </div>
     )
   }
@@ -28,11 +31,11 @@ class NewPictureDialog extends React.Component<NewPictureDialogProps, {}> {
     this.props.onReadyShow()
   }
 
-  private onDimensionChange = (dim: PictureDimension, isValid: boolean) => {
-    this.setState({isValid})
+  private onCancel = () => {
+    this.props.onDone()
   }
 
   private onOK = () => {
-    this.props.onOK(this.dimensionSelectState.dimension)
+    this.props.onDone(this.dimensionSelectState.dimension)
   }
 }

@@ -1,6 +1,8 @@
 * {
   color: var(--default-color);
   user-select: none;
+  font-family: var(--default-font-family);
+  -webkit-font-smoothing: antialiased;
 }
 div {
   cursor: default;
@@ -8,8 +10,6 @@ div {
 body {
   margin: 0;
   background-color: var(--default-background-color);
-  font-family: var(--default-font-family);
-  -webkit-font-smoothing: antialiased;
   font-size: 13px;
   position: fixed;
 }
