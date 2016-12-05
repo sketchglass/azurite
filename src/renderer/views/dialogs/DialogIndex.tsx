@@ -25,17 +25,22 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   const renderDialog = (name: string, param: any) => {
-    switch (name) {
-      case "newPicture":
-        return <NewPictureDialog onReadyShow={onReadyShow} onDone={onDone} />
-      case "resolutionChange":
-        return <ResolutionChangeDialog init={param} onReadyShow={onReadyShow} onDone={onDone} />
-    }
+
   }
 
   ipcRenderer.on("dialogOpen", (ev: Electron.IpcRendererEvent, name: string, param: any) => {
     ReactDOM.unmountComponentAtNode(root)
-    const dialog = renderDialog(name, param)
+    let dialog: JSX.Element|undefined
+    switch (name) {
+      case "newPicture":
+        document.title = "New Picture"
+        dialog = <NewPictureDialog onReadyShow={onReadyShow} onDone={onDone} />
+        break
+      case "resolutionChange":
+        document.title = "Change Canvas Resolution"
+        dialog = <ResolutionChangeDialog init={param} onReadyShow={onReadyShow} onDone={onDone} />
+        break
+    }
     if (dialog) {
       ReactDOM.render(dialog, root)
     }
