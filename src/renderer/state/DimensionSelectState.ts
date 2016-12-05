@@ -132,10 +132,10 @@ class DimensionSelectState {
   @action changeSizeCurrentUnit(width: number|undefined, height: number|undefined) {
     let w = width != undefined ? this.toPx(width, this.unit) : undefined
     let h = height != undefined ? this.toPx(height, this.unit) : undefined
-    if (w == undefined && h != undefined  && this.keepRatio) {
+    if (w == undefined && h != undefined && this.keepRatio) {
       w = h / this.ratio
     }
-    if (w != undefined && h == undefined  && this.keepRatio) {
+    if (w != undefined && h == undefined && this.keepRatio) {
       h = w * this.ratio
     }
     if (w != undefined) {
