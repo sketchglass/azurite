@@ -69,13 +69,6 @@ class DimensionSelectState {
     return this.fromPx(this.height, this.unit)
   }
 
-  @computed get widthCurrentUnitRounded() {
-    return Math.round(this.widthCurrentUnit)
-  }
-  @computed get heightCurrentUnitRounded() {
-    return Math.round(this.heightCurrentUnit)
-  }
-
   constructor() {
     this.setPreset(0)
     reaction(() => [this.width, this.height], () => {
