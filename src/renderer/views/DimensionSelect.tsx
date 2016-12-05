@@ -1,45 +1,68 @@
 import * as React from "react"
 import {observer} from "mobx-react"
-import DimensionSelectState, {dimensionPresets, DimensionUnit, DimensionPreset} from "../state/DimensionSelectState"
+import DimensionSelectState, {DimensionUnit} from "../state/DimensionSelectState"
 
 interface DimensionSelectProps {
   state: DimensionSelectState
 }
 
+function toFixedNumber(x: number, digits: number){
+  const pow = Math.pow(10, digits)
+  return Math.round(x * pow) / pow
+}
+
 @observer
 export default
 class DimensionSelect extends React.Component<DimensionSelectProps, {} > {
+  private digitsForUnit(unit: DimensionUnit) {
+    switch (unit) {
+      case "px":
+      case "mm":
+        return 0
+      case "inch":
+        return 1
+    }
+  }
+
   render() {
-    const {widthMm, heightMm, widthPx, heightPx, dpi, unit, keepRatio, tooLarge, isValid, currentPresetIndex} = this.props.state
-    const width = unit == "mm" ? widthMm : widthPx
-    const height = unit == "mm" ? heightMm : heightPx
+    const {
+      widthRounded, heightRounded,
+      widthCurrentUnit, heightCurrentUnit,
+      dpi, unit, keepRatio, tooLarge, isValid, lastSelectedPreset, presets
+    } = this.props.state
+    const digits = this.digitsForUnit(unit)
+    const step = Math.pow(10, -digits)
+    const widthCurrentUnitRounded = toFixedNumber(widthCurrentUnit, digits)
+    const heightCurrentUnitRounded = toFixedNumber(heightCurrentUnit, digits)
 
     return (
       <div className="DimensionSelect">
         <div className="DimensionSelect_Row">
           <label>Preset</label>
-          <select className="Select" value={currentPresetIndex} autoFocus onChange={this.onPresetSelect}>
-            {dimensionPresets.map((preset, i) => <option key={i} value={i}>{preset.name}</option>)}
+          <select className="Select" value={lastSelectedPreset} autoFocus onChange={this.onPresetSelect}>
+            {presets.map((preset, i) => <option key={i} value={i}>{preset.name}</option>)}
             <option value={-1}>Custom</option>
           </select>
         </div>
         <div className="DimensionSelect_Row">
           <label>Width</label>
           <div className="DimensionSelect_Value">
-            <input className="TextInput" type="number" value={width} min={1} onChange={this.onWidthChange} />
+            <input className="TextInput" type="number" value={widthCurrentUnitRounded} step={step} min={1} onChange={this.onWidthChange} />
             <select className="Select" value={unit} onChange={this.onUnitChange}>
               <option value="px">px</option>
               <option value="mm">mm</option>
+              <option value="inch">"</option>
             </select>
           </div>
         </div>
         <div className="DimensionSelect_Row">
           <label>Height</label>
           <div className="DimensionSelect_Value">
-            <input className="TextInput" type="number" value={height} min={1} onChange={this.onHeightChange} />
+            <input className="TextInput" type="number" value={heightCurrentUnitRounded} step={step} min={1} onChange={this.onHeightChange} />
             <select className="Select" value={unit} onChange={this.onUnitChange}>
               <option value="px">px</option>
               <option value="mm">mm</option>
+              <option value="inch">"</option>
             </select>
           </div>
         </div>
@@ -60,7 +83,7 @@ class DimensionSelect extends React.Component<DimensionSelectProps, {} > {
         <div className="DimensionSelect_Row">
           <label></label>
           <span className="DimensionSelect_PixelSize">
-            {widthPx || 0} x {heightPx || 0} px
+            {widthRounded || 0} x {heightRounded || 0} px
             <span className="DimensionSelect_TooLarge" hidden={!tooLarge}>Too Large</span>
           </span>
         </div>
@@ -71,23 +94,23 @@ class DimensionSelect extends React.Component<DimensionSelectProps, {} > {
   private onPresetSelect = (ev: React.FormEvent<HTMLSelectElement>) => {
     const i = parseInt((ev.target as HTMLSelectElement).value)
     if (i >= 0) {
-      this.props.state.setPreset(dimensionPresets[i])
+      this.props.state.setPreset(i)
     }
   }
 
   private onUnitChange = (ev: React.FormEvent<HTMLSelectElement>) => {
     const unit = (ev.target as HTMLSelectElement).value as DimensionUnit
-    this.props.state.changeUnit(unit)
+    this.props.state.unit = unit
   }
 
   private onWidthChange = (ev: React.FormEvent<HTMLInputElement>) => {
-    const width = parseInt((ev.target as HTMLInputElement).value)
-    this.props.state.changeWidth(width)
+    const width = parseFloat((ev.target as HTMLInputElement).value)
+    this.props.state.changeSizeCurrentUnit(width, undefined)
   }
 
   private onHeightChange = (ev: React.FormEvent<HTMLInputElement>) => {
-    const height = parseInt((ev.target as HTMLInputElement).value)
-    this.props.state.changeHeight(height)
+    const height = parseFloat((ev.target as HTMLInputElement).value)
+    this.props.state.changeSizeCurrentUnit(undefined, height)
   }
 
   private onDpiChange = (ev: React.FormEvent<HTMLInputElement>) => {
@@ -96,6 +119,6 @@ class DimensionSelect extends React.Component<DimensionSelectProps, {} > {
   }
 
   private onKeepRatioToggle = (ev: React.FormEvent<HTMLInputElement>) => {
-    this.props.state.changeKeepRatio((ev.target as HTMLInputElement).checked)
+    this.props.state.keepRatio = (ev.target as HTMLInputElement).checked
   }
 }
