@@ -69,13 +69,6 @@ class DimensionSelectState {
     return this.fromPx(this.height, this.unit)
   }
 
-  @computed get widthCurrentUnitRounded() {
-    return Math.round(this.widthCurrentUnit)
-  }
-  @computed get heightCurrentUnitRounded() {
-    return Math.round(this.heightCurrentUnit)
-  }
-
   constructor() {
     this.setPreset(0)
     reaction(() => [this.width, this.height], () => {
@@ -139,10 +132,10 @@ class DimensionSelectState {
   @action changeSizeCurrentUnit(width: number|undefined, height: number|undefined) {
     let w = width != undefined ? this.toPx(width, this.unit) : undefined
     let h = height != undefined ? this.toPx(height, this.unit) : undefined
-    if (w == undefined && h != undefined  && this.keepRatio) {
+    if (w == undefined && h != undefined && this.keepRatio) {
       w = h / this.ratio
     }
-    if (w != undefined && h == undefined  && this.keepRatio) {
+    if (w != undefined && h == undefined && this.keepRatio) {
       h = w * this.ratio
     }
     if (w != undefined) {
