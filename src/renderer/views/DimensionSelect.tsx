@@ -6,15 +6,34 @@ interface DimensionSelectProps {
   state: DimensionSelectState
 }
 
+function toFixedNumber(x: number, digits: number){
+  const pow = Math.pow(10, digits)
+  return Math.round(x * pow) / pow
+}
+
 @observer
 export default
 class DimensionSelect extends React.Component<DimensionSelectProps, {} > {
+  private digitsForUnit(unit: DimensionUnit) {
+    switch (unit) {
+      case "px":
+      case "mm":
+        return 0
+      case "inch":
+        return 1
+    }
+  }
+
   render() {
     const {
       widthRounded, heightRounded,
-      widthCurrentUnitRounded, heightCurrentUnitRounded,
+      widthCurrentUnit, heightCurrentUnit,
       dpi, unit, keepRatio, tooLarge, isValid, lastSelectedPreset, presets
     } = this.props.state
+    const digits = this.digitsForUnit(unit)
+    const step = Math.pow(10, -digits)
+    const widthCurrentUnitRounded = toFixedNumber(widthCurrentUnit, digits)
+    const heightCurrentUnitRounded = toFixedNumber(heightCurrentUnit, digits)
 
     return (
       <div className="DimensionSelect">
@@ -28,20 +47,22 @@ class DimensionSelect extends React.Component<DimensionSelectProps, {} > {
         <div className="DimensionSelect_Row">
           <label>Width</label>
           <div className="DimensionSelect_Value">
-            <input className="TextInput" type="number" value={widthCurrentUnitRounded} min={1} onChange={this.onWidthChange} />
+            <input className="TextInput" type="number" value={widthCurrentUnitRounded} step={step} min={1} onChange={this.onWidthChange} />
             <select className="Select" value={unit} onChange={this.onUnitChange}>
               <option value="px">px</option>
               <option value="mm">mm</option>
+              <option value="inch">"</option>
             </select>
           </div>
         </div>
         <div className="DimensionSelect_Row">
           <label>Height</label>
           <div className="DimensionSelect_Value">
-            <input className="TextInput" type="number" value={heightCurrentUnitRounded} min={1} onChange={this.onHeightChange} />
+            <input className="TextInput" type="number" value={heightCurrentUnitRounded} step={step} min={1} onChange={this.onHeightChange} />
             <select className="Select" value={unit} onChange={this.onUnitChange}>
               <option value="px">px</option>
               <option value="mm">mm</option>
+              <option value="inch">"</option>
             </select>
           </div>
         </div>
@@ -83,12 +104,12 @@ class DimensionSelect extends React.Component<DimensionSelectProps, {} > {
   }
 
   private onWidthChange = (ev: React.FormEvent<HTMLInputElement>) => {
-    const width = parseInt((ev.target as HTMLInputElement).value)
+    const width = parseFloat((ev.target as HTMLInputElement).value)
     this.props.state.changeSizeCurrentUnit(width, undefined)
   }
 
   private onHeightChange = (ev: React.FormEvent<HTMLInputElement>) => {
-    const height = parseInt((ev.target as HTMLInputElement).value)
+    const height = parseFloat((ev.target as HTMLInputElement).value)
     this.props.state.changeSizeCurrentUnit(undefined, height)
   }
 
