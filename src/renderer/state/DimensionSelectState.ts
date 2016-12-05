@@ -155,4 +155,10 @@ class DimensionSelectState {
       this.ratio = this.height / this.width
     }
   }
+
+  @action changeDpi(dpi: number) {
+    const {widthCurrentUnit, heightCurrentUnit} = this
+    this.dpi = dpi
+    this.changeSizeCurrentUnit(widthCurrentUnit, heightCurrentUnit)
+  }
 }

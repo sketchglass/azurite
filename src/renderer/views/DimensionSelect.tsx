@@ -115,7 +115,7 @@ class DimensionSelect extends React.Component<DimensionSelectProps, {} > {
 
   private onDpiChange = (ev: React.FormEvent<HTMLInputElement>) => {
     const dpi = parseInt((ev.target as HTMLInputElement).value) || 72
-    this.props.state.dpi = dpi
+    this.props.state.changeDpi(dpi)
   }
 
   private onKeepRatioToggle = (ev: React.FormEvent<HTMLInputElement>) => {
