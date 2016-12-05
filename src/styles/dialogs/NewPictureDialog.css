@@ -2,8 +2,12 @@
   padding: 24px;
   display: flex;
   flex-direction: column;
-  & button {
+  &_buttons {
     margin-top: 12px;
     align-self: flex-end;
+    display: flex;
+    & > * {
+      margin-left: 8px;
+    }
   }
 }

@@ -18,7 +18,7 @@ window.addEventListener("DOMContentLoaded", () => {
       remote.getCurrentWindow().show()
     })
   }
-  const onOK = (result: any) => {
+  const onDone = (result: any) => {
     remote.getCurrentWindow().hide()
     ipcRenderer.send("dialogDone", result)
   }
@@ -27,7 +27,7 @@ window.addEventListener("DOMContentLoaded", () => {
     ReactDOM.unmountComponentAtNode(container)
     switch (params.name) {
       case "newPicture":
-        ReactDOM.render(<NewPictureDialog onReadyShow={onReadyShow} onOK={onOK} />, container)
+        ReactDOM.render(<NewPictureDialog onReadyShow={onReadyShow} onDone={onDone} />, container)
         break
     }
   })
