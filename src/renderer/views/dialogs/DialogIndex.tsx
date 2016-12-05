@@ -23,9 +23,9 @@ window.addEventListener("DOMContentLoaded", () => {
     ipcRenderer.send("dialogDone", result)
   }
 
-  ipcRenderer.on("dialogOpen", (ev: Electron.IpcRendererEvent, params: {name: string}) => {
+  ipcRenderer.on("dialogOpen", (ev: Electron.IpcRendererEvent, name: string, param: any) => {
     ReactDOM.unmountComponentAtNode(container)
-    switch (params.name) {
+    switch (name) {
       case "newPicture":
         ReactDOM.render(<NewPictureDialog onReadyShow={onReadyShow} onDone={onDone} />, container)
         break
