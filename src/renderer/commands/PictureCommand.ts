@@ -1,7 +1,9 @@
 import {Rect, Vec2, Transform} from "paintvec"
 import {UndoCommand} from "../models/UndoStack"
-import Picture from "../models/Picture"
+import Picture, {PictureDimension} from "../models/Picture"
 import Layer from "../models/Layer"
+import TiledTexture from "../models/TiledTexture"
+import {TransformLayerCommand} from "./LayerCommand"
 
 export
 class FlipPictureCommand {
@@ -110,5 +112,41 @@ class Rotate180PictureCommand {
   }
   redo() {
     this.rotatePicture()
+  }
+}
+
+export
+class ChangePictureResolutionCommand {
+  title = "Change Canvas Resolution"
+  oldDimension: PictureDimension
+  transformCommands: UndoCommand[] = []
+
+  constructor(public picture: Picture, public newDimension: PictureDimension) {
+  }
+
+  undo() {
+    for (const command of this.transformCommands) {
+      command.undo()
+    }
+    this.picture.dimension = this.oldDimension
+    this.picture.lastUpdate = {}
+  }
+
+  redo() {
+    const oldDimension = this.picture.dimension
+    const dimension = this.newDimension
+    this.transformCommands = []
+
+    if (oldDimension.width != dimension.width || oldDimension.height != dimension.height) {
+      const transform = Transform.scale(new Vec2(dimension.width / oldDimension.width, dimension.height / oldDimension.height))
+      this.picture.forEachLayer(layer => {
+        const transformCommand = new TransformLayerCommand(this.picture, layer.path(), transform)
+        this.transformCommands.push(transformCommand)
+        transformCommand.redo()
+      })
+    }
+    this.oldDimension = oldDimension
+    this.picture.dimension = dimension
+    this.picture.lastUpdate = {}
   }
 }
