@@ -69,8 +69,15 @@ class DimensionSelectState {
     return this.fromPx(this.height, this.unit)
   }
 
-  constructor() {
-    this.setPreset(0)
+  constructor(init?: PictureDimension) {
+    if (init) {
+      this.width = init.width
+      this.height = init.height
+      this.dpi = init.dpi
+      this.ratio = this.height / this.width
+    } else {
+      this.setPreset(0)
+    }
     reaction(() => [this.width, this.height], () => {
       this.lastSelectedPreset = -1
     })

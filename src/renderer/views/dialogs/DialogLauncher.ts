@@ -4,8 +4,12 @@ import {ipcRenderer} from "electron"
 export default
 class DialogLauncher {
 
-  openNewPictureDialog(): Promise<PictureDimension|undefined> {
+  openNewPictureDialog() {
     return this.open<PictureDimension, void>("newPicture", undefined)
+  }
+
+  openResolutionChangeDialog(init: PictureDimension) {
+    return this.open<PictureDimension, PictureDimension>("resolutionChange", init)
   }
 
   async open<TResult, TParam>(name: string, param: TParam): Promise<TResult|undefined> {

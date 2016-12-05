@@ -2,6 +2,7 @@ import * as React from "react"
 import * as ReactDOM from "react-dom"
 import {remote, ipcRenderer} from "electron"
 import NewPictureDialog from "./NewPictureDialog"
+import ResolutionChangeDialog from "./ResolutionChangeDialog"
 import "../../../styles/main.css"
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -23,12 +24,20 @@ window.addEventListener("DOMContentLoaded", () => {
     ipcRenderer.send("dialogDone", result)
   }
 
-  ipcRenderer.on("dialogOpen", (ev: Electron.IpcRendererEvent, name: string, param: any) => {
-    ReactDOM.unmountComponentAtNode(root)
+  const renderDialog = (name: string, param: any) => {
     switch (name) {
       case "newPicture":
-        ReactDOM.render(<NewPictureDialog onReadyShow={onReadyShow} onDone={onDone} />, root)
-        break
+        return <NewPictureDialog onReadyShow={onReadyShow} onDone={onDone} />
+      case "resolutionChange":
+        return <ResolutionChangeDialog init={param} onReadyShow={onReadyShow} onDone={onDone} />
+    }
+  }
+
+  ipcRenderer.on("dialogOpen", (ev: Electron.IpcRendererEvent, name: string, param: any) => {
+    ReactDOM.unmountComponentAtNode(root)
+    const dialog = renderDialog(name, param)
+    if (dialog) {
+      ReactDOM.render(dialog, root)
     }
   })
 })

@@ -76,4 +76,8 @@ class PictureState {
   rotate180() {
     this.picture.undoStack.redoAndPush(new Rotate180PictureCommand(this.picture))
   }
+
+  async changeResolution() {
+    const newDimension = await dialogLauncher.openResolutionChangeDialog(this.picture.dimension)
+  }
 }

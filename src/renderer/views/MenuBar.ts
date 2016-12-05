@@ -180,6 +180,14 @@ class MenuBar {
           enabled: !!this.pictureState,
           click: () => this.pictureState && this.pictureState.flip("vertical"),
         },
+        {
+          type: "separator",
+        },
+        {
+          label: "Change Canvas Resolution",
+          enabled: !!this.pictureState,
+          click: () => this.pictureState && this.pictureState.changeResolution(),
+        },
       ],
     }
 
