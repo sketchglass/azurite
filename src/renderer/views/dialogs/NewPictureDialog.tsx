@@ -4,6 +4,7 @@ import {observer} from "mobx-react"
 import {PictureDimension} from "../../models/Picture"
 import DimensionSelect from "../DimensionSelect"
 import DimensionSelectState from "../../state/DimensionSelectState"
+import DialogContainer from "./DialogContainer"
 
 interface NewPictureDialogProps {
   onReadyShow: () => void
@@ -17,13 +18,9 @@ class NewPictureDialog extends React.Component<NewPictureDialogProps, {}> {
 
   render() {
     return (
-      <div className="NewPictureDialog">
+      <DialogContainer okText="New" canOK={this.dimensionSelectState.isValid} onOK={this.onOK} onCancel={this.onCancel}>
         <DimensionSelect state={this.dimensionSelectState} />
-        <div className="NewPictureDialog_buttons">
-          <button className="Button" onClick={this.onCancel}>Cancel</button>
-          <button className="Button Button-primary" onClick={this.onOK} disabled={!this.dimensionSelectState.isValid}>New</button>
-        </div>
-      </div>
+      </DialogContainer>
     )
   }
 
