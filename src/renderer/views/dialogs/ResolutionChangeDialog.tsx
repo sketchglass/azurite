@@ -20,12 +20,13 @@ class ResolutionChangeDialog extends React.Component<ResolutionChangeDialogProps
   constructor(props: ResolutionChangeDialogProps) {
     super(props)
     this.dimensionSelectState = new DimensionSelectState(props.init)
+    this.dimensionSelectState.unit = "percent"
   }
 
   render() {
     return (
       <DialogContainer okText="Change" canOK={this.dimensionSelectState.isValid} onOK={this.onOK} onCancel={this.onCancel}>
-        <DimensionSelect state={this.dimensionSelectState} />
+        <DimensionSelect state={this.dimensionSelectState} percent={true}/>
       </DialogContainer>
     )
   }

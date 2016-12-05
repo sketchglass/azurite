@@ -3,7 +3,7 @@ import {PictureDimension} from "../models/Picture"
 import {MAX_PICTURE_SIZE} from "../../common/constants"
 
 export
-type DimensionUnit = "px" | "mm" | "inch"
+type DimensionUnit = "px" | "mm" | "inch" | "percent"
 
 export
 interface DimensionPreset {
@@ -47,9 +47,11 @@ class DimensionSelectState {
     }
   ]
 
-  @observable width = 0
-  @observable height = 0
-  @observable dpi = 0
+  @observable percentBaseWidth = 100
+  @observable percentBaseHeight = 100
+  @observable width = 100
+  @observable height = 100
+  @observable dpi = 72
   @observable unit: DimensionUnit = "px"
   @observable ratio = 1
   @observable keepRatio = true
@@ -63,16 +65,16 @@ class DimensionSelectState {
   }
 
   @computed get widthCurrentUnit() {
-    return this.fromPx(this.width, this.unit)
+    return this.fromPx(this.width, this.unit, "width")
   }
   @computed get heightCurrentUnit() {
-    return this.fromPx(this.height, this.unit)
+    return this.fromPx(this.height, this.unit, "height")
   }
 
   constructor(init?: PictureDimension) {
     if (init) {
-      this.width = init.width
-      this.height = init.height
+      this.width = this.percentBaseWidth = init.width
+      this.height = this.percentBaseHeight = init.height
       this.dpi = init.dpi
       this.ratio = this.height / this.width
     } else {
@@ -112,7 +114,7 @@ class DimensionSelectState {
     return 0 < widthRounded && 0 < heightRounded && !this.tooLarge
   }
 
-  private toPx(value: number, unit: DimensionUnit) {
+  private toPx(value: number, unit: DimensionUnit, type: "width"|"height") {
     const {dpi} = this
     switch (unit) {
       case "px":
@@ -121,10 +123,12 @@ class DimensionSelectState {
         return value / 25.4 * dpi
       case "inch":
         return value * dpi
+      case "percent":
+        return type == "width" ? value / 100 * this.percentBaseWidth : value / 100 * this.percentBaseHeight
     }
   }
 
-  private fromPx(px: number, unit: DimensionUnit) {
+  private fromPx(px: number, unit: DimensionUnit, type: "width"|"height") {
     const {dpi} = this
     switch (unit) {
       case "px":
@@ -133,12 +137,14 @@ class DimensionSelectState {
         return px / dpi * 25.4
       case "inch":
         return px / dpi
+      case "percent":
+        return type == "width" ? px / this.percentBaseWidth * 100 : px / this.percentBaseHeight * 100
     }
   }
 
   @action changeSizeCurrentUnit(width: number|undefined, height: number|undefined) {
-    let w = width != undefined ? this.toPx(width, this.unit) : undefined
-    let h = height != undefined ? this.toPx(height, this.unit) : undefined
+    let w = width != undefined ? this.toPx(width, this.unit, "width") : undefined
+    let h = height != undefined ? this.toPx(height, this.unit, "height") : undefined
     if (w == undefined && h != undefined && this.keepRatio) {
       w = h / this.ratio
     }

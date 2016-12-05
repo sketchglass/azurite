@@ -3,6 +3,7 @@ import {observer} from "mobx-react"
 import DimensionSelectState, {DimensionUnit} from "../state/DimensionSelectState"
 
 interface DimensionSelectProps {
+  percent?: boolean
   state: DimensionSelectState
 }
 
@@ -20,6 +21,7 @@ class DimensionSelect extends React.Component<DimensionSelectProps, {} > {
       case "mm":
         return 0
       case "inch":
+      case "percent":
         return 1
     }
   }
@@ -49,6 +51,7 @@ class DimensionSelect extends React.Component<DimensionSelectProps, {} > {
           <div className="DimensionSelect_Value">
             <input className="TextInput" type="number" value={widthCurrentUnitRounded} step={step} min={1} onChange={this.onWidthChange} />
             <select className="Select" value={unit} onChange={this.onUnitChange}>
+              {this.props.percent ? <option value="percent">%</option> : undefined}
               <option value="px">px</option>
               <option value="mm">mm</option>
               <option value="inch">"</option>
