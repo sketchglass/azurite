@@ -153,6 +153,14 @@ class MenuBar {
       label: "Canvas",
       submenu: [
         {
+          label: "Change Canvas Resolution...",
+          enabled: !!this.pictureState,
+          click: () => this.pictureState && this.pictureState.changeResolution(),
+        },
+        {
+          type: "separator",
+        },
+        {
           label: "Rotate 90° Left",
           enabled: !!this.pictureState,
           click: () => this.pictureState && this.pictureState.rotate90("left"),

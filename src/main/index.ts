@@ -22,8 +22,8 @@ function openDialogsWindow() {
   win.on('closed', () => {
     dialogsWindow = undefined
   })
-  ipcMain.on("dialogOpen", (ev: Electron.IpcMainEvent, params: any) => {
-    win.webContents.send("dialogOpen", params)
+  ipcMain.on("dialogOpen", (ev: Electron.IpcMainEvent, name: string, param: any) => {
+    win.webContents.send("dialogOpen", name, param)
   })
   ipcMain.on("dialogDone", (ev: Electron.IpcMainEvent, result: any) => {
     if (mainWindow) {

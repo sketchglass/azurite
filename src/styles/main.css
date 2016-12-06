@@ -25,4 +25,4 @@
 @import "./components/SVGIcon.css";
 
 /* Dialogs */
-@import "./dialogs/NewPictureDialog.css";
+@import "./dialogs/DialogContainer.css";

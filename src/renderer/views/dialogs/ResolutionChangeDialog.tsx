@@ -6,20 +6,27 @@ import DimensionSelect from "../DimensionSelect"
 import DimensionSelectState from "../../state/DimensionSelectState"
 import DialogContainer from "./DialogContainer"
 
-interface NewPictureDialogProps {
+interface ResolutionChangeDialogProps {
+  init: PictureDimension
   onReadyShow: () => void
   onDone: (dimension?: PictureDimension) => void
 }
 
 @observer
 export default
-class NewPictureDialog extends React.Component<NewPictureDialogProps, {}> {
-  private dimensionSelectState = new DimensionSelectState()
+class ResolutionChangeDialog extends React.Component<ResolutionChangeDialogProps, {}> {
+  private dimensionSelectState: DimensionSelectState
+
+  constructor(props: ResolutionChangeDialogProps) {
+    super(props)
+    this.dimensionSelectState = new DimensionSelectState(props.init)
+    this.dimensionSelectState.unit = "percent"
+  }
 
   render() {
     return (
-      <DialogContainer okText="New" canOK={this.dimensionSelectState.isValid} onOK={this.onOK} onCancel={this.onCancel}>
-        <DimensionSelect state={this.dimensionSelectState} />
+      <DialogContainer okText="Change" canOK={this.dimensionSelectState.isValid} onOK={this.onOK} onCancel={this.onCancel}>
+        <DimensionSelect state={this.dimensionSelectState} percent={true}/>
       </DialogContainer>
     )
   }
