@@ -62,14 +62,14 @@ abstract class RectMoveTool extends Tool {
   @observable additionalTransform = new Transform()
   @observable hasRect = false
 
-  @observable editing = false
-  readonly editUndoStack = new UndoStack()
+  @observable private _modal = false
+  private readonly _modalUndoStack = new UndoStack()
 
   @computed get modal() {
-    return this.editing
+    return this._modal
   }
   @computed get modalUndoStack() {
-    return this.editUndoStack
+    return this._modalUndoStack
   }
 
   resetRect(rect?: Rect) {
@@ -140,8 +140,6 @@ abstract class RectMoveTool extends Tool {
     } else {
       this.dragType = DragType.Rotate
     }
-
-    this.startEditing()
   }
 
   @action move(ev: ToolPointerEvent) {
@@ -249,28 +247,28 @@ abstract class RectMoveTool extends Tool {
   }
 
   end() {
-    if (this.dragType != DragType.None) {
+    if (this.dragType != DragType.None && this.modal) {
       const command = new TransformChangeCommand(
         this,
         this.lastTranslation, this.lastRect, this.lastAdditionalTransform,
         this.translation, this.rect, this.additionalTransform
       )
-      this.editUndoStack.redoAndPush(command)
+      this.modalUndoStack.redoAndPush(command)
     }
     this.dragType = DragType.None
   }
 
-  startEditing() {
-    if (!this.editing) {
-      this.editing = true
-      this.editUndoStack.clear()
+  startModal() {
+    if (!this.modal) {
+      this._modal = true
+      this.modalUndoStack.clear()
     }
   }
 
-  endEditing() {
-    if (this.editing) {
-      this.editing = false
-      this.editUndoStack.clear()
+  endModal() {
+    if (this.modal) {
+      this._modal = false
+      this.modalUndoStack.clear()
     }
   }
 }

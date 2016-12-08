@@ -58,10 +58,10 @@ class TransformLayerOverlayUI extends FrameDebounced<{tool: TransformLayerTool},
 
 const TransformLayerSettings = observer((props: {tool: TransformLayerTool}) => {
   const {tool} = props
-  const onOK = () => tool.commit()
-  const onCancel = () => tool.cancel()
+  const onOK = () => tool.endEditing()
+  const onCancel = () => tool.cancelEditing()
   return (
-    <div className="TransformLayerSettings" hidden={!tool.editing}>
+    <div className="TransformLayerSettings" hidden={!tool.modal}>
       <button className="Button Button-primary" onClick={onOK}>OK</button>
       <button className="Button" onClick={onCancel}>Cancel</button>
     </div>
@@ -82,7 +82,7 @@ class TransformLayerTool extends RectMoveTool {
 
   constructor(appState: AppState) {
     super(appState)
-    reaction(() => this.active, () => this.cancel())
+    reaction(() => this.active, () => this.endEditing())
     reaction(() => [this.currentContent, this.active], () => this.reset())
     reaction(() => appState.currentPicture && appState.currentPicture.lastUpdate, () => this.reset())
     reaction(() => this.transform, () => this.update())
@@ -117,25 +117,36 @@ class TransformLayerTool extends RectMoveTool {
     }
   }
 
-  keyDown(ev: React.KeyboardEvent<HTMLElement>) {
-    if (ev.key == "Enter") {
-      this.commit()
-    }
-    if (ev.key == "Escape") {
-      this.cancel()
+  @action start(e: ToolPointerEvent) {
+    super.start(e)
+    if (this.dragType != DragType.None) {
+      this.startEditing()
     }
   }
 
-  commit() {
-    if (this.editing && this.picture && this.currentContent && this.originalTexture && this.originalRect) {
+  keyDown(ev: React.KeyboardEvent<HTMLElement>) {
+    if (ev.key == "Enter") {
+      this.endEditing()
+    }
+    if (ev.key == "Escape") {
+      this.cancelEditing()
+    }
+  }
+
+  startEditing() {
+    this.startModal()
+  }
+
+  endEditing() {
+    if (this.modal && this.picture && this.currentContent && this.originalTexture && this.originalRect) {
       const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.transform)
       this.picture.undoStack.redoAndPush(command)
     }
-    this.cancel()
+    this.cancelEditing()
   }
 
-  cancel() {
-    this.endEditing()
+  cancelEditing() {
+    this.endModal()
     this.reset()
   }
 
@@ -149,7 +160,7 @@ class TransformLayerTool extends RectMoveTool {
 
   replaceTile(layer: Layer, tileKey: Vec2): {replaced: boolean, tile?: Tile} {
     const content = this.currentContent
-    if (this.editing && content && layer == content.layer && this.originalRect && this.originalTexture) {
+    if (this.modal && content && layer == content.layer && this.originalRect && this.originalTexture) {
       transformedDrawTarget.clear(new Color(0,0,0,0))
       const transform = Transform.translate(this.originalRect.topLeft)
         .merge(this.transform)
