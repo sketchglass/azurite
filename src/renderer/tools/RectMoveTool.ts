@@ -1,6 +1,5 @@
 import * as React from "react"
 import {reaction, observable, computed, action} from "mobx"
-import {observer} from "mobx-react"
 import {Vec2, Rect, Transform} from "paintvec"
 import Tool, {ToolPointerEvent} from './Tool'
 
