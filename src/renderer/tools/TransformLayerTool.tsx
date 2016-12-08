@@ -15,6 +15,7 @@ import {AppState} from "../state/AppState"
 import {TransformLayerCommand} from "../commands/LayerCommand"
 import {UndoStack, UndoCommand} from "../models/UndoStack"
 import FrameDebounced from "../views/components/FrameDebounced"
+import RectMoveTool, {DragType} from "./RectMoveTool"
 
 const HANDLE_RADIUS = 4
 
@@ -72,20 +73,6 @@ const TransformLayerSettings = observer((props: {tool: TransformLayerTool}) => {
 const transformedTile = new Tile()
 const transformedDrawTarget = new TextureDrawTarget(context, transformedTile.texture)
 
-enum DragType {
-  None,
-  Translate,
-  MoveTopLeft,
-  MoveTopCenter,
-  MoveTopRight,
-  MoveCenterRight,
-  MoveBottomRight,
-  MoveBottomCenter,
-  MoveBottomLeft,
-  MoveCenterLeft,
-  Rotate,
-}
-
 class TransformChangeCommand implements UndoCommand {
   constructor(
     public tool: TransformLayerTool,
@@ -111,25 +98,13 @@ class TransformChangeCommand implements UndoCommand {
 }
 
 export default
-class TransformLayerTool extends Tool {
+class TransformLayerTool extends RectMoveTool {
   name = "Move"
 
-  dragType = DragType.None
-  startRectPos = new Vec2()
-  startQuadPos = new Vec2()
-  startTranslatePos = new Vec2()
-  originalRect: Rect|undefined
+  handleRadius = HANDLE_RADIUS
+
   originalTexture: Texture|undefined
   originalTextureSubrect = new Rect()
-  lastTranslation = new Vec2()
-  lastRect: Rect|undefined
-  lastQuad: [Vec2, Vec2, Vec2, Vec2]|undefined
-  lastRatioWToH = 1
-  lastRatioHToW = 1
-  lastAdditionalTransform = new Transform()
-  @observable translation = new Vec2()
-  @observable rect: Rect|undefined
-  @observable additionalTransform = new Transform()
 
   @observable editing = false
   @observable editUndoStack: UndoStack|undefined
@@ -151,35 +126,23 @@ class TransformLayerTool extends Tool {
   reset() {
     const content = this.currentContent
     if (content && this.active) {
-      this.originalRect = content.tiledTexture.boundingRect()
+      const originalRect = content.tiledTexture.boundingRect()
+      this.resetRect(originalRect)
       if (this.originalTexture) {
         this.originalTexture.dispose()
       }
-      if (this.originalRect) {
+      if (originalRect) {
         const inflation = 2
-        const textureRect = this.originalRect.inflate(inflation)
+        const textureRect = originalRect.inflate(inflation)
         const texture = this.originalTexture = content.tiledTexture.cropToTexture(textureRect)
         this.originalTextureSubrect = new Rect(new Vec2(), textureRect.size).inflate(-inflation)
         texture.filter = "bilinear"
       } else {
         this.originalTexture = undefined
       }
-      this.lastTranslation = this.translation = new Vec2()
-      this.lastRect = this.rect = this.originalRect
-      this.lastAdditionalTransform = this.additionalTransform = new Transform()
+    } else {
+      this.resetRect()
     }
-  }
-
-  @computed get transformToRect() {
-    return this.additionalTransform.translate(this.translation).invert() || new Transform()
-  }
-
-  @computed get transform() {
-    if (!this.originalRect || !this.rect) {
-      return new Transform()
-    }
-    const rectToRect = Transform.rectToRect(this.originalRect, this.rect)
-    return rectToRect.merge(this.additionalTransform).translate(this.translation)
   }
 
   @computed get currentContent() {
@@ -190,166 +153,21 @@ class TransformLayerTool extends Tool {
   }
 
   @action start(ev: ToolPointerEvent) {
-    if (!this.rect || !this.picture || !this.originalRect) {
-      this.dragType = DragType.None
-      return
-    }
-
-    this.startEditing()
-
-    const rectPos = this.startRectPos = ev.picturePos.transform(this.transformToRect).round()
-    this.startTranslatePos = ev.picturePos
-    this.startQuadPos = ev.picturePos.sub(this.translation)
-
-    this.lastTranslation = this.translation
-    this.lastRect = this.rect
-    this.lastQuad = this.rect.vertices().map(v => v.transform(this.additionalTransform)) as [Vec2, Vec2, Vec2, Vec2]
-    this.lastRatioWToH = this.rect.height / this.rect.width
-    this.lastRatioHToW = this.rect.width / this.rect.height
-    this.lastAdditionalTransform = this.additionalTransform
-
-    const [topLeft, topRight, bottomRight, bottomLeft] = this.originalRect.vertices().map(
-      v => v.transform(this.transform).transform(this.renderer.transformFromPicture)
-    )
-
-    const handlePoints = new Map<DragType, Vec2>([
-      [DragType.MoveTopLeft, topLeft],
-      [DragType.MoveTopCenter, topLeft.add(topRight).divScalar(2)],
-      [DragType.MoveTopRight, topRight],
-      [DragType.MoveCenterRight, topRight.add(bottomRight).divScalar(2)],
-      [DragType.MoveBottomRight, bottomRight],
-      [DragType.MoveBottomCenter, bottomRight.add(bottomLeft).divScalar(2)],
-      [DragType.MoveBottomLeft, bottomLeft],
-      [DragType.MoveCenterLeft, bottomLeft.add(topLeft).divScalar(2)],
-    ])
-
-    for (const [dragType, handlePos] of handlePoints) {
-      if (ev.rendererPos.sub(handlePos).length() <= HANDLE_RADIUS * 1.5 * devicePixelRatio) {
-        this.dragType = dragType
-        return
-      }
-    }
-    if (normalizeFlippedRect(this.rect).includes(rectPos)) {
-      this.dragType = DragType.Translate
-    } else {
-      this.dragType = DragType.Rotate
+    super.start(ev)
+    if (this.dragType != DragType.None) {
+      this.startEditing()
     }
   }
 
   @action move(ev: ToolPointerEvent) {
-    const rectPos = ev.picturePos.transform(this.transformToRect).round()
-    const rectOffset = rectPos.sub(this.startRectPos)
-    if (!this.lastRect) {
-      return
+    super.move(ev)
+    if (this.dragType != DragType.None) {
+      this.update()
     }
-    const quadPos = ev.picturePos.sub(this.lastTranslation)
-    const translatePos = ev.picturePos
-
-    const keepRatio = ev.shiftKey
-    const perspective = ev.ctrlKey || ev.metaKey
-
-    switch (this.dragType) {
-      case DragType.None:
-        return
-      case DragType.Translate: {
-        const translateOffset = translatePos.round().sub(this.startTranslatePos.round())
-        this.translation = this.lastTranslation.add(translateOffset)
-        break
-      }
-      case DragType.MoveTopLeft:
-        if (perspective) {
-          this.resizeQuad(0, quadPos)
-        } else {
-          this.resizeRect(-rectOffset.x, -rectOffset.y, new Vec2(0, 0), keepRatio)
-        }
-        break
-      case DragType.MoveTopCenter:
-        this.resizeRect(undefined, -rectOffset.y, new Vec2(0.5, 0), keepRatio)
-        break
-      case DragType.MoveTopRight:
-        if (perspective) {
-          this.resizeQuad(1, quadPos)
-        } else {
-          this.resizeRect(rectOffset.x, -rectOffset.y, new Vec2(1, 0), keepRatio)
-        }
-        break
-      case DragType.MoveCenterRight:
-        this.resizeRect(rectOffset.x, undefined, new Vec2(1, 0.5), keepRatio)
-        break
-      case DragType.MoveBottomRight:
-        if (perspective) {
-          this.resizeQuad(2, quadPos)
-        } else {
-          this.resizeRect(rectOffset.x, rectOffset.y, new Vec2(1, 1), keepRatio)
-        }
-        break
-      case DragType.MoveBottomCenter:
-        this.resizeRect(undefined, rectOffset.y, new Vec2(0.5, 1), keepRatio)
-        break
-      case DragType.MoveBottomLeft:
-        if (perspective) {
-          this.resizeQuad(3, quadPos)
-        } else {
-          this.resizeRect(-rectOffset.x, rectOffset.y, new Vec2(0, 1), keepRatio)
-        }
-        break
-      case DragType.MoveCenterLeft:
-        this.resizeRect(-rectOffset.x, undefined, new Vec2(0, 0.5), keepRatio)
-        break
-      case DragType.Rotate: {
-        const center = this.lastRect.center.transform(this.lastAdditionalTransform)
-        const origAngle = this.startQuadPos.sub(center).angle()
-        const angle = quadPos.sub(center).angle()
-        let rotation = angle - origAngle
-        if (keepRatio) {
-          const deg45 = Math.PI * 0.25
-          rotation = Math.round(rotation / deg45) * deg45
-        }
-        const rotationTransform = Transform.translate(center.neg()).rotate(rotation).translate(center)
-        this.additionalTransform = this.lastAdditionalTransform.merge(rotationTransform)
-        break
-      }
-    }
-    this.update()
-  }
-
-  resizeRect(diffWidth: number|undefined, diffHeight: number|undefined, origin: Vec2, keepRatio: boolean) {
-    if (!this.lastRect) {
-      return
-    }
-    if (keepRatio) {
-      const {width, height} = this.lastRect
-      const newWidth = width + diffWidth
-      const newHeight = height + diffHeight
-      if (diffHeight == undefined || newWidth / width < newHeight / height) {
-        diffHeight = newWidth * this.lastRatioWToH - height
-      } else {
-        diffWidth = newHeight * this.lastRatioHToW - width
-      }
-    }
-    const diff = new Vec2(diffWidth || 0, diffHeight || 0)
-    const topLeftDiff = diff.mul(new Vec2(1).sub(origin))
-    const bottomRightDiff = diff.mul(origin)
-    const {topLeft, bottomRight} = this.lastRect
-    this.rect = new Rect(topLeft.sub(topLeftDiff), bottomRight.add(bottomRightDiff))
-  }
-
-  resizeQuad(vertexIndex: number, newVertex: Vec2) {
-    if (!this.lastQuad) {
-      return
-    }
-    const newQuad = [...this.lastQuad]
-    newQuad[vertexIndex] = newVertex
-    const transform = Transform.quadToQuad(this.lastQuad, newQuad as [Vec2, Vec2, Vec2, Vec2])
-    if (!transform) {
-      return
-    }
-    this.additionalTransform = this.lastAdditionalTransform.merge(transform)
   }
 
   end() {
-    this.dragType = DragType.None
-    if (this.modalUndoStack && this.lastRect && this.rect) {
+    if (this.dragType != DragType.None && this.modalUndoStack) {
       const command = new TransformChangeCommand(
         this,
         this.lastTranslation, this.lastRect, this.lastAdditionalTransform,
@@ -357,6 +175,7 @@ class TransformLayerTool extends Tool {
       )
       this.modalUndoStack.redoAndPush(command)
     }
+    super.end()
   }
 
   keyDown(ev: React.KeyboardEvent<HTMLElement>) {
@@ -421,13 +240,4 @@ class TransformLayerTool extends Tool {
   renderSettings() {
     return <TransformLayerSettings tool={this} />
   }
-}
-
-function normalizeFlippedRect(rect: Rect) {
-  const {left, right, top, bottom} = rect
-  const trueLeft = Math.min(left, right)
-  const trueRight = Math.max(left, right)
-  const trueTop = Math.min(top, bottom)
-  const trueBottom = Math.max(top, bottom)
-  return new Rect(new Vec2(trueLeft, trueTop), new Vec2(trueRight, trueBottom))
 }
