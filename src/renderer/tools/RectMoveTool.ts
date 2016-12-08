@@ -47,15 +47,15 @@ abstract class RectMoveTool extends Tool {
 
   dragType = DragType.None
 
-  startRectPos = new Vec2()
-  startQuadPos = new Vec2()
-  startTranslatePos = new Vec2()
+  private startRectPos = new Vec2()
+  private startQuadPos = new Vec2()
+  private startTranslatePos = new Vec2()
 
   originalRect = new Rect()
 
-  lastTranslation = new Vec2()
-  lastRect = new Rect()
-  lastAdditionalTransform = new Transform()
+  private lastTranslation = new Vec2()
+  private lastRect = new Rect()
+  private lastAdditionalTransform = new Transform()
 
   @observable translation = new Vec2()
   @observable rect = new Rect()
@@ -83,11 +83,11 @@ abstract class RectMoveTool extends Tool {
     }
   }
 
-  @computed get transformToRect() {
+  @computed private get transformToRect() {
     return this.additionalTransform.translate(this.translation).invert() || new Transform()
   }
 
-  @computed get normalizedRect() {
+  @computed private get normalizedRect() {
     return normalizeFlippedRect(this.rect)
   }
 
@@ -96,7 +96,7 @@ abstract class RectMoveTool extends Tool {
     return rectToRect.merge(this.additionalTransform).translate(this.translation)
   }
 
-  @computed get lastQuad() {
+  @computed private get lastQuad() {
     return this.lastRect.vertices().map(v => v.transform(this.lastAdditionalTransform)) as [Vec2, Vec2, Vec2, Vec2]
   }
 
