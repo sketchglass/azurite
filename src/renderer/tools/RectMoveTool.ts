@@ -68,7 +68,7 @@ abstract class RectMoveTool extends Tool {
     }
 
     const rectPos = this.startRectPos = ev.picturePos.transform(this.transformToRect).round()
-    this.startTranslatePos = ev.picturePos
+    this.startTranslatePos = ev.picturePos.round()
     this.startQuadPos = ev.picturePos.sub(this.translation)
 
     this.lastTranslation = this.translation
@@ -110,7 +110,7 @@ abstract class RectMoveTool extends Tool {
     const rectPos = ev.picturePos.transform(this.transformToRect).round()
     const rectOffset = rectPos.sub(this.startRectPos)
     const quadPos = ev.picturePos.sub(this.lastTranslation)
-    const translatePos = ev.picturePos
+    const translatePos = ev.picturePos.round()
 
     const keepRatio = ev.shiftKey
     const perspective = ev.ctrlKey || ev.metaKey
@@ -119,7 +119,7 @@ abstract class RectMoveTool extends Tool {
       case DragType.None:
         return
       case DragType.Translate: {
-        const translateOffset = translatePos.round().sub(this.startTranslatePos.round())
+        const translateOffset = translatePos.sub(this.startTranslatePos)
         this.translation = this.lastTranslation.add(translateOffset)
         break
       }
