@@ -58,8 +58,8 @@ class TransformLayerOverlayUI extends FrameDebounced<{tool: TransformLayerTool},
 
 const TransformLayerSettings = observer((props: {tool: TransformLayerTool}) => {
   const {tool} = props
-  const onOK = () => tool.endEditing()
-  const onCancel = () => tool.cancelEditing()
+  const onOK = () => tool.commit()
+  const onCancel = () => tool.cancel()
   return (
     <div className="TransformLayerSettings" hidden={!tool.editing}>
       <button className="Button Button-primary" onClick={onOK}>OK</button>
@@ -80,18 +80,9 @@ class TransformLayerTool extends RectMoveTool {
   originalTexture: Texture|undefined
   originalTextureSubrect = new Rect()
 
-  @observable editing = false
-
-  @computed get modal() {
-    return this.editing
-  }
-  @computed get modalUndoStack() {
-    return this.editUndoStack
-  }
-
   constructor(appState: AppState) {
     super(appState)
-    reaction(() => this.active, () => this.endEditing())
+    reaction(() => this.active, () => this.cancel())
     reaction(() => [this.currentContent, this.active], () => this.reset())
     reaction(() => appState.currentPicture && appState.currentPicture.lastUpdate, () => this.reset())
     reaction(() => this.transform, () => this.update())
@@ -126,43 +117,26 @@ class TransformLayerTool extends RectMoveTool {
     }
   }
 
-  @action start(ev: ToolPointerEvent) {
-    super.start(ev)
-    if (this.dragType != DragType.None) {
-      this.startEditing()
-    }
-  }
-
   keyDown(ev: React.KeyboardEvent<HTMLElement>) {
     if (ev.key == "Enter") {
-      this.endEditing()
+      this.commit()
     }
     if (ev.key == "Escape") {
-      this.cancelEditing()
+      this.cancel()
     }
   }
 
-  startEditing() {
-    if (!this.editing) {
-      this.editing = true
-      this.editUndoStack.clear()
-    }
-  }
-
-  endEditing() {
+  commit() {
     if (this.editing && this.picture && this.currentContent && this.originalTexture && this.originalRect) {
       const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.transform)
       this.picture.undoStack.redoAndPush(command)
     }
-    this.cancelEditing()
+    this.cancel()
   }
 
-  cancelEditing() {
-    if (this.editing) {
-      this.editing = false
-      this.editUndoStack.clear()
-      this.reset()
-    }
+  cancel() {
+    this.endEditing()
+    this.reset()
   }
 
   update() {

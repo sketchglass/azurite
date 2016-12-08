@@ -62,7 +62,15 @@ abstract class RectMoveTool extends Tool {
   @observable additionalTransform = new Transform()
   @observable hasRect = false
 
+  @observable editing = false
   readonly editUndoStack = new UndoStack()
+
+  @computed get modal() {
+    return this.editing
+  }
+  @computed get modalUndoStack() {
+    return this.editUndoStack
+  }
 
   resetRect(rect?: Rect) {
     if (rect) {
@@ -132,6 +140,8 @@ abstract class RectMoveTool extends Tool {
     } else {
       this.dragType = DragType.Rotate
     }
+
+    this.startEditing()
   }
 
   @action move(ev: ToolPointerEvent) {
@@ -248,6 +258,20 @@ abstract class RectMoveTool extends Tool {
       this.editUndoStack.redoAndPush(command)
     }
     this.dragType = DragType.None
+  }
+
+  startEditing() {
+    if (!this.editing) {
+      this.editing = true
+      this.editUndoStack.clear()
+    }
+  }
+
+  endEditing() {
+    if (this.editing) {
+      this.editing = false
+      this.editUndoStack.clear()
+    }
   }
 }
 
