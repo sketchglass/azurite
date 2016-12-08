@@ -3,7 +3,7 @@ import {Texture} from "paintgl"
 import {IObservableArray} from "mobx"
 import {UndoCommand} from "../models/UndoStack"
 import Picture from "../models/Picture"
-import Layer, {LayerBlendMode} from "../models/Layer"
+import Layer, {LayerProps} from "../models/Layer"
 import {ImageLayerContent, GroupLayerContent} from "../models/LayerContent"
 import TiledTexture, {Tile} from "../models/TiledTexture"
 import {context} from "../GLContext"
@@ -203,20 +203,10 @@ class RemoveLayerCommand implements UndoCommand {
 }
 
 export
-interface LayerProps {
-  name?: string
-  visible?: boolean
-  blendMode?: LayerBlendMode
-  opacity?: number
-  preserveOpacity?: boolean
-  clippingGroup?: boolean
-}
-
-export
 class ChangeLayerPropsCommand implements UndoCommand {
   oldProps: LayerProps
 
-  constructor(public picture: Picture, public path: number[], public title: string, public props: LayerProps) {
+  constructor(public picture: Picture, public path: number[], public title: string, public props: Partial<LayerProps>) {
   }
   undo() {
     const layer = this.picture.layerFromPath(this.path)
@@ -227,8 +217,7 @@ class ChangeLayerPropsCommand implements UndoCommand {
   redo() {
     const layer = this.picture.layerFromPath(this.path)
     if (layer) {
-      const {name, visible, blendMode, opacity, preserveOpacity, clippingGroup} = layer
-      this.oldProps = {name, visible, blendMode, opacity, preserveOpacity, clippingGroup}
+      this.oldProps = layer.props
       Object.assign(layer, this.props)
     }
   }
