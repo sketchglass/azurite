@@ -21,14 +21,19 @@ enum DragType {
 
 abstract class RectMoveTool extends Tool {
   abstract handleRadius: number
+
   dragType = DragType.None
+
   startRectPos = new Vec2()
   startQuadPos = new Vec2()
   startTranslatePos = new Vec2()
+
   originalRect = new Rect()
+
   lastTranslation = new Vec2()
   lastRect = new Rect()
   lastAdditionalTransform = new Transform()
+
   @observable translation = new Vec2()
   @observable rect = new Rect()
   @observable additionalTransform = new Transform()
