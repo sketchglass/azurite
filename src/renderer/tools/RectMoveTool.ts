@@ -28,9 +28,6 @@ abstract class RectMoveTool extends Tool {
   originalRect = new Rect()
   lastTranslation = new Vec2()
   lastRect = new Rect()
-  lastQuad = this.lastRect.vertices()
-  lastRatioWToH = 1
-  lastRatioHToW = 1
   lastAdditionalTransform = new Transform()
   @observable translation = new Vec2()
   @observable rect = new Rect()
@@ -61,6 +58,10 @@ abstract class RectMoveTool extends Tool {
     return rectToRect.merge(this.additionalTransform).translate(this.translation)
   }
 
+  @computed get lastQuad() {
+    return this.lastRect.vertices().map(v => v.transform(this.lastAdditionalTransform)) as [Vec2, Vec2, Vec2, Vec2]
+  }
+
   @action start(ev: ToolPointerEvent) {
     if (!this.hasRect) {
       this.dragType = DragType.None
@@ -73,9 +74,6 @@ abstract class RectMoveTool extends Tool {
 
     this.lastTranslation = this.translation
     this.lastRect = this.rect
-    this.lastQuad = this.rect.vertices().map(v => v.transform(this.additionalTransform)) as [Vec2, Vec2, Vec2, Vec2]
-    this.lastRatioWToH = this.rect.height / this.rect.width
-    this.lastRatioHToW = this.rect.width / this.rect.height
     this.lastAdditionalTransform = this.additionalTransform
 
     const [topLeft, topRight, bottomRight, bottomLeft] = this.originalRect.vertices().map(
@@ -181,13 +179,16 @@ abstract class RectMoveTool extends Tool {
 
   private resizeRect(diffWidth: number|undefined, diffHeight: number|undefined, origin: Vec2, keepRatio: boolean) {
     if (keepRatio) {
+      const wToH = this.lastRect.height / this.lastRect.width
+      const hToW = this.lastRect.width / this.lastRect.height
+
       const {width, height} = this.lastRect
       const newWidth = width + diffWidth
       const newHeight = height + diffHeight
       if (diffHeight == undefined || newWidth / width < newHeight / height) {
-        diffHeight = newWidth * this.lastRatioWToH - height
+        diffHeight = newWidth * wToH - height
       } else {
-        diffWidth = newHeight * this.lastRatioHToW - width
+        diffWidth = newHeight * hToW - width
       }
     }
     const diff = new Vec2(diffWidth || 0, diffHeight || 0)
