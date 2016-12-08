@@ -71,30 +71,6 @@ const TransformLayerSettings = observer((props: {tool: TransformLayerTool}) => {
 const transformedTile = new Tile()
 const transformedDrawTarget = new TextureDrawTarget(context, transformedTile.texture)
 
-class TransformChangeCommand implements UndoCommand {
-  constructor(
-    public tool: TransformLayerTool,
-    public oldTranslation: Vec2, public oldRect: Rect, public oldAdditionalTransform: Transform,
-    public newTranslation: Vec2, public newRect: Rect, public newAdditionalTransform: Transform
-  ) {}
-
-  title = "Change Transform"
-
-  redo() {
-    this.tool.translation = this.newTranslation
-    this.tool.rect = this.newRect
-    this.tool.additionalTransform = this.newAdditionalTransform
-    this.tool.update()
-  }
-
-  undo() {
-    this.tool.translation = this.oldTranslation
-    this.tool.rect = this.oldRect
-    this.tool.additionalTransform = this.oldAdditionalTransform
-    this.tool.update()
-  }
-}
-
 export default
 class TransformLayerTool extends RectMoveTool {
   name = "Move"
@@ -105,7 +81,6 @@ class TransformLayerTool extends RectMoveTool {
   originalTextureSubrect = new Rect()
 
   @observable editing = false
-  @observable editUndoStack: UndoStack|undefined
 
   @computed get modal() {
     return this.editing
@@ -119,6 +94,7 @@ class TransformLayerTool extends RectMoveTool {
     reaction(() => this.active, () => this.endEditing())
     reaction(() => [this.currentContent, this.active], () => this.reset())
     reaction(() => appState.currentPicture && appState.currentPicture.lastUpdate, () => this.reset())
+    reaction(() => this.transform, () => this.update())
   }
 
   reset() {
@@ -157,25 +133,6 @@ class TransformLayerTool extends RectMoveTool {
     }
   }
 
-  @action move(ev: ToolPointerEvent) {
-    super.move(ev)
-    if (this.dragType != DragType.None) {
-      this.update()
-    }
-  }
-
-  end() {
-    if (this.dragType != DragType.None && this.modalUndoStack) {
-      const command = new TransformChangeCommand(
-        this,
-        this.lastTranslation, this.lastRect, this.lastAdditionalTransform,
-        this.translation, this.rect, this.additionalTransform
-      )
-      this.modalUndoStack.redoAndPush(command)
-    }
-    super.end()
-  }
-
   keyDown(ev: React.KeyboardEvent<HTMLElement>) {
     if (ev.key == "Enter") {
       this.endEditing()
@@ -188,7 +145,7 @@ class TransformLayerTool extends RectMoveTool {
   startEditing() {
     if (!this.editing) {
       this.editing = true
-      this.editUndoStack = new UndoStack()
+      this.editUndoStack.clear()
     }
   }
 
@@ -202,15 +159,14 @@ class TransformLayerTool extends RectMoveTool {
 
   cancelEditing() {
     if (this.editing) {
-      this.reset()
       this.editing = false
-      this.editUndoStack = undefined
-      this.update()
+      this.editUndoStack.clear()
+      this.reset()
     }
   }
 
   update() {
-    if (!this.picture) {
+    if (!this.picture || !this.renderer) {
       return
     }
     this.picture.layerBlender.wholeDirty = true

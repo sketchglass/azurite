@@ -2,6 +2,7 @@ import * as React from "react"
 import {reaction, observable, computed, action} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import Tool, {ToolPointerEvent} from './Tool'
+import {UndoStack, UndoCommand} from "../models/UndoStack"
 
 export
 enum DragType {
@@ -16,6 +17,29 @@ enum DragType {
   MoveBottomLeft,
   MoveCenterLeft,
   Rotate,
+}
+
+
+class TransformChangeCommand implements UndoCommand {
+  constructor(
+    public tool: RectMoveTool,
+    public oldTranslation: Vec2, public oldRect: Rect, public oldAdditionalTransform: Transform,
+    public newTranslation: Vec2, public newRect: Rect, public newAdditionalTransform: Transform
+  ) {}
+
+  title = "Change Transform"
+
+  redo() {
+    this.tool.translation = this.newTranslation
+    this.tool.rect = this.newRect
+    this.tool.additionalTransform = this.newAdditionalTransform
+  }
+
+  undo() {
+    this.tool.translation = this.oldTranslation
+    this.tool.rect = this.oldRect
+    this.tool.additionalTransform = this.oldAdditionalTransform
+  }
 }
 
 abstract class RectMoveTool extends Tool {
@@ -37,6 +61,8 @@ abstract class RectMoveTool extends Tool {
   @observable rect = new Rect()
   @observable additionalTransform = new Transform()
   @observable hasRect = false
+
+  readonly editUndoStack = new UndoStack()
 
   resetRect(rect?: Rect) {
     if (rect) {
@@ -213,6 +239,14 @@ abstract class RectMoveTool extends Tool {
   }
 
   end() {
+    if (this.dragType != DragType.None) {
+      const command = new TransformChangeCommand(
+        this,
+        this.lastTranslation, this.lastRect, this.lastAdditionalTransform,
+        this.translation, this.rect, this.additionalTransform
+      )
+      this.editUndoStack.redoAndPush(command)
+    }
     this.dragType = DragType.None
   }
 }
