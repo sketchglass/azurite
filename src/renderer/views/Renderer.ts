@@ -63,7 +63,7 @@ class Renderer {
   @observable size = new Vec2(100, 100)
   background = new Color(46/255, 48/255, 56/255, 1)
 
-  @computed get logicalSize() {
+  @computed get physicalSize() {
     return this.size.mulScalar(window.devicePixelRatio)
   }
   private readonly wholeShape = new RectShape(context, {
@@ -100,7 +100,7 @@ class Renderer {
       .merge(Transform.translate(viewportCenter))
   }
 
-  @computed get transformToLogicalPixels() {
+  @computed get transformToPhysicalPixels() {
     return this.transformFromPicture.scale(new Vec2(window.devicePixelRatio))
   }
 
@@ -124,7 +124,7 @@ class Renderer {
         this.shape.rect = new Rect(new Vec2(), size)
       }
     })
-    reaction(() => this.size, size => {
+    reaction(() => this.physicalSize, size => {
       canvas.width = size.width
       canvas.height = size.height
       this.wholeShape.rect = new Rect(new Vec2(), size)
@@ -155,7 +155,7 @@ class Renderer {
         this.wholeDirty = true
         layerBlender.renderNow()
       } else if (layerBlender.dirtyRect) {
-        const rect = layerBlender.dirtyRect.transform(this.transformToLogicalPixels)
+        const rect = layerBlender.dirtyRect.transform(this.transformToPhysicalPixels)
         this.addDirtyRect(rect)
         layerBlender.renderNow()
       }
@@ -172,7 +172,7 @@ class Renderer {
     if (this.picture) {
       this.boxShadowModel.uniforms = {
         pictureSize: this.picture.size,
-        transformToPicture: this.transformToLogicalPixels.invert()!,
+        transformToPicture: this.transformToPhysicalPixels.invert()!,
       }
       drawTarget.draw(this.boxShadowModel)
 
@@ -181,7 +181,7 @@ class Renderer {
       if (texture.filter != filter) {
         texture.filter = filter
       }
-      this.model.transform = this.transformToLogicalPixels
+      this.model.transform = this.transformToPhysicalPixels
       drawTarget.draw(this.model)
     }
     this.dirtyRect = undefined
