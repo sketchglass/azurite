@@ -77,17 +77,18 @@ class DimensionSelectState {
   }
 
   constructor(init?: PictureDimension) {
-    if (init) {
-      this.reset(init)
-    } else {
-      this.setPreset(0)
-    }
     observe(this, "width", () => {
       this.lastSelectedPreset = -1
     }, true)
     observe(this, "height", () => {
       this.lastSelectedPreset = -1
     }, true)
+
+    if (init) {
+      this.reset(init)
+    } else {
+      this.setPreset(0)
+    }
   }
 
   @action reset(init: PictureDimension) {
