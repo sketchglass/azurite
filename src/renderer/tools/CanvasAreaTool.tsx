@@ -8,6 +8,10 @@ import {AppState} from "../state/AppState"
 
 const HANDLE_RADIUS = 4
 
+function quadPath([a, b, c, d]: Vec2[]) {
+  return `M ${a.x},${a.y} L ${b.x},${b.y} ${c.x},${c.y} ${d.x},${d.y} Z`
+}
+
 class CanvasAreaOverlayUI extends FrameDebounced<{tool: CanvasAreaTool}, {}> {
   renderDebounced() {
     const {tool} = this.props
@@ -35,9 +39,12 @@ class CanvasAreaOverlayUI extends FrameDebounced<{tool: CanvasAreaTool}, {}> {
       bottomRight.add(bottomLeft).divScalar(2),
       bottomLeft.add(topLeft).divScalar(2),
     ]
+    const rendererQuad = new Rect(new Vec2(), tool.renderer.size.divScalar(devicePixelRatio)).vertices()
+    const fillPath = quadPath(rendererQuad) + " " + quadPath(vertices)
+
     return (
       <g>
-        <polygon points={polygonPoints} stroke="#888" fill="transparent" />
+        <path d={fillPath} fill="rgba(0,0,0,0.5)" fillRule="evenodd" />
         {handlePositions.map((pos, i) => <circle key={i} cx={pos.x} cy={pos.y} r={HANDLE_RADIUS} stroke="#888" fill="#FFF" />)}
       </g>
     )
