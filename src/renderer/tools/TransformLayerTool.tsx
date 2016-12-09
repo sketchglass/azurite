@@ -124,7 +124,7 @@ class TransformLayerTool extends RectMoveTool {
     }
   }
 
-  keyDown(ev: React.KeyboardEvent<HTMLElement>) {
+  @action keyDown(ev: React.KeyboardEvent<HTMLElement>) {
     super.keyDown(ev)
     if (ev.key == "Enter") {
       this.endEditing()
