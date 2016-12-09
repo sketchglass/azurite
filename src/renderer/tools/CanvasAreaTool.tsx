@@ -7,6 +7,8 @@ import {ToolPointerEvent} from "./Tool"
 import FrameDebounced from "../views/components/FrameDebounced"
 import {AppState} from "../state/AppState"
 import {ChangeCanvasAreaCommand} from "../commands/PictureCommand"
+import DimensionSelectState from "../state/DimensionSelectState"
+import DimensionSelect from "../views/DimensionSelect"
 
 const HANDLE_RADIUS = 4
 
@@ -59,6 +61,7 @@ const CanvasAreaToolSettings = observer((props: {tool: CanvasAreaTool}) => {
   const onCancel = () => tool.cancelEditing()
   return (
     <div className="CanvasAreaToolSettings">
+      <DimensionSelect state={tool.dimensionSelectState} percent={true} />
       <button className="Button Button-primary" onClick={onOK}>OK</button>
       <button className="Button" onClick={onCancel}>Cancel</button>
     </div>
@@ -72,6 +75,8 @@ class CanvasAreaTool extends RectMoveTool {
   canRotate = false
   canDistort = false
 
+  readonly dimensionSelectState = new DimensionSelectState()
+
   constructor(appState: AppState) {
     super(appState)
     reaction(() => this.active, active => {
@@ -83,10 +88,24 @@ class CanvasAreaTool extends RectMoveTool {
     reaction(() => this.picture && this.picture.size, () => {
       this.reset()
     })
+    reaction(() => this.rect.size.round(), action((size: Vec2) => {
+      if (!this.dimensionSelectState.size.round().equals(size)) {
+        this.dimensionSelectState.width = size.width
+        this.dimensionSelectState.height = size.height
+        this.dimensionSelectState.ratio = size.height / size.width
+      }
+    }))
+    reaction(() => this.dimensionSelectState.size.round(), action((size: Vec2) => {
+      if (!this.rect.size.round().equals(size)) {
+        this.rect = new Rect(this.rect.topLeft, this.rect.topLeft.add(size))
+      }
+    }))
   }
 
   reset() {
     if (this.picture) {
+      this.dimensionSelectState.reset(this.picture.dimension)
+      this.dimensionSelectState.unit = "percent"
       this.resetRect(new Rect(new Vec2(), this.picture.size))
     }
   }
