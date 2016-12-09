@@ -124,8 +124,15 @@ body {
 }
 
 .TransformLayerSettings {
+  margin: 0 8px;
   & .Button {
-    width: 64px;
+    margin-right: 8px;
+  }
+}
+
+.CanvasAreaToolSettings {
+  margin: 0 8px;
+  & .Button {
     margin-right: 8px;
   }
 }
