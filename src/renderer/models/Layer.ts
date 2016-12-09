@@ -3,36 +3,51 @@ import Picture from "./Picture"
 import {LayerContent, GroupLayerContent, ImageLayerContent, LayerContentData} from "./LayerContent"
 
 export
-interface LayerData {
+type LayerBlendMode = "normal" | "plus" | "multiply" // TODO: add more
+
+export
+interface LayerProps {
   name: string
   visible: boolean
   blendMode: LayerBlendMode
   opacity: number
   preserveOpacity: boolean
   clippingGroup: boolean
-  content: LayerContentData
 }
 
 export
-type LayerBlendMode = "normal" | "plus" | "multiply" // TODO: add more
+interface LayerData extends LayerProps {
+  content: LayerContentData
+}
 
 export default
-class Layer {
+class Layer implements LayerProps {
   @observable name: string
-  @observable visible = true
-  @observable blendMode: LayerBlendMode = "normal"
-  @observable opacity = 1
-  @observable preserveOpacity = false
-  @observable clippingGroup = false
+  @observable visible: boolean
+  @observable blendMode: LayerBlendMode
+  @observable opacity: number
+  @observable preserveOpacity: boolean
+  @observable clippingGroup: boolean
   parent: Layer|undefined
   public readonly content: LayerContent
 
-  constructor(public picture: Picture, name: string, makeContent: (layer: Layer) => LayerContent) {
-    this.name = name
+  constructor(public picture: Picture, props: Partial<LayerProps>, makeContent: (layer: Layer) => LayerContent) {
+    this.name = props.name || "Layer"
+    this.visible = props.visible != undefined ? props.visible : true
+    this.blendMode = props.blendMode || "normal"
+    this.opacity = props.opacity != undefined ? props.opacity : 1
+    this.preserveOpacity = props.preserveOpacity != undefined ? props.preserveOpacity : false
+    this.clippingGroup = props.clippingGroup != undefined ? props.clippingGroup : false
+
     this.content = makeContent(this)
     reaction(() => [this.visible, this.blendMode, this.opacity, this.clippingGroup], () => {
       picture.lastUpdate = {layer: this}
     })
+  }
+
+  get props(): LayerProps {
+    const {name, visible, blendMode, opacity, preserveOpacity, clippingGroup} = this
+    return {name, visible, blendMode, opacity, preserveOpacity, clippingGroup}
   }
 
   dispose() {
@@ -40,13 +55,12 @@ class Layer {
   }
 
   toData(): LayerData {
-    const {name, visible, blendMode, opacity, preserveOpacity, clippingGroup} = this
     const content = this.content.toData()
-    return {name, visible, blendMode, opacity, content, preserveOpacity, clippingGroup}
+    return {...this.props, content}
   }
 
   clone(): Layer {
-    return new Layer(this.picture, this.name, layer => this.content.clone(layer))
+    return new Layer(this.picture, this.props, layer => this.content.clone(layer))
   }
 
   path(): number[] {
@@ -97,13 +111,6 @@ class Layer {
           return GroupLayerContent.fromData(layer, data.content)
       }
     }
-    const layer = new Layer(picture, data.name, makeContent)
-    const {visible, blendMode, opacity, preserveOpacity, clippingGroup} = data
-    layer.visible = visible
-    layer.blendMode = blendMode
-    layer.opacity = opacity
-    layer.preserveOpacity = preserveOpacity
-    layer.clippingGroup = clippingGroup
-    return layer
+    return new Layer(picture, data, makeContent)
   }
 }
