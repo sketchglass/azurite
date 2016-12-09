@@ -1,7 +1,8 @@
 import * as React from "react"
-import {reaction} from "mobx"
+import {reaction, action} from "mobx"
+import {observer} from "mobx-react"
 import {Vec2, Rect} from "paintvec"
-import RectMoveTool from "./RectMoveTool"
+import RectMoveTool, {DragType} from "./RectMoveTool"
 import {ToolPointerEvent} from "./Tool"
 import FrameDebounced from "../views/components/FrameDebounced"
 import {AppState} from "../state/AppState"
@@ -51,6 +52,18 @@ class CanvasAreaOverlayUI extends FrameDebounced<{tool: CanvasAreaTool}, {}> {
   }
 }
 
+const CanvasAreaToolSettings = observer((props: {tool: CanvasAreaTool}) => {
+  const {tool} = props
+  const onOK = () => tool.endEditing()
+  const onCancel = () => tool.cancelEditing()
+  return (
+    <div className="CanvasAreaToolSettings">
+      <button className="Button Button-primary" onClick={onOK}>OK</button>
+      <button className="Button" onClick={onCancel}>Cancel</button>
+    </div>
+  )
+})
+
 export default
 class CanvasAreaTool extends RectMoveTool {
   name = "Canvas Area"
@@ -61,13 +74,54 @@ class CanvasAreaTool extends RectMoveTool {
   constructor(appState: AppState) {
     super(appState)
     reaction(() => this.active, () => {
-      if (this.active && this.picture) {
-        this.resetRect(new Rect(new Vec2(), this.picture.size))
+      if (this.active) {
+        this.reset()
       }
     })
+  }
+
+  reset() {
+    if (this.picture) {
+      this.resetRect(new Rect(new Vec2(), this.picture.size))
+    }
+  }
+
+  @action start(e: ToolPointerEvent) {
+    super.start(e)
+    if (this.dragType != DragType.None) {
+      this.startEditing()
+    }
+  }
+
+  @action keyDown(ev: React.KeyboardEvent<HTMLElement>) {
+    super.keyDown(ev)
+    if (ev.key == "Enter") {
+      this.endEditing()
+    }
+    if (ev.key == "Escape") {
+      this.cancelEditing()
+    }
   }
 
   renderOverlayUI() {
     return <CanvasAreaOverlayUI tool={this} />
   }
+
+  renderSettings() {
+    return <CanvasAreaToolSettings tool={this} />
+  }
+
+  startEditing() {
+    this.startModal()
+  }
+
+  endEditing() {
+    this.cancelEditing()
+  }
+
+  cancelEditing() {
+    this.endModal()
+    this.reset()
+  }
+
 }
