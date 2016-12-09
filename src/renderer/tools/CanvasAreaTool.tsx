@@ -60,7 +60,7 @@ const CanvasAreaToolSettings = observer((props: {tool: CanvasAreaTool}) => {
   const onOK = () => tool.endEditing()
   const onCancel = () => tool.cancelEditing()
   return (
-    <div className="CanvasAreaToolSettings">
+    <div className="CanvasAreaToolSettings" hidden={!tool.picture}>
       <DimensionSelect state={tool.dimensionSelectState} percent={true} />
       <div className="CanvasAreaToolSettings_buttons">
         <button className="Button" onClick={onCancel}>Cancel</button>
@@ -149,7 +149,9 @@ class CanvasAreaTool extends RectMoveTool {
 
   endEditing() {
     if (this.picture) {
-      const command = new ChangeCanvasAreaCommand(this.picture, this.roundTransformedRect)
+      const {topLeft, size} = this.roundTransformedRect
+      const dimension = {width: size.width, height: size.height, dpi: this.dimensionSelectState.dpi}
+      const command = new ChangeCanvasAreaCommand(this.picture, dimension, topLeft)
       this.picture.undoStack.redoAndPush(command)
     }
     this.cancelEditing()

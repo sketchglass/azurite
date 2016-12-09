@@ -154,9 +154,9 @@ class ChangePictureResolutionCommand {
 export
 class ChangeCanvasAreaCommand {
   title = "Change Canvas Area"
-  oldSize: Vec2
+  oldDimension: PictureDimension
 
-  constructor(public picture: Picture, public area: Rect) {
+  constructor(public picture: Picture, public dimension: PictureDimension, public offset: Vec2) {
   }
 
   translateLayer(layer: Layer, offset: Vec2) {
@@ -172,16 +172,15 @@ class ChangeCanvasAreaCommand {
   }
 
   undo() {
-    this.translatePicture(this.area.topLeft)
-    const {width, height, dpi} = this.picture.dimension
-    this.picture.dimension = {width: this.oldSize.x, height: this.oldSize.y, dpi}
+    this.translatePicture(this.offset)
+    this.picture.dimension = this.oldDimension
     this.picture.lastUpdate = {}
   }
   redo() {
-    this.translatePicture(this.area.topLeft.neg())
-    this.oldSize = this.picture.size
+    this.translatePicture(this.offset.neg())
+    this.oldDimension = this.picture.dimension
     const {width, height, dpi} = this.picture.dimension
-    this.picture.dimension = {width: this.area.width, height: this.area.height, dpi}
+    this.picture.dimension = this.dimension
     this.picture.lastUpdate = {}
   }
 }
