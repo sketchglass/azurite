@@ -1,5 +1,5 @@
 import * as React from "react"
-import {reaction, action} from "mobx"
+import {reaction, action, computed} from "mobx"
 import {observer} from "mobx-react"
 import {Vec2, Rect} from "paintvec"
 import RectMoveTool, {DragType} from "./RectMoveTool"
@@ -19,7 +19,7 @@ function quadPath([a, b, c, d]: Vec2[]) {
 class CanvasAreaOverlayUI extends FrameDebounced<{tool: CanvasAreaTool}, {}> {
   renderDebounced() {
     const {tool} = this.props
-    const rect = tool.rect.translate(tool.translation)
+    const rect = tool.roundTransformedRect
 
     if (!tool.hasRect) {
       return <g />
@@ -77,6 +77,12 @@ class CanvasAreaTool extends RectMoveTool {
 
   readonly dimensionSelectState = new DimensionSelectState()
 
+  @computed get roundTransformedRect() {
+    const topLeft = this.translation.add(this.rect.topLeft).round()
+    const size = this.rect.size.round()
+    return new Rect(topLeft, topLeft.add(size))
+  }
+
   constructor(appState: AppState) {
     super(appState)
     reaction(() => this.active, active => {
@@ -88,7 +94,7 @@ class CanvasAreaTool extends RectMoveTool {
     reaction(() => this.picture && this.picture.size, () => {
       this.reset()
     })
-    reaction(() => this.rect.size.round(), action((size: Vec2) => {
+    reaction(() => this.roundTransformedRect.size, action((size: Vec2) => {
       if (!this.dimensionSelectState.size.round().equals(size)) {
         this.dimensionSelectState.width = size.width
         this.dimensionSelectState.height = size.height
@@ -96,7 +102,7 @@ class CanvasAreaTool extends RectMoveTool {
       }
     }))
     reaction(() => this.dimensionSelectState.size.round(), action((size: Vec2) => {
-      if (!this.rect.size.round().equals(size)) {
+      if (!this.roundTransformedRect.size.equals(size)) {
         this.rect = new Rect(this.rect.topLeft, this.rect.topLeft.add(size))
       }
     }))
@@ -141,8 +147,7 @@ class CanvasAreaTool extends RectMoveTool {
 
   endEditing() {
     if (this.picture) {
-      const rect = this.rect.translate(this.translation)
-      const command = new ChangeCanvasAreaCommand(this.picture, rect)
+      const command = new ChangeCanvasAreaCommand(this.picture, this.roundTransformedRect)
       this.picture.undoStack.redoAndPush(command)
     }
     this.cancelEditing()
