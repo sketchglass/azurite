@@ -3,8 +3,8 @@ const {dialog} = remote
 import Picture from "../models/Picture"
 import {PictureSave} from "../services/PictureSave"
 import {PictureExport, PictureExportFormat} from "../services/PictureExport"
-import {Dialog} from "../views/Dialog"
-import PictureParams from "../models/PictureParams"
+import {dialogLauncher} from "../views/dialogs/DialogLauncher"
+import {FlipPictureCommand, Rotate90PictureCommand, Rotate180PictureCommand, ChangePictureResolutionCommand} from "../commands/PictureCommand"
 
 export
 class PictureState {
@@ -52,10 +52,9 @@ class PictureState {
   }
 
   static async new() {
-    const dialog = new Dialog<PictureParams>("newPicture")
-    const params = await dialog.open()
-    if (params) {
-      return new PictureState(new Picture(params))
+    const dimension = await dialogLauncher.openNewPictureDialog()
+    if (dimension) {
+      return new PictureState(new Picture(dimension))
     }
   }
 
@@ -63,6 +62,25 @@ class PictureState {
     const picture = await PictureSave.open()
     if (picture) {
       return new PictureState(picture)
+    }
+  }
+
+  flip(orientation: "horizontal"|"vertical") {
+    this.picture.undoStack.redoAndPush(new FlipPictureCommand(this.picture, orientation))
+  }
+
+  rotate90(direction: "left"|"right") {
+    this.picture.undoStack.redoAndPush(new Rotate90PictureCommand(this.picture, direction))
+  }
+
+  rotate180() {
+    this.picture.undoStack.redoAndPush(new Rotate180PictureCommand(this.picture))
+  }
+
+  async changeResolution() {
+    const newDimension = await dialogLauncher.openResolutionChangeDialog(this.picture.dimension)
+    if (newDimension) {
+      this.picture.undoStack.redoAndPush(new ChangePictureResolutionCommand(this.picture, newDimension))
     }
   }
 }

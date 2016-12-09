@@ -1,4 +1,4 @@
-import {observable} from "mobx"
+import {observable, reaction} from "mobx"
 import Picture from "./Picture"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Model, Texture, TextureDrawTarget, Shader, TextureShader, RectShape, PixelType, Color} from "paintgl"
@@ -21,6 +21,7 @@ class NormalBlendShader extends Shader {
   }
 }
 
+// Nice reference: https://www.w3.org/TR/SVGCompositing/#alphaCompositing
 abstract class BlendShader extends Shader {
   abstract get blendOp(): string
 
@@ -31,17 +32,28 @@ abstract class BlendShader extends Shader {
       uniform sampler2D srcTexture;
       uniform sampler2D dstTexture;
       uniform float opacity;
+      uniform bool clipping;
+      uniform bool startClipping;
       vec3 blendOp(vec3 src, vec3 dst) {
         ${this.blendOp}
       }
       vec3 getColor(vec4 pixel) {
-        return pixel.a == 0.0 ? vec3(0.0) : pixel.rgb / pixel.a;
+        return pixel.a < 0.0001 ? vec3(0.0) : pixel.rgb / pixel.a;
       }
       void main(void) {
         vec4 src = texture2D(srcTexture, vTexCoord) * opacity;
         vec4 dst = texture2D(dstTexture, vTexCoord);
         vec4 blended = vec4(clamp(blendOp(getColor(src), getColor(dst)), 0.0, 1.0), 1.0);
-        gl_FragColor = blended * src.a * dst.a + src * (1.0 - dst.a) + dst * (1.0 - src.a);
+        if (startClipping) {
+          // clip to src
+          gl_FragColor = blended * (src.a * dst.a) + src * (1.0 - dst.a);
+        } else if (clipping) {
+          // clip to dst
+          gl_FragColor = blended * (src.a * dst.a) + dst * (1.0 - src.a);
+        } else {
+          // normal blending
+          gl_FragColor = blended * (src.a * dst.a) + src * (1.0 - dst.a) + dst * (1.0 - src.a);
+        }
       }
     `
   }
@@ -82,6 +94,9 @@ export
 class TileBlender {
   tiles = [0, 1].map(i => new Tile())
   drawTargets = this.tiles.map(tile => new TextureDrawTarget(context, tile.texture))
+  clipBaseTile = new Tile()
+  clipBaseDrawTarget = new TextureDrawTarget(context, this.clipBaseTile.texture)
+  clipping = false
 
   currentIndex = 0
 
@@ -102,22 +117,45 @@ class TileBlender {
     return this.drawTargets[[1, 0][this.currentIndex]]
   }
 
-  blend(tile: Tile, mode: LayerBlendMode, opacity: number) {
-    const model = tileBlendModels.get(mode)
-    if (model) {
-      this.swapCurrent()
-      model.uniforms = {
-        srcTexture: tile.texture,
-        dstTexture: this.previousTile.texture,
-        opacity
+  blend(tile: Tile|undefined, layer: Layer, nextLayer: Layer|undefined) {
+    const {opacity, blendMode} = layer
+    const model = tileBlendModels.get(blendMode)
+    let startClipping = !!(!layer.clippingGroup && nextLayer && nextLayer.clippingGroup)
+    let endClipping = !!(layer.clippingGroup && !(nextLayer && nextLayer.clippingGroup))
+
+    if (startClipping) {
+      this.clipping = true
+      drawTexture(this.clipBaseDrawTarget, this.currentTile.texture, {blendMode: "src"})
+    }
+
+    if (tile) {
+      if (model) {
+        this.swapCurrent()
+        model.uniforms = {
+          srcTexture: tile.texture,
+          dstTexture: this.previousTile.texture,
+          clipping: this.clipping,
+          startClipping,
+          opacity,
+        }
+        this.currentDrawTarget.draw(model)
+      } else {
+        tileNormalModel.uniforms = {
+          srcTexture: tile.texture,
+          opacity,
+        }
+        tileNormalModel.blendMode = startClipping ? "src" : (this.clipping ? "src-atop" : "src-over")
+        this.currentDrawTarget.draw(tileNormalModel)
       }
-      this.currentDrawTarget.draw(model)
     } else {
-      tileNormalModel.uniforms = {
-        srcTexture: tile.texture,
-        opacity
+      if (startClipping) {
+        this.currentDrawTarget.clear(new Color(0, 0, 0, 0))
       }
-      this.currentDrawTarget.draw(tileNormalModel)
+    }
+
+    if (endClipping) {
+      this.clipping = false
+      drawTexture(this.currentDrawTarget, this.clipBaseTile.texture, {blendMode: "dst-over"})
     }
   }
 
@@ -135,25 +173,45 @@ class TileBlender {
 const tileBlenders = [new TileBlender()]
 
 export
-type LayerBlendHook = (layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) => boolean
+type ReplaceTile = (layer: Layer, tileKey: Vec2) => {replaced: boolean, tile?: Tile}
 
 export default
 class LayerBlender {
-  blendedTexture = new Texture(context, {
+  private blendedTexture = new Texture(context, {
     size: this.picture.size,
-    pixelType: "half-float",
+    pixelFormat: "rgb",
+    pixelType: "byte",
   })
-  drawTarget = new TextureDrawTarget(context, this.blendedTexture)
+  private drawTarget = new TextureDrawTarget(context, this.blendedTexture)
 
-  hook: LayerBlendHook|undefined
+  replaceTile: ReplaceTile|undefined
 
-  @observable lastBlend: {rect?: Rect} = {}
+  wholeDirty = true
+  dirtyRect: Rect|undefined
 
   constructor(public picture: Picture) {
+    reaction(() => picture.size, size => {
+      this.blendedTexture.size = size
+    })
   }
 
-  render(rect?: Rect) {
-    this.drawTarget.scissor = rect
+  addDirtyRect(rect: Rect) {
+    if (this.dirtyRect) {
+      this.dirtyRect = this.dirtyRect.union(rect)
+    } else {
+      this.dirtyRect = rect
+    }
+  }
+
+  renderNow() {
+    let rect: Rect|undefined
+    if (this.wholeDirty) {
+      this.drawTarget.scissor = undefined
+    } else if (this.dirtyRect) {
+      rect = this.drawTarget.scissor = this.dirtyRect
+    } else {
+      return
+    }
     this.drawTarget.clear(new Color(1, 1, 1, 1))
     const tileKeys = TiledTexture.keysForRect(rect || new Rect(new Vec2(0), this.picture.size))
     for (const key of tileKeys) {
@@ -164,40 +222,47 @@ class LayerBlender {
       this.renderLayers(this.picture.layers, key, tileScissor, 0)
       drawTexture(this.drawTarget, tileBlenders[0].currentTile.texture, {transform: Transform.translate(offset), blendMode: "src-over"})
     }
-    this.lastBlend = {rect}
+    this.dirtyRect = undefined
+    this.wholeDirty = false
   }
 
-  renderLayer(layer: Layer, key: Vec2, scissor: Rect|undefined, depth: number): boolean {
-    if (!layer.visible) {
-      return false
-    }
+  getBlendedTexture() {
+    this.renderNow()
+    return this.blendedTexture
+  }
+
+  private renderLayer(layer: Layer, nextLayer: Layer|undefined, key: Vec2, scissor: Rect|undefined, depth: number): boolean {
     const {content} = layer
     let tile: Tile|undefined = undefined
 
-    if (content.type == "image") {
-      if (content.tiledTexture.has(key)) {
-        tile = content.tiledTexture.get(key)
-      }
-    } else {
-      const {children} = content
-      const rendered = this.renderLayers(children, key, scissor, depth + 1)
-      if (rendered) {
-        tile = tileBlenders[depth + 1].currentTile
+    if (layer.visible) {
+      if (content.type == "image") {
+        if (content.tiledTexture.has(key)) {
+          tile = content.tiledTexture.get(key)
+        }
+      } else {
+        const {children} = content
+        const rendered = this.renderLayers(children, key, scissor, depth + 1)
+        if (rendered) {
+          tile = tileBlenders[depth + 1].currentTile
+        }
       }
     }
 
     const tileBlender = tileBlenders[depth]
-    const hooked = this.hook && this.hook(layer, key, tile, tileBlender)
-    if (hooked) {
-      return true
-    } else if (tile) {
-      tileBlender.blend(tile, layer.blendMode, layer.opacity)
-      return true
+
+    if (this.replaceTile) {
+      const {replaced, tile: replacedTile} = this.replaceTile(layer, key)
+      if (replaced) {
+        tile = replacedTile
+      }
     }
-    return false
+
+    tileBlender.blend(tile, layer, nextLayer)
+    return !!tile
   }
 
-  renderLayers(layers: Layer[], key: Vec2, scissor: Rect|undefined, depth: number): boolean {
+  private renderLayers(layers: Layer[], key: Vec2, scissor: Rect|undefined, depth: number): boolean {
     if (!tileBlenders[depth]) {
       tileBlenders[depth] = new TileBlender()
     }
@@ -205,7 +270,7 @@ class LayerBlender {
     tileBlenders[depth].clear()
     let rendered = false
     for (let i = layers.length - 1; i >= 0; --i) {
-      const childRendered = this.renderLayer(layers[i], key, scissor, depth)
+      const childRendered = this.renderLayer(layers[i], layers[i-1], key, scissor, depth)
       rendered = rendered || childRendered
     }
     return rendered

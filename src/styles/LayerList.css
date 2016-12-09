@@ -3,17 +3,37 @@
   flex-direction: column;
   flex: 1;
 }
-.LayerList .ReactDraggableTree {
+.LayerList_scroll {
   flex: 1;
-  overflow-y: scroll;
+  background-color: var(--darken-background-color);
+  overflow-y: auto;
+  & .ReactDraggableTree {
+    min-height: 100%;
+  }
+  & .ReactDraggableTree_row-selected {
+    background-color: var(--ui-primary-background-color);
+  }
+  & .ReactDraggableTree_toggler:before {
+    border-right-color: var(--default-color);
+    border-bottom-color: var(--default-color);
+  }
 }
 .LayerList_layer {
-  height: 48px;
-  padding: 12px;
+  height: 40px;
+  padding: 4px;
   padding-left: 4px;
   display: flex;
   align-items: center;
   flex: 1;
+  &-clipped {
+    &:before {
+      content: "";
+      width: 4px;
+      height: 100%;
+      margin-right: 8px;
+      background-color: var(--ui-primary-background-color);
+    }
+  }
 }
 .LayerList_layer .ClickToEdit {
   flex: 1;
@@ -21,9 +41,21 @@
 .LayerList_layer img {
   margin-right: 12px;
   box-shadow: 0 0 4px rgba(0,0,0,0.25);
-  max-width: 64px;
-  max-height: 48px;
+  max-width: 40px;
+  max-height: 40px;
 }
 .LayerList_layer-current {
   background-color: grey;
+}
+.LayerList_buttons {
+  margin: 4px 8px;
+  & button {
+    border: none;
+    background: none;
+    padding: 4px;
+  }
+  & .SVGIcon {
+    width: 16px;
+    height: 16px;
+  }
 }

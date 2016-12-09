@@ -10,6 +10,10 @@ import Picture from "../models/Picture"
 import {PictureExportFormat} from "../services/PictureExport"
 
 class MenuBar {
+  @computed get pictureState() {
+    return appState.currentPictureState
+  }
+
   constructor() {
     autorun(() => {
       const menu = Menu.buildFromTemplate(this.render())
@@ -21,39 +25,12 @@ class MenuBar {
     appState.newPicture()
   }
 
-  async save() {
-    if (appState.currentPictureState) {
-      appState.currentPictureState.save()
-    }
-  }
-
-  async saveAs() {
-    if (appState.currentPictureState) {
-      appState.currentPictureState.saveAs()
-    }
-  }
-
-  async open() {
+  open() {
     appState.openPicture()
   }
 
-  async close() {
+  close() {
     appState.closePicture(appState.currentPictureIndex)
-  }
-
-  async export(format: PictureExportFormat) {
-    if (appState.currentPictureState) {
-      appState.currentPictureState.export(format)
-    }
-  }
-  exportPng() {
-    this.export("png")
-  }
-  exportJpeg() {
-    this.export("jpeg")
-  }
-  exportBmp() {
-    this.export("bmp")
   }
 
   zoomIn() {
@@ -92,27 +69,32 @@ class MenuBar {
         {
           label: "Save",
           accelerator: "CmdOrCtrl+S",
-          click: () => this.save(),
+          enabled: !!this.pictureState,
+          click: () => this.pictureState && this.pictureState.save(),
         },
         {
           label: "Save As...",
           accelerator: "CmdOrCtrl+Shift+S",
-          click: () => this.saveAs(),
+          enabled: !!this.pictureState,
+          click: () => this.pictureState && this.pictureState.saveAs(),
         },
         {
           label: "Export",
           submenu: [
             {
               label: "PNG...",
-              click: () => this.exportPng(),
+              enabled: !!this.pictureState,
+              click: () => this.pictureState && this.pictureState.export("png"),
             },
             {
               label: "JPEG...",
-              click: () => this.exportJpeg(),
+              enabled: !!this.pictureState,
+              click: () => this.pictureState && this.pictureState.export("jpeg"),
             },
             {
               label: "BMP...",
-              click: () => this.exportBmp(),
+              enabled: !!this.pictureState,
+              click: () => this.pictureState && this.pictureState.export("bmp"),
             },
           ],
         },
@@ -122,6 +104,7 @@ class MenuBar {
         {
           label: "Close",
           accelerator: "CmdOrCtrl+W",
+          enabled: !!this.pictureState,
           click: () => this.close(),
         },
       ],
@@ -164,6 +147,48 @@ class MenuBar {
           role: 'selectall'
         }
       ]
+    }
+
+    const canvasMenu: MenuItemOptions = {
+      label: "Canvas",
+      submenu: [
+        {
+          label: "Change Canvas Resolution...",
+          enabled: !!this.pictureState,
+          click: () => this.pictureState && this.pictureState.changeResolution(),
+        },
+        {
+          type: "separator",
+        },
+        {
+          label: "Rotate 90° Left",
+          enabled: !!this.pictureState,
+          click: () => this.pictureState && this.pictureState.rotate90("left"),
+        },
+        {
+          label: "Rotate 90° Right",
+          enabled: !!this.pictureState,
+          click: () => this.pictureState && this.pictureState.rotate90("right"),
+        },
+        {
+          label: "Rotate 180°",
+          enabled: !!this.pictureState,
+          click: () => this.pictureState && this.pictureState.rotate180(),
+        },
+        {
+          type: "separator",
+        },
+        {
+          label: "Flip Canvas Horizontally",
+          enabled: !!this.pictureState,
+          click: () => this.pictureState && this.pictureState.flip("horizontal"),
+        },
+        {
+          label: "Flip Canvas Vertically",
+          enabled: !!this.pictureState,
+          click: () => this.pictureState && this.pictureState.flip("vertical"),
+        },
+      ],
     }
 
     const viewMenu: MenuItemOptions = {
@@ -233,7 +258,7 @@ class MenuBar {
     }
 
     const template: MenuItemOptions[] = [
-      fileMenu, editMenu, viewMenu, windowMenu, helpMenu
+      fileMenu, editMenu, canvasMenu, viewMenu, windowMenu, helpMenu
     ]
 
     if (process.platform === 'darwin') {

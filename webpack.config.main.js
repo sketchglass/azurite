@@ -12,6 +12,7 @@ module.exports = {
   },
   externals: {
     "receive-tablet-event": true,
+    "electron-devtools-installer": true,
   },
   resolve: {
     extensions: ["", ".ts", ".js"],
@@ -24,4 +25,7 @@ module.exports = {
       },
     ],
   },
+  plugins: [
+    require("webpack-fail-plugin"),
+  ],
 }

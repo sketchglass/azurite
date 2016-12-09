@@ -5,7 +5,9 @@ import Waypoint from "../models/Waypoint"
 export default
 class PanTool extends Tool {
   name = "Pan"
-  cursor = "all-scroll"
+  get cursor() {
+    return "all-scroll"
+  }
   originalPos = new Vec2(0)
   originalTranslation = new Vec2(0)
   originalRendererToPicture = new Transform()
@@ -25,7 +27,7 @@ class PanTool extends Tool {
     }
     const pos = ev.rendererPos.transform(this.originalRendererToPicture)
     const offset = pos.sub(this.originalPos)
-    const translation = this.originalTranslation.add(offset)
+    const translation = this.originalTranslation.add(offset).floor()
     this.picture.navigation.translation = translation
   }
 

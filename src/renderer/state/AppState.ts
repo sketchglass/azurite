@@ -10,6 +10,7 @@ import RotateTool from "../tools/RotateTool"
 import TransformLayerTool from "../tools/TransformLayerTool"
 import {HSVColor} from "../../lib/Color"
 import {PictureState} from "./PictureState"
+import * as IPCChannels from "../../common/IPCChannels"
 
 export
 class AppState {
@@ -51,12 +52,12 @@ class AppState {
 
   constructor() {
     reaction(() => [this.currentPictureState, this.currentTool], () => {
-      const hook = this.currentTool.hookLayerBlend.bind(this.currentTool)
+      const replaceTile = this.currentTool.replaceTile.bind(this.currentTool)
       for (const pictureState of this.pictureStates) {
         if (pictureState == this.currentPictureState) {
-          pictureState.picture.layerBlender.hook = hook
+          pictureState.picture.layerBlender.replaceTile = replaceTile
         } else {
-          pictureState.picture.layerBlender.hook = undefined
+          pictureState.picture.layerBlender.replaceTile = undefined
         }
       }
     })
@@ -118,8 +119,6 @@ class AppState {
 
 export const appState = new AppState()
 
-window.addEventListener("beforeunload", e => {
-  // Do not close window immediately https://github.com/electron/electron/blob/master/docs/api/browser-window.md#event-close
-  e.returnValue = false
+IPCChannels.quit.listen().forEach(() => {
   appState.quit()
 })

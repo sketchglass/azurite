@@ -2,20 +2,12 @@ import {Vec2} from "paintvec"
 import Tool, {ToolPointerEvent} from './Tool'
 import Waypoint from "../models/Waypoint"
 
-function modRotation(rotation: number) {
-  while (Math.PI < rotation) {
-    rotation -= 2 * Math.PI
-  }
-  while (rotation < -Math.PI) {
-    rotation += 2 * Math.PI
-  }
-  return rotation
-}
-
 export default
 class RotateTool extends Tool {
   name = "Rotate"
-  cursor = "ew-resize" // TODO: use more rotate-like cursor
+  get cursor() {
+    return "ew-resize" // TODO: use more rotate-like cursor
+  }
   originalAngle = 0
   originalRotation = 0
 
@@ -40,8 +32,8 @@ class RotateTool extends Tool {
     }
     const {translation, scale} = this.picture.navigation
     const angle = this.posAngle(ev.rendererPos)
-    const rotation = modRotation(angle - this.originalAngle + this.originalRotation)
-    this.picture.navigation.rotation = rotation
+    const rotation = angle - this.originalAngle + this.originalRotation
+    this.picture.navigation.setNormalizedRotation(rotation)
   }
 
   posAngle(rendererPos: Vec2) {

@@ -1,0 +1,27 @@
+.ColorSlider {
+  --slider-height: 16px;
+  position: relative;
+  height: var(--slider-height);
+  width: 100%;
+}
+.ColorSlider_gradient {
+  --gradient-height: 12px;
+  background: var(--gradient);
+  position: absolute;
+  left: 0px;
+  top: calc((var(--slider-height) - var(--gradient-height)) / 2);
+  width: 100%;
+  height: var(--gradient-height);
+  border-radius: 4px;
+}
+.ColorSlider_handle {
+  background-color: var(--color);
+  position: absolute;
+  left: calc(var(--value) * 100% - var(--slider-height) / 2);
+  top: 0px;
+  width: var(--slider-height);
+  height: var(--slider-height);
+  box-sizing: border-box;
+  border: 2px solid white;
+  border-radius: calc(var(--slider-height) / 2);
+}

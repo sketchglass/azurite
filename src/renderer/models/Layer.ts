@@ -3,32 +3,51 @@ import Picture from "./Picture"
 import {LayerContent, GroupLayerContent, ImageLayerContent, LayerContentData} from "./LayerContent"
 
 export
-interface LayerData {
+type LayerBlendMode = "normal" | "plus" | "multiply" // TODO: add more
+
+export
+interface LayerProps {
   name: string
   visible: boolean
   blendMode: LayerBlendMode
   opacity: number
-  content: LayerContentData
+  preserveOpacity: boolean
+  clippingGroup: boolean
 }
 
 export
-type LayerBlendMode = "normal" | "plus" | "multiply" // TODO: add more
+interface LayerData extends LayerProps {
+  content: LayerContentData
+}
 
 export default
-class Layer {
+class Layer implements LayerProps {
   @observable name: string
-  @observable visible = true
-  @observable blendMode: LayerBlendMode = "normal"
-  @observable opacity = 1
+  @observable visible: boolean
+  @observable blendMode: LayerBlendMode
+  @observable opacity: number
+  @observable preserveOpacity: boolean
+  @observable clippingGroup: boolean
   parent: Layer|undefined
   public readonly content: LayerContent
 
-  constructor(public picture: Picture, name: string, makeContent: (layer: Layer) => LayerContent) {
-    this.name = name
+  constructor(public picture: Picture, props: Partial<LayerProps>, makeContent: (layer: Layer) => LayerContent) {
+    this.name = props.name || "Layer"
+    this.visible = props.visible != undefined ? props.visible : true
+    this.blendMode = props.blendMode || "normal"
+    this.opacity = props.opacity != undefined ? props.opacity : 1
+    this.preserveOpacity = props.preserveOpacity != undefined ? props.preserveOpacity : false
+    this.clippingGroup = props.clippingGroup != undefined ? props.clippingGroup : false
+
     this.content = makeContent(this)
-    reaction(() => [this.visible, this.blendMode, this.opacity], () => {
+    reaction(() => [this.visible, this.blendMode, this.opacity, this.clippingGroup], () => {
       picture.lastUpdate = {layer: this}
     })
+  }
+
+  get props(): LayerProps {
+    const {name, visible, blendMode, opacity, preserveOpacity, clippingGroup} = this
+    return {name, visible, blendMode, opacity, preserveOpacity, clippingGroup}
   }
 
   dispose() {
@@ -36,21 +55,17 @@ class Layer {
   }
 
   toData(): LayerData {
-    const {name, visible, blendMode, opacity} = this
     const content = this.content.toData()
-    return {name, visible, blendMode, opacity, content}
+    return {...this.props, content}
   }
 
   clone(): Layer {
-    return new Layer(this.picture, this.name, layer => this.content.clone(layer))
+    return new Layer(this.picture, this.props, layer => this.content.clone(layer))
   }
 
   path(): number[] {
     if (this.parent) {
-      if (this.parent.content.type != "group") {
-        throw new Error("invalid parent")
-      }
-      const index = this.parent.content.children.indexOf(this)
+      const index = this.parent.children.indexOf(this)
       if (index < 0) {
         throw new Error("cannot find in children list")
       }
@@ -64,12 +79,25 @@ class Layer {
     if (path.length == 0) {
       return this
     }
+    const {children} = this
+    const index = path[0]
+    if (0 <= index && index < children.length) {
+      return this.children[index].descendantFromPath(path.slice(1))
+    }
+  }
+
+  get children() {
     if (this.content.type == "group") {
-      const {children} = this.content
-      const index = path[0]
-      if (index < children.length) {
-        return this.content.children[index].descendantFromPath(path.slice(1))
-      }
+      return Array.from(this.content.children)
+    } else {
+      return []
+    }
+  }
+
+  forEachDescendant(action: (layer: Layer) => void) {
+    for (const child of this.children) {
+      action(child)
+      child.forEachDescendant(action)
     }
   }
 
@@ -83,11 +111,6 @@ class Layer {
           return GroupLayerContent.fromData(layer, data.content)
       }
     }
-    const layer = new Layer(picture, data.name, makeContent)
-    const {visible, blendMode, opacity} = data
-    layer.visible = visible
-    layer.blendMode = blendMode
-    layer.opacity = opacity
-    return layer
+    return new Layer(picture, data, makeContent)
   }
 }

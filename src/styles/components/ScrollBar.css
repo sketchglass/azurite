@@ -1,0 +1,23 @@
+.ScrollBar {
+  position: relative;
+  background-color: var(--darken-background-color);
+  z-index: 100;
+  overflow: hidden;
+}
+.ScrollBar_handle {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: var(--default-color);
+  will-change: transform;
+}
+.ScrollBar-vertical .ScrollBar_handle {
+  transform-origin: left top;
+  transform: translateY(calc(var(--handle-start) * 100%)) scaleY(calc(var(--handle-end) - var(--handle-start)));
+}
+.ScrollBar-horizontal .ScrollBar_handle {
+  transform-origin: left top;
+  transform: translateX(calc(var(--handle-start) * 100%)) scaleX(calc(var(--handle-end) - var(--handle-start)));
+}

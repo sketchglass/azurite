@@ -38,6 +38,7 @@ class ShapeClipShader extends Shader {
       uniform float uSoftness;
       uniform sampler2D uOriginalTexture;
       uniform lowp float uMode;
+      uniform bool uPreserveOpacity;
 
       varying highp vec2 vOffset;
       varying highp vec2 vTexCoord;
@@ -53,11 +54,16 @@ class ShapeClipShader extends Shader {
 
       void main(void) {
         float r = distance(fract(uBrushPos), vOffset);
-
+        float opacity = calcOpacity(r);
+        vec4 original = fetchOriginal();
         if (uMode == ${ShapeClipModes.Shape}.0) {
-          gl_FragColor = vec4(calcOpacity(r));
+          if (uPreserveOpacity) {
+            gl_FragColor = vec4(opacity * original.a);
+          } else {
+            gl_FragColor = vec4(opacity);
+          }
         } else {
-          gl_FragColor = fetchOriginal() * calcOpacity(r);
+          gl_FragColor = original * opacity;
         }
       }
     `
@@ -79,6 +85,9 @@ class WatercolorShader extends Shader {
         float topLod = log2(uSampleSize);
         vec4 sampleAverage = texture2DLod(uShapeClipTexture, vec2(0.75, 0.5), topLod);
         vec4 shapeAverage = texture2DLod(uShapeClipTexture, vec2(0.25, 0.5),  topLod);
+        if (shapeAverage.a < 0.001) {
+          return vec4(0.0);
+        }
         return sampleAverage / shapeAverage.a;
       }
 
@@ -96,6 +105,7 @@ class WatercolorShader extends Shader {
       uniform float uBlending;
       uniform float uThickness;
       uniform vec4 uColor;
+      uniform bool uPreserveOpacity;
 
       uniform sampler2D uOriginalTexture;
       uniform sampler2D uShapeClipTexture;
@@ -109,8 +119,13 @@ class WatercolorShader extends Shader {
         vec4 orig = texture2D(uOriginalTexture, vTexCoord);
 
         float mixRate = opacity * uBlending;
+
+        vec4 mixColor = vMixColor;
+        if (uPreserveOpacity) {
+          mixColor *= orig.a;
+        }
         // mix color
-        vec4 color = orig * (1.0 - mixRate) + vMixColor * mixRate;
+        vec4 color = mix(orig, mixColor, mixRate);
         // add color
         vec4 addColor = uColor * (uThickness * opacity);
 
@@ -140,6 +155,12 @@ class WatercolorTool extends BaseBrushTool {
   sampleSize = 0
 
   start(ev: ToolPointerEvent) {
+    super.start(ev)
+    if (!this.targetContent) {
+      return
+    }
+    const {preserveOpacity} = this.targetContent.layer
+
     this.sampleSize = Math.pow(2, Math.ceil(Math.log2(this.width + 2)))
 
     this.model.uniforms = {
@@ -148,6 +169,7 @@ class WatercolorTool extends BaseBrushTool {
       uThickness: this.thickness,
       uColor: this.appState.color.toRgb(),
       uOpacity: this.opacity,
+      uPreserveOpacity: preserveOpacity,
     }
 
     this.shapeClipModel.uniforms = {
@@ -155,13 +177,12 @@ class WatercolorTool extends BaseBrushTool {
       uBrushRadius: this.width * 0.5,
       uSoftness: this.softness,
       uMinWidthRatio: this.minWidthRatio,
+      uPreserveOpacity: preserveOpacity,
     }
 
     this.originalTexture.size = new Vec2(this.sampleSize)
     this.shapeClipTexture.size = new Vec2(this.sampleSize * 2, this.sampleSize)
     this.shape.rect = new Rect(new Vec2(), new Vec2(this.sampleSize))
-
-    return super.start(ev)
   }
 
   renderWaypoints(waypoints: Waypoint[], rect: Rect) {

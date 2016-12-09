@@ -1,16 +1,51 @@
 import Electron = require('electron')
 type BrowserWindow = Electron.BrowserWindow
-const {app, BrowserWindow} = Electron
+const {app, BrowserWindow, ipcMain} = Electron
 import {TabletEventReceiver} from "receive-tablet-event"
 import * as IPCChannels from "../common/IPCChannels"
 import {contentBase} from "../common/contentBase"
 
 app.commandLine.appendSwitch("enable-experimental-web-platform-features")
 
-let window: BrowserWindow|undefined
+let mainWindow: BrowserWindow|undefined
+let dialogsWindow: BrowserWindow|undefined
 
-function openWindow() {
-  const win = window = new BrowserWindow({width: 1200, height: 768})
+function openDialogsWindow() {
+  const win = dialogsWindow = new BrowserWindow({
+    width: 100,
+    height: 100,
+    show: false,
+    parent: mainWindow,
+    modal: true,
+  })
+  win.loadURL(`${contentBase}/dialogs.html`)
+  win.on('closed', () => {
+    dialogsWindow = undefined
+  })
+  ipcMain.on("dialogOpen", (ev: Electron.IpcMainEvent, name: string, param: any) => {
+    win.webContents.send("dialogOpen", name, param)
+  })
+  ipcMain.on("dialogDone", (ev: Electron.IpcMainEvent, result: any) => {
+    if (mainWindow) {
+      mainWindow.webContents.send("dialogDone", result)
+    }
+  })
+  win.on("close", (e) => {
+    e.preventDefault()
+    win.hide()
+    if (mainWindow) {
+      mainWindow.webContents.send("dialogDone", undefined)
+    }
+  })
+}
+
+async function openWindow() {
+  if (process.env.NODE_ENV == "development") {
+    const {default: installExtension, REACT_DEVELOPER_TOOLS} = require('electron-devtools-installer');
+    await installExtension(REACT_DEVELOPER_TOOLS)
+  }
+
+  const win = mainWindow = new BrowserWindow({width: 1200, height: 768})
 
   win.loadURL(`${contentBase}/index.html`)
   if (process.env.NODE_ENV == "development") {
@@ -33,22 +68,21 @@ function openWindow() {
     IPCChannels.tabletUp.send(win.webContents, ev)
   })
 
+  win.on('close', e => {
+    e.preventDefault()
+    IPCChannels.quit.send(win.webContents, undefined)
+  })
+
   win.on('closed', () => {
     receiver.dispose()
-    window = undefined
+    mainWindow = undefined
+    if (dialogsWindow) {
+      dialogsWindow.destroy()
+    }
   })
 }
 
-app.on('ready', openWindow)
-
-app.on('window-all-closed', () => {
-  if (process.platform != 'darwin') {
-    app.quit()
-  }
-})
-
-app.on('activate', () => {
-  if (!window) {
-    openWindow()
-  }
+app.on('ready', async () => {
+  await openWindow()
+  openDialogsWindow()
 })

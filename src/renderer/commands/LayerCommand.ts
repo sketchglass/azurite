@@ -3,7 +3,7 @@ import {Texture} from "paintgl"
 import {IObservableArray} from "mobx"
 import {UndoCommand} from "../models/UndoStack"
 import Picture from "../models/Picture"
-import Layer, {LayerBlendMode} from "../models/Layer"
+import Layer, {LayerProps} from "../models/Layer"
 import {ImageLayerContent, GroupLayerContent} from "../models/LayerContent"
 import TiledTexture, {Tile} from "../models/TiledTexture"
 import {context} from "../GLContext"
@@ -188,27 +188,25 @@ class RemoveLayerCommand implements UndoCommand {
       removedLayers.unshift(removed)
     }
     this.removedLayers = removedLayers
-
-    const nextLayer = this.picture.layerFromPath(this.paths[0])
-    if (nextLayer) {
-      this.picture.selectedLayers.replace([nextLayer])
-    }
+    this.reselect()
   }
-}
-
-export
-interface LayerProps {
-  name?: string
-  visible?: boolean
-  blendMode?: LayerBlendMode
-  opacity?: number
+  reselect() {
+    const nextPath = this.paths[0]
+    const parentPath = nextPath.slice(0, -1)
+    const prevPath = [...parentPath, nextPath[nextPath.length - 1] - 1]
+    const nextLayer = this.picture.layerFromPath(nextPath)
+    const prevLayer = this.picture.layerFromPath(prevPath)
+    const parentLayer = this.picture.layerFromPath(parentPath)
+    const selectedLayers = nextLayer? [nextLayer] : prevLayer ? [prevLayer] : parentLayer ? [parentLayer] : []
+    this.picture.selectedLayers.replace(selectedLayers)
+  }
 }
 
 export
 class ChangeLayerPropsCommand implements UndoCommand {
   oldProps: LayerProps
 
-  constructor(public picture: Picture, public path: number[], public title: string, public props: LayerProps) {
+  constructor(public picture: Picture, public path: number[], public title: string, public props: Partial<LayerProps>) {
   }
   undo() {
     const layer = this.picture.layerFromPath(this.path)
@@ -219,8 +217,7 @@ class ChangeLayerPropsCommand implements UndoCommand {
   redo() {
     const layer = this.picture.layerFromPath(this.path)
     if (layer) {
-      const {name, visible, blendMode, opacity} = layer
-      this.oldProps = {name, visible, blendMode, opacity}
+      this.oldProps = layer.props
       Object.assign(layer, this.props)
     }
   }
@@ -270,7 +267,7 @@ class TransformLayerCommand implements UndoCommand {
   title = "Transform Layer"
   oldTiledTexture: TiledTexture|undefined
 
-  constructor(public picture: Picture, public path: number[], public sourceTexture: Texture,  public transform: Transform) {
+  constructor(public picture: Picture, public path: number[], public transform: Transform) {
   }
 
   undo() {
@@ -289,10 +286,24 @@ class TransformLayerCommand implements UndoCommand {
     if (!content) {
       return
     }
+    const rect = content.tiledTexture.boundingRect()
+    if (!rect) {
+      return
+    }
+
+    const textureRect = rect.inflate(2)
+    const texture = content.tiledTexture.cropToTexture(textureRect)
+    const subrect = new Rect(new Vec2(), textureRect.size).inflate(-2)
+    texture.filter = "bilinear"
+
     this.oldTiledTexture = content.tiledTexture
     const newTiledTexture = new TiledTexture()
-    newTiledTexture.drawTexture(this.sourceTexture, {transform: this.transform, blendMode: "src"})
+    const transform = Transform.translate(rect.topLeft).merge(this.transform)
+    newTiledTexture.drawTexture(texture, {transform, blendMode: "src", bicubic: true, srcRect: subrect})
     content.tiledTexture = newTiledTexture
+
+    texture.dispose()
+
     this.picture.lastUpdate = {layer: content.layer}
   }
 }

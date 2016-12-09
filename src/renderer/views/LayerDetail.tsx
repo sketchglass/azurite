@@ -52,17 +52,35 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
       picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), "Change Layer Opacity", {opacity}))
     }
   })
+  onPreserveOpacityChange = action((e: React.FormEvent<HTMLInputElement>) => {
+    const {layer} = this.props
+    if (layer) {
+      const {picture} = layer
+      const preserveOpacity = (e.target as HTMLInputElement).checked
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), "Change Layer Preserve Opacity", {preserveOpacity}))
+    }
+  })
+  onClippingGroupChange = action((e: React.FormEvent<HTMLInputElement>) => {
+    const {layer} = this.props
+    if (layer) {
+      const {picture} = layer
+      const clippingGroup = (e.target as HTMLInputElement).checked
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), "Change Layer Clipping Group", {clippingGroup}))
+    }
+  })
 
   render() {
     const {layer} = this.props
     const blendMode = layer ? layer.blendMode : "normal"
     const opacity = layer ? layer.opacity : 1
+    const preserveOpacity = layer ? layer.preserveOpacity : false
+    const clippingGroup = layer ? layer.clippingGroup : false
 
     return (
       <div className="LayerDetail">
         <div>
           <label>Blend</label>
-          <select value={blendMode} onChange={this.onBlendModeChange}>
+          <select className="Select" value={blendMode} onChange={this.onBlendModeChange}>
             {blendModes.map(mode => <option key={mode} value={mode}>{blendModeTexts.get(mode)}</option>)}
           </select>
         </div>
@@ -70,6 +88,20 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
           <label>Opacity</label>
           <RangeSlider onChangeBegin={this.onOpaictyChangeBegin} onChange={this.onOpacityChange} onChangeEnd={this.onOpacityChangeEnd} min={0} max={100} value={Math.round(opacity * 100)} />
           <span>{Math.round(opacity * 100)}%</span>
+        </div>
+        <div>
+          <label></label>
+          <label>
+            <input type="checkbox" onChange={this.onPreserveOpacityChange} checked={preserveOpacity} />
+            Preserve Opacity
+          </label>
+        </div>
+        <div>
+          <label></label>
+          <label>
+            <input type="checkbox" onChange={this.onClippingGroupChange} checked={clippingGroup} />
+            Clipping Group
+          </label>
         </div>
       </div>
     )

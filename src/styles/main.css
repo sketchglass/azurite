@@ -1,11 +1,12 @@
 /* Dependencies */
-@import "../../bundles/fonts/Lato/latofonts.css";
+@import "../../bundles/fonts/Lato/lato.css";
 
 /* Variables */
 @import "./variables.css";
 
 /* App Styles */
 @import "./App.css";
+@import "./DimensionSelect.css";
 @import "./LayerDetail.css";
 @import "./LayerList.css";
 @import "./Navigator.css";
@@ -15,8 +16,13 @@
 
 /* Components */
 @import "./components/ClickToEdit.css";
+@import "./components/ColorSlider.css";
 @import "./components/Palette.css";
 @import "./components/DraggablePanel.css";
 @import "./components/RangeSlider.css";
 @import "./components/RGBRangeSliders.css";
+@import "./components/ScrollBar.css";
 @import "./components/SVGIcon.css";
+
+/* Dialogs */
+@import "./dialogs/DialogContainer.css";

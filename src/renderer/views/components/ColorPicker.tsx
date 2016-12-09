@@ -1,7 +1,7 @@
 import React = require("react")
 import {Vec2} from "paintvec"
 import {HSVColor} from "../../../lib/Color"
-import {mouseOffsetPos} from "../util"
+import PointerEvents from "./PointerEvents"
 
 const wheelWidth = Math.round(16 * devicePixelRatio)
 const squareSize = Math.round(96 * devicePixelRatio)
@@ -40,33 +40,25 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
   }
 
   componentDidMount() {
-    this.canvas = this.refs["canvas"] as HTMLCanvasElement
-    this.canvas.addEventListener("pointerdown", this.onPointerDown)
-    this.canvas.addEventListener("pointermove", this.onPointerMove)
-    this.canvas.addEventListener("pointerup", this.onPointerUp)
     this.context = this.canvas.getContext("2d")!
     this.wheelGradient = this.createWheelGradient()
     this.squareGradient = this.context.createImageData(squareSize, squareSize)
     this.update()
   }
 
-  componentWillUnmount() {
-    this.canvas.removeEventListener("pointerdown", this.onPointerDown)
-    this.canvas.removeEventListener("pointermove", this.onPointerMove)
-    this.canvas.removeEventListener("pointerup", this.onPointerUp)
-  }
-
   render() {
     this.update()
     return (
-      <canvas ref="canvas" width={wheelSize} height={wheelSize} style={{width: logicalWheelSize, height: logicalWheelSize}}/>
+      <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
+        <canvas className="ColorPicker" ref={e => this.canvas = e} width={wheelSize} height={wheelSize} style={{width: logicalWheelSize, height: logicalWheelSize}}/>
+      </PointerEvents>
     )
   }
 
   onPointerDown = (event: PointerEvent) => {
     event.preventDefault()
     const center = new Vec2(wheelSize / 2, wheelSize / 2)
-    const pos = mouseOffsetPos(event, this.canvas).mulScalar(devicePixelRatio).sub(center)
+    const pos = new Vec2(event.offsetX, event.offsetY).mulScalar(devicePixelRatio).sub(center)
     const r = pos.length()
     if (wheelSize / 2 - wheelWidth <= r && r <= wheelSize / 2) {
       // wheel clicked
@@ -85,7 +77,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
   onPointerMove = (event: PointerEvent) => {
     event.preventDefault()
     const center = new Vec2(wheelSize / 2, wheelSize / 2)
-    const pos = mouseOffsetPos(event, this.canvas).mulScalar(devicePixelRatio).sub(center)
+    const pos = new Vec2(event.offsetX, event.offsetY).mulScalar(devicePixelRatio).sub(center)
     if (this.draggingWheel) {
       this.onHueChanged(this.posToHue(pos))
     } else if (this.draggingSquare) {

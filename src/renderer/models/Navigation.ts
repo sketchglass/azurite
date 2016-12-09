@@ -2,6 +2,7 @@ import {Vec2} from "paintvec"
 import {observable, action} from "mobx"
 
 const SCALE_STEPS = [
+  0.125,
   0.25,
   0.33,
   0.5,
@@ -14,6 +15,8 @@ const SCALE_STEPS = [
   16,
   32
 ]
+
+const ROTATION_STEP_DEG = 15
 
 function nextScaleStep(scale: number) {
   for (const step of SCALE_STEPS) {
@@ -45,5 +48,22 @@ class Navigation {
   }
   @action zoomOut() {
     this.scale = prevScaleStep(this.scale)
+  }
+  @action rotateLeft() {
+    const step = Math.round(this.rotation * (180 / Math.PI) / ROTATION_STEP_DEG)
+    this.setNormalizedRotation((step - 1) * ROTATION_STEP_DEG * (Math.PI / 180))
+  }
+  @action rotateRight() {
+    const step = Math.round(this.rotation * (180 / Math.PI) / ROTATION_STEP_DEG)
+    this.setNormalizedRotation((step + 1) * ROTATION_STEP_DEG * (Math.PI / 180))
+  }
+  @action setNormalizedRotation(rotation: number) {
+    while (Math.PI < rotation) {
+      rotation -= 2 * Math.PI
+    }
+    while (rotation < -Math.PI) {
+      rotation += 2 * Math.PI
+    }
+    this.rotation = rotation
   }
 }

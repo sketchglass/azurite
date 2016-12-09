@@ -7,9 +7,9 @@ import Picture from "../models/Picture"
 import Layer from "../models/Layer"
 import {MoveLayerCommand, CopyLayerCommand, GroupLayerCommand, AddLayerCommand, RemoveLayerCommand, ChangeLayerPropsCommand} from "../commands/LayerCommand"
 import ClickToEdit from "./components/ClickToEdit"
+import SVGIcon from "./components/SVGIcon"
 import LayerDetail from "./LayerDetail"
 const classNames = require("classnames")
-import {mouseOffsetPos} from "./util"
 
 interface LayerListProps {
   picture: Picture|undefined
@@ -66,9 +66,10 @@ const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
   const onVisibleClick = (e: React.MouseEvent<HTMLInputElement>) => {
     e.stopPropagation()
   }
+  const className = classNames("LayerList_layer", {"LayerList_layer-clipped": layer.clippingGroup})
 
   return (
-    <div className="LayerList_layer">
+    <div className={className}>
       <img src={thumbnail} />
       <ClickToEdit text={layer.name} onChange={rename} editable={selected}/>
       <input type="checkbox" checked={layer.visible} onChange={onVisibleToggle} onClick={onVisibleClick} />
@@ -128,21 +129,23 @@ class LayerList extends React.Component<LayerListProps, {}> {
 
     return (
       <div className="LayerList">
-        <div className="LayerList_buttons">
-          <button onClick={this.addLayer.bind(this)}>Add</button>
-          <button onClick={this.groupLayer.bind(this)}>Group</button>
-          <button onClick={this.removeLayer.bind(this)}>Remove</button>
+        <div className="LayerList_scroll">
+          <LayerTree
+            root={root}
+            selectedKeys={new Set(selectedKeys)}
+            rowHeight={48}
+            rowContent={({node, selected}) => <LayerListItem layer={node.layer} selected={selected} />}
+            onSelectedKeysChange={this.onSelectedKeysChange}
+            onCollapsedChange={this.onCollapsedChange}
+            onMove={this.onMove}
+            onCopy={this.onCopy}
+          />
         </div>
-        <LayerTree
-          root={root}
-          selectedKeys={new Set(selectedKeys)}
-          rowHeight={72}
-          rowContent={({node, selected}) => <LayerListItem layer={node.layer} selected={selected} />}
-          onSelectedKeysChange={this.onSelectedKeysChange}
-          onCollapsedChange={this.onCollapsedChange}
-          onMove={this.onMove}
-          onCopy={this.onCopy}
-        />
+        <div className="LayerList_buttons">
+          <button onClick={this.addLayer.bind(this)}><SVGIcon className="add" /></button>
+          <button onClick={this.groupLayer.bind(this)}><SVGIcon className="folder" /></button>
+          <button onClick={this.removeLayer.bind(this)}><SVGIcon className="subtract" /></button>
+        </div>
         <LayerDetail layer={picture && picture.currentLayer} />
       </div>
     )

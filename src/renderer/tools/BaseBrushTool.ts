@@ -36,8 +36,6 @@ abstract class BaseBrushTool extends Tool {
   private lastInterpolateWaypoints: Waypoint[] = []
   private nextDabOffset = 0
 
-  cursor = "crosshair"
-
   // brush width (diameter)
   @observable width = 10
   // brush opacity
@@ -52,12 +50,25 @@ abstract class BaseBrushTool extends Tool {
   // how many neighbor event positions used to stabilize stroke
   @observable stabilizingLevel = 2
 
-  targetContent: ImageLayerContent|undefined
+  @observable targetContent: ImageLayerContent|undefined
   newTiledTexture: TiledTexture|undefined
   editedRect: Rect|undefined
 
-  cursorElement = document.createElement("canvas")
-  cursorContext = this.cursorElement.getContext("2d")!
+  private _cursorElement = document.createElement("canvas")
+  private _cursorElementSize = 0
+  private cursorContext = this._cursorElement.getContext("2d")!
+
+  get cursor() {
+    return "not-allowed"
+  }
+  @computed get cursorElement() {
+    if (this.currentLayer && this.currentLayer.content.type == "image") {
+      return this._cursorElement
+    }
+  }
+  get cursorElementSize() {
+    return this._cursorElementSize
+  }
 
   constructor(appState: AppState) {
     super(appState)
@@ -69,10 +80,10 @@ abstract class BaseBrushTool extends Tool {
     const dpr = window.devicePixelRatio
     const canvasSize = this.width + 4 * dpr
     const center = canvasSize / 2
-    this.cursorElement.width = canvasSize
-    this.cursorElement.height = canvasSize
-    this.cursorElement.style.width = `${canvasSize/dpr}px`
-    this.cursorElement.style.height = `${canvasSize/dpr}px`
+    this._cursorElement.width = canvasSize
+    this._cursorElement.height = canvasSize
+    this._cursorElement.style.width = `${canvasSize/dpr}px`
+    this._cursorElement.style.height = `${canvasSize/dpr}px`
 
     const context = this.cursorContext
 
@@ -88,7 +99,7 @@ abstract class BaseBrushTool extends Tool {
     context.ellipse(center, center, radius + dpr, radius + dpr, 0, 0, 2 * Math.PI)
     context.stroke()
 
-    this.cursorElementSize = canvasSize / dpr
+    this._cursorElementSize = canvasSize / dpr
   }
 
   addEditedRect(rect: Rect) {
@@ -103,19 +114,20 @@ abstract class BaseBrushTool extends Tool {
     if (!this.picture) {
       return
     }
-    this.picture.layerBlender.render(rect)
-    this.renderer.render(rect)
+    this.picture.layerBlender.addDirtyRect(rect)
+    this.renderer.renderNow()
   }
 
-  hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender) {
+  replaceTile(layer: Layer, tileKey: Vec2): {replaced: boolean, tile?: Tile} {
     if (this.targetContent && this.newTiledTexture && layer == this.targetContent.layer) {
       if (this.newTiledTexture.has(tileKey)) {
         const {blendMode, opacity} = layer
-        tileBlender.blend(this.newTiledTexture.get(tileKey), blendMode, opacity)
+        return {replaced: true, tile: this.newTiledTexture.get(tileKey)}
+      } else {
+        return {replaced: true}
       }
-      return true
     } else {
-      return false
+      return {replaced: false}
     }
   }
 
@@ -278,6 +290,7 @@ abstract class BaseBrushTool extends Tool {
     const {picture} = layer
     const command = new ChangeLayerImageCommand(picture, layer.path(), this.name, rect, oldData, newData)
     picture.undoStack.push(command)
+    picture.lastUpdate = {layer, rect}
   }
 
   brushSize(waypoint: Waypoint) {

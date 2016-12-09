@@ -1,3 +1,59 @@
 .Navigator {
-  margin: 8px;
+  font-size: 12px;
+  &_minimap {
+    width: 240px;
+    height: 120px;
+  }
+  &_sliderRow {
+    display: flex;
+    align-items: center;
+    margin: 0 4px 4px;
+  }
+  & input[type="range"] {
+    --movable-range: 120px;
+    --handle-size: 12px;
+    -webkit-appearance:none;
+    margin: 0 4px;
+    width: calc(var(--movable-range) + var(--handle-size));
+    height: 4px;
+    border-radius: 2px;
+    background-color: var(--ui-background-color);
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: var(--handle-size);
+      height: var(--handle-size);
+      border-radius: 50%;
+      background-color: var(--default-color);
+    }
+  }
+  & button {
+    border: none;
+    background: none;
+    margin: 0;
+    padding: 0;
+  }
+  & .SVGIcon {
+    width: 16px;
+    height: 16px;
+  }
+  &_reset {
+    position: relative;
+    width: 16px;
+    height: 16px;
+    &:before {
+      content: "";
+      position: absolute;
+      left: 6px;
+      top: 6px;
+      width: 4px;
+      height: 4px;
+      border-radius: 2px;
+      background-color: var(--default-color);
+    }
+  }
+  &_check {
+    margin: 0 4px;
+    display: flex;
+    align-items: center;
+  }
 }

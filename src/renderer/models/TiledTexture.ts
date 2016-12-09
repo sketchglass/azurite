@@ -120,14 +120,16 @@ class TiledTexture {
     return cloned
   }
 
-  drawTexture(src: Texture, opts: {transform: Transform, blendMode: BlendMode}) {
-    const {blendMode, transform} = opts
+  drawTexture(src: Texture, opts: {transform: Transform, blendMode: BlendMode, bicubic?: boolean, srcRect?: Rect}) {
+    const {blendMode, transform, bicubic, srcRect} = opts
     const rect = new Rect(new Vec2(), src.size).transform(transform)
     for (const key of TiledTexture.keysForRect(rect)) {
       tileDrawTarget.texture = this.get(key).texture
       drawTexture(tileDrawTarget, src, {
         transform: transform.translate(key.mulScalar(-Tile.width)),
-        blendMode
+        blendMode,
+        bicubic,
+        srcRect
       })
     }
   }
@@ -149,6 +151,14 @@ class TiledTexture {
       transform = transform.translate(offset)
       drawTexture(dest, this.get(key).texture, {transform, blendMode})
     }
+  }
+
+  cropToTexture(rect: Rect) {
+    const texture = new Texture(context, {size: rect.size, pixelType: "half-float"})
+    const drawTarget = new TextureDrawTarget(context, texture)
+    this.drawToDrawTarget(drawTarget, {offset: rect.topLeft.neg(), blendMode: "src"})
+    drawTarget.dispose()
+    return texture
   }
 
   transform(transform: Transform) {

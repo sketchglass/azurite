@@ -48,9 +48,15 @@ abstract class Tool {
 
   abstract name: string
 
-  @observable cursor = "auto"
-  @observable cursorElement: HTMLElement|undefined
-  @observable cursorElementSize = 0
+  get cursor() {
+    return "auto"
+  }
+  get cursorElement(): HTMLElement|undefined {
+    return undefined
+  }
+  get cursorElementSize() {
+    return 0
+  }
 
   get modal() { return false }
   get modalUndoStack(): UndoStack|undefined { return }
@@ -62,6 +68,8 @@ abstract class Tool {
 
   renderSettings(): JSX.Element { return React.createElement("div") }
   renderOverlayUI(): JSX.Element|undefined { return }
-  hookLayerBlend(layer: Layer, tileKey: Vec2, tile: Tile|undefined, tileBlender: TileBlender){ return false }
+  replaceTile(layer: Layer, tileKey: Vec2): {replaced: boolean, tile?: Tile} {
+    return {replaced: false}
+  }
 }
 export default Tool

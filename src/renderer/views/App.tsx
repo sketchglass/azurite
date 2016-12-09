@@ -113,35 +113,25 @@ class App extends React.Component<{}, {}> {
     })
     return (
       <div className="App">
-        <div className="AppItem">
-          <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
+        <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
+        <aside className="Sidebar Sidebar-left">
+          <div className="PanelTitle">Color</div>
+          <ColorPicker color={color} onChange={onColorChange} />
+          <RGBRangeSliders color={color} onChange={onColorChange} />
+          <Palette palette={palette} paletteIndex={paletteIndex} onChange={onPaletteChange} />
+          <div className="PanelTitle">Tool</div>
+          {currentTool.renderSettings()}
+        </aside>
+        <div className="CenterArea">
+          <PictureTabBar />
+          <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
         </div>
-        <div className="AppItem">
-          <aside className="LeftSidebar">
-            <DraggablePanelContainer top={60} left={12} margin={12} labelHeight={24}>
-              <DraggablePanel label="Color" width={216} height={200}>
-                <ColorPicker color={color} onChange={onColorChange} />
-              </DraggablePanel>
-              <DraggablePanel label="Slider" width={216} height={70}>
-                <RGBRangeSliders color={color} onChange={onColorChange} />
-              </DraggablePanel>
-              <DraggablePanel label="Palette" width={216} height={80}>
-                <Palette palette={palette} paletteIndex={paletteIndex} onChange={onPaletteChange} />
-              </DraggablePanel>
-              <DraggablePanel label="Settings" width={216} height={200}>
-                {currentTool.renderSettings()}
-              </DraggablePanel>
-            </DraggablePanelContainer>
-          </aside>
-          <div className="CenterArea">
-            <PictureTabBar />
-            <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
-          </div>
-          <aside className="RightSidebar">
-            <Navigator picture={picture} />
-            <LayerList picture={picture} />
-          </aside>
-        </div>
+        <aside className="Sidebar Sidebar-right">
+          <div className="PanelTitle">Navigator</div>
+          <Navigator picture={picture} />
+          <div className="PanelTitle">Layers</div>
+          <LayerList picture={picture} />
+        </aside>
       </div>
     )
   }
