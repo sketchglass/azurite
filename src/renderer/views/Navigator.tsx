@@ -25,14 +25,10 @@ class NavigatorMinimap extends React.Component<{}, {} > {
   }
 
   componentDidMount() {
-    this.disposer = reaction(() => {
-      const {picture} = this
-      if (picture) {
-        const {scale, translation, rotation} = picture.navigation
-        const {size} = renderer
-        return [picture.lastUpdate, scale, translation, rotation, size]
-      }
-    }, frameDebounce(() => this.redraw()))
+    this.disposer = reaction(
+      () => renderer.transformToPicture,
+      frameDebounce(() => this.redraw())
+    )
   }
 
   componentWillUnmount() {

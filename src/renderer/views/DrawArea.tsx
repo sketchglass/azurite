@@ -89,6 +89,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   tabletDownSubscription: Subscription
   tabletMoveSubscription: Subscription
   tabletUpSubscription: Subscription
+  clientTopLeft = new Vec2()
 
   constructor(props: DrawAreaProps) {
     super(props)
@@ -184,6 +185,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       width: Math.round(rect.width),
       height: Math.round(rect.height),
     }
+    this.clientTopLeft = new Vec2(roundRect.left, roundRect.top)
     renderer.size = new Vec2(roundRect.width, roundRect.height).mulScalar(window.devicePixelRatio)
 
     IPCChannels.setTabletCaptureArea.send(roundRect)
@@ -208,10 +210,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
 
   offsetPos(ev: {clientX: number, clientY: number}) {
-    const rect = this.element!.getBoundingClientRect()
-    const x = ev.clientX - rect.left
-    const y = ev.clientY - rect.top
-    return new Vec2(x, y)
+    return new Vec2(ev.clientX, ev.clientY).sub(this.clientTopLeft)
   }
 
   toToolEvent(ev: PointerEvent | TabletEvent): ToolPointerEvent {
