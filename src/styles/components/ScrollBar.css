@@ -7,17 +7,18 @@
 .ScrollBar_handle {
   position: absolute;
   background-color: var(--default-color);
-  will-change: left, top;
 }
 .ScrollBar-vertical .ScrollBar_handle {
   left: 0;
   width: 100%;
   top: calc(var(--handle-start) * 100%);
   height: calc((var(--handle-end) - var(--handle-start)) * 100%);
+  will-change: top, height;
 }
 .ScrollBar-horizontal .ScrollBar_handle {
   left : calc(var(--handle-start) * 100%);
   width : calc((var(--handle-end) - var(--handle-start)) * 100%);
   top: 0;
   height: 100%;
+  will-change: left, width;
 }
