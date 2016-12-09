@@ -19,7 +19,7 @@ function quadPath([a, b, c, d]: Vec2[]) {
 class CanvasAreaOverlayUI extends FrameDebounced<{tool: CanvasAreaTool}, {}> {
   renderDebounced() {
     const {tool} = this.props
-    const rect = tool.roundTransformedRect
+    const rect = tool.areaRect
 
     if (!tool.hasRect) {
       return <g />
@@ -79,7 +79,7 @@ class CanvasAreaTool extends RectMoveTool {
 
   readonly dimensionSelectState = new DimensionSelectState()
 
-  @computed get roundTransformedRect() {
+  @computed get areaRect() {
     const topLeft = this.translation.add(this.normalizedRect.topLeft).round()
     const size = this.normalizedRect.size.round()
     return new Rect(topLeft, topLeft.add(size))
@@ -96,7 +96,7 @@ class CanvasAreaTool extends RectMoveTool {
     reaction(() => this.picture && this.picture.size, () => {
       this.reset()
     })
-    reaction(() => this.roundTransformedRect.size, action((size: Vec2) => {
+    reaction(() => this.areaRect.size, action((size: Vec2) => {
       if (!this.dimensionSelectState.size.round().equals(size)) {
         this.dimensionSelectState.width = size.width
         this.dimensionSelectState.height = size.height
@@ -104,7 +104,7 @@ class CanvasAreaTool extends RectMoveTool {
       }
     }))
     reaction(() => this.dimensionSelectState.size.round(), action((size: Vec2) => {
-      if (!this.roundTransformedRect.size.equals(size)) {
+      if (!this.areaRect.size.equals(size)) {
         this.rect = new Rect(this.rect.topLeft, this.rect.topLeft.add(size))
       }
     }))
@@ -153,7 +153,7 @@ class CanvasAreaTool extends RectMoveTool {
 
   endEditing() {
     if (this.picture) {
-      const {topLeft, size} = this.roundTransformedRect
+      const {topLeft, size} = this.areaRect
       const dimension = {width: size.width, height: size.height, dpi: this.dimensionSelectState.dpi}
       const command = new ChangeCanvasAreaCommand(this.picture, dimension, topLeft)
       this.picture.undoStack.redoAndPush(command)
