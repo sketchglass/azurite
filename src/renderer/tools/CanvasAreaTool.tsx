@@ -74,12 +74,14 @@ class CanvasAreaTool extends RectMoveTool {
 
   constructor(appState: AppState) {
     super(appState)
-    reaction(() => this.active, () => {
-      if (this.active) {
-        this.reset()
-      } else {
+    reaction(() => this.active, active => {
+      this.reset()
+      if (!active) {
         this.cancelEditing()
       }
+    })
+    reaction(() => this.picture && this.picture.size, () => {
+      this.reset()
     })
   }
 
