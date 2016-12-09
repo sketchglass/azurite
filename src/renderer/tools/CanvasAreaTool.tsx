@@ -11,7 +11,7 @@ const HANDLE_RADIUS = 4
 class CanvasAreaOverlayUI extends FrameDebounced<{tool: CanvasAreaTool}, {}> {
   renderDebounced() {
     const {tool} = this.props
-    const {rect} = tool
+    const rect = tool.rect.translate(tool.translation)
 
     if (!tool.hasRect) {
       return <g />
