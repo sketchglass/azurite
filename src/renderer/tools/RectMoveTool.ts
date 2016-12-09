@@ -44,6 +44,8 @@ class TransformChangeCommand implements UndoCommand {
 
 abstract class RectMoveTool extends Tool {
   abstract handleRadius: number
+  @observable canRotate = true
+  @observable canDistort = true
 
   dragType = DragType.None
 
@@ -137,8 +139,10 @@ abstract class RectMoveTool extends Tool {
     }
     if (normalizeFlippedRect(this.rect).includes(rectPos)) {
       this.dragType = DragType.Translate
-    } else {
+    } else if (this.canRotate) {
       this.dragType = DragType.Rotate
+    } else {
+      this.dragType = DragType.None
     }
   }
 
@@ -149,7 +153,7 @@ abstract class RectMoveTool extends Tool {
     const translatePos = ev.picturePos.round()
 
     const keepRatio = ev.shiftKey
-    const perspective = ev.ctrlKey || ev.metaKey
+    const distorting = this.canDistort && (ev.ctrlKey || ev.metaKey)
 
     switch (this.dragType) {
       case DragType.None:
@@ -160,7 +164,7 @@ abstract class RectMoveTool extends Tool {
         break
       }
       case DragType.MoveTopLeft:
-        if (perspective) {
+        if (distorting) {
           this.resizeQuad(0, quadPos)
         } else {
           this.resizeRect(-rectOffset.x, -rectOffset.y, new Vec2(0, 0), keepRatio)
@@ -170,7 +174,7 @@ abstract class RectMoveTool extends Tool {
         this.resizeRect(undefined, -rectOffset.y, new Vec2(0.5, 0), keepRatio)
         break
       case DragType.MoveTopRight:
-        if (perspective) {
+        if (distorting) {
           this.resizeQuad(1, quadPos)
         } else {
           this.resizeRect(rectOffset.x, -rectOffset.y, new Vec2(1, 0), keepRatio)
@@ -180,7 +184,7 @@ abstract class RectMoveTool extends Tool {
         this.resizeRect(rectOffset.x, undefined, new Vec2(1, 0.5), keepRatio)
         break
       case DragType.MoveBottomRight:
-        if (perspective) {
+        if (distorting) {
           this.resizeQuad(2, quadPos)
         } else {
           this.resizeRect(rectOffset.x, rectOffset.y, new Vec2(1, 1), keepRatio)
@@ -190,7 +194,7 @@ abstract class RectMoveTool extends Tool {
         this.resizeRect(undefined, rectOffset.y, new Vec2(0.5, 1), keepRatio)
         break
       case DragType.MoveBottomLeft:
-        if (perspective) {
+        if (distorting) {
           this.resizeQuad(3, quadPos)
         } else {
           this.resizeRect(-rectOffset.x, rectOffset.y, new Vec2(0, 1), keepRatio)

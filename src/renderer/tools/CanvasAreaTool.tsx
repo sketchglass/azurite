@@ -48,6 +48,8 @@ export default
 class CanvasAreaTool extends RectMoveTool {
   name = "Canvas Area"
   handleRadius = HANDLE_RADIUS
+  canRotate = false
+  canDistort = false
 
   constructor(appState: AppState) {
     super(appState)
