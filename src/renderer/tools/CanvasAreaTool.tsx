@@ -6,6 +6,7 @@ import RectMoveTool, {DragType} from "./RectMoveTool"
 import {ToolPointerEvent} from "./Tool"
 import FrameDebounced from "../views/components/FrameDebounced"
 import {AppState} from "../state/AppState"
+import {ChangeCanvasAreaCommand} from "../commands/PictureCommand"
 
 const HANDLE_RADIUS = 4
 
@@ -76,6 +77,8 @@ class CanvasAreaTool extends RectMoveTool {
     reaction(() => this.active, () => {
       if (this.active) {
         this.reset()
+      } else {
+        this.cancelEditing()
       }
     })
   }
@@ -116,6 +119,11 @@ class CanvasAreaTool extends RectMoveTool {
   }
 
   endEditing() {
+    if (this.picture) {
+      const rect = this.rect.translate(this.translation)
+      const command = new ChangeCanvasAreaCommand(this.picture, rect)
+      this.picture.undoStack.redoAndPush(command)
+    }
     this.cancelEditing()
   }
 
