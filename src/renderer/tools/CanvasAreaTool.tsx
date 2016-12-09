@@ -62,8 +62,10 @@ const CanvasAreaToolSettings = observer((props: {tool: CanvasAreaTool}) => {
   return (
     <div className="CanvasAreaToolSettings">
       <DimensionSelect state={tool.dimensionSelectState} percent={true} />
-      <button className="Button Button-primary" onClick={onOK}>OK</button>
-      <button className="Button" onClick={onCancel}>Cancel</button>
+      <div className="CanvasAreaToolSettings_buttons">
+        <button className="Button" onClick={onCancel}>Cancel</button>
+        <button className="Button Button-primary" onClick={onOK}>OK</button>
+      </div>
     </div>
   )
 })
