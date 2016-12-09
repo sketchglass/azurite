@@ -90,7 +90,7 @@ abstract class RectMoveTool extends Tool {
     return this.additionalTransform.translate(this.translation).invert() || new Transform()
   }
 
-  @computed private get normalizedRect() {
+  @computed get normalizedRect() {
     return normalizeFlippedRect(this.rect)
   }
 

@@ -80,8 +80,8 @@ class CanvasAreaTool extends RectMoveTool {
   readonly dimensionSelectState = new DimensionSelectState()
 
   @computed get roundTransformedRect() {
-    const topLeft = this.translation.add(this.rect.topLeft).round()
-    const size = this.rect.size.round()
+    const topLeft = this.translation.add(this.normalizedRect.topLeft).round()
+    const size = this.normalizedRect.size.round()
     return new Rect(topLeft, topLeft.add(size))
   }
 
