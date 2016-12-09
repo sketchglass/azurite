@@ -46,6 +46,7 @@ abstract class RectMoveTool extends Tool {
   abstract handleRadius: number
   @observable canRotate = true
   @observable canDistort = true
+  @observable alwaysKeepsRatio = false
 
   dragType = DragType.None
 
@@ -152,7 +153,7 @@ abstract class RectMoveTool extends Tool {
     const quadPos = ev.picturePos.sub(this.lastTranslation)
     const translatePos = ev.picturePos.round()
 
-    const keepRatio = ev.shiftKey
+    const keepRatio = this.alwaysKeepsRatio || ev.shiftKey
     const distorting = this.canDistort && (ev.ctrlKey || ev.metaKey)
 
     switch (this.dragType) {

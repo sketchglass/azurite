@@ -108,6 +108,10 @@ class CanvasAreaTool extends RectMoveTool {
         this.rect = new Rect(this.rect.topLeft, this.rect.topLeft.add(size))
       }
     }))
+    reaction(() => this.dimensionSelectState.keepRatio, keepRatio => {
+      this.alwaysKeepsRatio = keepRatio
+    })
+    this.dimensionSelectState.keepRatio = this.alwaysKeepsRatio = true
   }
 
   reset() {
