@@ -70,6 +70,11 @@ class UndoStack {
     command.redo()
     this.push(command)
   }
+
+  @action clear() {
+    this.commands.replace([])
+    this.doneCount = 0
+  }
 }
 
 export const undoStack = new UndoStack()
