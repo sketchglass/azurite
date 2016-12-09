@@ -1,4 +1,4 @@
-import {observable, computed, action, reaction} from "mobx"
+import {observable, computed, action, observe} from "mobx"
 import {Vec2} from "paintvec"
 import {PictureDimension} from "../models/Picture"
 import {MAX_PICTURE_SIZE} from "../../common/constants"
@@ -82,9 +82,12 @@ class DimensionSelectState {
     } else {
       this.setPreset(0)
     }
-    reaction(() => [this.width, this.height], () => {
+    observe(this, "width", () => {
       this.lastSelectedPreset = -1
-    })
+    }, true)
+    observe(this, "height", () => {
+      this.lastSelectedPreset = -1
+    }, true)
   }
 
   @action reset(init: PictureDimension) {
