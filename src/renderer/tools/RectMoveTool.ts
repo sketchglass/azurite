@@ -262,6 +262,24 @@ abstract class RectMoveTool extends Tool {
     this.dragType = DragType.None
   }
 
+  @action keyDown(ev: React.KeyboardEvent<HTMLElement>) {
+    super.keyDown(ev)
+    switch (ev.key) {
+      case "ArrowLeft":
+        this.translation = this.translation.add(new Vec2(-1, 0))
+        break
+      case "ArrowRight":
+        this.translation = this.translation.add(new Vec2(1, 0))
+        break
+      case "ArrowUp":
+        this.translation = this.translation.add(new Vec2(0, -1))
+        break
+      case "ArrowDown":
+        this.translation = this.translation.add(new Vec2(0, 1))
+        break
+    }
+  }
+
   startModal() {
     if (!this.modal) {
       this._modal = true
