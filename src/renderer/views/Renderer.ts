@@ -100,8 +100,11 @@ class Renderer {
       .merge(Transform.translate(viewportCenter))
   }
 
-  @computed get transformToPhysicalPixels() {
+  @computed get transformFromPicturePhysical() {
     return this.transformFromPicture.scale(new Vec2(window.devicePixelRatio))
+  }
+  @computed get transformToPicturePhysical() {
+    return this.transformFromPicturePhysical.invert() || new Transform()
   }
 
   @computed get transformToPicture() {
@@ -155,7 +158,7 @@ class Renderer {
         this.wholeDirty = true
         layerBlender.renderNow()
       } else if (layerBlender.dirtyRect) {
-        const rect = layerBlender.dirtyRect.transform(this.transformToPhysicalPixels)
+        const rect = layerBlender.dirtyRect.transform(this.transformFromPicturePhysical)
         this.addDirtyRect(rect)
         layerBlender.renderNow()
       }
@@ -172,7 +175,7 @@ class Renderer {
     if (this.picture) {
       this.boxShadowModel.uniforms = {
         pictureSize: this.picture.size,
-        transformToPicture: this.transformToPhysicalPixels.invert()!,
+        transformToPicture: this.transformToPicturePhysical,
       }
       drawTarget.draw(this.boxShadowModel)
 
@@ -181,7 +184,7 @@ class Renderer {
       if (texture.filter != filter) {
         texture.filter = filter
       }
-      this.model.transform = this.transformToPhysicalPixels
+      this.model.transform = this.transformFromPicturePhysical
       drawTarget.draw(this.model)
     }
     this.dirtyRect = undefined
