@@ -91,7 +91,7 @@ abstract class RectMoveTool extends Tool {
   }
 
   @computed get normalizedRect() {
-    return normalizeFlippedRect(this.rect)
+    return Rect.fromTwoPoints(this.rect.topLeft, this.rect.bottomRight)
   }
 
   @computed get transform() {
@@ -138,7 +138,7 @@ abstract class RectMoveTool extends Tool {
         return
       }
     }
-    if (normalizeFlippedRect(this.rect).includes(rectPos)) {
+    if (this.normalizedRect.includes(rectPos)) {
       this.dragType = DragType.Translate
     } else if (this.canRotate) {
       this.dragType = DragType.Rotate
@@ -294,15 +294,6 @@ abstract class RectMoveTool extends Tool {
       this.modalUndoStack.clear()
     }
   }
-}
-
-function normalizeFlippedRect(rect: Rect) {
-  const {left, right, top, bottom} = rect
-  const trueLeft = Math.min(left, right)
-  const trueRight = Math.max(left, right)
-  const trueTop = Math.min(top, bottom)
-  const trueBottom = Math.max(top, bottom)
-  return new Rect(new Vec2(trueLeft, trueTop), new Vec2(trueRight, trueBottom))
 }
 
 export default RectMoveTool

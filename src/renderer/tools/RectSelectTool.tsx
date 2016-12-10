@@ -8,15 +8,6 @@ import Tool, {ToolPointerEvent} from './Tool'
 import FrameDebounced from "../views/components/FrameDebounced"
 import {frameDebounce} from "../../lib/Debounce"
 
-// TODO: move to paintvec
-function rectFromPoints(p0: Vec2, p1: Vec2) {
-  const trueLeft = Math.min(p0.x, p1.x)
-  const trueRight = Math.max(p0.x, p1.x)
-  const trueTop = Math.min(p0.y, p1.y)
-  const trueBottom = Math.max(p0.y, p1.y)
-  return new Rect(new Vec2(trueLeft, trueTop), new Vec2(trueRight, trueBottom))
-}
-
 export default
 class RectSelectTool extends Tool {
   name = "Rectangle Select"
@@ -99,7 +90,7 @@ class RectSelectTool extends Tool {
     const {selection} = this.picture
 
     if (this.selecting && !this.startRendererPos.equals(this.currentRendererPos)) {
-      const rect = rectFromPoints(this.startRendererPos, this.currentRendererPos)
+      const rect = Rect.fromTwoPoints(this.startRendererPos, this.currentRendererPos)
 
       this.context.setTransform(1, 0, 0, 1, 0, 0)
       this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
