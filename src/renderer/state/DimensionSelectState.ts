@@ -1,4 +1,5 @@
-import {observable, computed, action, reaction} from "mobx"
+import {observable, computed, action, observe} from "mobx"
+import {Vec2} from "paintvec"
 import {PictureDimension} from "../models/Picture"
 import {MAX_PICTURE_SIZE} from "../../common/constants"
 
@@ -57,6 +58,10 @@ class DimensionSelectState {
   @observable keepRatio = true
   @observable lastSelectedPreset = -1
 
+  @computed get size() {
+    return new Vec2(this.width, this.height)
+  }
+
   @computed get widthRounded() {
     return Math.round(this.width)
   }
@@ -72,17 +77,25 @@ class DimensionSelectState {
   }
 
   constructor(init?: PictureDimension) {
+    observe(this, "width", () => {
+      this.lastSelectedPreset = -1
+    }, true)
+    observe(this, "height", () => {
+      this.lastSelectedPreset = -1
+    }, true)
+
     if (init) {
-      this.width = this.percentBaseWidth = init.width
-      this.height = this.percentBaseHeight = init.height
-      this.dpi = init.dpi
-      this.ratio = this.height / this.width
+      this.reset(init)
     } else {
       this.setPreset(0)
     }
-    reaction(() => [this.width, this.height], () => {
-      this.lastSelectedPreset = -1
-    })
+  }
+
+  @action reset(init: PictureDimension) {
+    this.width = this.percentBaseWidth = init.width
+    this.height = this.percentBaseHeight = init.height
+    this.dpi = init.dpi
+    this.ratio = this.height / this.width
   }
 
   @action setPreset(index: number) {

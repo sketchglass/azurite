@@ -150,3 +150,37 @@ class ChangePictureResolutionCommand {
     this.picture.lastUpdate = {}
   }
 }
+
+export
+class ChangeCanvasAreaCommand {
+  title = "Change Canvas Area"
+  oldDimension: PictureDimension
+
+  constructor(public picture: Picture, public dimension: PictureDimension, public offset: Vec2) {
+  }
+
+  translateLayer(layer: Layer, offset: Vec2) {
+    const content = layer.content
+    if (content.type != "image") {
+      return
+    }
+    content.tiledTexture = content.tiledTexture.transform(Transform.translate(offset))
+  }
+
+  translatePicture(offset: Vec2) {
+    this.picture.forEachLayer(layer => this.translateLayer(layer, offset))
+  }
+
+  undo() {
+    this.translatePicture(this.offset)
+    this.picture.dimension = this.oldDimension
+    this.picture.lastUpdate = {}
+  }
+  redo() {
+    this.translatePicture(this.offset.neg())
+    this.oldDimension = this.picture.dimension
+    const {width, height, dpi} = this.picture.dimension
+    this.picture.dimension = this.dimension
+    this.picture.lastUpdate = {}
+  }
+}

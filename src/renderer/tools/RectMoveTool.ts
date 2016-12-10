@@ -44,6 +44,9 @@ class TransformChangeCommand implements UndoCommand {
 
 abstract class RectMoveTool extends Tool {
   abstract handleRadius: number
+  @observable canRotate = true
+  @observable canDistort = true
+  @observable alwaysKeepsRatio = false
 
   dragType = DragType.None
 
@@ -87,7 +90,7 @@ abstract class RectMoveTool extends Tool {
     return this.additionalTransform.translate(this.translation).invert() || new Transform()
   }
 
-  @computed private get normalizedRect() {
+  @computed get normalizedRect() {
     return normalizeFlippedRect(this.rect)
   }
 
@@ -137,8 +140,10 @@ abstract class RectMoveTool extends Tool {
     }
     if (normalizeFlippedRect(this.rect).includes(rectPos)) {
       this.dragType = DragType.Translate
-    } else {
+    } else if (this.canRotate) {
       this.dragType = DragType.Rotate
+    } else {
+      this.dragType = DragType.None
     }
   }
 
@@ -148,8 +153,8 @@ abstract class RectMoveTool extends Tool {
     const quadPos = ev.picturePos.sub(this.lastTranslation)
     const translatePos = ev.picturePos.round()
 
-    const keepRatio = ev.shiftKey
-    const perspective = ev.ctrlKey || ev.metaKey
+    const keepRatio = this.alwaysKeepsRatio || ev.shiftKey
+    const distorting = this.canDistort && (ev.ctrlKey || ev.metaKey)
 
     switch (this.dragType) {
       case DragType.None:
@@ -160,7 +165,7 @@ abstract class RectMoveTool extends Tool {
         break
       }
       case DragType.MoveTopLeft:
-        if (perspective) {
+        if (distorting) {
           this.resizeQuad(0, quadPos)
         } else {
           this.resizeRect(-rectOffset.x, -rectOffset.y, new Vec2(0, 0), keepRatio)
@@ -170,7 +175,7 @@ abstract class RectMoveTool extends Tool {
         this.resizeRect(undefined, -rectOffset.y, new Vec2(0.5, 0), keepRatio)
         break
       case DragType.MoveTopRight:
-        if (perspective) {
+        if (distorting) {
           this.resizeQuad(1, quadPos)
         } else {
           this.resizeRect(rectOffset.x, -rectOffset.y, new Vec2(1, 0), keepRatio)
@@ -180,7 +185,7 @@ abstract class RectMoveTool extends Tool {
         this.resizeRect(rectOffset.x, undefined, new Vec2(1, 0.5), keepRatio)
         break
       case DragType.MoveBottomRight:
-        if (perspective) {
+        if (distorting) {
           this.resizeQuad(2, quadPos)
         } else {
           this.resizeRect(rectOffset.x, rectOffset.y, new Vec2(1, 1), keepRatio)
@@ -190,7 +195,7 @@ abstract class RectMoveTool extends Tool {
         this.resizeRect(undefined, rectOffset.y, new Vec2(0.5, 1), keepRatio)
         break
       case DragType.MoveBottomLeft:
-        if (perspective) {
+        if (distorting) {
           this.resizeQuad(3, quadPos)
         } else {
           this.resizeRect(-rectOffset.x, rectOffset.y, new Vec2(0, 1), keepRatio)
@@ -256,6 +261,24 @@ abstract class RectMoveTool extends Tool {
       this.modalUndoStack.redoAndPush(command)
     }
     this.dragType = DragType.None
+  }
+
+  @action keyDown(ev: React.KeyboardEvent<HTMLElement>) {
+    super.keyDown(ev)
+    switch (ev.key) {
+      case "ArrowLeft":
+        this.translation = this.translation.add(new Vec2(-1, 0))
+        break
+      case "ArrowRight":
+        this.translation = this.translation.add(new Vec2(1, 0))
+        break
+      case "ArrowUp":
+        this.translation = this.translation.add(new Vec2(0, -1))
+        break
+      case "ArrowDown":
+        this.translation = this.translation.add(new Vec2(0, 1))
+        break
+    }
   }
 
   startModal() {
