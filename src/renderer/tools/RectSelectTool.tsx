@@ -72,6 +72,12 @@ class RectSelectTool extends Tool {
     this.adding = ev.shiftKey
     this.startPos = ev.rendererPos.round()
     this.selecting = true
+
+    if (!this.adding) {
+      this.picture.selection.clear()
+      this.renderer.wholeDirty = true
+      this.renderer.update()
+    }
   }
 
   move(ev: ToolPointerEvent) {
@@ -80,6 +86,7 @@ class RectSelectTool extends Tool {
     }
     this.rect = rectFromPoints(this.startPos, ev.rendererPos.round())
     this.updateSelection()
+
   }
 
   updateSelectionNow() {
@@ -104,6 +111,7 @@ class RectSelectTool extends Tool {
     } else {
       drawTexture(selection.drawTarget, this.canvasTexture, {blendMode: "src"})
     }
+    selection.empty = false
     this.renderer.wholeDirty = true
     this.renderer.renderNow()
   }

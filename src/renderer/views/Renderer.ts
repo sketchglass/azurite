@@ -50,6 +50,8 @@ class BoxShadowShader extends Shader {
   }
 }
 
+const SELECTION_DURATION = 50
+
 class SelectionShader extends Shader {
   get fragmentShader() {
     return `
@@ -62,7 +64,6 @@ class SelectionShader extends Shader {
       varying vec2 vPosition;
 
       #define STRIPE_WIDTH 4.0
-      #define DURATION_MS 50.0
 
       void main(void) {
         bool isOutline = false;
@@ -82,7 +83,7 @@ class SelectionShader extends Shader {
 
         if (isOutline) {
           vec2 coord = gl_FragCoord.xy - vec2(0.5);
-          float d = coord.x + coord.y + floor(milliseconds / DURATION_MS);
+          float d = coord.x + coord.y + floor(milliseconds / ${SELECTION_DURATION}.0);
           float stripe = mod(d / STRIPE_WIDTH, 2.0);
           if (stripe < 1.0) {
             gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
@@ -181,6 +182,12 @@ class Renderer {
     reaction(() => this.picture && this.picture.lastUpdate, update => {
       this.update()
     })
+    setInterval(() => {
+      if (this.picture && !this.picture.selection.empty) {
+        this.wholeDirty = true
+        this.update()
+      }
+    }, SELECTION_DURATION)
   }
 
   addDirtyRect(rect: Rect) {
@@ -230,12 +237,14 @@ class Renderer {
       this.model.transform = this.transformFromPicture
       drawTarget.draw(this.model)
 
-      this.selectionModel.uniforms = {
+      if (!this.picture.selection.empty) {
+        this.selectionModel.uniforms = {
         texelSize: new Vec2(1).div(this.picture.size),
         texture: this.picture.selection.texture,
         milliseconds}
-      this.selectionModel.transform = this.transformFromPicture
-      drawTarget.draw(this.selectionModel)
+        this.selectionModel.transform = this.transformFromPicture
+        drawTarget.draw(this.selectionModel)
+      }
     }
     this.dirtyRect = undefined
     this.wholeDirty = false
