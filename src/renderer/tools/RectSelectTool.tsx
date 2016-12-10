@@ -3,10 +3,11 @@ import {observable} from "mobx"
 import {Vec2, Transform, Rect} from "paintvec"
 import {Texture, TextureDrawTarget, BlendMode, Color} from "paintgl"
 import {context} from "../GLContext"
-import {drawTexture} from "../GLUtil"
+import {drawTexture, duplicateTexture} from "../GLUtil"
 import Tool, {ToolPointerEvent} from './Tool'
 import FrameDebounced from "../views/components/FrameDebounced"
 import {frameDebounce} from "../../lib/Debounce"
+import {SelectionChangeCommand} from "../commands/SelectionCommand"
 
 export default
 class RectSelectTool extends Tool {
@@ -27,6 +28,7 @@ class RectSelectTool extends Tool {
   canvas = document.createElement("canvas")
   context = this.canvas.getContext("2d")!
   canvasTexture = new Texture(context, {})
+  hasOriginal = false
   originalSelectionTexture = new Texture(context, {})
   originalSelectionDrawTarget = new TextureDrawTarget(context, this.originalSelectionTexture)
 
@@ -78,6 +80,7 @@ class RectSelectTool extends Tool {
     if (!this.originalSelectionTexture.size.equals(selection.size)) {
       this.originalSelectionTexture.size = selection.size
     }
+    this.hasOriginal = !selection.empty
 
     drawTexture(this.originalSelectionDrawTarget, selection.texture, {blendMode: "src"})
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
@@ -122,11 +125,23 @@ class RectSelectTool extends Tool {
 
   updateSelection = frameDebounce(() => this.updateSelectionNow())
 
+  commit() {
+    if (!this.picture) {
+      return
+    }
+    const {selection} = this.picture
+    const oldTexture = this.hasOriginal ? duplicateTexture(this.originalSelectionTexture) : undefined
+    const newTexture = !selection.empty ? duplicateTexture(this.canvasTexture) : undefined
+    const command = new SelectionChangeCommand(this.picture, oldTexture, newTexture)
+    this.picture.undoStack.push(command)
+  }
+
   end(ev: ToolPointerEvent) {
     if (!this.picture || !(this.selecting || this.dragging)) {
       return
     }
     this.updateSelectionNow()
+    this.commit()
     this.dragging = false
     this.selecting = false
   }

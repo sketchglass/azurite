@@ -249,3 +249,11 @@ function normalizeQuad(quad: Quad): [Quad, Transform] {
   const retQuad = quad.map(q => q.transform(transformToNormalized)) as [Vec2, Vec2, Vec2, Vec2]
   return [retQuad, transformToOriginal]
 }
+
+export function duplicateTexture(texture: Texture) {
+  const result = new Texture(context, {size: texture.size, pixelType: texture.pixelType, pixelFormat: texture.pixelFormat})
+  const drawTarget = new TextureDrawTarget(context, result)
+  drawTexture(drawTarget, texture, {blendMode: "src"})
+  drawTarget.dispose()
+  return result
+}
