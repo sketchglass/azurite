@@ -259,7 +259,7 @@ class Renderer {
 
       const {selection} = this.picture
       if (!selection.empty) {
-        if (texture.filter != filter) {
+        if (selection.texture.filter != filter) {
           selection.texture.filter = filter
         }
         this.selectionModel.uniforms = {
