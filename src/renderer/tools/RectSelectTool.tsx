@@ -8,20 +8,6 @@ import Tool, {ToolPointerEvent} from './Tool'
 import FrameDebounced from "../views/components/FrameDebounced"
 import {frameDebounce} from "../../lib/Debounce"
 
-class RectSelectOverlay extends FrameDebounced<{tool: RectSelectTool}, {}> {
-  renderDebounced() {
-    const {tool} = this.props
-    const {rect} = tool
-    if (!rect) {
-      return <g />
-    }
-    const vertices = new Rect(rect.topLeft.divScalar(devicePixelRatio), rect.bottomRight.divScalar(devicePixelRatio)).vertices()
-    return (
-      <polygon points={vertices.map(({x, y}) => `${x},${y}`).join(" ")} stroke="#888" fill="transparent" />
-    )
-  }
-}
-
 // TODO: move to paintvec
 function rectFromPoints(p0: Vec2, p1: Vec2) {
   const trueLeft = Math.min(p0.x, p1.x)
@@ -39,8 +25,9 @@ class RectSelectTool extends Tool {
   }
 
   selecting = false
+  dragging = false
   startPos = new Vec2()
-  @observable rect: Rect|undefined
+  currentPos = new Vec2()
 
   adding = false
 
@@ -56,7 +43,39 @@ class RectSelectTool extends Tool {
     }
 
     const {selection} = this.picture
+    this.resetData()
 
+    this.startPos = this.currentPos = ev.rendererPos.round()
+
+    if (selection.includes(ev.picturePos)) {
+      // move
+      this.dragging = true
+    } else {
+      // select
+      this.adding = ev.shiftKey
+      this.selecting = true
+
+      if (!this.adding) {
+        selection.clear()
+        this.renderer.wholeDirty = true
+        this.renderer.update()
+      }
+    }
+  }
+
+  move(ev: ToolPointerEvent) {
+    if (!this.picture || !(this.selecting || this.dragging)) {
+      return
+    }
+    this.currentPos = ev.rendererPos.round()
+    this.updateSelection()
+  }
+
+  resetData() {
+    if (!this.picture) {
+      return
+    }
+    const {selection} = this.picture
     if (!new Vec2(this.canvas.width, this.canvas.height).equals(selection.size)) {
       this.canvas.width = selection.size.width
       this.canvas.height = selection.size.height
@@ -66,51 +85,41 @@ class RectSelectTool extends Tool {
     }
 
     drawTexture(this.originalSelectionDrawTarget, selection.texture, {blendMode: "src"})
-
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
-
-    this.adding = ev.shiftKey
-    this.startPos = ev.rendererPos.round()
-    this.selecting = true
-
-    if (!this.adding) {
-      this.picture.selection.clear()
-      this.renderer.wholeDirty = true
-      this.renderer.update()
-    }
-  }
-
-  move(ev: ToolPointerEvent) {
-    if (!this.picture || !this.selecting) {
-      return
-    }
-    this.rect = rectFromPoints(this.startPos, ev.rendererPos.round())
-    this.updateSelection()
-
   }
 
   updateSelectionNow() {
-    if (!this.picture || !this.rect) {
+    if (!this.picture) {
       return
     }
-    this.context.setTransform(1, 0, 0, 1, 0, 0)
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
-
-    const transform = this.renderer.transformToPicture
-    this.context.setTransform(transform.m00, transform.m01, transform.m10, transform.m11, transform.m20, transform.m21)
-    this.context.fillStyle = "white"
-    this.context.fillRect(this.rect.left, this.rect.top, this.rect.width, this.rect.height)
-
-    this.canvasTexture.setImage(this.canvas)
-
     const {selection} = this.picture
 
-    if (this.adding) {
-      drawTexture(selection.drawTarget, this.originalSelectionTexture, {blendMode: "src"})
-      drawTexture(selection.drawTarget, this.canvasTexture, {blendMode: "src-over"})
-    } else {
-      drawTexture(selection.drawTarget, this.canvasTexture, {blendMode: "src"})
+    if (this.selecting && !this.startPos.equals(this.currentPos)) {
+      const rect = rectFromPoints(this.startPos, this.currentPos)
+
+      this.context.setTransform(1, 0, 0, 1, 0, 0)
+      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+
+      const transform = this.renderer.transformToPicture
+      this.context.setTransform(transform.m00, transform.m01, transform.m10, transform.m11, transform.m20, transform.m21)
+      this.context.fillStyle = "white"
+      this.context.fillRect(rect.left, rect.top, rect.width, rect.height)
+
+      this.canvasTexture.setImage(this.canvas)
+
+      if (this.adding) {
+        drawTexture(selection.drawTarget, this.originalSelectionTexture, {blendMode: "src"})
+        drawTexture(selection.drawTarget, this.canvasTexture, {blendMode: "src-over"})
+      } else {
+        drawTexture(selection.drawTarget, this.canvasTexture, {blendMode: "src"})
+      }
     }
+    if (this.dragging) {
+      const offset = this.currentPos.sub(this.startPos)
+      selection.clear()
+      drawTexture(selection.drawTarget, this.originalSelectionTexture, {blendMode: "src", transform: Transform.translate(offset)})
+    }
+
     selection.empty = false
     this.renderer.wholeDirty = true
     this.renderer.renderNow()
@@ -119,15 +128,11 @@ class RectSelectTool extends Tool {
   updateSelection = frameDebounce(() => this.updateSelectionNow())
 
   end(ev: ToolPointerEvent) {
-    if (!this.picture || !this.selecting) {
+    if (!this.picture || !(this.selecting || this.dragging)) {
       return
     }
     this.updateSelectionNow()
+    this.dragging = false
     this.selecting = false
-    this.rect = undefined
   }
-
-  // renderOverlayUI() {
-  //   return <RectSelectOverlay tool={this} />
-  // }
 }
