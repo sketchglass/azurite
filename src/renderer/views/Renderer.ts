@@ -53,6 +53,24 @@ class BoxShadowShader extends Shader {
 const SELECTION_DURATION = 100
 
 class SelectionShader extends Shader {
+  get additionalVertexShader() {
+    return `
+      varying vec2 vTexXOffset;
+      varying vec2 vTexYOffset;
+      uniform vec2 pictureSize;
+      uniform mat3 transformToPicture;
+
+      mat2 getScaleRotation(mat3 m) {
+        return mat2(m[0][0], m[0][1], m[1][0], m[1][1]);
+      }
+
+      void paintgl_additional() {
+        mat2 scaleRotation = getScaleRotation(transformToPicture);
+        vTexXOffset = scaleRotation * vec2(1.0, 0.0) / pictureSize;
+        vTexYOffset = scaleRotation * vec2(0.0, 1.0) / pictureSize;
+      }
+    `
+  }
   get fragmentShader() {
     return `
       precision highp float;
@@ -61,7 +79,8 @@ class SelectionShader extends Shader {
       uniform float milliseconds;
       uniform vec2 texelSize;
       varying vec2 vTexCoord;
-      varying vec2 vPosition;
+      varying vec2 vTexXOffset;
+      varying vec2 vTexYOffset;
 
       #define STRIPE_WIDTH 4.0
       #define STEP 2.0
@@ -73,7 +92,8 @@ class SelectionShader extends Shader {
           for (int y = -1; y <= 1; ++y) {
             for (int x = -1; x <= 1; ++x) {
               if (x != 0 && y != 0) {
-                float selection = texture2D(texture, vTexCoord + texelSize * vec2(x, y)).a;
+                vec2 texCoord = vTexCoord + vTexXOffset * float(x) + vTexYOffset * float(y);
+                float selection = texture2D(texture, texCoord).a;
                 if (selection != 0.0) {
                   isOutline = true;
                 }
@@ -240,9 +260,11 @@ class Renderer {
 
       if (!this.picture.selection.empty) {
         this.selectionModel.uniforms = {
-        texelSize: new Vec2(1).div(this.picture.size),
-        texture: this.picture.selection.texture,
-        milliseconds}
+          pictureSize: this.picture.size,
+          transformToPicture: this.transformToPicture,
+          texture: this.picture.selection.texture,
+          milliseconds
+        }
         this.selectionModel.transform = this.transformFromPicture
         drawTarget.draw(this.selectionModel)
       }
