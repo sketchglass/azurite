@@ -77,7 +77,6 @@ class SelectionShader extends Shader {
 
       uniform sampler2D texture;
       uniform float milliseconds;
-      uniform vec2 texelSize;
       varying vec2 vTexCoord;
       varying vec2 vTexXOffset;
       varying vec2 vTexYOffset;
