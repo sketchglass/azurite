@@ -26,8 +26,10 @@ class RectSelectTool extends Tool {
 
   selecting = false
   dragging = false
-  startPos = new Vec2()
-  currentPos = new Vec2()
+  startRendererPos = new Vec2()
+  currentRendererPos = new Vec2()
+  startPicturePos = new Vec2()
+  currentPicturePos = new Vec2()
 
   adding = false
 
@@ -45,7 +47,8 @@ class RectSelectTool extends Tool {
     const {selection} = this.picture
     this.resetData()
 
-    this.startPos = this.currentPos = ev.rendererPos.round()
+    this.startRendererPos = this.currentRendererPos = ev.rendererPos.round()
+    this.startPicturePos = this.currentPicturePos = ev.picturePos.round()
 
     if (selection.includes(ev.picturePos)) {
       // move
@@ -67,7 +70,8 @@ class RectSelectTool extends Tool {
     if (!this.picture || !(this.selecting || this.dragging)) {
       return
     }
-    this.currentPos = ev.rendererPos.round()
+    this.currentRendererPos = ev.rendererPos.round()
+    this.currentPicturePos = ev.picturePos.round()
     this.updateSelection()
   }
 
@@ -94,8 +98,8 @@ class RectSelectTool extends Tool {
     }
     const {selection} = this.picture
 
-    if (this.selecting && !this.startPos.equals(this.currentPos)) {
-      const rect = rectFromPoints(this.startPos, this.currentPos)
+    if (this.selecting && !this.startRendererPos.equals(this.currentRendererPos)) {
+      const rect = rectFromPoints(this.startRendererPos, this.currentRendererPos)
 
       this.context.setTransform(1, 0, 0, 1, 0, 0)
       this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
@@ -115,7 +119,7 @@ class RectSelectTool extends Tool {
       }
     }
     if (this.dragging) {
-      const offset = this.currentPos.sub(this.startPos)
+      const offset = this.currentPicturePos.sub(this.startPicturePos)
       selection.clear()
       drawTexture(selection.drawTarget, this.originalSelectionTexture, {blendMode: "src", transform: Transform.translate(offset)})
     }
