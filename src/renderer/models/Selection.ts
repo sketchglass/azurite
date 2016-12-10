@@ -8,7 +8,7 @@ export default
 class Selection {
   readonly texture = new Texture(context, {})
   readonly drawTarget = new TextureDrawTarget(context, this.texture)
-  @observable empty = true
+  @observable hasSelection = true
 
   get size() {
     return this.texture.size
@@ -27,6 +27,6 @@ class Selection {
 
   clear() {
     this.drawTarget.clear(new Color(0,0,0,0))
-    this.empty = true
+    this.hasSelection = false
   }
 }

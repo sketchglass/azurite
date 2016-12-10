@@ -15,7 +15,7 @@ class SelectionChangeCommand implements UndoCommand {
     const {selection} = this.picture
     if (texture) {
       drawTexture(selection.drawTarget, texture, {blendMode: "src"})
-      selection.empty = false
+      selection.hasSelection = true
     } else {
       selection.clear()
     }

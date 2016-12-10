@@ -80,7 +80,7 @@ class RectSelectTool extends Tool {
     if (!this.originalSelectionTexture.size.equals(selection.size)) {
       this.originalSelectionTexture.size = selection.size
     }
-    this.hasOriginal = !selection.empty
+    this.hasOriginal = selection.hasSelection
 
     drawTexture(this.originalSelectionDrawTarget, selection.texture, {blendMode: "src"})
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
@@ -118,7 +118,7 @@ class RectSelectTool extends Tool {
       drawTexture(selection.drawTarget, this.originalSelectionTexture, {blendMode: "src", transform: Transform.translate(offset)})
     }
 
-    selection.empty = false
+    selection.hasSelection = true
     this.renderer.wholeDirty = true
     this.renderer.renderNow()
   }
@@ -131,7 +131,7 @@ class RectSelectTool extends Tool {
     }
     const {selection} = this.picture
     const oldTexture = this.hasOriginal ? duplicateTexture(this.originalSelectionTexture) : undefined
-    const newTexture = !selection.empty ? duplicateTexture(this.canvasTexture) : undefined
+    const newTexture = selection.hasSelection ? duplicateTexture(this.canvasTexture) : undefined
     const command = new SelectionChangeCommand(this.picture, oldTexture, newTexture)
     this.picture.undoStack.push(command)
   }
