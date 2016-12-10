@@ -70,7 +70,7 @@ class RectSelectTool extends Tool {
 
 
     this.adding = ev.shiftKey
-    this.startPos = ev.rendererPos
+    this.startPos = ev.rendererPos.round()
     this.selecting = true
   }
 
@@ -78,7 +78,7 @@ class RectSelectTool extends Tool {
     if (!this.picture || !this.selecting) {
       return
     }
-    this.rect = rectFromPoints(this.startPos, ev.rendererPos)
+    this.rect = rectFromPoints(this.startPos, ev.rendererPos.round())
 
     this.context.setTransform(1, 0, 0, 1, 0, 0)
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
