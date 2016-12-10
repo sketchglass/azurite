@@ -8,6 +8,7 @@ import PanTool from "../tools/PanTool"
 import {ZoomTool} from "../tools/ZoomTool"
 import RotateTool from "../tools/RotateTool"
 import TransformLayerTool from "../tools/TransformLayerTool"
+import RectSelectTool from "../tools/RectSelectTool"
 import {HSVColor} from "../../lib/Color"
 import {PictureState} from "./PictureState"
 import * as IPCChannels from "../../common/IPCChannels"
@@ -35,6 +36,7 @@ class AppState {
     new ZoomTool(this),
     new RotateTool(this),
     new TransformLayerTool(this),
+    new RectSelectTool(this),
   ])
   @observable currentTool: Tool = this.tools[0]
   @observable overrideTool: Tool|undefined
