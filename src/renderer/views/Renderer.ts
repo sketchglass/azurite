@@ -205,7 +205,7 @@ class Renderer {
       this.update()
     })
     setInterval(() => {
-      if (this.picture && !this.picture.selection.empty && this.selectionAnimationEnabled) {
+      if (this.picture && this.picture.selection.hasSelection && this.selectionAnimationEnabled) {
         this.wholeDirty = true
         this.update()
       }
@@ -260,7 +260,7 @@ class Renderer {
       drawTarget.draw(this.model)
 
       const {selection} = this.picture
-      if (!selection.empty) {
+      if (selection.hasSelection) {
         if (selection.texture.filter != filter) {
           selection.texture.filter = filter
         }
