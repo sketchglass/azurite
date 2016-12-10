@@ -50,7 +50,7 @@ class BoxShadowShader extends Shader {
   }
 }
 
-const SELECTION_DURATION = 50
+const SELECTION_DURATION = 100
 
 class SelectionShader extends Shader {
   get fragmentShader() {
@@ -64,6 +64,7 @@ class SelectionShader extends Shader {
       varying vec2 vPosition;
 
       #define STRIPE_WIDTH 4.0
+      #define STEP 2.0
 
       void main(void) {
         bool isOutline = false;
@@ -83,7 +84,7 @@ class SelectionShader extends Shader {
 
         if (isOutline) {
           vec2 coord = gl_FragCoord.xy - vec2(0.5);
-          float d = coord.x + coord.y + floor(milliseconds / ${SELECTION_DURATION}.0);
+          float d = coord.x + coord.y + floor(milliseconds / ${SELECTION_DURATION}.0) * STEP;
           float stripe = mod(d / STRIPE_WIDTH, 2.0);
           if (stripe < 1.0) {
             gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
