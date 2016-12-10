@@ -131,6 +131,8 @@ class Renderer {
   @observable size = new Vec2(100, 100)
   background = new Color(46/255, 48/255, 56/255, 1)
 
+  @observable selectionAnimationEnabled = true
+
   private readonly wholeShape = new RectShape(context, {
     usage: "static",
   })
@@ -203,7 +205,7 @@ class Renderer {
       this.update()
     })
     setInterval(() => {
-      if (this.picture && !this.picture.selection.empty) {
+      if (this.picture && !this.picture.selection.empty && this.selectionAnimationEnabled) {
         this.wholeDirty = true
         this.update()
       }
