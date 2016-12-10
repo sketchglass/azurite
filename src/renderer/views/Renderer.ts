@@ -258,11 +258,15 @@ class Renderer {
       this.model.transform = this.transformFromPicture
       drawTarget.draw(this.model)
 
-      if (!this.picture.selection.empty) {
+      const {selection} = this.picture
+      if (!selection.empty) {
+        if (texture.filter != filter) {
+          selection.texture.filter = filter
+        }
         this.selectionModel.uniforms = {
           pictureSize: this.picture.size,
           transformToPicture: this.transformToPicture,
-          texture: this.picture.selection.texture,
+          texture: selection.texture,
           milliseconds
         }
         this.selectionModel.transform = this.transformFromPicture
