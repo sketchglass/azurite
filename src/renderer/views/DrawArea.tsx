@@ -125,7 +125,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     })
     this.tabletUpSubscription = IPCChannels.tabletUp.listen().subscribe(ev => {
       this.usingTablet = false
-      this.onUp()
+      this.onUp(this.toToolEvent(ev))
     })
 
     this.onResize()
@@ -243,7 +243,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
   onPointerUp = (ev: PointerEvent) => {
     if (!this.usingTablet) {
-      this.onUp()
+      this.onUp(this.toToolEvent(ev))
     }
     ev.preventDefault()
   }
@@ -258,9 +258,9 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       const rect = this.currentTool.move(ev)
     }
   }
-  onUp() {
+  onUp(ev: ToolPointerEvent) {
     if (this.currentTool) {
-      const rect = this.currentTool.end()
+      const rect = this.currentTool.end(ev)
       this.currentTool = undefined
     }
   }

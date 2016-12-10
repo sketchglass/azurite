@@ -8,6 +8,7 @@ import ThumbnailGenerator from "./ThumbnailGenerator"
 import LayerBlender from "./LayerBlender"
 import {UndoStack} from "./UndoStack"
 import {Navigation} from "./Navigation"
+import Selection from "./Selection"
 
 export
 interface PictureData {
@@ -35,6 +36,8 @@ class Picture {
     return new Vec2(this.dimension.width, this.dimension.height)
   }
   layerThumbnailGenerator: ThumbnailGenerator
+
+  selection: Selection
 
   readonly rootLayer = new Layer(this, "root", layer =>
     new GroupLayerContent(layer, [])
@@ -67,6 +70,9 @@ class Picture {
   constructor(dimension: PictureDimension) {
     reaction(() => this.size, () => this.onResize())
     this.dimension = dimension
+
+    this.selection = new Selection()
+    this.selection.texture.size = this.size
 
     const defaultLayer = new Layer(this, "Layer", layer => new ImageLayerContent(layer))
     this.layers.push(defaultLayer)

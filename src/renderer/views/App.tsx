@@ -30,6 +30,7 @@ const toolToIcon = (tool: Tool) => {
     "Rotate": "rotate",
     "Move": "transform",
     "Zoom": "search",
+    "Rectangle Select": "rect-select",
     "Canvas Area": "crop",
   }
   return <SVGIcon className={map[tool.name]} />

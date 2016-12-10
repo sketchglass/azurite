@@ -50,6 +50,74 @@ class BoxShadowShader extends Shader {
   }
 }
 
+const SELECTION_DURATION = 100
+
+class SelectionShader extends Shader {
+  get additionalVertexShader() {
+    return `
+      varying vec2 vTexXOffset;
+      varying vec2 vTexYOffset;
+      uniform vec2 pictureSize;
+      uniform mat3 transformToPicture;
+
+      mat2 getScaleRotation(mat3 m) {
+        return mat2(m[0][0], m[0][1], m[1][0], m[1][1]);
+      }
+
+      void paintgl_additional() {
+        mat2 scaleRotation = getScaleRotation(transformToPicture);
+        vTexXOffset = scaleRotation * vec2(1.0, 0.0) / pictureSize;
+        vTexYOffset = scaleRotation * vec2(0.0, 1.0) / pictureSize;
+      }
+    `
+  }
+  get fragmentShader() {
+    return `
+      precision highp float;
+
+      uniform sampler2D texture;
+      uniform float milliseconds;
+      varying vec2 vTexCoord;
+      varying vec2 vTexXOffset;
+      varying vec2 vTexYOffset;
+
+      #define STRIPE_WIDTH 4.0
+      #define STEP 2.0
+
+      void main(void) {
+        bool isOutline = false;
+
+        if (texture2D(texture, vTexCoord).a == 0.0) {
+          for (int y = -1; y <= 1; ++y) {
+            for (int x = -1; x <= 1; ++x) {
+              if (x != 0 && y != 0) {
+                vec2 texCoord = vTexCoord + vTexXOffset * float(x) + vTexYOffset * float(y);
+                float selection = texture2D(texture, texCoord).a;
+                if (selection != 0.0) {
+                  isOutline = true;
+                }
+              }
+            }
+          }
+        }
+
+        if (isOutline) {
+          vec2 coord = gl_FragCoord.xy - vec2(0.5);
+          float d = coord.x + coord.y + floor(milliseconds / ${SELECTION_DURATION}.0) * STEP;
+          float stripe = mod(d / STRIPE_WIDTH, 2.0);
+          if (stripe < 1.0) {
+            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+          } else {
+            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+          }
+        } else {
+          gl_FragColor = vec4(0.0);
+        }
+      }
+    `
+  }
+}
+
 export default
 class Renderer {
   @observable picture: Picture|undefined
@@ -63,12 +131,18 @@ class Renderer {
   @observable size = new Vec2(100, 100)
   background = new Color(46/255, 48/255, 56/255, 1)
 
+  @observable selectionAnimationEnabled = true
+
   private readonly wholeShape = new RectShape(context, {
     usage: "static",
   })
   private readonly boxShadowModel = new Model(context, {
     shape: this.wholeShape,
     shader: BoxShadowShader,
+  })
+  private readonly selectionModel = new Model(context, {
+    shape: this.shape,
+    shader: SelectionShader,
   })
 
   @computed get pictureSize() {
@@ -103,6 +177,7 @@ class Renderer {
 
   wholeDirty = true
   dirtyRect: Rect|undefined
+  startupTime = Date.now()
 
   constructor() {
     reaction(() => this.picture, picture => {
@@ -129,6 +204,12 @@ class Renderer {
     reaction(() => this.picture && this.picture.lastUpdate, update => {
       this.update()
     })
+    setInterval(() => {
+      if (this.picture && !this.picture.selection.empty && this.selectionAnimationEnabled) {
+        this.wholeDirty = true
+        this.update()
+      }
+    }, SELECTION_DURATION)
   }
 
   addDirtyRect(rect: Rect) {
@@ -142,6 +223,7 @@ class Renderer {
   update = frameDebounce(() => this.renderNow())
 
   renderNow() {
+    const milliseconds = Date.now() - this.startupTime
     if (this.picture) {
       const {layerBlender} = this.picture
       if (layerBlender.wholeDirty) {
@@ -176,6 +258,21 @@ class Renderer {
       }
       this.model.transform = this.transformFromPicture
       drawTarget.draw(this.model)
+
+      const {selection} = this.picture
+      if (!selection.empty) {
+        if (selection.texture.filter != filter) {
+          selection.texture.filter = filter
+        }
+        this.selectionModel.uniforms = {
+          pictureSize: this.picture.size,
+          transformToPicture: this.transformToPicture,
+          texture: selection.texture,
+          milliseconds
+        }
+        this.selectionModel.transform = this.transformFromPicture
+        drawTarget.draw(this.selectionModel)
+      }
     }
     this.dirtyRect = undefined
     this.wholeDirty = false

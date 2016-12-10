@@ -8,6 +8,7 @@ import PanTool from "../tools/PanTool"
 import {ZoomTool} from "../tools/ZoomTool"
 import RotateTool from "../tools/RotateTool"
 import TransformLayerTool from "../tools/TransformLayerTool"
+import RectSelectTool from "../tools/RectSelectTool"
 import CanvasAreaTool from "../tools/CanvasAreaTool"
 import {HSVColor} from "../../lib/Color"
 import {PictureState} from "./PictureState"
@@ -36,6 +37,7 @@ class AppState {
     new ZoomTool(this),
     new RotateTool(this),
     new TransformLayerTool(this),
+    new RectSelectTool(this),
     new CanvasAreaTool(this),
   ])
   @observable currentTool: Tool = this.tools[0]

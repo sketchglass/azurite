@@ -145,6 +145,8 @@ abstract class BaseBrushTool extends Tool {
     this.lastStabilizeWaypoints = []
     this.lastInterpolateWaypoints = []
 
+    this.renderer.selectionAnimationEnabled = false
+
     this.stabilizeMove(new Waypoint(ev.picturePos, ev.pressure))
   }
 
@@ -159,6 +161,7 @@ abstract class BaseBrushTool extends Tool {
       this.targetContent.updateThumbnail()
       this.targetContent = undefined
     }
+    this.renderer.selectionAnimationEnabled = true
   }
 
   stabilizeMove(waypoint: Waypoint) {
