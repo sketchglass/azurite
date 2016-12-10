@@ -62,7 +62,7 @@
     "mobx": "^2.6.3",
     "mobx-react": "^4.0.3",
     "msgpack-lite": "^0.1.26",
-    "paintgl": "github:sketchglass/paintgl#3851b8ff9eae82e559d3e288d13a45af50db214e",
+    "paintgl": "github:sketchglass/paintgl#62a702369b278b2c1cf6980f0695b3c80874e215",
     "paintvec": "github:sketchglass/paintvec#095b7ce53d6fa635964f132bd29b84240758dbc1",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",

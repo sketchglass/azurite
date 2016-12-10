@@ -71,7 +71,8 @@ class Picture {
     reaction(() => this.size, () => this.onResize())
     this.dimension = dimension
 
-    this.selection = new Selection(this.size)
+    this.selection = new Selection()
+    this.selection.texture.size = this.size
 
     const defaultLayer = new Layer(this, "Layer", layer => new ImageLayerContent(layer))
     this.layers.push(defaultLayer)

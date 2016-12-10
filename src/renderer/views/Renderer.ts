@@ -50,6 +50,21 @@ class BoxShadowShader extends Shader {
   }
 }
 
+class SelectionShader extends Shader {
+  get fragmentShader() {
+    return `
+      precision highp float;
+      uniform sampler2D texture;
+      varying vec2 vTexCoord;
+      void main(void) {
+        vec4 color = texture2D(texture, vTexCoord);
+        // blue
+        gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0) * (color.a * 0.5);
+      }
+    `
+  }
+}
+
 export default
 class Renderer {
   @observable picture: Picture|undefined
@@ -69,6 +84,10 @@ class Renderer {
   private readonly boxShadowModel = new Model(context, {
     shape: this.wholeShape,
     shader: BoxShadowShader,
+  })
+  private readonly selectionModel = new Model(context, {
+    shape: this.shape,
+    shader: SelectionShader,
   })
 
   @computed get pictureSize() {
@@ -176,6 +195,10 @@ class Renderer {
       }
       this.model.transform = this.transformFromPicture
       drawTarget.draw(this.model)
+
+      this.selectionModel.uniforms = {texture: this.picture.selection.texture}
+      this.selectionModel.transform = this.transformFromPicture
+      drawTarget.draw(this.selectionModel)
     }
     this.dirtyRect = undefined
     this.wholeDirty = false
