@@ -54,12 +54,44 @@ class SelectionShader extends Shader {
   get fragmentShader() {
     return `
       precision highp float;
+
       uniform sampler2D texture;
+      uniform float milliseconds;
+      uniform vec2 texelSize;
       varying vec2 vTexCoord;
+      varying vec2 vPosition;
+
+      #define STRIPE_WIDTH 4.0
+      #define DURATION_MS 50.0
+
       void main(void) {
-        vec4 color = texture2D(texture, vTexCoord);
-        // blue
-        gl_FragColor = vec4(0.0, 0.0, 1.0, 1.0) * (color.a * 0.5);
+        bool isOutline = false;
+
+        if (texture2D(texture, vTexCoord).a == 0.0) {
+          for (int y = -1; y <= 1; ++y) {
+            for (int x = -1; x <= 1; ++x) {
+              if (x != 0 && y != 0) {
+                float selection = texture2D(texture, vTexCoord + texelSize * vec2(x, y)).a;
+                if (selection != 0.0) {
+                  isOutline = true;
+                }
+              }
+            }
+          }
+        }
+
+        if (isOutline) {
+          vec2 coord = gl_FragCoord.xy - vec2(0.5);
+          float d = coord.x + coord.y + floor(milliseconds / DURATION_MS);
+          float stripe = mod(d / STRIPE_WIDTH, 2.0);
+          if (stripe < 1.0) {
+            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
+          } else {
+            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
+          }
+        } else {
+          gl_FragColor = vec4(0.0);
+        }
       }
     `
   }
@@ -122,6 +154,7 @@ class Renderer {
 
   wholeDirty = true
   dirtyRect: Rect|undefined
+  startupTime = Date.now()
 
   constructor() {
     reaction(() => this.picture, picture => {
@@ -161,6 +194,7 @@ class Renderer {
   update = frameDebounce(() => this.renderNow())
 
   renderNow() {
+    const milliseconds = Date.now() - this.startupTime
     if (this.picture) {
       const {layerBlender} = this.picture
       if (layerBlender.wholeDirty) {
@@ -196,7 +230,10 @@ class Renderer {
       this.model.transform = this.transformFromPicture
       drawTarget.draw(this.model)
 
-      this.selectionModel.uniforms = {texture: this.picture.selection.texture}
+      this.selectionModel.uniforms = {
+        texelSize: new Vec2(1).div(this.picture.size),
+        texture: this.picture.selection.texture,
+        milliseconds}
       this.selectionModel.transform = this.transformFromPicture
       drawTarget.draw(this.selectionModel)
     }
