@@ -6,6 +6,7 @@ import {context} from "../GLContext"
 import {drawTexture} from "../GLUtil"
 import Tool, {ToolPointerEvent} from './Tool'
 import FrameDebounced from "../views/components/FrameDebounced"
+import {frameDebounce} from "../../lib/Debounce"
 
 class RectSelectOverlay extends FrameDebounced<{tool: RectSelectTool}, {}> {
   renderDebounced() {
@@ -68,7 +69,6 @@ class RectSelectTool extends Tool {
 
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
-
     this.adding = ev.shiftKey
     this.startPos = ev.rendererPos.round()
     this.selecting = true
@@ -79,7 +79,13 @@ class RectSelectTool extends Tool {
       return
     }
     this.rect = rectFromPoints(this.startPos, ev.rendererPos.round())
+    this.updateSelection()
+  }
 
+  updateSelectionNow() {
+    if (!this.picture || !this.rect) {
+      return
+    }
     this.context.setTransform(1, 0, 0, 1, 0, 0)
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
@@ -99,13 +105,16 @@ class RectSelectTool extends Tool {
       drawTexture(selection.drawTarget, this.canvasTexture, {blendMode: "src"})
     }
     this.renderer.wholeDirty = true
-    this.renderer.update()
+    this.renderer.renderNow()
   }
+
+  updateSelection = frameDebounce(() => this.updateSelectionNow())
 
   end(ev: ToolPointerEvent) {
     if (!this.picture || !this.selecting) {
       return
     }
+    this.updateSelectionNow()
     this.selecting = false
     this.rect = undefined
   }
