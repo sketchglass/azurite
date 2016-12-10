@@ -42,4 +42,7 @@
     mask: url("../../../bundles/icons/flaticon/svg/circuit-9.svg");
     transform: scaleX(-1);
   }
+  &.crop {
+    mask: url("../../../bundles/icons/flaticon/svg/crop.svg");
+  }
 }

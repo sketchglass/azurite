@@ -124,8 +124,26 @@ body {
 }
 
 .TransformLayerSettings {
+  margin: 0 8px;
   & .Button {
-    width: 64px;
     margin-right: 8px;
+  }
+}
+
+.CanvasAreaToolSettings {
+  margin: 0 8px;
+  display: flex;
+  flex-direction: column;
+  & .DimensionSelect_Value > :nth-child(1) {
+    width: 64px;
+  }
+  &_buttons {
+    margin-top: 8px;
+    margin-right: 8px;
+    align-self: flex-end;
+    display: flex;
+    & > * {
+      margin-left: 8px;
+    }
   }
 }
