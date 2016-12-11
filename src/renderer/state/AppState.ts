@@ -1,6 +1,5 @@
 import {observable, computed, reaction} from "mobx"
 import {remote} from "electron"
-import Picture from "../models/Picture"
 import Tool from "../tools/Tool"
 import BrushTool from "../tools/BrushTool"
 import WatercolorTool from "../tools/WatercolorTool"

@@ -3,11 +3,9 @@ const {Menu, app} = remote
 type MenuItem = Electron.MenuItem
 type BrowserWindow = Electron.BrowserWindow
 type MenuItemOptions = Electron.MenuItemOptions
-import {observable, computed, autorun} from "mobx"
+import {computed, autorun} from "mobx"
 import {appState} from "../state/AppState"
 import {undoState} from "../state/UndoState"
-import Picture from "../models/Picture"
-import {PictureExportFormat} from "../services/PictureExport"
 
 class MenuBar {
   @computed get pictureState() {

@@ -1,6 +1,5 @@
 import {Vec2, Rect} from "paintvec"
-import {Texture, TextureDrawTarget, Color, RectShape, } from "paintgl"
-import TextureToCanvas from "./TextureToCanvas"
+import {Texture, TextureDrawTarget, Color} from "paintgl"
 import TiledTexture from "./TiledTexture"
 import {context} from "../GLContext"
 import {drawTexture} from "../GLUtil"

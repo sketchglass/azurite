@@ -1,6 +1,5 @@
 import {Vec2} from "paintvec"
 import Tool, {ToolPointerEvent} from './Tool'
-import Waypoint from "../models/Waypoint"
 
 export default
 class RotateTool extends Tool {
@@ -30,7 +29,6 @@ class RotateTool extends Tool {
     if (ev.button == 2) {
       return
     }
-    const {translation, scale} = this.picture.navigation
     const angle = this.posAngle(ev.rendererPos)
     const rotation = angle - this.originalAngle + this.originalRotation
     this.picture.navigation.setNormalizedRotation(rotation)

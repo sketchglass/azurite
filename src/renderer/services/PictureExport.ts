@@ -3,7 +3,6 @@ import Picture from "../models/Picture"
 import TextureToCanvas from "../models/TextureToCanvas"
 import {remote} from "electron"
 const {dialog} = remote
-import * as path from "path"
 import * as fs from "fs"
 
 async function blobToBuffer(blob: Blob) {

@@ -1,5 +1,4 @@
 import React = require("react")
-import ReactDOM = require("react-dom")
 import {observer} from "mobx-react"
 import {PictureDimension} from "../../models/Picture"
 import DimensionSelect from "../DimensionSelect"

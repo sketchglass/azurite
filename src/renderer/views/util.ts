@@ -1,5 +1,3 @@
-import {Vec2} from "paintvec"
-
 export
 function isTextInput(elem: Element) {
   if (elem instanceof HTMLTextAreaElement) {

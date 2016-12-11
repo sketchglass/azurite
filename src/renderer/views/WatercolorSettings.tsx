@@ -1,7 +1,6 @@
 import {observer} from "mobx-react"
 import React = require("react")
 import WatercolorTool from "../tools/WatercolorTool"
-import {parseHexColor, toHexColor} from "../../lib/Color"
 import RangeSlider from "./components/RangeSlider"
 
 interface WatercolorSettingsProps {

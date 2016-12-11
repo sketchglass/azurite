@@ -1,7 +1,6 @@
 import * as path from "path"
 import {observable, computed, reaction, action} from "mobx"
 import {Vec2, Rect} from "paintvec"
-import {Texture} from "paintgl"
 import Layer, {LayerData} from "./Layer"
 import {GroupLayerContent, ImageLayerContent} from "./LayerContent"
 import ThumbnailGenerator from "./ThumbnailGenerator"

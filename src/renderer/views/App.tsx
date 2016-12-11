@@ -11,14 +11,13 @@ import ColorPicker from "./components/ColorPicker"
 import Palette from "./components/Palette"
 import Navigator from "./Navigator"
 import RGBRangeSliders from "./components/RGBRangeSliders"
-import {DraggablePanel, DraggablePanelContainer} from "./components/DraggablePanel"
 import {PictureTabBar} from "./PictureTabBar"
 import {HSVColor} from "../../lib/Color"
 import NavigationKeyBinding from "./NavigationKeyBinding"
 import {appState} from "../state/AppState"
 import {remote} from "electron"
 import SVGIcon from "./components/SVGIcon"
-const {Menu, app} = remote
+const {Menu} = remote
 import "./MenuBar"
 import "../../styles/main.css"
 

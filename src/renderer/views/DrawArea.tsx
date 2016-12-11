@@ -1,11 +1,10 @@
-import {observable, autorun, action, observe} from "mobx"
+import {observable, autorun} from "mobx"
 import {observer} from "mobx-react"
 import {Subscription} from "rxjs/Subscription"
 import React = require("react")
 import Picture from "../models/Picture"
 import {Vec2, Transform} from "paintvec"
 import Tool, {ToolPointerEvent} from "../tools/Tool"
-import Waypoint from "../models/Waypoint"
 import {TabletEvent} from "receive-tablet-event"
 import {canvas} from "../GLContext"
 import {renderer} from "./Renderer"
@@ -42,7 +41,7 @@ class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined}, {}> {
     if (!picture) {
       return
     }
-    const {scale, rotation, translation} = picture.navigation
+    const {scale, rotation} = picture.navigation
     const rendererTranslation = this.originalRendererTranslation.sub(offset)
     picture.navigation.translation = rendererTranslation.transform(Transform.scale(new Vec2(1 / scale)).rotate(-rotation)).floor()
   }
@@ -134,7 +133,6 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
 
   componentWillUnmount() {
-    const element = this.element!
     this.tabletDownSubscription.unsubscribe()
     this.tabletMoveSubscription.unsubscribe()
     this.tabletUpSubscription.unsubscribe()
@@ -250,17 +248,17 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   onDown(ev: ToolPointerEvent) {
     this.element && this.element.focus()
     const {tool} = this.props
-    const rect = tool.start(ev)
+    tool.start(ev)
     this.currentTool = tool
   }
   onMove(ev: ToolPointerEvent) {
     if (this.currentTool) {
-      const rect = this.currentTool.move(ev)
+      this.currentTool.move(ev)
     }
   }
   onUp(ev: ToolPointerEvent) {
     if (this.currentTool) {
-      const rect = this.currentTool.end(ev)
+      this.currentTool.end(ev)
       this.currentTool = undefined
     }
   }

@@ -1,6 +1,5 @@
 import {Vec2} from "paintvec"
 import Tool, {ToolPointerEvent} from './Tool'
-import Waypoint from "../models/Waypoint"
 
 export
 class ZoomInTool extends Tool {

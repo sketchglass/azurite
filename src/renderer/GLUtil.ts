@@ -1,5 +1,5 @@
 import {Vec2, Rect, Transform} from "paintvec"
-import {Model, Texture, Shader, RectShape, QuadShape, TextureShader, DrawTarget, TextureDrawTarget, PixelType, BlendMode} from "paintgl"
+import {Model, Texture, Shader, RectShape, QuadShape, TextureShader, DrawTarget, TextureDrawTarget, BlendMode} from "paintgl"
 import {context} from "./GLContext"
 
 // http://www.java-gaming.org/index.php?topic=35123.0
