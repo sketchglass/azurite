@@ -197,7 +197,7 @@ class RemoveLayerCommand implements UndoCommand {
     const nextLayer = this.picture.layerFromPath(nextPath)
     const prevLayer = this.picture.layerFromPath(prevPath)
     const parentLayer = this.picture.layerFromPath(parentPath)
-    const selectedLayers = nextLayer? [nextLayer] : prevLayer ? [prevLayer] : parentLayer ? [parentLayer] : []
+    const selectedLayers = nextLayer ? [nextLayer] : prevLayer ? [prevLayer] : parentLayer ? [parentLayer] : []
     this.picture.selectedLayers.replace(selectedLayers)
   }
 }

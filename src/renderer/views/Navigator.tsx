@@ -196,7 +196,7 @@ class Navigator extends React.Component<NavigatorProps, {}> {
         <NavigatorMinimap />
         <div className="Navigator_sliderRow">
           <button onClick={this.onZoomOut}><SVGIcon className="zoom-out" /></button>
-          <input type="range" min={-3} max={5} step={1/8} onChange={this.onScaleChange} value={scaleLog} />
+          <input type="range" min={-3} max={5} step={1 / 8} onChange={this.onScaleChange} value={scaleLog} />
           <button onClick={this.onZoomIn}><SVGIcon className="zoom-in" /></button>
           <button className="Navigator_reset" onClick={this.onZoomReset} />
           {(scale * 100).toFixed(scale < 1 ? 1 : 0)}%

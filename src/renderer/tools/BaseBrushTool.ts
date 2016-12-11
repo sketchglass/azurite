@@ -79,8 +79,8 @@ abstract class BaseBrushTool extends Tool {
     const center = canvasSize / 2
     this._cursorElement.width = canvasSize
     this._cursorElement.height = canvasSize
-    this._cursorElement.style.width = `${canvasSize/dpr}px`
-    this._cursorElement.style.height = `${canvasSize/dpr}px`
+    this._cursorElement.style.width = `${canvasSize / dpr}px`
+    this._cursorElement.style.height = `${canvasSize / dpr}px`
 
     const context = this.cursorContext
 

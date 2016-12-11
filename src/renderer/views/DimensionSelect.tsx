@@ -7,7 +7,7 @@ interface DimensionSelectProps {
   state: DimensionSelectState
 }
 
-function toFixedNumber(x: number, digits: number){
+function toFixedNumber(x: number, digits: number) {
   const pow = Math.pow(10, digits)
   return Math.round(x * pow) / pow
 }

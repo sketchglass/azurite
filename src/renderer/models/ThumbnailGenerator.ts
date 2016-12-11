@@ -65,7 +65,7 @@ class ThumbnailGenerator {
   }
 
   private clear() {
-    this.drawTarget.clear(new Color(1,1,1,1))
+    this.drawTarget.clear(new Color(1, 1, 1, 1))
   }
 
   private readToThumbnail() {

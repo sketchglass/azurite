@@ -45,7 +45,7 @@ class FlipPictureCommand {
 
 export
 class Rotate90PictureCommand {
-  title = this.direction == "left" ? "Rotate Canvas 90° Left": "Rotate Canvas 90° Right"
+  title = this.direction == "left" ? "Rotate Canvas 90° Left" : "Rotate Canvas 90° Right"
 
   constructor(public picture: Picture, public direction: "left"|"right") {
   }

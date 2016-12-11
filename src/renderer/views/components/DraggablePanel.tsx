@@ -69,7 +69,7 @@ class Panel extends React.Component<PanelProps, void> {
     this.offsetY = pageY - top
   }
   onPointerMove = (e: PointerEvent) => {
-    if(this.dragging) {
+    if (this.dragging) {
       this.onDrag(e)
     }
   }
@@ -130,7 +130,7 @@ export class DraggablePanelContainer extends React.Component<DraggablePanelConta
   previewState: PreviewState
   componentWillMount() {
     React.Children.forEach(this.props.children!, (_child, i) => {
-      if(_child["props"] && _child["props"]["label"]) {
+      if (_child["props"] && _child["props"]["label"]) {
         const child = _child as React.ReactElement<DraggablePanelProps & { children?: React.ReactNode }>
         const order = i
         this.childrenState[i] = {
@@ -155,7 +155,7 @@ export class DraggablePanelContainer extends React.Component<DraggablePanelConta
     this.onChildrenOrderUpdate()
   }
   onChildrenOrderUpdate = () => {
-    for(let s of this.childrenState) {
+    for (let s of this.childrenState) {
       const top = this.childrenState.filter(x => { return x.order < s.order }).map(x => { return x.height }).reduce((a, b) => {
         return a + b + this.props.labelHeight + this.props.margin
       }, this.props.top)
@@ -180,7 +180,7 @@ export class DraggablePanelContainer extends React.Component<DraggablePanelConta
     childState.top = y
     childState.dragging = true
     const swapTargets = this.getSwapTargets(childState, x, y)
-    if(swapTargets.length) {
+    if (swapTargets.length) {
       this.previewState.top = swapTargets[0].top
       this.previewState.left = swapTargets[0].left
       this.previewState.height = swapTargets[0].height + this.props.labelHeight
@@ -193,7 +193,7 @@ export class DraggablePanelContainer extends React.Component<DraggablePanelConta
   }
   onChildDrop = (childState: ChildState, x: number, y: number) => {
     const swapTargets = this.getSwapTargets(childState, x, y)
-    if(swapTargets.length) {
+    if (swapTargets.length) {
       this.swapChild(childState, swapTargets[0])
       childState.left = childState.initialLeft
       this.onChildrenOrderUpdate()
@@ -207,7 +207,7 @@ export class DraggablePanelContainer extends React.Component<DraggablePanelConta
   }
   render() {
     const children = React.Children.map(this.props.children!, (_child, i) => {
-      if(_child["props"] && _child["props"]["label"]) {
+      if (_child["props"] && _child["props"]["label"]) {
         const child = _child as React.ReactElement<DraggablePanelProps & { children?: React.ReactNode }>
         const currentIndex = i
         const result = (

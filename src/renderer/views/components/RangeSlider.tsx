@@ -71,7 +71,7 @@ export default class RangeSlider extends React.Component<RangeSliderProps, void>
   }
   onPointerMove = (e: PointerEvent) => {
     e.preventDefault()
-    if(this.clicking) {
+    if (this.clicking) {
       this.onChange(e)
     }
   }

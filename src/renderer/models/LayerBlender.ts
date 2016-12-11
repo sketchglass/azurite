@@ -72,7 +72,7 @@ const tileShape = new RectShape(context, {
   rect: Tile.rect
 })
 const tileBlendModels = new Map(Array.from(blendOps).map(([type, op]) => {
-  class shader extends BlendShader {
+  const shader = class extends BlendShader {
     get blendOp() {
       return op
     }
@@ -270,7 +270,7 @@ class LayerBlender {
     tileBlenders[depth].clear()
     let rendered = false
     for (let i = layers.length - 1; i >= 0; --i) {
-      const childRendered = this.renderLayer(layers[i], layers[i-1], key, scissor, depth)
+      const childRendered = this.renderLayer(layers[i], layers[i - 1], key, scissor, depth)
       rendered = rendered || childRendered
     }
     return rendered

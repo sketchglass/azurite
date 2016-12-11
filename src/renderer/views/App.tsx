@@ -103,7 +103,7 @@ class App extends React.Component<{}, {}> {
     })
     const onPaletteChange = action((e: React.MouseEvent<Element>, index: number) => {
       appState.paletteIndex = index
-      if(e.shiftKey) {
+      if (e.shiftKey) {
         appState.palette[index] = appState.color
       } else {
         appState.color = appState.palette[index]
