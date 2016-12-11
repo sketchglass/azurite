@@ -39,7 +39,7 @@ class IPCToMain<T> {
     return Observable.create((observer: Observer<T>) => {
       const {ipcMain} = Electron
       const callback = (ev: Electron.IpcMainEvent, value: T) => {
-        if (!sender || ev.sender == sender) {
+        if (!sender || ev.sender === sender) {
           observer.next(value)
         }
       }

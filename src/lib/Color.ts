@@ -9,9 +9,9 @@ export function parseHexColor(color: string) {
 
 export function toHexColor(color: Color) {
   const {r, g, b} = color
-  return '#' + [r, g, b].map(c => {
+  return "#" + [r, g, b].map(c => {
     const str = Math.round(c * 255).toString(16)
-    return str.length == 1 ? "0" + str : str
+    return str.length === 1 ? "0" + str : str
   }).join("")
 }
 

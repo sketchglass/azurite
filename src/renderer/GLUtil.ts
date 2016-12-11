@@ -91,7 +91,7 @@ function drawTexture(dst: DrawTarget, src: Texture, params: DrawTextureParams) {
   const transform = params.transform || new Transform()
   const {bicubic} = params
 
-  if (bicubic && src.filter != "bilinear" && src.filter != "mipmap-bilinear") {
+  if (bicubic && src.filter !== "bilinear" && src.filter !== "mipmap-bilinear") {
     console.warn("src texture filter must be bilinear")
   }
 
@@ -127,11 +127,11 @@ function drawTexture(dst: DrawTarget, src: Texture, params: DrawTextureParams) {
 
 function isTransformIntTranslation(transform: Transform) {
   const {m20, m21} = transform
-  return transform.isTranslation() && Math.floor(m20) == m20 && Math.floor(m21) == m21
+  return transform.isTranslation() && Math.floor(m20) === m20 && Math.floor(m21) === m21
 }
 
 function verticesEquals(xs: Vec2[], ys: Vec2[]) {
-  if (xs.length != ys.length) {
+  if (xs.length !== ys.length) {
     return false
   }
   for (let i = 0; i < xs.length; ++i) {

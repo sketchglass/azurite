@@ -2,9 +2,9 @@
 
 export
 function float32To16(x: number) {
-  var bits = (x >> 16) & 0x8000; /* Get the sign */
-  var m = (x >> 12) & 0x07ff; /* Keep one extra bit for rounding */
-  var e = (x >> 23) & 0xff; /* Using int is faster here */
+  let bits = (x >> 16) & 0x8000; /* Get the sign */
+  let m = (x >> 12) & 0x07ff; /* Keep one extra bit for rounding */
+  let e = (x >> 23) & 0xff; /* Using int is faster here */
 
   /* If zero, or denormal, or exponent underflows too much for a denormal
    * half, return signed zero. */
@@ -17,7 +17,7 @@ function float32To16(x: number) {
     bits |= 0x7c00;
     /* If exponent was 0xff and one mantissa bit was set, it means NaN,
          * not Inf, so make sure we set one mantissa bit too. */
-    bits |= ((e == 255) ? 0 : 1) && (x & 0x007fffff);
+    bits |= ((e === 255) ? 0 : 1) && (x & 0x007fffff);
     return bits;
   }
 
