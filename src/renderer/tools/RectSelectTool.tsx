@@ -40,12 +40,12 @@ class RectSelectTool extends Tool {
     this.startRendererPos = this.currentRendererPos = ev.rendererPos.round()
     this.startPicturePos = this.currentPicturePos = ev.picturePos.round()
 
-    if (selection.includes(ev.picturePos)) {
+    this.adding = ev.shiftKey
+    if (selection.includes(ev.picturePos) && !this.adding) {
       // move
       this.dragging = true
     } else {
       // select
-      this.adding = ev.shiftKey
       this.selecting = true
 
       if (!this.adding) {
