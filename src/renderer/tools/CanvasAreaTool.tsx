@@ -31,7 +31,6 @@ class CanvasAreaOverlayUI extends FrameDebounced<{tool: CanvasAreaTool}, {}> {
 
     const vertices = rect.vertices().map(transformPos)
 
-    const polygonPoints = vertices.map(v => `${v.x},${v.y}`).join(" ")
     const [topLeft, topRight, bottomRight, bottomLeft] = vertices
     const handlePositions = [
       topLeft,

@@ -5,7 +5,7 @@ import {UndoCommand} from "../models/UndoStack"
 import Picture from "../models/Picture"
 import Layer, {LayerProps} from "../models/Layer"
 import {ImageLayerContent, GroupLayerContent} from "../models/LayerContent"
-import TiledTexture, {Tile} from "../models/TiledTexture"
+import TiledTexture from "../models/TiledTexture"
 import {context} from "../GLContext"
 
 function getSiblingsAndIndex(picture: Picture, path: number[]): [IObservableArray<Layer>, number] {

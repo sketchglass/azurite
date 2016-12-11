@@ -1,7 +1,6 @@
 import {observer} from "mobx-react"
 import React = require("react")
 import BrushTool from "../tools/BrushTool"
-import {parseHexColor, toHexColor} from "../../lib/Color"
 import RangeSlider from "./components/RangeSlider"
 
 interface BrushSettingsProps {

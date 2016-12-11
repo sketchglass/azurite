@@ -30,7 +30,7 @@ class DimensionSelect extends React.Component<DimensionSelectProps, {} > {
     const {
       widthRounded, heightRounded,
       widthCurrentUnit, heightCurrentUnit,
-      dpi, unit, keepRatio, tooLarge, isValid, lastSelectedPreset, presets
+      dpi, unit, keepRatio, tooLarge, lastSelectedPreset, presets
     } = this.props.state
     const digits = this.digitsForUnit(unit)
     const step = Math.pow(10, -digits)

@@ -1,5 +1,4 @@
-import {observable, action, IObservableArray, IArrayChange, IArraySplice} from "mobx"
-import Picture from "./Picture"
+import {observable, action, IArrayChange, IArraySplice} from "mobx"
 import Layer, {LayerData} from "./Layer"
 import TiledTexture, {TiledTextureData} from "./TiledTexture"
 

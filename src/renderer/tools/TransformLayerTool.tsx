@@ -1,17 +1,15 @@
 import * as React from "react"
-import {reaction, observable, computed, action} from "mobx"
+import {reaction, computed, action} from "mobx"
 import {observer} from "mobx-react"
 import {Vec2, Rect, Transform} from "paintvec"
 import {TextureDrawTarget, Color, Texture} from "paintgl"
-import Picture from "../models/Picture"
 import Layer from "../models/Layer"
-import TiledTexture, {Tile} from "../models/TiledTexture"
-import Tool, {ToolPointerEvent} from './Tool'
+import {Tile} from "../models/TiledTexture"
+import {ToolPointerEvent} from './Tool'
 import {drawTexture} from "../GLUtil"
 import {context} from "../GLContext"
 import {AppState} from "../state/AppState"
 import {TransformLayerCommand} from "../commands/LayerCommand"
-import {UndoStack, UndoCommand} from "../models/UndoStack"
 import FrameDebounced from "../views/components/FrameDebounced"
 import RectMoveTool, {DragType} from "./RectMoveTool"
 

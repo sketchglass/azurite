@@ -1,16 +1,13 @@
 import {observable, action, autorun, computed} from "mobx"
-import {Vec2, Rect, Transform} from "paintvec"
-import {Texture, TextureDrawTarget, Color} from "paintgl"
+import {Vec2, Rect} from "paintvec"
+import {Texture, TextureDrawTarget} from "paintgl"
 import Waypoint from "../models/Waypoint"
 import Tool, {ToolPointerEvent} from "./Tool"
 import Layer from "../models/Layer"
 import {ImageLayerContent} from "../models/LayerContent"
 import TiledTexture, {Tile} from "../models/TiledTexture"
-import {TileBlender} from "../models/LayerBlender"
-import Picture from "../models/Picture"
 import {ChangeLayerImageCommand} from "../commands/LayerCommand"
 import {context} from "../GLContext"
-import {drawTexture} from "../GLUtil"
 import {AppState} from "../state/AppState"
 import {float32ArrayTo16} from "../../lib/Float"
 
@@ -121,7 +118,6 @@ abstract class BaseBrushTool extends Tool {
   replaceTile(layer: Layer, tileKey: Vec2): {replaced: boolean, tile?: Tile} {
     if (this.targetContent && this.newTiledTexture && layer == this.targetContent.layer) {
       if (this.newTiledTexture.has(tileKey)) {
-        const {blendMode, opacity} = layer
         return {replaced: true, tile: this.newTiledTexture.get(tileKey)}
       } else {
         return {replaced: true}

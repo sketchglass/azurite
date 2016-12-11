@@ -1,5 +1,5 @@
 import * as React from "react"
-import {reaction, observable, computed, action} from "mobx"
+import {observable, computed, action} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import Tool, {ToolPointerEvent} from './Tool'
 import {UndoStack, UndoCommand} from "../models/UndoStack"

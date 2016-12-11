@@ -1,4 +1,3 @@
-import * as React from "react"
 import ElementContainer from "./ElementContainer"
 const decamelize = require('decamelize')
 

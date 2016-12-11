@@ -1,6 +1,6 @@
 import * as zlib from "zlib"
 import {Vec2, Rect, Transform} from "paintvec"
-import {Texture, PixelType, DrawTarget, TextureDrawTarget, Model, TextureShader, RectShape, BlendMode} from "paintgl"
+import {Texture, DrawTarget, TextureDrawTarget, Model, TextureShader, RectShape, BlendMode} from "paintgl"
 import {context} from "../GLContext"
 import {drawTexture} from "../GLUtil"
 import {float32ArrayTo16} from "../../lib/Float"

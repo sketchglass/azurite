@@ -1,8 +1,7 @@
-import {Rect, Vec2, Transform} from "paintvec"
+import {Vec2, Transform} from "paintvec"
 import {UndoCommand} from "../models/UndoStack"
 import Picture, {PictureDimension} from "../models/Picture"
 import Layer from "../models/Layer"
-import TiledTexture from "../models/TiledTexture"
 import {TransformLayerCommand} from "./LayerCommand"
 
 export
@@ -179,7 +178,6 @@ class ChangeCanvasAreaCommand {
   redo() {
     this.translatePicture(this.offset.neg())
     this.oldDimension = this.picture.dimension
-    const {width, height, dpi} = this.picture.dimension
     this.picture.dimension = this.dimension
     this.picture.lastUpdate = {}
   }

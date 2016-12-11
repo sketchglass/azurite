@@ -39,7 +39,7 @@ class ColorSlider extends React.Component<ColorSliderProps, {}> {
     this.dragged = false
   }
   render() {
-    const {color, value, onChange} = this.props
+    const {color, value} = this.props
     const gradientSteps = this.props.gradientSteps.map(([color, pos]) => `${toHexColor(color)} ${pos * 100}%`)
     const gradient = `linear-gradient(to right, ${gradientSteps.join(", ")})`
     return (

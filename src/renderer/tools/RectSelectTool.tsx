@@ -1,11 +1,8 @@
-import * as React from "react"
-import {observable} from "mobx"
 import {Vec2, Transform, Rect} from "paintvec"
-import {Texture, TextureDrawTarget, BlendMode, Color} from "paintgl"
+import {Texture, TextureDrawTarget} from "paintgl"
 import {context} from "../GLContext"
 import {drawTexture, duplicateTexture} from "../GLUtil"
 import Tool, {ToolPointerEvent} from './Tool'
-import FrameDebounced from "../views/components/FrameDebounced"
 import {frameDebounce} from "../../lib/Debounce"
 import {SelectionChangeCommand} from "../commands/SelectionCommand"
 

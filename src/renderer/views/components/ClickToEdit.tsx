@@ -25,7 +25,7 @@ class ClickToEdit extends React.Component<ClickToEditProps, ClickToEditState> {
   }
 
   render() {
-    const {text, onChange, editable} = this.props
+    const {text} = this.props
     const {isEditing} = this.state
     return (
       <div className="ClickToEdit">

@@ -9,7 +9,7 @@ interface PaletteProps {
 }
 
 const Palette = observer((props: PaletteProps) => {
-  const {palette, paletteIndex} = props
+  const {palette} = props
 
   const rowLength = 10
   const rows: HSVColor[][] = []

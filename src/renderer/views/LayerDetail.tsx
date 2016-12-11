@@ -1,4 +1,4 @@
-import {computed, observable, action} from "mobx"
+import {action} from "mobx"
 import * as React from "react"
 import {observer} from "mobx-react"
 import Layer, {LayerBlendMode} from "../models/Layer"

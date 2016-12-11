@@ -70,7 +70,7 @@ class ScrollBar extends React.Component<ScrollBarProps, {}> {
   handle: HTMLElement
 
   render() {
-    const {direction, contentMin, contentMax, visibleMin, visibleMax, onChange} = this.props
+    const {direction, contentMin, contentMax, visibleMin, visibleMax} = this.props
     const length = contentMax - contentMin
     const handleStart = (visibleMin - contentMin) / length
     const handleEnd = (visibleMax - contentMin) / length

@@ -1,7 +1,6 @@
 import {Texture} from "paintgl"
 import {UndoCommand} from "../models/UndoStack"
 import Picture from "../models/Picture"
-import Selection from "../models/Selection"
 import {drawTexture} from "../GLUtil"
 
 export
