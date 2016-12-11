@@ -1,4 +1,4 @@
-import Electron = require('electron')
+import Electron = require("electron")
 type BrowserWindow = Electron.BrowserWindow
 const {app, BrowserWindow, ipcMain} = Electron
 import {TabletEventReceiver} from "receive-tablet-event"
@@ -19,7 +19,7 @@ function openDialogsWindow() {
     modal: true,
   })
   win.loadURL(`${contentBase}/dialogs.html`)
-  win.on('closed', () => {
+  win.on("closed", () => {
     dialogsWindow = undefined
   })
   ipcMain.on("dialogOpen", (ev: Electron.IpcMainEvent, name: string, param: any) => {
@@ -40,15 +40,15 @@ function openDialogsWindow() {
 }
 
 async function openWindow() {
-  if (process.env.NODE_ENV == "development") {
-    const {default: installExtension, REACT_DEVELOPER_TOOLS} = require('electron-devtools-installer');
+  if (process.env.NODE_ENV === "development") {
+    const {default: installExtension, REACT_DEVELOPER_TOOLS} = require("electron-devtools-installer");
     await installExtension(REACT_DEVELOPER_TOOLS)
   }
 
   const win = mainWindow = new BrowserWindow({width: 1200, height: 768})
 
   win.loadURL(`${contentBase}/index.html`)
-  if (process.env.NODE_ENV == "development") {
+  if (process.env.NODE_ENV === "development") {
     win.webContents.openDevTools()
   }
 
@@ -68,12 +68,12 @@ async function openWindow() {
     IPCChannels.tabletUp.send(win.webContents, ev)
   })
 
-  win.on('close', e => {
+  win.on("close", e => {
     e.preventDefault()
     IPCChannels.quit.send(win.webContents, undefined)
   })
 
-  win.on('closed', () => {
+  win.on("closed", () => {
     receiver.dispose()
     mainWindow = undefined
     if (dialogsWindow) {
@@ -82,7 +82,7 @@ async function openWindow() {
   })
 }
 
-app.on('ready', async () => {
+app.on("ready", async () => {
   await openWindow()
   openDialogsWindow()
 })
