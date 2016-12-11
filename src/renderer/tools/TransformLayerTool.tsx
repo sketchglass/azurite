@@ -160,7 +160,7 @@ class TransformLayerTool extends RectMoveTool {
   replaceTile(layer: Layer, tileKey: Vec2): {replaced: boolean, tile?: Tile} {
     const content = this.currentContent
     if (this.modal && content && layer == content.layer && this.originalRect && this.originalTexture) {
-      transformedDrawTarget.clear(new Color(0,0,0,0))
+      transformedDrawTarget.clear(new Color(0, 0, 0, 0))
       const transform = Transform.translate(this.originalRect.topLeft)
         .merge(this.transform)
         .translate(tileKey.mulScalar(-Tile.width))

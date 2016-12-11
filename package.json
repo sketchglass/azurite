@@ -12,7 +12,7 @@
     "watch": "npm-run-all --parallel watch:main devserver",
     "app": "cross-env NODE_ENV=development electron .",
     "start": "npm-run-all build --parallel devserver app",
-    "lint": "tslint src/**/*.ts src/**/*.tsx",
+    "lint": "tslint 'src/**/*.{ts,tsx}'",
     "test": "echo \"Error: no test specified\" && exit 1",
     "postinstall": "electron-rebuild -e node_modules/electron -w receive-tablet-event",
     "package": "ts-node scripts/package.ts"

@@ -129,7 +129,7 @@ class Renderer {
     shader: TextureShader,
   })
   @observable size = new Vec2(100, 100)
-  background = new Color(46/255, 48/255, 56/255, 1)
+  background = new Color(46 / 255, 48 / 255, 56 / 255, 1)
 
   @observable selectionAnimationEnabled = true
 

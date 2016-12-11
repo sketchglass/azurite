@@ -25,7 +25,7 @@ class Selection {
   }
 
   clear() {
-    this.drawTarget.clear(new Color(0,0,0,0))
+    this.drawTarget.clear(new Color(0, 0, 0, 0))
     this.hasSelection = false
   }
 }
