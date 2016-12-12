@@ -7,12 +7,9 @@ import BrushTool from "../tools/BrushTool"
 import WatercolorTool from "../tools/WatercolorTool"
 import DrawArea from "./DrawArea"
 import LayerList from "./LayerList"
-import ColorPicker from "./components/ColorPicker"
-import Palette from "./components/Palette"
 import Navigator from "./Navigator"
-import RGBRangeSliders from "./components/RGBRangeSliders"
 import {PictureTabBar} from "./PictureTabBar"
-import {HSVColor} from "../../lib/Color"
+import ColorArea from "./ColorArea"
 import NavigationKeyBinding from "./NavigationKeyBinding"
 import {appState} from "../state/AppState"
 import {remote} from "electron"
@@ -74,7 +71,7 @@ class App extends React.Component<{}, {}> {
     })
   }
   render() {
-    const {tools, currentTool, overrideTool, color, paletteIndex, palette} = appState
+    const {tools, currentTool, overrideTool} = appState
     const picture = appState.currentPicture
     const onToolChange = (tool: Tool) => {
       appState.currentTool = tool
@@ -101,25 +98,12 @@ class App extends React.Component<{}, {}> {
       const menu = Menu.buildFromTemplate(menuTemplate)
       menu.popup(remote.getCurrentWindow())
     })
-    const onPaletteChange = action((e: React.MouseEvent<Element>, index: number) => {
-      appState.paletteIndex = index
-      if (e.shiftKey) {
-        appState.palette[index] = appState.color
-      } else {
-        appState.color = appState.palette[index]
-      }
-    })
-    const onColorChange = action((value: HSVColor) => {
-      appState.color = value
-    })
     return (
       <div className="App">
         <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
         <aside className="Sidebar Sidebar-left">
           <div className="PanelTitle">Color</div>
-          <ColorPicker color={color} onChange={onColorChange} />
-          <RGBRangeSliders color={color} onChange={onColorChange} />
-          <Palette palette={palette} paletteIndex={paletteIndex} onChange={onPaletteChange} />
+          <ColorArea />
           <div className="PanelTitle">Tool</div>
           {currentTool.renderSettings()}
         </aside>
