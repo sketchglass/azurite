@@ -9,7 +9,7 @@ import DrawArea from "./DrawArea"
 import LayerList from "./LayerList"
 import Navigator from "./Navigator"
 import {PictureTabBar} from "./PictureTabBar"
-import ColorArea from "./ColorArea"
+import ColorPanel from "./panels/ColorPanel"
 import NavigationKeyBinding from "./NavigationKeyBinding"
 import {appState} from "../state/AppState"
 import {remote} from "electron"
@@ -103,7 +103,7 @@ class App extends React.Component<{}, {}> {
         <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
         <aside className="Sidebar Sidebar-left">
           <div className="PanelTitle">Color</div>
-          <ColorArea />
+          <ColorPanel />
           <div className="PanelTitle">Tool</div>
           {currentTool.renderSettings()}
         </aside>

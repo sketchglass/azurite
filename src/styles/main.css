@@ -6,7 +6,6 @@
 
 /* App Styles */
 @import "./App.css";
-@import "./ColorArea.css";
 @import "./DimensionSelect.css";
 @import "./LayerDetail.css";
 @import "./LayerList.css";
@@ -24,6 +23,9 @@
 @import "./components/RGBRangeSliders.css";
 @import "./components/ScrollBar.css";
 @import "./components/SVGIcon.css";
+
+/* Panels */
+@import "./panels/ColorPanel.css";
 
 /* Dialogs */
 @import "./dialogs/DialogContainer.css";
