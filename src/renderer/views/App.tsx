@@ -6,10 +6,12 @@ import BaseBrushTool from "../tools/BaseBrushTool"
 import BrushTool from "../tools/BrushTool"
 import WatercolorTool from "../tools/WatercolorTool"
 import DrawArea from "./DrawArea"
-import LayerList from "./LayerList"
 import Navigator from "./Navigator"
 import {PictureTabBar} from "./PictureTabBar"
+
 import ColorPanel from "./panels/ColorPanel"
+import LayerPanel from "./panels/LayerPanel"
+
 import NavigationKeyBinding from "./NavigationKeyBinding"
 import {appState} from "../state/AppState"
 import {remote} from "electron"
@@ -115,7 +117,7 @@ class App extends React.Component<{}, {}> {
           <div className="PanelTitle">Navigator</div>
           <Navigator picture={picture} />
           <div className="PanelTitle">Layers</div>
-          <LayerList picture={picture} />
+          <LayerPanel />
         </aside>
       </div>
     )

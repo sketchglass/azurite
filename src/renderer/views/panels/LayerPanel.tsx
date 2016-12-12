@@ -1,19 +1,15 @@
 import {action} from "mobx"
 import {observer} from "mobx-react"
 import React = require("react")
+import * as classNames from "classnames"
 import {Tree, TreeNode, NodeInfo} from "react-draggable-tree"
 import "react-draggable-tree/lib/index.css"
-import Picture from "../models/Picture"
-import Layer from "../models/Layer"
-import {MoveLayerCommand, CopyLayerCommand, GroupLayerCommand, AddLayerCommand, RemoveLayerCommand, ChangeLayerPropsCommand} from "../commands/LayerCommand"
-import ClickToEdit from "./components/ClickToEdit"
-import SVGIcon from "./components/SVGIcon"
-import LayerDetail from "./LayerDetail"
-const classNames = require("classnames")
-
-interface LayerListProps {
-  picture: Picture|undefined
-}
+import Layer from "../../models/Layer"
+import {MoveLayerCommand, CopyLayerCommand, GroupLayerCommand, AddLayerCommand, RemoveLayerCommand, ChangeLayerPropsCommand} from "../../commands/LayerCommand"
+import ClickToEdit from "../components/ClickToEdit"
+import SVGIcon from "../components/SVGIcon"
+import LayerDetail from "../LayerDetail"
+import {appState} from "../../state/AppState"
 
 interface LayerNode extends TreeNode {
   layer: Layer
@@ -66,7 +62,7 @@ const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
   const onVisibleClick = (e: React.MouseEvent<HTMLInputElement>) => {
     e.stopPropagation()
   }
-  const className = classNames("LayerList_layer", {"LayerList_layer-clipped": layer.clippingGroup})
+  const className = classNames("LayerPanel_layer", {"LayerPanel_layer-clipped": layer.clippingGroup})
 
   return (
     <div className={className}>
@@ -81,10 +77,10 @@ class LayerTree extends Tree<LayerNode> {
 }
 
 @observer export default
-class LayerList extends React.Component<LayerListProps, {}> {
+class LayerPanel extends React.Component<{}, {}> {
 
   onSelectedKeysChange = action((selectedKeys: Set<number>, selectedNodeInfos: NodeInfo<LayerNode>[]) => {
-    const {picture} = this.props
+    const picture = appState.currentPicture
     if (picture) {
       picture.selectedLayers.replace(selectedNodeInfos.map(info => info.node.layer))
     }
@@ -96,7 +92,7 @@ class LayerList extends React.Component<LayerListProps, {}> {
     }
   })
   onMove = action((src: NodeInfo<LayerNode>[], dest: NodeInfo<LayerNode>, destIndex: number) => {
-    const {picture} = this.props
+    const picture = appState.currentPicture
     if (picture) {
       const srcPaths = src.map(info => info.path)
       const destPath = [...dest.path, destIndex]
@@ -105,7 +101,7 @@ class LayerList extends React.Component<LayerListProps, {}> {
     }
   })
   onCopy = action((src: NodeInfo<LayerNode>[], dest: NodeInfo<LayerNode>, destIndex: number) => {
-    const {picture} = this.props
+    const picture = appState.currentPicture
     if (picture) {
       const srcPaths = src.map(info => info.path)
       const destPath = [...dest.path, destIndex]
@@ -122,14 +118,14 @@ class LayerList extends React.Component<LayerListProps, {}> {
   })
 
   render() {
-    const {picture} = this.props
+    const picture = appState.currentPicture
     const dummyRoot = {key: 0} as LayerNode
     const root = picture ? layerToNode(picture.rootLayer) : dummyRoot
     const selectedKeys = picture ? picture.selectedLayers.map(getLayerKey) : []
 
     return (
-      <div className="LayerList">
-        <div className="LayerList_scroll">
+      <div className="LayerPanel">
+        <div className="LayerPanel_scroll">
           <LayerTree
             root={root}
             selectedKeys={new Set(selectedKeys)}
@@ -141,7 +137,7 @@ class LayerList extends React.Component<LayerListProps, {}> {
             onCopy={this.onCopy}
           />
         </div>
-        <div className="LayerList_buttons">
+        <div className="LayerPanel_buttons">
           <button onClick={this.addLayer.bind(this)}><SVGIcon className="add" /></button>
           <button onClick={this.groupLayer.bind(this)}><SVGIcon className="folder" /></button>
           <button onClick={this.removeLayer.bind(this)}><SVGIcon className="subtract" /></button>
@@ -152,7 +148,7 @@ class LayerList extends React.Component<LayerListProps, {}> {
   }
 
   @action groupLayer() {
-    const {picture} = this.props
+    const picture = appState.currentPicture
     if (picture) {
       if (picture.selectedLayers.length > 0) {
         const paths = picture.selectedLayers.map(l => l.path())
@@ -162,7 +158,7 @@ class LayerList extends React.Component<LayerListProps, {}> {
   }
 
   @action addLayer() {
-    const {picture} = this.props
+    const picture = appState.currentPicture
     if (picture) {
       const path = picture.currentLayer ? picture.currentLayer.path() : [0]
       picture.undoStack.redoAndPush(new AddLayerCommand(picture, path))
@@ -170,7 +166,7 @@ class LayerList extends React.Component<LayerListProps, {}> {
   }
 
   @action removeLayer() {
-    const {picture} = this.props
+    const picture = appState.currentPicture
     if (picture) {
       const paths = picture.selectedLayers.map(l => l.path())
       picture.undoStack.redoAndPush(new RemoveLayerCommand(picture, paths))
