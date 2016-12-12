@@ -1,44 +1,26 @@
-import {Texture, Color} from "paintgl"
+import {Texture} from "paintgl"
 import {UndoCommand} from "../models/UndoStack"
 import Picture from "../models/Picture"
-import {drawTexture, duplicateTexture} from "../GLUtil"
+import Selection from "../models/Selection"
+import {drawTexture} from "../GLUtil"
 
 abstract class SelectionCommand implements UndoCommand {
   abstract title: string
-  oldTexture: Texture|undefined
-
-  get selection() {
-    return this.picture.selection
-  }
+  oldSelection: Selection
 
   constructor(public picture: Picture) {
   }
 
-  setTexture(texture: Texture|undefined) {
-    const {selection} = this
-    if (texture) {
-      drawTexture(selection.drawTarget, texture, {blendMode: "src"})
-      selection.hasSelection = true
-    } else {
-      selection.clear()
-    }
-  }
-
   undo() {
-    this.setTexture(this.oldTexture)
-    if (this.oldTexture) {
-      this.oldTexture.dispose()
-      this.oldTexture = undefined
-    }
+    this.picture.selection = this.oldSelection
     this.picture.lastUpdate = {}
   }
 
-  abstract apply(): void
+  abstract newSelection(): Selection
 
   redo() {
-    const {selection} = this
-    this.oldTexture = selection.hasSelection ? duplicateTexture(selection.texture) : undefined
-    this.apply()
+    this.oldSelection = this.picture.selection
+    this.picture.selection = this.newSelection()
     this.picture.lastUpdate = {}
   }
 }
@@ -74,10 +56,10 @@ export
 class SelectAllCommand extends SelectionCommand {
   title = "Select All"
 
-  apply() {
-    const {selection} = this
-    selection.drawTarget.clear(new Color(1, 1, 1, 1))
-    selection.hasSelection = true
+  newSelection() {
+    const selection = new Selection(this.picture.size)
+    selection.selectAll()
+    return selection
   }
 }
 
@@ -86,9 +68,8 @@ export
 class ClearSelectionCommand extends SelectionCommand {
   title = "Clear Selection"
 
-  apply() {
-    const {selection} = this
-    selection.clear()
+  newSelection() {
+    return new Selection(this.picture.size)
   }
 }
 
@@ -96,12 +77,7 @@ export
 class InvertSelectionCommand extends SelectionCommand {
   title = "Invert Selection"
 
-  apply() {
-    const {selection} = this
-    selection.drawTarget.clear(new Color(1, 1, 1, 1))
-    if (this.oldTexture) {
-      drawTexture(selection.drawTarget, this.oldTexture, {blendMode: "dst-out"})
-    }
-    selection.hasSelection = true
+  newSelection() {
+    return this.picture.selection.invert()
   }
 }

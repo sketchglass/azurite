@@ -26,6 +26,23 @@ class Selection {
     this.hasSelection = false
   }
 
+  selectAll() {
+    this.drawTarget.clear(new Color(1, 1, 1, 1))
+    this.hasSelection = true
+  }
+
+  invert() {
+    const selection = new Selection(this.size)
+    selection.hasSelection = this.hasSelection
+    if (this.hasSelection) {
+      selection.drawTarget.clear(new Color(1, 1, 1, 1))
+      drawTexture(selection.drawTarget, this.texture, {blendMode: "dst-out"})
+    } else {
+      selection.selectAll()
+    }
+    return selection
+  }
+
   transform(newSize: Vec2, transform: Transform, opts: {bicubic?: boolean} = {}) {
     const selection = new Selection(newSize)
     selection.hasSelection = this.hasSelection
