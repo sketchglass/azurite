@@ -1,19 +1,16 @@
 import {observable} from "mobx"
-import {Vec2, Rect} from "paintvec"
+import {Vec2, Rect, Transform} from "paintvec"
 import {Texture, TextureDrawTarget, Color} from "paintgl"
 import {context} from "../GLContext"
+import {drawTexture} from "../GLUtil"
 
 export default
 class Selection {
-  readonly texture = new Texture(context, {})
+  readonly texture = new Texture(context, {size: this.size})
   readonly drawTarget = new TextureDrawTarget(context, this.texture)
   @observable hasSelection = true
 
-  get size() {
-    return this.texture.size
-  }
-  set size(size: Vec2) {
-    this.texture.size = size
+  constructor(public readonly size: Vec2) {
   }
 
   includes(pos: Vec2) {
@@ -27,5 +24,40 @@ class Selection {
   clear() {
     this.drawTarget.clear(new Color(0, 0, 0, 0))
     this.hasSelection = false
+  }
+
+  selectAll() {
+    this.drawTarget.clear(new Color(1, 1, 1, 1))
+    this.hasSelection = true
+  }
+
+  invert() {
+    const selection = new Selection(this.size)
+    selection.hasSelection = this.hasSelection
+    if (this.hasSelection) {
+      selection.drawTarget.clear(new Color(1, 1, 1, 1))
+      drawTexture(selection.drawTarget, this.texture, {blendMode: "dst-out"})
+    } else {
+      selection.selectAll()
+    }
+    return selection
+  }
+
+  transform(newSize: Vec2, transform: Transform, opts: {bicubic?: boolean} = {}) {
+    const selection = new Selection(newSize)
+    selection.hasSelection = this.hasSelection
+    if (this.hasSelection) {
+      drawTexture(selection.drawTarget, this.texture, {blendMode: "src", transform, ...opts})
+    }
+    return selection
+  }
+
+  clone() {
+    return this.transform(this.size, new Transform())
+  }
+
+  dispose() {
+    this.drawTarget.dispose()
+    this.texture.dispose()
   }
 }
