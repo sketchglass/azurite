@@ -5,6 +5,7 @@ import {PictureSave} from "../services/PictureSave"
 import {PictureExport, PictureExportFormat} from "../services/PictureExport"
 import {dialogLauncher} from "../views/dialogs/DialogLauncher"
 import {FlipPictureCommand, Rotate90PictureCommand, Rotate180PictureCommand, ChangePictureResolutionCommand} from "../commands/PictureCommand"
+import {SelectAllCommand, ClearSelectionCommand, InvertSelectionCommand} from "../commands/SelectionCommand"
 
 export
 class PictureState {
@@ -82,5 +83,17 @@ class PictureState {
     if (newDimension) {
       this.picture.undoStack.redoAndPush(new ChangePictureResolutionCommand(this.picture, newDimension))
     }
+  }
+
+  selectAll() {
+    this.picture.undoStack.redoAndPush(new SelectAllCommand(this.picture))
+  }
+
+  clearSelection() {
+    this.picture.undoStack.redoAndPush(new ClearSelectionCommand(this.picture))
+  }
+
+  invertSelection() {
+    this.picture.undoStack.redoAndPush(new InvertSelectionCommand(this.picture))
   }
 }
