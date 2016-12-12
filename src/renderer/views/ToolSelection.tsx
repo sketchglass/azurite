@@ -38,19 +38,19 @@ class ToolSelection extends React.Component<{}, {}> {
     const brushTools = tools.filter(tool => tool instanceof BaseBrushTool)
     return (
       <div className="ToolSelection">{
-          nonBrushTools.map(tool => {
+          nonBrushTools.map((tool, i) => {
             const selected = tool === currentTool
             const className = classNames("ToolSelection_button", {"ToolSelection_button-selected": selected})
             const onClick = () => this.onChange(tool)
-            return <button key={tool.name} onClick={onClick} className={className}>{toolToIcon(tool)}</button>
+            return <button key={i} onClick={onClick} className={className}>{toolToIcon(tool)}</button>
           })
         }{
-          brushTools.map(tool => {
+          brushTools.map((tool, i) => {
             const onContextMenu = (e: React.MouseEvent<Element>) => this.onContextMenu(tool, e)
             const selected = tool === currentTool
             const className = classNames("ToolSelection_button", {"ToolSelection_button-selected": selected})
             const onClick = () => this.onChange(tool)
-            return <button key={tool.name} onContextMenu={onContextMenu} onClick={onClick} className={className}>{toolToIcon(tool)}</button>
+            return <button key={i} onContextMenu={onContextMenu} onClick={onClick} className={className}>{toolToIcon(tool)}</button>
           })
         }
       </div>
