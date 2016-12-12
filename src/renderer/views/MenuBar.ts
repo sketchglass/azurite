@@ -5,7 +5,7 @@ type BrowserWindow = Electron.BrowserWindow
 type MenuItemOptions = Electron.MenuItemOptions
 import {computed, autorun} from "mobx"
 import {appState} from "../state/AppState"
-import {undoState} from "../state/UndoState"
+import {editActionState} from "../state/EditActionState"
 
 class MenuBar {
   @computed get pictureState() {
@@ -112,16 +112,16 @@ class MenuBar {
       label: 'Edit',
       submenu: [
         {
-          label: `Undo ${undoState.undoName}`,
+          label: `Undo ${editActionState.undoName}`,
           accelerator: "CmdOrCtrl+Z",
-          enabled: undoState.canUndo,
-          click: () => undoState.undo(),
+          enabled: editActionState.canUndo,
+          click: () => editActionState.undo(),
         },
         {
-          label: `Redo ${undoState.redoName}`,
+          label: `Redo ${editActionState.redoName}`,
           accelerator: process.platform === 'darwin' ? 'Shift+Command+Z' : 'Ctrl+Y',
-          enabled: undoState.canRedo,
-          click: () => undoState.redo(),
+          enabled: editActionState.canRedo,
+          click: () => editActionState.redo(),
         },
         {
           type: 'separator'

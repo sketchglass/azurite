@@ -3,8 +3,8 @@ import {remote} from "electron"
 import {appState} from "./AppState"
 import {isTextInput} from "../views/util"
 
-export
-class UndoState {
+export default
+class EditActionState {
   constructor() {
     window.addEventListener("focus", e => {
       this.isTextInputFocused = isTextInput(document.activeElement)
@@ -78,4 +78,4 @@ class UndoState {
   }
 }
 
-export const undoState = new UndoState()
+export const editActionState = new EditActionState()
