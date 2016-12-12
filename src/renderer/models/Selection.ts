@@ -1,13 +1,22 @@
 import {observable} from "mobx"
-import {Vec2, Rect} from "paintvec"
+import {Vec2, Rect, Transform} from "paintvec"
 import {Texture, TextureDrawTarget, Color} from "paintgl"
 import {context} from "../GLContext"
+import {drawTexture} from "../GLUtil"
 
 export default
 class Selection {
-  readonly texture = new Texture(context, {})
-  readonly drawTarget = new TextureDrawTarget(context, this.texture)
+  _texture = new Texture(context, {})
+  readonly drawTarget = new TextureDrawTarget(context, this._texture)
   @observable hasSelection = true
+
+  get texture() {
+    return this._texture
+  }
+  set texture(tex: Texture) {
+    this._texture = tex
+    this.drawTarget.texture = tex
+  }
 
   get size() {
     return this.texture.size
@@ -27,5 +36,15 @@ class Selection {
   clear() {
     this.drawTarget.clear(new Color(0, 0, 0, 0))
     this.hasSelection = false
+  }
+
+  transform(newSize: Vec2, transform: Transform) {
+    if (!this.hasSelection) {
+      return
+    }
+    const oldTexture = this.texture
+    this.texture = new Texture(context, {size: newSize})
+    drawTexture(this.drawTarget, oldTexture, {transform})
+    oldTexture.dispose()
   }
 }

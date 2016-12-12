@@ -4,6 +4,21 @@ import Picture, {PictureDimension} from "../models/Picture"
 import Layer from "../models/Layer"
 import {TransformLayerCommand} from "./LayerCommand"
 
+function transformPicture(picture: Picture, newSize: Vec2, transform: Transform) {
+  picture.forEachLayer(layer => {
+    const content = layer.content
+    if (content.type != "image") {
+      return
+    }
+    content.tiledTexture = content.tiledTexture.transform(transform)
+  })
+  picture.selection.transform(newSize, transform)
+  const {width, height} = newSize
+  const {dpi} = picture.dimension
+  picture.dimension = {width, height, dpi}
+  picture.lastUpdate = {}
+}
+
 export
 class FlipPictureCommand {
   title = this.orientation == "horizontal" ? "Flip Canvas Horizontally" : "Flip Canvas Vertically"
@@ -11,11 +26,7 @@ class FlipPictureCommand {
   constructor(public picture: Picture, public orientation: "horizontal"|"vertical") {
   }
 
-  flipLayer(layer: Layer) {
-    const content = layer.content
-    if (content.type != "image") {
-      return
-    }
+  flipPicture() {
     const {width, height} = this.picture.size
     let transform: Transform
     if (this.orientation == "horizontal") {
@@ -27,12 +38,7 @@ class FlipPictureCommand {
       // y' = height - y
       transform = new Transform(1, 0, 0, 0, -1, 0, 0, height, 1)
     }
-    content.tiledTexture = content.tiledTexture.transform(transform)
-  }
-
-  flipPicture() {
-    this.picture.forEachLayer(layer => this.flipLayer(layer))
-    this.picture.lastUpdate = {}
+    transformPicture(this.picture, this.picture.size, transform)
   }
 
   undo() {
@@ -50,11 +56,7 @@ class Rotate90PictureCommand {
   constructor(public picture: Picture, public direction: "left"|"right") {
   }
 
-  rotateLayer(layer: Layer, direction: "left"|"right") {
-    const content = layer.content
-    if (content.type != "image") {
-      return
-    }
+  rotatePicture(direction: "left"|"right") {
     const {width, height} = this.picture.size
     let transform: Transform
     if (direction == "left") {
@@ -66,14 +68,7 @@ class Rotate90PictureCommand {
       // y' = x
       transform = new Transform(0, 1, 0, -1, 0, 0, height, 0, 1)
     }
-    content.tiledTexture = content.tiledTexture.transform(transform)
-  }
-
-  rotatePicture(direction: "left"|"right") {
-    this.picture.forEachLayer(layer => this.rotateLayer(layer, direction))
-    const {width, height, dpi} = this.picture.dimension
-    this.picture.dimension = {width: height, height: width, dpi}
-    this.picture.lastUpdate = {}
+    transformPicture(this.picture, new Vec2(height, width), transform)
   }
 
   undo() {
@@ -102,8 +97,9 @@ class Rotate180PictureCommand {
   }
 
   rotatePicture() {
-    this.picture.forEachLayer(layer => this.rotateLayer(layer))
-    this.picture.lastUpdate = {}
+    const {width, height} = this.picture.size
+    const transform = new Transform(-1, 0, 0, 0, -1, 0, width, height, 1)
+    transformPicture(this.picture, this.picture.size, transform)
   }
 
   undo() {
