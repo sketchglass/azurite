@@ -22,7 +22,6 @@ abstract class SelectionCommand implements UndoCommand {
     } else {
       selection.clear()
     }
-    this.picture.lastUpdate = {}
   }
 
   undo() {
@@ -31,6 +30,7 @@ abstract class SelectionCommand implements UndoCommand {
       this.oldTexture.dispose()
       this.oldTexture = undefined
     }
+    this.picture.lastUpdate = {}
   }
 
   abstract apply(): void
@@ -39,6 +39,7 @@ abstract class SelectionCommand implements UndoCommand {
     const {selection} = this
     this.oldTexture = selection.hasSelection ? duplicateTexture(selection.texture) : undefined
     this.apply()
+    this.picture.lastUpdate = {}
   }
 }
 
