@@ -28,7 +28,6 @@ class TransformLayerOverlayUI extends FrameDebounced<{tool: TransformLayerTool},
       return pos
         .transform(tool.transform)
         .transform(tool.renderer.transformFromPicture)
-        .divScalar(devicePixelRatio)
     }
 
     const vertices = originalRect.vertices().map(transformPos)

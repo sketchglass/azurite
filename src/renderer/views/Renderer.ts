@@ -141,6 +141,9 @@ class Renderer {
 
   @observable selectionAnimationEnabled = true
 
+  @computed get physicalSize() {
+    return this.size.mulScalar(window.devicePixelRatio)
+  }
   private readonly wholeShape = new RectShape(context, {
     usage: "static",
   })
@@ -179,6 +182,13 @@ class Renderer {
       .merge(Transform.translate(viewportCenter))
   }
 
+  @computed get transformFromPicturePhysical() {
+    return this.transformFromPicture.scale(new Vec2(window.devicePixelRatio))
+  }
+  @computed get transformToPicturePhysical() {
+    return this.transformFromPicturePhysical.invert() || new Transform()
+  }
+
   @computed get transformToPicture() {
     return this.transformFromPicture.invert()!
   }
@@ -200,7 +210,7 @@ class Renderer {
         this.shape.rect = new Rect(new Vec2(), size)
       }
     })
-    reaction(() => this.size, size => {
+    reaction(() => this.physicalSize, size => {
       canvas.width = size.width
       canvas.height = size.height
       this.wholeShape.rect = new Rect(new Vec2(), size)
@@ -238,7 +248,7 @@ class Renderer {
         this.wholeDirty = true
         layerBlender.renderNow()
       } else if (layerBlender.dirtyRect) {
-        const rect = layerBlender.dirtyRect.transform(this.transformFromPicture)
+        const rect = layerBlender.dirtyRect.transform(this.transformFromPicturePhysical)
         this.addDirtyRect(rect)
         layerBlender.renderNow()
       }
@@ -255,7 +265,7 @@ class Renderer {
     if (this.picture) {
       this.boxShadowModel.uniforms = {
         pictureSize: this.picture.size,
-        transformToPicture: this.transformToPicture,
+        transformToPicture: this.transformToPicturePhysical,
       }
       drawTarget.draw(this.boxShadowModel)
 
@@ -264,7 +274,7 @@ class Renderer {
       if (texture.filter != filter) {
         texture.filter = filter
       }
-      this.model.transform = this.transformFromPicture
+      this.model.transform = this.transformFromPicturePhysical
       drawTarget.draw(this.model)
 
       const {selection} = this.picture

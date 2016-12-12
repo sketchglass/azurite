@@ -184,7 +184,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       height: Math.round(rect.height),
     }
     this.clientTopLeft = new Vec2(roundRect.left, roundRect.top)
-    renderer.size = new Vec2(roundRect.width, roundRect.height).mulScalar(window.devicePixelRatio)
+    renderer.size = new Vec2(roundRect.width, roundRect.height)
 
     IPCChannels.setTabletCaptureArea.send(roundRect)
   }
@@ -213,7 +213,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   toToolEvent(ev: PointerEvent | TabletEvent): ToolPointerEvent {
     const {pressure, button, altKey, ctrlKey, metaKey, shiftKey} = ev
-    const rendererPos = this.offsetPos(ev).mulScalar(window.devicePixelRatio)
+    const rendererPos = this.offsetPos(ev)
     const picturePos = rendererPos.transform(renderer.transformToPicture)
     return {
       rendererPos, picturePos, pressure, button, altKey, ctrlKey, metaKey, shiftKey

@@ -133,7 +133,7 @@ abstract class RectMoveTool extends Tool {
     ])
 
     for (const [dragType, handlePos] of handlePoints) {
-      if (ev.rendererPos.sub(handlePos).length() <= this.handleRadius * 1.5 * devicePixelRatio) {
+      if (ev.rendererPos.sub(handlePos).length() <= this.handleRadius * 1.5) {
         this.dragType = dragType
         return
       }
