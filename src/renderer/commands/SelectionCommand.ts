@@ -1,7 +1,7 @@
 import {Texture} from "paintgl"
 import {UndoCommand} from "../models/UndoStack"
 import Picture from "../models/Picture"
-import {drawTexture} from "../GLUtil"
+import {drawTexture, duplicateTexture} from "../GLUtil"
 
 export
 class SelectionChangeCommand implements UndoCommand {
@@ -27,5 +27,30 @@ class SelectionChangeCommand implements UndoCommand {
 
   redo() {
     this.setTexture(this.newTexture)
+  }
+}
+
+export
+class SelectAllCommand implements UndoCommand {
+  title = "Select All"
+  oldTexture: Texture|undefined
+
+  constructor(public picture: Picture) {
+  }
+
+  undo() {
+    const {selection} = this.picture
+    if (this.oldTexture) {
+      drawTexture(selection.drawTarget, this.oldTexture, {blendMode: "src"})
+      selection.hasSelection = true
+    } else {
+      selection.clear()
+    }
+  }
+
+  redo() {
+    const {selection} = this.picture
+    this.oldTexture = selection.hasSelection ? duplicateTexture(selection.texture) : undefined
+    selection.selectAll()
   }
 }
