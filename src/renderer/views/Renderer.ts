@@ -84,16 +84,24 @@ class SelectionShader extends Shader {
       #define STRIPE_WIDTH 4.0
       #define STEP 2.0
 
+      bool isSelected(vec2 texCoord) {
+        float x = texCoord.x;
+        float y = texCoord.y;
+        if (0.0 <= x && x <= 1.0 && 0.0 <= y && y <= 1.0) {
+          return texture2D(texture, texCoord).a != 0.0;
+        } else {
+          return false;
+        }
+      }
+
       void main(void) {
         bool isOutline = false;
-
-        if (texture2D(texture, vTexCoord).a == 0.0) {
+        if (isSelected(vTexCoord)) {
           for (int y = -1; y <= 1; ++y) {
             for (int x = -1; x <= 1; ++x) {
               if (x != 0 && y != 0) {
                 vec2 texCoord = vTexCoord + vTexXOffset * float(x) + vTexYOffset * float(y);
-                float selection = texture2D(texture, texCoord).a;
-                if (selection != 0.0) {
+                if (!isSelected(texCoord)) {
                   isOutline = true;
                 }
               }
