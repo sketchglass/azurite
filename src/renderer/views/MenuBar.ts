@@ -141,10 +141,31 @@ class MenuBar {
         {
           role: 'delete'
         },
-        {
-          role: 'selectall'
-        }
       ]
+    }
+
+    const selectionMenu: MenuItemOptions = {
+      label: "Selection",
+      submenu: [
+        {
+          label: "Select All",
+          enabled: editActionState.canSelectAll,
+          click: () => editActionState.selectAll(),
+          accelerator: "CmdOrCtrl+A",
+        },
+        {
+          label: "Clear Selection",
+          enabled: !!this.pictureState,
+          click: () => this.pictureState && this.pictureState.clearSelection(),
+          accelerator: "CmdOrCtrl+D",
+        },
+        {
+          label: "Invert Selection",
+          enabled: !!this.pictureState,
+          click: () => this.pictureState && this.pictureState.invertSelection(),
+          accelerator: "Shift+CmdOrCtrl+I",
+        },
+      ],
     }
 
     const canvasMenu: MenuItemOptions = {
@@ -256,7 +277,7 @@ class MenuBar {
     }
 
     const template: MenuItemOptions[] = [
-      fileMenu, editMenu, canvasMenu, viewMenu, windowMenu, helpMenu
+      fileMenu, editMenu, selectionMenu, canvasMenu, viewMenu, windowMenu, helpMenu
     ]
 
     if (process.platform === 'darwin') {

@@ -41,6 +41,10 @@ class EditActionState {
     return false
   }
 
+  @computed get canSelectAll() {
+    return this.isTextInputFocused || !!appState.currentPicture
+  }
+
   @computed get undoName() {
     if (this.undoStack) {
       const {undoCommand} = this.undoStack
@@ -74,6 +78,14 @@ class EditActionState {
       remote.getCurrentWebContents().redo()
     } else if (this.undoStack) {
       this.undoStack.redo()
+    }
+  }
+
+  @action selectAll() {
+    if (this.isTextInputFocused) {
+      remote.getCurrentWebContents().selectAll()
+    } else if (appState.currentPictureState) {
+      appState.currentPictureState.selectAll()
     }
   }
 }
