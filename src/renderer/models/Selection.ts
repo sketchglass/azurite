@@ -2,6 +2,7 @@ import {observable} from "mobx"
 import {Vec2, Rect} from "paintvec"
 import {Texture, TextureDrawTarget, Color} from "paintgl"
 import {context} from "../GLContext"
+import {duplicateTexture, drawTexture} from "../GLUtil"
 
 export default
 class Selection {
@@ -27,5 +28,18 @@ class Selection {
   clear() {
     this.drawTarget.clear(new Color(0, 0, 0, 0))
     this.hasSelection = false
+  }
+
+  selectAll() {
+    this.drawTarget.clear(new Color(1, 1, 1, 1))
+    this.hasSelection = true
+  }
+
+  invert() {
+    const dup = duplicateTexture(this.texture)
+    this.drawTarget.clear(new Color(1, 1, 1, 1))
+    drawTexture(this.drawTarget, dup, {blendMode: "dst-out"})
+    dup.dispose()
+    this.hasSelection = true
   }
 }
