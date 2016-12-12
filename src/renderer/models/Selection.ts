@@ -38,13 +38,13 @@ class Selection {
     this.hasSelection = false
   }
 
-  transform(newSize: Vec2, transform: Transform) {
+  transform(newSize: Vec2, transform: Transform, opts: {bicubic?: boolean} = {}) {
     if (!this.hasSelection) {
       return
     }
     const oldTexture = this.texture
     this.texture = new Texture(context, {size: newSize})
-    drawTexture(this.drawTarget, oldTexture, {transform})
+    drawTexture(this.drawTarget, oldTexture, {transform, ...opts})
     oldTexture.dispose()
   }
 }
