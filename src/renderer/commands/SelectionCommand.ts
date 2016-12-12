@@ -3,6 +3,45 @@ import {UndoCommand} from "../models/UndoStack"
 import Picture from "../models/Picture"
 import {drawTexture, duplicateTexture} from "../GLUtil"
 
+abstract class SelectionCommand implements UndoCommand {
+  abstract title: string
+  oldTexture: Texture|undefined
+
+  get selection() {
+    return this.picture.selection
+  }
+
+  constructor(public picture: Picture) {
+  }
+
+  setTexture(texture: Texture|undefined) {
+    const {selection} = this
+    if (texture) {
+      drawTexture(selection.drawTarget, texture, {blendMode: "src"})
+      selection.hasSelection = true
+    } else {
+      selection.clear()
+    }
+    this.picture.lastUpdate = {}
+  }
+
+  undo() {
+    this.setTexture(this.oldTexture)
+    if (this.oldTexture) {
+      this.oldTexture.dispose()
+      this.oldTexture = undefined
+    }
+  }
+
+  abstract apply(): void
+
+  redo() {
+    const {selection} = this
+    this.oldTexture = selection.hasSelection ? duplicateTexture(selection.texture) : undefined
+    this.apply()
+  }
+}
+
 export
 class SelectionChangeCommand implements UndoCommand {
   title = "Change Selection"
@@ -31,26 +70,11 @@ class SelectionChangeCommand implements UndoCommand {
 }
 
 export
-class SelectAllCommand implements UndoCommand {
+class SelectAllCommand extends SelectionCommand {
   title = "Select All"
-  oldTexture: Texture|undefined
 
-  constructor(public picture: Picture) {
-  }
-
-  undo() {
-    const {selection} = this.picture
-    if (this.oldTexture) {
-      drawTexture(selection.drawTarget, this.oldTexture, {blendMode: "src"})
-      selection.hasSelection = true
-    } else {
-      selection.clear()
-    }
-  }
-
-  redo() {
-    const {selection} = this.picture
-    this.oldTexture = selection.hasSelection ? duplicateTexture(selection.texture) : undefined
+  apply() {
+    const {selection} = this
     selection.drawTarget.clear(new Color(1, 1, 1, 1))
     selection.hasSelection = true
   }
@@ -58,51 +82,21 @@ class SelectAllCommand implements UndoCommand {
 
 
 export
-class ClearSelectionCommand implements UndoCommand {
+class ClearSelectionCommand extends SelectionCommand {
   title = "Clear Selection"
-  oldTexture: Texture|undefined
 
-  constructor(public picture: Picture) {
-  }
-
-  undo() {
-    const {selection} = this.picture
-    if (this.oldTexture) {
-      drawTexture(selection.drawTarget, this.oldTexture, {blendMode: "src"})
-      selection.hasSelection = true
-    } else {
-      selection.clear()
-    }
-  }
-
-  redo() {
-    const {selection} = this.picture
-    this.oldTexture = selection.hasSelection ? duplicateTexture(selection.texture) : undefined
+  apply() {
+    const {selection} = this
     selection.clear()
   }
 }
 
 export
-class InvertSelectionCommand implements UndoCommand {
+class InvertSelectionCommand extends SelectionCommand {
   title = "Invert Selection"
-  oldTexture: Texture|undefined
 
-  constructor(public picture: Picture) {
-  }
-
-  undo() {
-    const {selection} = this.picture
-    if (this.oldTexture) {
-      drawTexture(selection.drawTarget, this.oldTexture, {blendMode: "src"})
-      selection.hasSelection = true
-    } else {
-      selection.clear()
-    }
-  }
-
-  redo() {
-    const {selection} = this.picture
-    this.oldTexture = selection.hasSelection ? duplicateTexture(selection.texture) : undefined
+  apply() {
+    const {selection} = this
     selection.drawTarget.clear(new Color(1, 1, 1, 1))
     if (this.oldTexture) {
       drawTexture(selection.drawTarget, this.oldTexture, {blendMode: "dst-out"})
