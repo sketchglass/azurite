@@ -87,16 +87,6 @@ class Rotate180PictureCommand {
   constructor(public picture: Picture) {
   }
 
-  rotateLayer(layer: Layer) {
-    const content = layer.content
-    if (content.type != "image") {
-      return
-    }
-    const {width, height} = this.picture.size
-    const transform = new Transform(-1, 0, 0, 0, -1, 0, width, height, 1)
-    content.tiledTexture = content.tiledTexture.transform(transform)
-  }
-
   rotatePicture() {
     const {width, height} = this.picture.size
     const transform = new Transform(-1, 0, 0, 0, -1, 0, width, height, 1)
