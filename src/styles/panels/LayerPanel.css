@@ -1,9 +1,9 @@
-.LayerList {
+.LayerPanel {
   display: flex;
   flex-direction: column;
   flex: 1;
 }
-.LayerList_scroll {
+.LayerPanel_scroll {
   flex: 1;
   background-color: var(--darken-background-color);
   overflow-y: auto;
@@ -18,7 +18,7 @@
     border-bottom-color: var(--default-color);
   }
 }
-.LayerList_layer {
+.LayerPanel_layer {
   height: 40px;
   padding: 4px;
   padding-left: 4px;
@@ -35,19 +35,19 @@
     }
   }
 }
-.LayerList_layer .ClickToEdit {
+.LayerPanel_layer .ClickToEdit {
   flex: 1;
 }
-.LayerList_layer img {
+.LayerPanel_layer img {
   margin-right: 12px;
   box-shadow: 0 0 4px rgba(0,0,0,0.25);
   max-width: 40px;
   max-height: 40px;
 }
-.LayerList_layer-current {
+.LayerPanel_layer-current {
   background-color: grey;
 }
-.LayerList_buttons {
+.LayerPanel_buttons {
   margin: 4px 8px;
   & button {
     border: none;
@@ -57,5 +57,23 @@
   & .SVGIcon {
     width: 16px;
     height: 16px;
+  }
+}
+.LayerDetail {
+  margin: 8px;
+  & > * {
+    display: flex;
+    align-items: center;
+    margin: 4px 0;
+    & > :nth-child(1) {
+      width: 48px;
+    }
+    & > :nth-child(2) {
+      flex: 1;
+    }
+    & > :nth-child(3) {
+      width: 32px;
+      text-align: right;
+    }
   }
 }

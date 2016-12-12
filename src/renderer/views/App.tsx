@@ -6,10 +6,13 @@ import BaseBrushTool from "../tools/BaseBrushTool"
 import BrushTool from "../tools/BrushTool"
 import WatercolorTool from "../tools/WatercolorTool"
 import DrawArea from "./DrawArea"
-import LayerList from "./LayerList"
-import Navigator from "./Navigator"
 import {PictureTabBar} from "./PictureTabBar"
-import ColorArea from "./ColorArea"
+
+import ColorPanel from "./panels/ColorPanel"
+import ToolSettingsPanel from "./panels/ToolSettingsPanel"
+import NavigatorPanel from "./panels/NavigatorPanel"
+import LayerPanel from "./panels/LayerPanel"
+
 import NavigationKeyBinding from "./NavigationKeyBinding"
 import {appState} from "../state/AppState"
 import {remote} from "electron"
@@ -103,9 +106,9 @@ class App extends React.Component<{}, {}> {
         <ToolSelection tools={tools} currentTool={currentTool} onChange={onToolChange} onContextMenu={onToolContextMenu} />
         <aside className="Sidebar Sidebar-left">
           <div className="PanelTitle">Color</div>
-          <ColorArea />
+          <ColorPanel />
           <div className="PanelTitle">Tool</div>
-          {currentTool.renderSettings()}
+          <ToolSettingsPanel />
         </aside>
         <div className="CenterArea">
           <PictureTabBar />
@@ -113,9 +116,9 @@ class App extends React.Component<{}, {}> {
         </div>
         <aside className="Sidebar Sidebar-right">
           <div className="PanelTitle">Navigator</div>
-          <Navigator picture={picture} />
+          <NavigatorPanel />
           <div className="PanelTitle">Layers</div>
-          <LayerList picture={picture} />
+          <LayerPanel />
         </aside>
       </div>
     )

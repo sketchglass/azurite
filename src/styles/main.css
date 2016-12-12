@@ -6,11 +6,7 @@
 
 /* App Styles */
 @import "./App.css";
-@import "./ColorArea.css";
 @import "./DimensionSelect.css";
-@import "./LayerDetail.css";
-@import "./LayerList.css";
-@import "./Navigator.css";
 @import "./PictureTabBar.css";
 @import "./DrawArea.css";
 @import "./ToolSelection.css";
@@ -24,6 +20,11 @@
 @import "./components/RGBRangeSliders.css";
 @import "./components/ScrollBar.css";
 @import "./components/SVGIcon.css";
+
+/* Panels */
+@import "./panels/ColorPanel.css";
+@import "./panels/LayerPanel.css";
+@import "./panels/NavigatorPanel.css";
 
 /* Dialogs */
 @import "./dialogs/DialogContainer.css";
