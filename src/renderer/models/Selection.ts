@@ -2,7 +2,6 @@ import {observable} from "mobx"
 import {Vec2, Rect} from "paintvec"
 import {Texture, TextureDrawTarget, Color} from "paintgl"
 import {context} from "../GLContext"
-import {duplicateTexture, drawTexture} from "../GLUtil"
 
 export default
 class Selection {
