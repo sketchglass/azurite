@@ -5,7 +5,7 @@ type BrowserWindow = Electron.BrowserWindow
 type MenuItemOptions = Electron.MenuItemOptions
 import {computed, autorun} from "mobx"
 import {appState} from "../state/AppState"
-import {undoState} from "../state/UndoState"
+import {editActionState} from "../state/EditActionState"
 
 class MenuBar {
   @computed get pictureState() {
@@ -112,16 +112,16 @@ class MenuBar {
       label: 'Edit',
       submenu: [
         {
-          label: `Undo ${undoState.undoName}`,
+          label: `Undo ${editActionState.undoName}`,
           accelerator: "CmdOrCtrl+Z",
-          enabled: undoState.canUndo,
-          click: () => undoState.undo(),
+          enabled: editActionState.canUndo,
+          click: () => editActionState.undo(),
         },
         {
-          label: `Redo ${undoState.redoName}`,
+          label: `Redo ${editActionState.redoName}`,
           accelerator: process.platform === 'darwin' ? 'Shift+Command+Z' : 'Ctrl+Y',
-          enabled: undoState.canRedo,
-          click: () => undoState.redo(),
+          enabled: editActionState.canRedo,
+          click: () => editActionState.redo(),
         },
         {
           type: 'separator'
@@ -141,10 +141,31 @@ class MenuBar {
         {
           role: 'delete'
         },
-        {
-          role: 'selectall'
-        }
       ]
+    }
+
+    const selectionMenu: MenuItemOptions = {
+      label: "Selection",
+      submenu: [
+        {
+          label: "Select All",
+          enabled: editActionState.canSelectAll,
+          click: () => editActionState.selectAll(),
+          accelerator: "CmdOrCtrl+A",
+        },
+        {
+          label: "Clear Selection",
+          enabled: !!this.pictureState,
+          click: () => this.pictureState && this.pictureState.clearSelection(),
+          accelerator: "CmdOrCtrl+D",
+        },
+        {
+          label: "Invert Selection",
+          enabled: !!this.pictureState,
+          click: () => this.pictureState && this.pictureState.invertSelection(),
+          accelerator: "Shift+CmdOrCtrl+I",
+        },
+      ],
     }
 
     const canvasMenu: MenuItemOptions = {
@@ -256,7 +277,7 @@ class MenuBar {
     }
 
     const template: MenuItemOptions[] = [
-      fileMenu, editMenu, canvasMenu, viewMenu, windowMenu, helpMenu
+      fileMenu, editMenu, selectionMenu, canvasMenu, viewMenu, windowMenu, helpMenu
     ]
 
     if (process.platform === 'darwin') {

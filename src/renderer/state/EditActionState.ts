@@ -3,8 +3,8 @@ import {remote} from "electron"
 import {appState} from "./AppState"
 import {isTextInput} from "../views/util"
 
-export
-class UndoState {
+export default
+class EditActionState {
   constructor() {
     window.addEventListener("focus", e => {
       this.isTextInputFocused = isTextInput(document.activeElement)
@@ -39,6 +39,10 @@ class UndoState {
       return this.undoStack.isRedoable
     }
     return false
+  }
+
+  @computed get canSelectAll() {
+    return this.isTextInputFocused || !!appState.currentPicture
   }
 
   @computed get undoName() {
@@ -76,6 +80,14 @@ class UndoState {
       this.undoStack.redo()
     }
   }
+
+  @action selectAll() {
+    if (this.isTextInputFocused) {
+      remote.getCurrentWebContents().selectAll()
+    } else if (appState.currentPictureState) {
+      appState.currentPictureState.selectAll()
+    }
+  }
 }
 
-export const undoState = new UndoState()
+export const editActionState = new EditActionState()
