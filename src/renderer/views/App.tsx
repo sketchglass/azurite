@@ -9,6 +9,7 @@ import DrawArea from "./DrawArea"
 import {PictureTabBar} from "./PictureTabBar"
 
 import ColorPanel from "./panels/ColorPanel"
+import ToolSettingsPanel from "./panels/ToolSettingsPanel"
 import NavigatorPanel from "./panels/NavigatorPanel"
 import LayerPanel from "./panels/LayerPanel"
 
@@ -107,7 +108,7 @@ class App extends React.Component<{}, {}> {
           <div className="PanelTitle">Color</div>
           <ColorPanel />
           <div className="PanelTitle">Tool</div>
-          {currentTool.renderSettings()}
+          <ToolSettingsPanel />
         </aside>
         <div className="CenterArea">
           <PictureTabBar />
