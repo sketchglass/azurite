@@ -29,12 +29,4 @@ class Selection {
     this.drawTarget.clear(new Color(0, 0, 0, 0))
     this.hasSelection = false
   }
-
-  invert() {
-    const dup = duplicateTexture(this.texture)
-    this.drawTarget.clear(new Color(1, 1, 1, 1))
-    drawTexture(this.drawTarget, dup, {blendMode: "dst-out"})
-    dup.dispose()
-    this.hasSelection = true
-  }
 }
