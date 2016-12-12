@@ -30,11 +30,6 @@ class Selection {
     this.hasSelection = false
   }
 
-  selectAll() {
-    this.drawTarget.clear(new Color(1, 1, 1, 1))
-    this.hasSelection = true
-  }
-
   invert() {
     const dup = duplicateTexture(this.texture)
     this.drawTarget.clear(new Color(1, 1, 1, 1))
