@@ -1,6 +1,7 @@
 import React = require("react")
 import {Vec2} from "paintvec"
 import {HSVColor} from "../../../lib/Color"
+import {frameDebounce} from "../../../lib/Debounce"
 import PointerEvents from "./PointerEvents"
 
 const wheelWidth = Math.round(16 * devicePixelRatio)
@@ -160,15 +161,13 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
     return canvas
   }
 
-  update() {
-    requestAnimationFrame(() => {
-      this.clear()
-      this.drawWheel()
-      this.drawSquare()
-      this.drawHCursor()
-      this.drawSVCursor()
-    })
-  }
+  update = frameDebounce(() => {
+    this.clear()
+    this.drawWheel()
+    this.drawSquare()
+    this.drawHCursor()
+    this.drawSVCursor()
+  })
 
   clear() {
     const {context} = this
