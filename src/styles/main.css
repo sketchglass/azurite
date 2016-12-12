@@ -7,7 +7,6 @@
 /* App Styles */
 @import "./App.css";
 @import "./DimensionSelect.css";
-@import "./Navigator.css";
 @import "./PictureTabBar.css";
 @import "./DrawArea.css";
 @import "./ToolSelection.css";
@@ -25,6 +24,7 @@
 /* Panels */
 @import "./panels/ColorPanel.css";
 @import "./panels/LayerPanel.css";
+@import "./panels/NavigatorPanel.css";
 
 /* Dialogs */
 @import "./dialogs/DialogContainer.css";

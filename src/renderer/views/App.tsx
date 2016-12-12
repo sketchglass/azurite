@@ -6,10 +6,10 @@ import BaseBrushTool from "../tools/BaseBrushTool"
 import BrushTool from "../tools/BrushTool"
 import WatercolorTool from "../tools/WatercolorTool"
 import DrawArea from "./DrawArea"
-import Navigator from "./Navigator"
 import {PictureTabBar} from "./PictureTabBar"
 
 import ColorPanel from "./panels/ColorPanel"
+import NavigatorPanel from "./panels/NavigatorPanel"
 import LayerPanel from "./panels/LayerPanel"
 
 import NavigationKeyBinding from "./NavigationKeyBinding"
@@ -115,7 +115,7 @@ class App extends React.Component<{}, {}> {
         </div>
         <aside className="Sidebar Sidebar-right">
           <div className="PanelTitle">Navigator</div>
-          <Navigator picture={picture} />
+          <NavigatorPanel />
           <div className="PanelTitle">Layers</div>
           <LayerPanel />
         </aside>
