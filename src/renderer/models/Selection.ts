@@ -6,23 +6,11 @@ import {drawTexture} from "../GLUtil"
 
 export default
 class Selection {
-  _texture = new Texture(context, {})
-  readonly drawTarget = new TextureDrawTarget(context, this._texture)
+  readonly texture = new Texture(context, {size: this.size})
+  readonly drawTarget = new TextureDrawTarget(context, this.texture)
   @observable hasSelection = true
 
-  get texture() {
-    return this._texture
-  }
-  set texture(tex: Texture) {
-    this._texture = tex
-    this.drawTarget.texture = tex
-  }
-
-  get size() {
-    return this.texture.size
-  }
-  set size(size: Vec2) {
-    this.texture.size = size
+  constructor(public readonly size: Vec2) {
   }
 
   includes(pos: Vec2) {
@@ -39,12 +27,20 @@ class Selection {
   }
 
   transform(newSize: Vec2, transform: Transform, opts: {bicubic?: boolean} = {}) {
-    if (!this.hasSelection) {
-      return
+    const selection = new Selection(newSize)
+    selection.hasSelection = this.hasSelection
+    if (this.hasSelection) {
+      drawTexture(selection.drawTarget, this.texture, {blendMode: "src", transform, ...opts})
     }
-    const oldTexture = this.texture
-    this.texture = new Texture(context, {size: newSize})
-    drawTexture(this.drawTarget, oldTexture, {transform, ...opts})
-    oldTexture.dispose()
+    return selection
+  }
+
+  clone() {
+    return this.transform(this.size, new Transform())
+  }
+
+  dispose() {
+    this.drawTarget.dispose()
+    this.texture.dispose()
   }
 }

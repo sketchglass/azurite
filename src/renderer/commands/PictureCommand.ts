@@ -1,10 +1,9 @@
 import {Vec2, Transform} from "paintvec"
-import {Texture} from "paintgl"
 import {UndoCommand} from "../models/UndoStack"
 import Picture, {PictureDimension} from "../models/Picture"
+import Selection from "../models/Selection"
 import Layer from "../models/Layer"
 import {TransformLayerCommand} from "./LayerCommand"
-import {duplicateTexture, drawTexture} from "../GLUtil"
 
 function transformPicture(picture: Picture, newSize: Vec2, transform: Transform) {
   picture.forEachLayer(layer => {
@@ -14,7 +13,7 @@ function transformPicture(picture: Picture, newSize: Vec2, transform: Transform)
     }
     content.tiledTexture = content.tiledTexture.transform(transform)
   })
-  picture.selection.transform(newSize, transform)
+  picture.selection = picture.selection.transform(newSize, transform)
   const {width, height} = newSize
   const {dpi} = picture.dimension
   picture.dimension = {width, height, dpi}
@@ -117,7 +116,7 @@ class ChangePictureResolutionCommand {
   title = "Change Canvas Resolution"
   oldDimension: PictureDimension
   transformCommands: UndoCommand[] = []
-  oldSelection: Texture|undefined
+  oldSelection: Selection
 
   constructor(public picture: Picture, public newDimension: PictureDimension) {
   }
@@ -126,9 +125,7 @@ class ChangePictureResolutionCommand {
     for (const command of this.transformCommands) {
       command.undo()
     }
-    if (this.oldSelection) {
-      drawTexture(this.picture.selection.drawTarget, this.oldSelection, {blendMode: "src"})
-    }
+    this.picture.selection = this.oldSelection
     this.picture.dimension = this.oldDimension
     this.picture.lastUpdate = {}
   }
@@ -145,9 +142,8 @@ class ChangePictureResolutionCommand {
         this.transformCommands.push(transformCommand)
         transformCommand.redo()
       })
-      const {selection} = this.picture
-      this.oldSelection = selection.hasSelection ? duplicateTexture(selection.texture) : undefined
-      selection.transform(new Vec2(dimension.width, dimension.height), transform, {bicubic: true})
+      this.oldSelection = this.picture.selection
+      this.picture.selection = this.oldSelection.transform(new Vec2(dimension.width, dimension.height), transform, {bicubic: true})
     }
 
     this.oldDimension = oldDimension
