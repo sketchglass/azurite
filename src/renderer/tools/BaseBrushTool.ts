@@ -51,20 +51,20 @@ abstract class BaseBrushTool extends Tool {
   newTiledTexture: TiledTexture|undefined
   editedRect: Rect|undefined
 
-  private _cursorElement = document.createElement("canvas")
-  private _cursorElementSize = 0
-  private cursorContext = this._cursorElement.getContext("2d")!
+  private _cursorImage = document.createElement("canvas")
+  private _cursorImageSize = 0
+  private cursorContext = this._cursorImage.getContext("2d")!
 
   get cursor() {
     return "not-allowed"
   }
   @computed get cursorImage() {
     if (this.currentLayer && this.currentLayer.content.type == "image") {
-      return this._cursorElement
+      return this._cursorImage
     }
   }
   get cursorImageSize() {
-    return this._cursorElementSize
+    return this._cursorImageSize
   }
 
   constructor(appState: AppState) {
@@ -77,8 +77,8 @@ abstract class BaseBrushTool extends Tool {
     const dpr = window.devicePixelRatio
     const canvasSize = this.width + 4 * dpr
     const center = canvasSize / 2
-    this._cursorElement.width = canvasSize
-    this._cursorElement.height = canvasSize
+    this._cursorImage.width = canvasSize
+    this._cursorImage.height = canvasSize
 
     const context = this.cursorContext
 
@@ -94,7 +94,7 @@ abstract class BaseBrushTool extends Tool {
     context.ellipse(center, center, radius + dpr, radius + dpr, 0, 0, 2 * Math.PI)
     context.stroke()
 
-    this._cursorElementSize = canvasSize / dpr
+    this._cursorImageSize = canvasSize / dpr
   }
 
   addEditedRect(rect: Rect) {
