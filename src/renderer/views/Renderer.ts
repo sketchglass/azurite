@@ -132,7 +132,7 @@ class Renderer {
   private readonly pictureShape = new RectShape(context, {
     usage: "static",
   })
-  private readonly model = new Model(context, {
+  private readonly pictureModel = new Model(context, {
     shape: this.pictureShape,
     shader: TextureShader,
   })
@@ -216,9 +216,9 @@ class Renderer {
   constructor() {
     reaction(() => this.picture, picture => {
       if (picture) {
-        this.model.uniforms = {texture: picture.layerBlender.getBlendedTexture()}
+        this.pictureModel.uniforms = {texture: picture.layerBlender.getBlendedTexture()}
       } else {
-        this.model.uniforms = {}
+        this.pictureModel.uniforms = {}
       }
     })
     reaction(() => this.picture && this.picture.size, size => {
@@ -300,8 +300,8 @@ class Renderer {
       if (texture.filter != filter) {
         texture.filter = filter
       }
-      this.model.transform = this.transformFromPicture
-      drawTarget.draw(this.model)
+      this.pictureModel.transform = this.transformFromPicture
+      drawTarget.draw(this.pictureModel)
 
       const {selection} = this.picture
       if (selection.hasSelection) {
