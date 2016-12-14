@@ -55,7 +55,7 @@ const SELECTION_DURATION = 100
 class SelectionShader extends Shader {
   get additionalVertexShader() {
     return `
-      varying mat2 toTexOffset;
+      varying mat2 vToTexOffset;
       uniform vec2 pictureSize;
       uniform mat3 transformToPicture;
 
@@ -65,7 +65,7 @@ class SelectionShader extends Shader {
 
       void paintgl_additional() {
         vec2 texelSize = 1.0 / pictureSize;
-        toTexOffset = mat2(texelSize.x, 0.0, 0.0, texelSize.y) * getScaleRotation(transformToPicture);
+        vToTexOffset = mat2(texelSize.x, 0.0, 0.0, texelSize.y) * getScaleRotation(transformToPicture);
       }
     `
   }
@@ -76,7 +76,7 @@ class SelectionShader extends Shader {
       uniform sampler2D texture;
       uniform float milliseconds;
       varying vec2 vTexCoord;
-      varying mat2 toTexOffset;
+      varying mat2 vToTexOffset;
 
       #define STRIPE_WIDTH 4.0
       #define STEP 2.0
@@ -97,7 +97,7 @@ class SelectionShader extends Shader {
           for (int y = -1; y <= 1; ++y) {
             for (int x = -1; x <= 1; ++x) {
               if (x != 0 && y != 0) {
-                vec2 texCoord = vTexCoord + toTexOffset * vec2(float(x), float(y));
+                vec2 texCoord = vTexCoord + vToTexOffset * vec2(float(x), float(y));
                 if (!isSelected(texCoord)) {
                   isOutline = true;
                 }
