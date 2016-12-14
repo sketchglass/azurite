@@ -58,12 +58,12 @@ abstract class BaseBrushTool extends Tool {
   get cursor() {
     return "not-allowed"
   }
-  @computed get cursorElement() {
+  @computed get cursorImage() {
     if (this.currentLayer && this.currentLayer.content.type == "image") {
       return this._cursorElement
     }
   }
-  get cursorElementSize() {
+  get cursorImageSize() {
     return this._cursorElementSize
   }
 

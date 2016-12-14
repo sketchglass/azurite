@@ -1,6 +1,6 @@
 import {observable, computed, reaction} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
-import {Model, RectShape, Shader, TextureShader, CanvasDrawTarget, Color, TextureFilter} from "paintgl"
+import {Texture, Model, RectShape, Shader, TextureShader, CanvasDrawTarget, Color, TextureFilter} from "paintgl"
 import {context, canvas} from "../GLContext"
 import {frameDebounce} from "../../lib/Debounce"
 import Picture from "../models/Picture"
@@ -136,8 +136,9 @@ class Renderer {
     shape: this.shape,
     shader: TextureShader,
   })
+
   @observable size = new Vec2(100, 100)
-  background = new Color(46 / 255, 48 / 255, 56 / 255, 1)
+  readonly background = new Color(46 / 255, 48 / 255, 56 / 255, 1)
 
   @observable selectionAnimationEnabled = true
 
@@ -152,6 +153,31 @@ class Renderer {
     shape: this.shape,
     shader: SelectionShader,
   })
+
+  private readonly cursorShape = new RectShape(context, {
+    usage: "static",
+    rect: new Rect(new Vec2(0), new Vec2(1)),
+  })
+  readonly cursorTexture = new Texture(context, {})
+  private readonly cursorModel = new Model(context, {
+    shape: this.cursorShape,
+    shader: TextureShader,
+    uniforms: {
+      texture: this.cursorTexture
+    }
+  })
+
+  @observable cursorVisible = false
+  @observable cursorSize = new Vec2()
+  @observable cursorPosition = new Vec2()
+
+  @computed get cursorRect() {
+    const pos = this.cursorPosition
+    const size = this.cursorSize
+    return new Rect(pos.sub(size.mulScalar(0.5)), pos.add(size.mulScalar(0.5)))
+  }
+
+  private lastCursorRect: Rect|undefined
 
   @computed get pictureSize() {
     if (this.picture) {
@@ -226,6 +252,15 @@ class Renderer {
         this.update()
       }
     }, SELECTION_DURATION)
+    reaction(() => [this.cursorRect, this.cursorVisible], () => {
+      if (this.cursorVisible) {
+        if (this.lastCursorRect) {
+          this.addDirtyRect(this.lastCursorRect)
+        }
+        this.addDirtyRect(this.cursorRect)
+      }
+      this.update()
+    })
   }
 
   addDirtyRect(rect: Rect) {
@@ -282,6 +317,13 @@ class Renderer {
         this.selectionModel.transform = this.transformFromPicture
         drawTarget.draw(this.selectionModel)
       }
+    }
+    if (this.cursorVisible) {
+      this.lastCursorRect = this.cursorRect
+      this.cursorModel.transform = Transform.rectToRect(this.cursorShape.rect, this.cursorRect)
+      drawTarget.draw(this.cursorModel)
+    } else {
+      this.lastCursorRect = undefined
     }
     this.dirtyRect = undefined
     this.wholeDirty = false

@@ -1,4 +1,4 @@
-import {observable, autorun} from "mobx"
+import {observable, autorun, action} from "mobx"
 import {observer} from "mobx-react"
 import {Subscription} from "rxjs/Subscription"
 import React = require("react")
@@ -8,7 +8,6 @@ import Tool, {ToolPointerEvent} from "../tools/Tool"
 import {TabletEvent} from "receive-tablet-event"
 import {canvas} from "../GLContext"
 import {renderer} from "./Renderer"
-import {frameDebounce} from "../../lib/Debounce"
 import * as IPCChannels from "../../common/IPCChannels"
 import PointerEvents from "./components/PointerEvents"
 import ScrollBar, {ScrollBarDirection} from "./components/ScrollBar"
@@ -82,7 +81,6 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   @observable tool: Tool
   @observable picture: Picture|undefined
   currentTool: Tool|undefined
-  cursorElement: HTMLElement|undefined
   @observable cursorPosition = new Vec2()
   usingTablet = false
   tabletDownSubscription: Subscription
@@ -95,7 +93,6 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     this.picture = renderer.picture = props.picture
     this.setTool(props.tool)
     autorun(() => this.updateCursor())
-    autorun(() => this.updateCursorGeometry())
   }
 
   setTool(tool: Tool) {
@@ -141,39 +138,23 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
 
   updateCursor() {
-    const {cursor, cursorElement} = this.tool
-    if (this.element) {
-      if (this.cursorElement && this.cursorElement.parentElement) {
-        this.cursorElement.parentElement.removeChild(this.cursorElement)
+    const {cursor, cursorImage, cursorImageSize} = this.tool
+    const {cursorPosition} = this
+    action(() => {
+      if (!this.element) {
+        return
       }
-
-      if (cursorElement) {
+      renderer.cursorVisible = !!cursorImage
+      if (cursorImage) {
         this.element.style.cursor = "none"
-        cursorElement.className = "DrawArea_Cursor"
-        this.element.appendChild(cursorElement)
-        this.cursorElement = cursorElement
+        renderer.cursorTexture.setImage(cursorImage)
+        renderer.cursorPosition = cursorPosition.mulScalar(devicePixelRatio)
+        renderer.cursorSize = new Vec2(cursorImageSize * devicePixelRatio)
       } else {
         this.element.style.cursor = cursor
       }
-    }
+    })()
   }
-
-  updateCursorGeometry() {
-    const {x, y} = this.cursorPosition.floor()
-    const {cursorElementSize} = this.tool
-    if (this.cursorElement) {
-      const center = cursorElementSize / 2
-      this.updateCursorStyle(x - center, y - center)
-    }
-  }
-
-  updateCursorStyle = frameDebounce((left: number, top: number) => {
-    if (this.cursorElement) {
-      const {style} = this.cursorElement
-      style.left = `${left}px`
-      style.top = `${top}px`
-    }
-  })
 
   onResize = () => {
     const rect = this.element!.getBoundingClientRect()
