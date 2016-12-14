@@ -210,6 +210,14 @@ class Renderer {
       this.update()
     })
     reaction(() => this.picture && this.picture.lastUpdate, update => {
+      if (!update) {
+        return
+      }
+      if (update.rect) {
+        this.addPictureDirtyRect(update.rect)
+      } else {
+        this.wholeDirty = true
+      }
       this.update()
     })
     setInterval(() => {
@@ -228,21 +236,14 @@ class Renderer {
     }
   }
 
+  addPictureDirtyRect(rect: Rect) {
+    this.addDirtyRect(rect.transform(this.transformFromPicture))
+  }
+
   update = frameDebounce(() => this.renderNow())
 
   renderNow() {
     const milliseconds = Date.now() - this.startupTime
-    if (this.picture) {
-      const {layerBlender} = this.picture
-      if (layerBlender.wholeDirty) {
-        this.wholeDirty = true
-        layerBlender.renderNow()
-      } else if (layerBlender.dirtyRect) {
-        const rect = layerBlender.dirtyRect.transform(this.transformFromPicture)
-        this.addDirtyRect(rect)
-        layerBlender.renderNow()
-      }
-    }
     if (!this.wholeDirty && !this.dirtyRect) {
       return
     }
