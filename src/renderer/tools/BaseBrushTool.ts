@@ -94,7 +94,7 @@ abstract class BaseBrushTool extends Tool {
     context.ellipse(center, center, radius + dpr, radius + dpr, 0, 0, 2 * Math.PI)
     context.stroke()
 
-    this._cursorImageSize = canvasSize / dpr
+    this._cursorImageSize = canvasSize
   }
 
   addEditedRect(rect: Rect) {
