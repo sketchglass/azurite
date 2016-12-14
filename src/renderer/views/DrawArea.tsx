@@ -1,4 +1,4 @@
-import {observable, autorun, action} from "mobx"
+import {observable, autorun, runInAction} from "mobx"
 import {observer} from "mobx-react"
 import {Subscription} from "rxjs/Subscription"
 import React = require("react")
@@ -140,7 +140,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   updateCursor() {
     const {cursor, cursorImage, cursorImageSize} = this.tool
     const {cursorPosition} = this
-    action(() => {
+    runInAction(() => {
       if (!this.element) {
         return
       }
@@ -153,7 +153,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       } else {
         this.element.style.cursor = cursor
       }
-    })()
+    })
   }
 
   onResize = () => {
