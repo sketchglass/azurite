@@ -142,11 +142,11 @@ class Renderer {
 
   @observable selectionAnimationEnabled = true
 
-  private readonly wholeShape = new RectShape(context, {
+  private readonly rendererShape = new RectShape(context, {
     usage: "static",
   })
   private readonly boxShadowModel = new Model(context, {
-    shape: this.wholeShape,
+    shape: this.rendererShape,
     shader: BoxShadowShader,
   })
   private readonly selectionModel = new Model(context, {
@@ -229,7 +229,7 @@ class Renderer {
     reaction(() => this.size, size => {
       canvas.width = size.width
       canvas.height = size.height
-      this.wholeShape.rect = new Rect(new Vec2(), size)
+      this.rendererShape.rect = new Rect(new Vec2(), size)
     })
     reaction(() => [this.size, this.transformToPicture], () => {
       this.wholeDirty = true
