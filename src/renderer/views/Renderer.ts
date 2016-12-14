@@ -55,8 +55,7 @@ const SELECTION_DURATION = 100
 class SelectionShader extends Shader {
   get additionalVertexShader() {
     return `
-      varying vec2 vTexXOffset;
-      varying vec2 vTexYOffset;
+      varying mat2 vToTexOffset;
       uniform vec2 pictureSize;
       uniform mat3 transformToPicture;
 
@@ -65,9 +64,8 @@ class SelectionShader extends Shader {
       }
 
       void paintgl_additional() {
-        mat2 scaleRotation = getScaleRotation(transformToPicture);
-        vTexXOffset = scaleRotation * vec2(1.0, 0.0) / pictureSize;
-        vTexYOffset = scaleRotation * vec2(0.0, 1.0) / pictureSize;
+        vec2 texelSize = 1.0 / pictureSize;
+        vToTexOffset = mat2(texelSize.x, 0.0, 0.0, texelSize.y) * getScaleRotation(transformToPicture);
       }
     `
   }
@@ -78,8 +76,7 @@ class SelectionShader extends Shader {
       uniform sampler2D texture;
       uniform float milliseconds;
       varying vec2 vTexCoord;
-      varying vec2 vTexXOffset;
-      varying vec2 vTexYOffset;
+      varying mat2 vToTexOffset;
 
       #define STRIPE_WIDTH 4.0
       #define STEP 2.0
@@ -100,7 +97,7 @@ class SelectionShader extends Shader {
           for (int y = -1; y <= 1; ++y) {
             for (int x = -1; x <= 1; ++x) {
               if (x != 0 && y != 0) {
-                vec2 texCoord = vTexCoord + vTexXOffset * float(x) + vTexYOffset * float(y);
+                vec2 texCoord = vTexCoord + vToTexOffset * vec2(float(x), float(y));
                 if (!isSelected(texCoord)) {
                   isOutline = true;
                 }
@@ -129,11 +126,11 @@ class SelectionShader extends Shader {
 export default
 class Renderer {
   @observable picture: Picture|undefined
-  private readonly shape = new RectShape(context, {
+  private readonly pictureShape = new RectShape(context, {
     usage: "static",
   })
-  private readonly model = new Model(context, {
-    shape: this.shape,
+  private readonly pictureModel = new Model(context, {
+    shape: this.pictureShape,
     shader: TextureShader,
   })
 
@@ -142,15 +139,15 @@ class Renderer {
 
   @observable selectionAnimationEnabled = true
 
-  private readonly wholeShape = new RectShape(context, {
+  private readonly rendererShape = new RectShape(context, {
     usage: "static",
   })
   private readonly boxShadowModel = new Model(context, {
-    shape: this.wholeShape,
+    shape: this.rendererShape,
     shader: BoxShadowShader,
   })
   private readonly selectionModel = new Model(context, {
-    shape: this.shape,
+    shape: this.pictureShape,
     shader: SelectionShader,
   })
 
@@ -216,20 +213,16 @@ class Renderer {
   constructor() {
     reaction(() => this.picture, picture => {
       if (picture) {
-        this.model.uniforms = {texture: picture.layerBlender.getBlendedTexture()}
+        this.pictureModel.uniforms = {texture: picture.layerBlender.getBlendedTexture()}
+        this.pictureShape.rect = new Rect(new Vec2(), picture.size)
       } else {
-        this.model.uniforms = {}
-      }
-    })
-    reaction(() => this.picture && this.picture.size, size => {
-      if (size) {
-        this.shape.rect = new Rect(new Vec2(), size)
+        this.pictureModel.uniforms = {}
       }
     })
     reaction(() => this.size, size => {
       canvas.width = size.width
       canvas.height = size.height
-      this.wholeShape.rect = new Rect(new Vec2(), size)
+      this.rendererShape.rect = new Rect(new Vec2(), size)
     })
     reaction(() => [this.size, this.transformToPicture], () => {
       this.wholeDirty = true
@@ -300,8 +293,8 @@ class Renderer {
       if (texture.filter != filter) {
         texture.filter = filter
       }
-      this.model.transform = this.transformFromPicture
-      drawTarget.draw(this.model)
+      this.pictureModel.transform = this.transformFromPicture
+      drawTarget.draw(this.pictureModel)
 
       const {selection} = this.picture
       if (selection.hasSelection) {
