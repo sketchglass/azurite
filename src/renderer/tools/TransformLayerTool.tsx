@@ -154,6 +154,7 @@ class TransformLayerTool extends RectMoveTool {
       return
     }
     this.picture.layerBlender.wholeDirty = true
+    this.renderer.wholeDirty = true
     this.renderer.update()
   }
 
