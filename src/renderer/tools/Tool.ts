@@ -48,10 +48,10 @@ abstract class Tool {
   get cursor() {
     return "auto"
   }
-  get cursorElement(): HTMLElement|undefined {
+  get cursorImage(): HTMLCanvasElement|undefined {
     return undefined
   }
-  get cursorElementSize() {
+  get cursorImageSize() {
     return 0
   }
 
