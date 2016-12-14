@@ -129,11 +129,11 @@ class SelectionShader extends Shader {
 export default
 class Renderer {
   @observable picture: Picture|undefined
-  private readonly shape = new RectShape(context, {
+  private readonly pictureShape = new RectShape(context, {
     usage: "static",
   })
   private readonly model = new Model(context, {
-    shape: this.shape,
+    shape: this.pictureShape,
     shader: TextureShader,
   })
 
@@ -150,7 +150,7 @@ class Renderer {
     shader: BoxShadowShader,
   })
   private readonly selectionModel = new Model(context, {
-    shape: this.shape,
+    shape: this.pictureShape,
     shader: SelectionShader,
   })
 
@@ -223,7 +223,7 @@ class Renderer {
     })
     reaction(() => this.picture && this.picture.size, size => {
       if (size) {
-        this.shape.rect = new Rect(new Vec2(), size)
+        this.pictureShape.rect = new Rect(new Vec2(), size)
       }
     })
     reaction(() => this.size, size => {
