@@ -118,7 +118,7 @@ abstract class ShapeSelectTool extends Tool {
     selection.hasSelection = true
   }
 
-  private update = frameDebounce(() => {
+  update = frameDebounce(() => {
     if (this.moving) {
       this.moveSelection()
     }

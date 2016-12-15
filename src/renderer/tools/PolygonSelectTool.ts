@@ -13,8 +13,19 @@ class PolygonSelectTool extends ShapeSelectTool {
 
   start(ev: ToolPointerEvent) {
     const pos = ev.rendererPos.round()
-    this.positions.push(pos)
+    if (this.positions.length > 0) {
+      this.positions.pop()
+    }
+    this.positions.push(pos, pos)
     super.start(ev)
+  }
+
+  hover(ev: ToolPointerEvent) {
+    const pos = ev.rendererPos.round()
+    if (this.positions.length > 0) {
+      this.positions[this.positions.length - 1] = pos
+    }
+    this.update()
   }
 
   // TODO: handle hover event
