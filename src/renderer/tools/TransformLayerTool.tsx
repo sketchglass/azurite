@@ -10,49 +10,9 @@ import {drawTexture} from "../GLUtil"
 import {context} from "../GLContext"
 import {AppState} from "../state/AppState"
 import {TransformLayerCommand} from "../commands/LayerCommand"
-import FrameDebounced from "../views/components/FrameDebounced"
 import RectMoveTool, {DragType} from "./RectMoveTool"
 
 const HANDLE_RADIUS = 4
-
-class TransformLayerOverlayUI extends FrameDebounced<{tool: TransformLayerTool}, {}> {
-  renderDebounced() {
-    const {tool} = this.props
-    const {originalRect} = tool
-
-    if (!originalRect) {
-      return <g />
-    }
-
-    const transformPos = (pos: Vec2) => {
-      return pos
-        .transform(tool.transform)
-        .transform(tool.renderer.transformFromPicture)
-        .divScalar(devicePixelRatio)
-    }
-
-    const vertices = originalRect.vertices().map(transformPos)
-
-    const polygonPoints = vertices.map(v => `${v.x},${v.y}`).join(" ")
-    const [topLeft, topRight, bottomRight, bottomLeft] = vertices
-    const handlePositions = [
-      topLeft,
-      topRight,
-      bottomRight,
-      bottomLeft,
-      topLeft.add(topRight).divScalar(2),
-      topRight.add(bottomRight).divScalar(2),
-      bottomRight.add(bottomLeft).divScalar(2),
-      bottomLeft.add(topLeft).divScalar(2),
-    ]
-    return (
-      <g>
-        <polygon points={polygonPoints} stroke="#888" fill="transparent" />
-        {handlePositions.map((pos, i) => <circle key={i} cx={pos.x} cy={pos.y} r={HANDLE_RADIUS} stroke="#888" fill="#FFF" />)}
-      </g>
-    )
-  }
-}
 
 const TransformLayerSettings = observer((props: {tool: TransformLayerTool}) => {
   const {tool} = props
@@ -172,11 +132,57 @@ class TransformLayerTool extends RectMoveTool {
     }
   }
 
-  renderOverlayUI() {
-    return <TransformLayerOverlayUI tool={this} />
-  }
-
   renderSettings() {
     return <TransformLayerSettings tool={this} />
+  }
+
+  renderOverlayCanvas(context: CanvasRenderingContext2D) {
+    if (!this.hasRect) {
+      return
+    }
+    const {originalRect} = this
+
+    const transformPos = (pos: Vec2) => {
+      return pos
+        .transform(this.transform)
+        .transform(this.renderer.transformFromPicture)
+    }
+
+    const vertices = originalRect.vertices().map(transformPos)
+
+    context.lineWidth = 1 * devicePixelRatio
+    context.strokeStyle = "#888"
+    context.beginPath()
+    for (const [i, p] of vertices.entries()) {
+      if (i == 0) {
+        context.moveTo(p.x, p.y)
+      } else {
+        context.lineTo(p.x, p.y)
+      }
+    }
+    context.closePath()
+    context.stroke()
+
+    const [topLeft, topRight, bottomRight, bottomLeft] = vertices
+    const handlePositions = [
+      topLeft,
+      topRight,
+      bottomRight,
+      bottomLeft,
+      topLeft.add(topRight).divScalar(2),
+      topRight.add(bottomRight).divScalar(2),
+      bottomRight.add(bottomLeft).divScalar(2),
+      bottomLeft.add(topLeft).divScalar(2),
+    ]
+
+    const handleRadius = HANDLE_RADIUS * devicePixelRatio
+    for (const handle of handlePositions) {
+      context.strokeStyle = "#888"
+      context.fillStyle = "#fff"
+      context.beginPath()
+      context.ellipse(handle.x, handle.y, handleRadius, handleRadius, 0, 0, 2 * Math.PI)
+      context.fill()
+      context.stroke()
+    }
   }
 }

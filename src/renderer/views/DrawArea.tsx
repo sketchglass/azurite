@@ -98,6 +98,12 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   setTool(tool: Tool) {
     this.tool = tool
     this.tool.renderer = renderer
+    if (tool.renderOverlayCanvas) {
+      const renderWithCanvas = tool.renderOverlayCanvas.bind(tool)
+      renderer.overlay = {renderWithCanvas}
+    } else {
+      renderer.overlay = undefined
+    }
   }
 
   componentWillReceiveProps(nextProps: DrawAreaProps) {
@@ -173,16 +179,11 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   render() {
     const style = {visibility: this.picture ? "visible" : "hidden"}
-    const overlay = this.tool.renderOverlayUI()
 
     return (
       <div className="DrawArea_wrapper">
         <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
-          <div ref={e => this.element = e} className="DrawArea" style={style} tabIndex={-1} onKeyDown={this.onKeyDown} >
-            <svg hidden={!overlay} className="DrawArea_Overlay">
-              {overlay}
-            </svg>
-          </div>
+          <div ref={e => this.element = e} className="DrawArea" style={style} tabIndex={-1} onKeyDown={this.onKeyDown} />
         </PointerEvents>
         <DrawAreaScroll picture={this.picture} />
       </div>
