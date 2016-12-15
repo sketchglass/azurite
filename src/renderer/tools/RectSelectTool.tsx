@@ -13,15 +13,15 @@ class RectSelectTool extends Tool {
     return "crosshair"
   }
 
-  selecting = false
-  dragging = false
+  drawing = false
+  moving = false
   startRendererPos = new Vec2()
   currentRendererPos = new Vec2()
   startPicturePos = new Vec2()
   currentPicturePos = new Vec2()
 
   get selectingRect() {
-    if (this.selecting && !this.startRendererPos.equals(this.currentRendererPos)) {
+    if (this.drawing && !this.startRendererPos.equals(this.currentRendererPos)) {
       return Rect.fromTwoPoints(this.startRendererPos, this.currentRendererPos)
     }
   }
@@ -49,10 +49,10 @@ class RectSelectTool extends Tool {
     this.adding = ev.shiftKey
     if (selection.includes(ev.picturePos) && !this.adding) {
       // move
-      this.dragging = true
+      this.moving = true
     } else {
-      // select
-      this.selecting = true
+      // draw
+      this.drawing = true
 
       if (!this.adding) {
         selection.clear()
@@ -63,7 +63,7 @@ class RectSelectTool extends Tool {
   }
 
   move(ev: ToolPointerEvent) {
-    if (!this.picture || !(this.selecting || this.dragging)) {
+    if (!this.picture || !(this.drawing || this.moving)) {
       return
     }
     this.currentRendererPos = ev.rendererPos.round()
@@ -90,7 +90,7 @@ class RectSelectTool extends Tool {
   }
 
   moveSelection() {
-    if (!this.picture || !this.dragging) {
+    if (!this.picture || !this.moving) {
       return
     }
     const {selection} = this.picture
@@ -100,7 +100,7 @@ class RectSelectTool extends Tool {
   }
 
   drawSelection() {
-    if (!this.picture || !this.selecting) {
+    if (!this.picture || !this.drawing) {
       return
     }
     const {selection} = this.picture
@@ -128,7 +128,7 @@ class RectSelectTool extends Tool {
   }
 
   update = frameDebounce(() => {
-    if (this.dragging) {
+    if (this.moving) {
       this.moveSelection()
     }
     this.renderer.wholeDirty = true
@@ -147,18 +147,18 @@ class RectSelectTool extends Tool {
   }
 
   end(ev: ToolPointerEvent) {
-    if (!this.picture || !(this.selecting || this.dragging)) {
+    if (!this.picture || !(this.drawing || this.moving)) {
       return
     }
-    if (this.selecting) {
+    if (this.drawing) {
       this.drawSelection()
     }
-    if (this.dragging) {
+    if (this.moving) {
       this.moveSelection()
     }
     this.commit()
-    this.dragging = false
-    this.selecting = false
+    this.moving = false
+    this.drawing = false
   }
 
   renderOverlayCanvas(context: CanvasRenderingContext2D) {
