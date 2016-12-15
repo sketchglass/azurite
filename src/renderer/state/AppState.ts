@@ -8,6 +8,8 @@ import {ZoomTool} from "../tools/ZoomTool"
 import RotateTool from "../tools/RotateTool"
 import TransformLayerTool from "../tools/TransformLayerTool"
 import RectSelectTool from "../tools/RectSelectTool"
+import FreehandSelectTool from "../tools/FreehandSelectTool"
+import PolygonSelectTool from "../tools/PolygonSelectTool"
 import CanvasAreaTool from "../tools/CanvasAreaTool"
 import {HSVColor} from "../../lib/Color"
 import {PictureState} from "./PictureState"
@@ -38,6 +40,8 @@ class AppState {
     new TransformLayerTool(this),
     new RectSelectTool("rect", this),
     new RectSelectTool("ellipse", this),
+    new FreehandSelectTool(this),
+    new PolygonSelectTool(this),
     new CanvasAreaTool(this),
   ])
   @observable currentTool: Tool = this.tools[0]

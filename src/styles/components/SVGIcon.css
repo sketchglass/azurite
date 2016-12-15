@@ -48,6 +48,12 @@
   &.ellipse-select {
     mask: url("../../../bundles/icons/flaticon/svg/circle.svg");
   }
+  &.freehand-select {
+    mask: url("../icons/freehand-select.svg");
+  }
+  &.polygon-select {
+    mask: url("../icons/polygon-select.svg");
+  }
   &.crop {
     mask: url("../../../bundles/icons/flaticon/svg/crop.svg");
   }

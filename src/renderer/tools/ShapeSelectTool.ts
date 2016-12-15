@@ -7,6 +7,8 @@ import {frameDebounce} from "../../lib/Debounce"
 import {SelectionChangeCommand} from "../commands/SelectionCommand"
 
 abstract class ShapeSelectTool extends Tool {
+  commitDrawOnEnd = true
+
   drawing = false
   moving = false
   adding = false
@@ -22,6 +24,10 @@ abstract class ShapeSelectTool extends Tool {
 
   start(ev: ToolPointerEvent) {
     if (!this.picture) {
+      return
+    }
+    if (this.drawing) {
+      this.update()
       return
     }
 
@@ -44,6 +50,7 @@ abstract class ShapeSelectTool extends Tool {
         this.renderer.update()
       }
     }
+    this.update()
   }
 
   move(ev: ToolPointerEvent) {
@@ -87,16 +94,18 @@ abstract class ShapeSelectTool extends Tool {
       return
     }
     const {selection} = this.picture
+    const {context} = this
 
-    this.context.setTransform(1, 0, 0, 1, 0, 0)
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    context.setTransform(1, 0, 0, 1, 0, 0)
+    context.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
     const transform = this.renderer.transformToPicture
-    this.context.setTransform(transform.m00, transform.m01, transform.m10, transform.m11, transform.m20, transform.m21)
-    this.context.fillStyle = "white"
-    this.context.beginPath()
-    this.drawShape(this.context)
-    this.context.fill()
+    context.setTransform(transform.m00, transform.m01, transform.m10, transform.m11, transform.m20, transform.m21)
+    context.fillStyle = "white"
+    context.beginPath()
+    this.drawShape(context)
+    context.closePath()
+    context.fill()
 
     this.canvasTexture.setImage(this.canvas)
 
@@ -117,19 +126,8 @@ abstract class ShapeSelectTool extends Tool {
     this.renderer.renderNow()
   })
 
-  private commit() {
+  commit() {
     if (!this.picture) {
-      return
-    }
-    const {selection} = this.picture
-    const oldTexture = this.hasOriginal ? duplicateTexture(this.originalSelectionTexture) : undefined
-    const newTexture = selection.hasSelection ? duplicateTexture(this.canvasTexture) : undefined
-    const command = new SelectionChangeCommand(this.picture, oldTexture, newTexture)
-    this.picture.undoStack.push(command)
-  }
-
-  end(ev: ToolPointerEvent) {
-    if (!this.picture || !(this.drawing || this.moving)) {
       return
     }
     if (this.drawing) {
@@ -138,9 +136,26 @@ abstract class ShapeSelectTool extends Tool {
     if (this.moving) {
       this.moveSelection()
     }
-    this.commit()
+    const {selection} = this.picture
+    const oldTexture = this.hasOriginal ? duplicateTexture(this.originalSelectionTexture) : undefined
+    const newTexture = selection.hasSelection ? duplicateTexture(this.canvasTexture) : undefined
+    const command = new SelectionChangeCommand(this.picture, oldTexture, newTexture)
+    this.picture.undoStack.push(command)
+
     this.moving = false
     this.drawing = false
+  }
+
+  end(ev: ToolPointerEvent) {
+    if (!this.picture) {
+      return
+    }
+    if (this.drawing && this.commitDrawOnEnd) {
+      this.commit()
+    }
+    if (this.moving) {
+      this.commit()
+    }
   }
 
   renderOverlayCanvas(context: CanvasRenderingContext2D) {
