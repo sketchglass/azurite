@@ -15,12 +15,12 @@ abstract class ShapeSelectTool extends Tool {
   startPicturePos = new Vec2()
   currentPicturePos = new Vec2()
 
-  canvas = document.createElement("canvas")
-  context = this.canvas.getContext("2d")!
-  canvasTexture = new Texture(context, {})
-  hasOriginal = false
-  originalSelectionTexture = new Texture(context, {})
-  originalSelectionDrawTarget = new TextureDrawTarget(context, this.originalSelectionTexture)
+  private canvas = document.createElement("canvas")
+  private context = this.canvas.getContext("2d")!
+  private canvasTexture = new Texture(context, {})
+  private hasOriginal = false
+  private originalSelectionTexture = new Texture(context, {})
+  private originalSelectionDrawTarget = new TextureDrawTarget(context, this.originalSelectionTexture)
 
   start(ev: ToolPointerEvent) {
     if (!this.picture) {
@@ -58,7 +58,7 @@ abstract class ShapeSelectTool extends Tool {
     this.update()
   }
 
-  resetData() {
+  private resetData() {
     if (!this.picture) {
       return
     }
@@ -76,7 +76,7 @@ abstract class ShapeSelectTool extends Tool {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
   }
 
-  moveSelection() {
+  private moveSelection() {
     if (!this.picture || !this.moving) {
       return
     }
@@ -86,7 +86,7 @@ abstract class ShapeSelectTool extends Tool {
     drawTexture(selection.drawTarget, this.originalSelectionTexture, {blendMode: "src", transform: Transform.translate(offset)})
   }
 
-  drawSelection() {
+  private drawSelection() {
     if (!this.picture || !this.drawing) {
       return
     }
@@ -113,7 +113,7 @@ abstract class ShapeSelectTool extends Tool {
     selection.hasSelection = true
   }
 
-  update = frameDebounce(() => {
+  private update = frameDebounce(() => {
     if (this.moving) {
       this.moveSelection()
     }
@@ -121,7 +121,7 @@ abstract class ShapeSelectTool extends Tool {
     this.renderer.renderNow()
   })
 
-  commit() {
+  private commit() {
     if (!this.picture) {
       return
     }
