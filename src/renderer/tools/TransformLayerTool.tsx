@@ -150,7 +150,7 @@ class TransformLayerTool extends RectMoveTool {
 
     const vertices = originalRect.vertices().map(transformPos)
 
-    context.lineWidth = 1
+    context.lineWidth = 1 * devicePixelRatio
     context.strokeStyle = "#888"
     context.beginPath()
     for (const [i, p] of vertices.entries()) {

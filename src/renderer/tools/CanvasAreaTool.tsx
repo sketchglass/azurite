@@ -165,6 +165,7 @@ class CanvasAreaTool extends RectMoveTool {
     for (const handle of handlePositions) {
       context.strokeStyle = "#888"
       context.fillStyle = "#fff"
+      context.lineWidth = 1 * devicePixelRatio
       context.beginPath()
       context.ellipse(handle.x, handle.y, handleRadius, handleRadius, 0, 0, 2 * Math.PI)
       context.fill()
