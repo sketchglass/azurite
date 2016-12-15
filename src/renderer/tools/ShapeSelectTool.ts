@@ -1,4 +1,4 @@
-import {Vec2, Transform, Rect} from "paintvec"
+import {Vec2, Transform} from "paintvec"
 import {Texture, TextureDrawTarget, Color} from "paintgl"
 import {context} from "../GLContext"
 import {drawTexture, duplicateTexture} from "../GLUtil"
@@ -6,34 +6,19 @@ import Tool, {ToolPointerEvent} from './Tool'
 import {frameDebounce} from "../../lib/Debounce"
 import {SelectionChangeCommand} from "../commands/SelectionCommand"
 
-export default
-class RectSelectTool extends Tool {
-  name = "Rectangle Select"
-  get cursor() {
-    return "crosshair"
-  }
-
+abstract class ShapeSelectTool extends Tool {
   drawing = false
   moving = false
-  startRendererPos = new Vec2()
-  currentRendererPos = new Vec2()
+  adding = false
   startPicturePos = new Vec2()
   currentPicturePos = new Vec2()
 
-  get selectingRect() {
-    if (this.drawing && !this.startRendererPos.equals(this.currentRendererPos)) {
-      return Rect.fromTwoPoints(this.startRendererPos, this.currentRendererPos)
-    }
-  }
-
-  adding = false
-
-  canvas = document.createElement("canvas")
-  context = this.canvas.getContext("2d")!
-  canvasTexture = new Texture(context, {})
-  hasOriginal = false
-  originalSelectionTexture = new Texture(context, {})
-  originalSelectionDrawTarget = new TextureDrawTarget(context, this.originalSelectionTexture)
+  private canvas = document.createElement("canvas")
+  private context = this.canvas.getContext("2d")!
+  private canvasTexture = new Texture(context, {})
+  private hasOriginal = false
+  private originalSelectionTexture = new Texture(context, {})
+  private originalSelectionDrawTarget = new TextureDrawTarget(context, this.originalSelectionTexture)
 
   start(ev: ToolPointerEvent) {
     if (!this.picture) {
@@ -43,7 +28,6 @@ class RectSelectTool extends Tool {
     const {selection} = this.picture
     this.resetData()
 
-    this.startRendererPos = this.currentRendererPos = ev.rendererPos.round()
     this.startPicturePos = this.currentPicturePos = ev.picturePos.round()
 
     this.adding = ev.shiftKey
@@ -66,12 +50,11 @@ class RectSelectTool extends Tool {
     if (!this.picture || !(this.drawing || this.moving)) {
       return
     }
-    this.currentRendererPos = ev.rendererPos.round()
     this.currentPicturePos = ev.picturePos.round()
     this.update()
   }
 
-  resetData() {
+  private resetData() {
     if (!this.picture) {
       return
     }
@@ -89,7 +72,7 @@ class RectSelectTool extends Tool {
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
   }
 
-  moveSelection() {
+  private moveSelection() {
     if (!this.picture || !this.moving) {
       return
     }
@@ -99,35 +82,34 @@ class RectSelectTool extends Tool {
     drawTexture(selection.drawTarget, this.originalSelectionTexture, {blendMode: "src", transform: Transform.translate(offset)})
   }
 
-  drawSelection() {
+  private drawSelection() {
     if (!this.picture || !this.drawing) {
       return
     }
     const {selection} = this.picture
-    const rect = this.selectingRect
 
-    if (rect) {
-      this.context.setTransform(1, 0, 0, 1, 0, 0)
-      this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    this.context.setTransform(1, 0, 0, 1, 0, 0)
+    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
-      const transform = this.renderer.transformToPicture
-      this.context.setTransform(transform.m00, transform.m01, transform.m10, transform.m11, transform.m20, transform.m21)
-      this.context.fillStyle = "white"
-      this.context.fillRect(rect.left, rect.top, rect.width, rect.height)
+    const transform = this.renderer.transformToPicture
+    this.context.setTransform(transform.m00, transform.m01, transform.m10, transform.m11, transform.m20, transform.m21)
+    this.context.fillStyle = "white"
+    this.context.beginPath()
+    this.drawShape(this.context)
+    this.context.fill()
 
-      this.canvasTexture.setImage(this.canvas)
+    this.canvasTexture.setImage(this.canvas)
 
-      if (this.adding) {
-        drawTexture(selection.drawTarget, this.originalSelectionTexture, {blendMode: "src"})
-        drawTexture(selection.drawTarget, this.canvasTexture, {blendMode: "src-over"})
-      } else {
-        drawTexture(selection.drawTarget, this.canvasTexture, {blendMode: "src"})
-      }
-      selection.hasSelection = true
+    if (this.adding) {
+      drawTexture(selection.drawTarget, this.originalSelectionTexture, {blendMode: "src"})
+      drawTexture(selection.drawTarget, this.canvasTexture, {blendMode: "src-over"})
+    } else {
+      drawTexture(selection.drawTarget, this.canvasTexture, {blendMode: "src"})
     }
+    selection.hasSelection = true
   }
 
-  update = frameDebounce(() => {
+  private update = frameDebounce(() => {
     if (this.moving) {
       this.moveSelection()
     }
@@ -135,7 +117,7 @@ class RectSelectTool extends Tool {
     this.renderer.renderNow()
   })
 
-  commit() {
+  private commit() {
     if (!this.picture) {
       return
     }
@@ -162,13 +144,15 @@ class RectSelectTool extends Tool {
   }
 
   renderOverlayCanvas(context: CanvasRenderingContext2D) {
-    const rect = this.selectingRect
-    if (rect) {
+    if (this.drawing) {
       context.strokeStyle = "#888"
       context.lineWidth = 1
       context.beginPath()
-      context.rect(rect.left, rect.top, rect.width, rect.height)
+      this.drawShape(context)
       context.stroke()
     }
   }
+
+  abstract drawShape(context: CanvasRenderingContext2D): void
 }
+export default ShapeSelectTool
