@@ -123,8 +123,17 @@ class SelectionShader extends Shader {
   }
 }
 
+export
+interface RendererOverlay {
+  renderWithCanvas?: (context: CanvasRenderingContext2D) => void
+  // TODO
+  // renderWithGL?: (drawTarget: DrawTarget) => void
+}
+
 export default
 class Renderer {
+  @observable overlay: RendererOverlay|undefined
+
   @observable picture: Picture|undefined
   private readonly pictureShape = new RectShape(context, {
     usage: "static",
@@ -175,6 +184,17 @@ class Renderer {
   }
 
   private lastCursorRect: Rect|undefined
+
+  private readonly overlayCanvas = document.createElement("canvas")
+  private readonly overlayCanvasContext = this.overlayCanvas.getContext("2d")!
+  private readonly overlayTexture = new Texture(context, {})
+  private readonly overlayModel = new Model(context, {
+    shape: this.rendererShape,
+    shader: TextureShader,
+    uniforms: {
+      texture: this.overlayTexture
+    }
+  })
 
   @computed get pictureSize() {
     if (this.picture) {
@@ -281,12 +301,17 @@ class Renderer {
       drawTarget.scissor = this.dirtyRect
     }
     drawTarget.clear(this.background)
+
     if (this.picture) {
+      // render background
+
       this.boxShadowModel.uniforms = {
         pictureSize: this.picture.size,
         transformToPicture: this.transformToPicture,
       }
       drawTarget.draw(this.boxShadowModel)
+
+      // render picture
 
       const filter: TextureFilter = this.picture.navigation.scale < 2 ? "bilinear" : "nearest"
       const texture = this.picture.layerBlender.getBlendedTexture()
@@ -295,6 +320,8 @@ class Renderer {
       }
       this.pictureModel.transform = this.transformFromPicture
       drawTarget.draw(this.pictureModel)
+
+      // render selection
 
       const {selection} = this.picture
       if (selection.hasSelection) {
@@ -311,6 +338,9 @@ class Renderer {
         drawTarget.draw(this.selectionModel)
       }
     }
+
+    // render cursor
+
     if (this.cursorVisible) {
       this.lastCursorRect = this.cursorRect
       this.cursorModel.transform = Transform.rectToRect(this.cursorShape.rect, this.cursorRect)
@@ -318,6 +348,18 @@ class Renderer {
     } else {
       this.lastCursorRect = undefined
     }
+
+    // render overlay
+
+    if (this.overlay) {
+      if (this.overlay.renderWithCanvas) {
+        this.overlayCanvasContext.clearRect(0, 0, this.size.width, this.size.height)
+        this.overlay.renderWithCanvas(this.overlayCanvasContext)
+        this.overlayTexture.setImage(this.overlayCanvas)
+      }
+      drawTarget.draw(this.overlayModel)
+    }
+
     this.dirtyRect = undefined
     this.wholeDirty = false
   }
