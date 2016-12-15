@@ -87,16 +87,18 @@ abstract class ShapeSelectTool extends Tool {
       return
     }
     const {selection} = this.picture
+    const {context} = this
 
-    this.context.setTransform(1, 0, 0, 1, 0, 0)
-    this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
+    context.setTransform(1, 0, 0, 1, 0, 0)
+    context.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
     const transform = this.renderer.transformToPicture
-    this.context.setTransform(transform.m00, transform.m01, transform.m10, transform.m11, transform.m20, transform.m21)
-    this.context.fillStyle = "white"
-    this.context.beginPath()
-    this.drawShape(this.context)
-    this.context.fill()
+    context.setTransform(transform.m00, transform.m01, transform.m10, transform.m11, transform.m20, transform.m21)
+    context.fillStyle = "white"
+    context.beginPath()
+    this.drawShape(context)
+    context.closePath()
+    context.fill()
 
     this.canvasTexture.setImage(this.canvas)
 
