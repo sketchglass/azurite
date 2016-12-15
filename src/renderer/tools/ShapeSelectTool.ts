@@ -138,7 +138,7 @@ abstract class ShapeSelectTool extends Tool {
     }
     const {selection} = this.picture
     const oldTexture = this.hasOriginal ? duplicateTexture(this.originalSelectionTexture) : undefined
-    const newTexture = selection.hasSelection ? duplicateTexture(this.canvasTexture) : undefined
+    const newTexture = selection.hasSelection ? duplicateTexture(selection.texture) : undefined
     const command = new SelectionChangeCommand(this.picture, oldTexture, newTexture)
     this.picture.undoStack.push(command)
 
