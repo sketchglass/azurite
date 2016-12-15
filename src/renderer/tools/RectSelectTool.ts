@@ -1,10 +1,13 @@
 import {Vec2, Rect} from "paintvec"
 import ShapeSelectTool from "./ShapeSelectTool"
 import {ToolPointerEvent} from "./Tool"
+import {AppState} from "../state/AppState"
+
+type RectSelectType = "rect"|"ellipse"
 
 export default
 class RectSelectTool extends ShapeSelectTool {
-  name = "Rectangle Select"
+  name = this.type == "rect" ? "Rectangle Select" : "Ellipse Select"
   get cursor() {
     return "crosshair"
   }
@@ -15,6 +18,10 @@ class RectSelectTool extends ShapeSelectTool {
     if (this.drawing && !this.startPos.equals(this.currentPos)) {
       return Rect.fromTwoPoints(this.startPos, this.currentPos)
     }
+  }
+
+  constructor(public type: RectSelectType, appState: AppState) {
+    super(appState)
   }
 
   start(ev: ToolPointerEvent) {
@@ -30,7 +37,12 @@ class RectSelectTool extends ShapeSelectTool {
   drawShape(context: CanvasRenderingContext2D) {
     const rect = this.selectingRect
     if (rect) {
-      context.rect(rect.left, rect.top, rect.width, rect.height)
+      if (this.type == "rect") {
+        context.rect(rect.left, rect.top, rect.width, rect.height)
+      } else {
+        const {center, width, height} = rect
+        context.ellipse(center.x, center.y, width / 2, height / 2, 0, 0, 2 * Math.PI)
+      }
     }
   }
 }
