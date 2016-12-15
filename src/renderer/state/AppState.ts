@@ -36,7 +36,8 @@ class AppState {
     new ZoomTool(this),
     new RotateTool(this),
     new TransformLayerTool(this),
-    new RectSelectTool(this),
+    new RectSelectTool("rect", this),
+    new RectSelectTool("ellipse", this),
     new CanvasAreaTool(this),
   ])
   @observable currentTool: Tool = this.tools[0]
