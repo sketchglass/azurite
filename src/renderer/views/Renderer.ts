@@ -234,9 +234,13 @@ class Renderer {
     reaction(() => this.picture, picture => {
       if (picture) {
         this.pictureModel.uniforms = {texture: picture.layerBlender.getBlendedTexture()}
-        this.pictureShape.rect = new Rect(new Vec2(), picture.size)
       } else {
         this.pictureModel.uniforms = {}
+      }
+    })
+    reaction(() => this.picture && this.picture.size, size => {
+      if (size) {
+        this.pictureShape.rect = new Rect(new Vec2(), size)
       }
     })
     reaction(() => this.size, size => {
