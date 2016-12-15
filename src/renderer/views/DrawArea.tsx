@@ -123,8 +123,8 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     })
     this.tabletMoveSubscription = IPCChannels.tabletMove.listen().subscribe(ev => {
       const toolEv = this.toToolEvent(ev)
-      this.onMove(toolEv)
       this.cursorPosition = toolEv.rendererPos
+      this.onMove(toolEv)
     })
     this.tabletUpSubscription = IPCChannels.tabletUp.listen().subscribe(ev => {
       this.usingTablet = false
@@ -237,6 +237,8 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   onMove(ev: ToolPointerEvent) {
     if (this.currentTool) {
       this.currentTool.move(ev)
+    } else {
+      this.tool.hover(ev)
     }
   }
   onUp(ev: ToolPointerEvent) {
