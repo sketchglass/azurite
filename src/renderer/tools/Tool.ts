@@ -64,7 +64,7 @@ abstract class Tool {
   keyDown(event: React.KeyboardEvent<HTMLElement>) {}
 
   renderSettings(): JSX.Element { return React.createElement("div") }
-  renderOverlayUI(): JSX.Element|undefined { return }
+  renderOverlayCanvas?(context: CanvasRenderingContext2D): void
   replaceTile(layer: Layer, tileKey: Vec2): {replaced: boolean, tile?: Tile} {
     return {replaced: false}
   }

@@ -243,6 +243,9 @@ class Renderer {
       canvas.width = size.width
       canvas.height = size.height
       this.rendererShape.rect = new Rect(new Vec2(), size)
+      this.overlayTexture.size = size
+      this.overlayCanvas.width = size.width
+      this.overlayCanvas.height = size.height
     })
     reaction(() => [this.size, this.transformToPicture], () => {
       this.wholeDirty = true
