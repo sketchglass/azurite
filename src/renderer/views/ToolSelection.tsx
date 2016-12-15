@@ -26,6 +26,7 @@ const toolToIcon = (tool: Tool) => {
     "Rectangle Select": "rect-select",
     "Ellipse Select": "ellipse-select",
     "Freehand Select": "freehand-select",
+    "Polygon Select": "polygon-select",
     "Canvas Area": "crop",
   }
   return <SVGIcon className={map[tool.name]} />
