@@ -61,6 +61,7 @@ abstract class Tool {
   abstract start(event: ToolPointerEvent): void
   abstract move(event: ToolPointerEvent): void
   abstract end(event: ToolPointerEvent): void
+  hover(event: ToolPointerEvent) {}
   keyDown(event: React.KeyboardEvent<HTMLElement>) {}
 
   renderSettings(): JSX.Element { return React.createElement("div") }
