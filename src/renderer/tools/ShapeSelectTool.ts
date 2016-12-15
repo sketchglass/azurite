@@ -10,8 +10,6 @@ abstract class ShapeSelectTool extends Tool {
   drawing = false
   moving = false
   adding = false
-  startRendererPos = new Vec2()
-  currentRendererPos = new Vec2()
   startPicturePos = new Vec2()
   currentPicturePos = new Vec2()
 
@@ -30,7 +28,6 @@ abstract class ShapeSelectTool extends Tool {
     const {selection} = this.picture
     this.resetData()
 
-    this.startRendererPos = this.currentRendererPos = ev.rendererPos.round()
     this.startPicturePos = this.currentPicturePos = ev.picturePos.round()
 
     this.adding = ev.shiftKey
@@ -53,7 +50,6 @@ abstract class ShapeSelectTool extends Tool {
     if (!this.picture || !(this.drawing || this.moving)) {
       return
     }
-    this.currentRendererPos = ev.rendererPos.round()
     this.currentPicturePos = ev.picturePos.round()
     this.update()
   }
