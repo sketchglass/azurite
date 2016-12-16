@@ -5,7 +5,7 @@ import Waypoint from "../models/Waypoint"
 import Tool, {ToolPointerEvent} from "./Tool"
 import Layer from "../models/Layer"
 import {ImageLayerContent} from "../models/LayerContent"
-import TiledTexture, {Tile} from "../models/TiledTexture"
+import TiledTexture from "../models/TiledTexture"
 import {ChangeLayerImageCommand} from "../commands/LayerCommand"
 import {context} from "../GLContext"
 import {AppState} from "../state/AppState"
@@ -114,15 +114,15 @@ abstract class BaseBrushTool extends Tool {
     this.renderer.renderNow()
   }
 
-  replaceTile(layer: Layer, tileKey: Vec2): {replaced: boolean, tile?: Tile} {
+  previewLayerTile(layer: Layer, tileKey: Vec2) {
     if (this.targetContent && this.newTiledTexture && layer == this.targetContent.layer) {
       if (this.newTiledTexture.has(tileKey)) {
-        return {replaced: true, tile: this.newTiledTexture.get(tileKey)}
+        return this.newTiledTexture.get(tileKey)
       } else {
-        return {replaced: true}
+        return undefined
       }
     } else {
-      return {replaced: false}
+      return false
     }
   }
 

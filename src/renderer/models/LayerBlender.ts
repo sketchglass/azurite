@@ -173,7 +173,7 @@ class TileBlender {
 const tileBlenders = [new TileBlender()]
 
 export
-type ReplaceTile = (layer: Layer, tileKey: Vec2) => {replaced: boolean, tile?: Tile}
+type ReplaceTile = (layer: Layer, tileKey: Vec2) => Tile|undefined|false
 
 export default
 class LayerBlender {
@@ -252,9 +252,9 @@ class LayerBlender {
     const tileBlender = tileBlenders[depth]
 
     if (this.replaceTile) {
-      const {replaced, tile: replacedTile} = this.replaceTile(layer, key)
-      if (replaced) {
-        tile = replacedTile
+      const replace = this.replaceTile(layer, key)
+      if (replace != false) {
+        tile = replace
       }
     }
 
