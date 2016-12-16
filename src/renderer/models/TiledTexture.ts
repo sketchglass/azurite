@@ -4,6 +4,7 @@ import {Texture, DrawTarget, TextureDrawTarget, Model, TextureShader, RectShape,
 import {context} from "../GLContext"
 import {drawTexture} from "../GLUtil"
 import {float32ArrayTo16} from "../../lib/Float"
+import {getBoundingRect} from "./util"
 
 export
 class Tile {
@@ -26,32 +27,7 @@ class Tile {
     const {width, rect} = Tile
     byteAlphaDrawTarget.readPixels(rect, byteAlphaData)
 
-    let hasOpaquePixel = false
-    let left = 0, right = 0, top = 0, bottom = 0
-    let i = 3
-    for (let y = 0; y < width; ++y) {
-      for (let x = 0; x < width; ++x) {
-        const a = byteAlphaData[i]
-        i += 4
-        if (a != 0) {
-          if (hasOpaquePixel) {
-            left = Math.min(left, x)
-            right = Math.max(right, x + 1)
-            top = Math.min(top, y)
-            bottom = Math.max(bottom, y + 1)
-          } else {
-            hasOpaquePixel = true
-            left = x
-            right = x + 1
-            top = y
-            bottom = y + 1
-          }
-        }
-      }
-    }
-    if (hasOpaquePixel) {
-      return new Rect(new Vec2(left, top), new Vec2(right, bottom))
-    }
+    return getBoundingRect(byteAlphaData, new Vec2(width))
   }
 
   toData() {
