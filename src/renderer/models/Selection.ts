@@ -31,6 +31,40 @@ class Selection {
     this.hasSelection = true
   }
 
+  boundingRect() {
+    const {width, height} = this.size
+    const area = width * height
+    const data = new Uint8Array(area * 4)
+    this.drawTarget.readPixels(new Rect(new Vec2(), this.size), data)
+
+    let hasOpaquePixel = false
+    let left = 0, right = 0, top = 0, bottom = 0
+    let i = 3
+    for (let y = 0; y < height; ++y) {
+      for (let x = 0; x < width; ++x) {
+        const a = data[i]
+        i += 4
+        if (a != 0) {
+          if (hasOpaquePixel) {
+            left = Math.min(left, x)
+            right = Math.max(right, x + 1)
+            top = Math.min(top, y)
+            bottom = Math.max(bottom, y + 1)
+          } else {
+            hasOpaquePixel = true
+            left = x
+            right = x + 1
+            top = y
+            bottom = y + 1
+          }
+        }
+      }
+    }
+    if (hasOpaquePixel) {
+      return new Rect(new Vec2(left, top), new Vec2(right, bottom))
+    }
+  }
+
   invert() {
     const selection = new Selection(this.size)
     selection.hasSelection = this.hasSelection
@@ -69,15 +103,6 @@ class Selection {
   }
 
   checkHasSelection() {
-    const area = this.size.width * this.size.height
-    const data = new Uint8Array(area * 4)
-    this.drawTarget.readPixels(new Rect(new Vec2(), this.size), data)
-    for (let i = 0; i < area; ++i) {
-      if (data[i * 4 + 3] != 0) {
-        this.hasSelection = true
-        return
-      }
-    }
-    this.hasSelection = false
+    this.hasSelection = !!this.boundingRect()
   }
 }
