@@ -287,7 +287,7 @@ class TransformLayerCommand implements UndoCommand {
     if (!content) {
       return
     }
-    const layerTransform = new LayerTransform(content.tiledTexture)
+    const layerTransform = new LayerTransform(content.tiledTexture, this.picture.selection)
     layerTransform.transform = this.transform
 
     this.oldTiledTexture = content.tiledTexture

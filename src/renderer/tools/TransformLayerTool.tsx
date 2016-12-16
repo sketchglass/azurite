@@ -45,11 +45,11 @@ class TransformLayerTool extends RectMoveTool {
 
   reset() {
     const content = this.currentContent
-    if (content && this.active) {
+    if (content && this.active && this.picture) {
       if (this.layerTransform) {
         this.layerTransform.dispose()
       }
-      this.layerTransform = new LayerTransform(content.tiledTexture)
+      this.layerTransform = new LayerTransform(content.tiledTexture, this.picture.selection)
       this.resetRect(this.layerTransform.boundingRect)
     } else {
       this.resetRect()
