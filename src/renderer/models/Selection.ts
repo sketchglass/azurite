@@ -3,6 +3,7 @@ import {Vec2, Rect, Transform} from "paintvec"
 import {Texture, TextureDrawTarget, Color} from "paintgl"
 import {context} from "../GLContext"
 import {drawTexture} from "../GLUtil"
+import {getBoundingRect} from "./util"
 
 export default
 class Selection {
@@ -29,6 +30,13 @@ class Selection {
   selectAll() {
     this.drawTarget.clear(new Color(1, 1, 1, 1))
     this.hasSelection = true
+  }
+
+  boundingRect() {
+    const area = this.size.width * this.size.height
+    const data = new Uint8Array(area * 4)
+    this.drawTarget.readPixels(new Rect(new Vec2(), this.size), data)
+    return getBoundingRect(data, this.size)
   }
 
   invert() {
@@ -69,15 +77,6 @@ class Selection {
   }
 
   checkHasSelection() {
-    const area = this.size.width * this.size.height
-    const data = new Uint8Array(area * 4)
-    this.drawTarget.readPixels(new Rect(new Vec2(), this.size), data)
-    for (let i = 0; i < area; ++i) {
-      if (data[i * 4 + 3] != 0) {
-        this.hasSelection = true
-        return
-      }
-    }
-    this.hasSelection = false
+    this.hasSelection = !!this.boundingRect()
   }
 }
