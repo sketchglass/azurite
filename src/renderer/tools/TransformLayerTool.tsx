@@ -118,7 +118,7 @@ class TransformLayerTool extends RectMoveTool {
     this.renderer.update()
   }
 
-  replaceTile(layer: Layer, tileKey: Vec2): {replaced: boolean, tile?: Tile} {
+  previewLayerTile(layer: Layer, tileKey: Vec2) {
     const content = this.currentContent
     if (this.modal && content && layer == content.layer && this.originalRect && this.originalTexture) {
       transformedDrawTarget.clear(new Color(0, 0, 0, 0))
@@ -126,9 +126,9 @@ class TransformLayerTool extends RectMoveTool {
         .merge(this.transform)
         .translate(tileKey.mulScalar(-Tile.width))
       drawTexture(transformedDrawTarget, this.originalTexture, {transform, blendMode: "src", bicubic: true, srcRect: this.originalTextureSubrect})
-      return {replaced: true, tile: transformedTile}
+      return transformedTile
     } else {
-      return {replaced: false}
+      return false
     }
   }
 

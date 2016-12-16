@@ -66,8 +66,6 @@ abstract class Tool {
 
   renderSettings(): JSX.Element { return React.createElement("div") }
   renderOverlayCanvas?(context: CanvasRenderingContext2D): void
-  replaceTile(layer: Layer, tileKey: Vec2): {replaced: boolean, tile?: Tile} {
-    return {replaced: false}
-  }
+  previewLayerTile(layer: Layer, tileKey: Vec2): Tile|undefined|false { return false }
 }
 export default Tool

@@ -60,10 +60,9 @@ class AppState {
 
   constructor() {
     reaction(() => [this.currentPictureState, this.currentTool], () => {
-      const replaceTile = this.currentTool.replaceTile.bind(this.currentTool)
       for (const pictureState of this.pictureStates) {
         if (pictureState == this.currentPictureState) {
-          pictureState.picture.layerBlender.replaceTile = replaceTile
+          pictureState.picture.layerBlender.replaceTile = (layer, tileKey) => this.currentTool.previewLayerTile(layer, tileKey)
         } else {
           pictureState.picture.layerBlender.replaceTile = undefined
         }
