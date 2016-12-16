@@ -1,16 +1,14 @@
 import * as React from "react"
 import {reaction, computed, action} from "mobx"
 import {observer} from "mobx-react"
-import {Vec2, Rect, Transform} from "paintvec"
-import {TextureDrawTarget, Color, Texture} from "paintgl"
+import {Vec2} from "paintvec"
 import Layer from "../models/Layer"
 import {Tile} from "../models/TiledTexture"
 import {ToolPointerEvent} from './Tool'
-import {drawTexture} from "../GLUtil"
-import {context} from "../GLContext"
 import {AppState} from "../state/AppState"
 import {TransformLayerCommand} from "../commands/LayerCommand"
 import RectMoveTool, {DragType} from "./RectMoveTool"
+import LayerTransform from "../services/LayerTransform"
 
 const HANDLE_RADIUS = 4
 
@@ -27,7 +25,6 @@ const TransformLayerSettings = observer((props: {tool: TransformLayerTool}) => {
 })
 
 const transformedTile = new Tile()
-const transformedDrawTarget = new TextureDrawTarget(context, transformedTile.texture)
 
 export default
 class TransformLayerTool extends RectMoveTool {
@@ -35,8 +32,7 @@ class TransformLayerTool extends RectMoveTool {
 
   handleRadius = HANDLE_RADIUS
 
-  originalTexture: Texture|undefined
-  originalTextureSubrect = new Rect()
+  layerTransform: LayerTransform|undefined
 
   constructor(appState: AppState) {
     super(appState)
@@ -49,20 +45,11 @@ class TransformLayerTool extends RectMoveTool {
   reset() {
     const content = this.currentContent
     if (content && this.active) {
-      const originalRect = content.tiledTexture.boundingRect()
-      this.resetRect(originalRect)
-      if (this.originalTexture) {
-        this.originalTexture.dispose()
+      if (this.layerTransform) {
+        this.layerTransform.dispose()
       }
-      if (originalRect) {
-        const inflation = 2
-        const textureRect = originalRect.inflate(inflation)
-        const texture = this.originalTexture = content.tiledTexture.cropToTexture(textureRect)
-        this.originalTextureSubrect = new Rect(new Vec2(), textureRect.size).inflate(-inflation)
-        texture.filter = "bilinear"
-      } else {
-        this.originalTexture = undefined
-      }
+      this.layerTransform = new LayerTransform(content.tiledTexture)
+      this.resetRect(this.layerTransform.rect)
     } else {
       this.resetRect()
     }
@@ -97,7 +84,7 @@ class TransformLayerTool extends RectMoveTool {
   }
 
   endEditing() {
-    if (this.modal && this.picture && this.currentContent && this.originalTexture && this.originalRect) {
+    if (this.modal && this.picture && this.currentContent && this.originalRect) {
       const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.transform)
       this.picture.undoStack.redoAndPush(command)
     }
@@ -120,12 +107,9 @@ class TransformLayerTool extends RectMoveTool {
 
   previewLayerTile(layer: Layer, tileKey: Vec2) {
     const content = this.currentContent
-    if (this.modal && content && layer == content.layer && this.originalRect && this.originalTexture) {
-      transformedDrawTarget.clear(new Color(0, 0, 0, 0))
-      const transform = Transform.translate(this.originalRect.topLeft)
-        .merge(this.transform)
-        .translate(tileKey.mulScalar(-Tile.width))
-      drawTexture(transformedDrawTarget, this.originalTexture, {transform, blendMode: "src", bicubic: true, srcRect: this.originalTextureSubrect})
+    if (this.modal && content && layer == content.layer && this.layerTransform) {
+      this.layerTransform.transform = this.transform
+      this.layerTransform.transformToTile(transformedTile, tileKey)
       return transformedTile
     } else {
       return false
