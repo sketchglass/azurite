@@ -16,33 +16,40 @@ enum ShapeClipModes {
 class ShapeClipShader extends Shader {
   get additionalVertexShader() {
     return `
+      uniform vec2 uBrushPos;
       uniform float uSampleSize;
       uniform float uPressure;
       uniform float uMinWidthRatio;
       uniform float uBrushRadius;
+      uniform vec2 uPictureSize;
       varying vec2 vOffset;
       varying float vRadius;
+      varying vec2 vSelectionUV;
 
       void paintgl_additional() {
         vRadius = uBrushRadius * (uMinWidthRatio + (1.0 - uMinWidthRatio) * uPressure);
         vOffset = aPosition - uSampleSize * 0.5;
+        vSelectionUV = (vOffset + floor(uBrushPos)) / uPictureSize;
       }
     `
   }
 
   get fragmentShader() {
     return `
-      precision mediump float;
+      precision highp float;
 
-      uniform highp vec2 uBrushPos;
+      uniform vec2 uBrushPos;
       uniform float uSoftness;
       uniform sampler2D uOriginalTexture;
-      uniform lowp float uMode;
+      uniform float uMode;
       uniform bool uPreserveOpacity;
+      uniform bool uHasSelection;
+      uniform sampler2D uSelection;
 
-      varying highp vec2 vOffset;
-      varying highp vec2 vTexCoord;
-      varying highp float vRadius;
+      varying vec2 vOffset;
+      varying vec2 vTexCoord;
+      varying float vRadius;
+      varying vec2 vSelectionUV;
 
       vec4 fetchOriginal() {
         return texture2D(uOriginalTexture, vTexCoord);
@@ -57,11 +64,14 @@ class ShapeClipShader extends Shader {
         float opacity = calcOpacity(r);
         vec4 original = fetchOriginal();
         if (uMode == ${ShapeClipModes.Shape}.0) {
+          float clip = 1.0;
           if (uPreserveOpacity) {
-            gl_FragColor = vec4(opacity * original.a);
-          } else {
-            gl_FragColor = vec4(opacity);
+            clip *= original.a;
           }
+          if (uHasSelection) {
+            clip *= texture2D(uSelection, vSelectionUV).a;
+          }
+          gl_FragColor = vec4(opacity * clip);
         } else {
           gl_FragColor = original * opacity;
         }
@@ -156,7 +166,7 @@ class WatercolorTool extends BaseBrushTool {
 
   start(ev: ToolPointerEvent) {
     super.start(ev)
-    if (!this.targetContent) {
+    if (!this.targetContent || !this.picture) {
       return
     }
     const {preserveOpacity} = this.targetContent.layer
@@ -173,11 +183,14 @@ class WatercolorTool extends BaseBrushTool {
     }
 
     this.shapeClipModel.uniforms = {
+      uPictureSize: this.picture.size,
       uSampleSize: this.sampleSize,
       uBrushRadius: this.width * 0.5,
       uSoftness: this.softness,
       uMinWidthRatio: this.minWidthRatio,
       uPreserveOpacity: preserveOpacity,
+      uHasSelection: this.picture.selection.hasSelection,
+      uSelection: this.picture.selection.texture,
     }
 
     this.originalTexture.size = new Vec2(this.sampleSize)

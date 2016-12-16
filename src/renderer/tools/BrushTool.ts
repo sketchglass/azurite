@@ -17,14 +17,17 @@ class BrushShader extends Shader {
       uniform float uSpacingRatio;
       uniform float uMinWidthRatio;
       uniform float uOpacity;
+      uniform vec2 uPictureSize;
 
       attribute vec2 aCenter;
 
-      varying mediump float vRadius;
-      varying mediump float vOpacity;
-      varying mediump vec2 vOffset;
+      varying float vRadius;
+      varying float vOpacity;
+      varying vec2 vOffset;
+      varying vec2 vSelectionUV;
 
       void paintgl_additional() {
+        vSelectionUV = aPosition / uPictureSize;
         vOffset = aPosition - aCenter;
 
         float brushSize = uBrushSize * (uMinWidthRatio + (1.0 - uMinWidthRatio) * aTexCoord.x);
@@ -39,20 +42,28 @@ class BrushShader extends Shader {
   }
   get fragmentShader() {
     return `
-      precision mediump float;
+      precision highp float;
 
       uniform highp float uBrushSize;
       uniform float uSoftness;
       uniform vec4 uColor;
+      uniform bool uHasSelection;
+      uniform sampler2D uSelection;
 
       varying float vRadius;
       varying float vOpacity;
       varying vec2 vOffset;
+      varying vec2 vSelectionUV;
 
       void main(void) {
         float r = length(vOffset);
-        lowp float opacity = smoothstep(vRadius, vRadius - max(1.0, vRadius * uSoftness), r);
-        gl_FragColor = uColor * opacity * vOpacity;
+        float opacity = smoothstep(vRadius, vRadius - max(1.0, vRadius * uSoftness), r);
+        vec4 color = uColor * opacity * vOpacity;
+        if (uHasSelection) {
+          gl_FragColor = color * texture2D(uSelection, vSelectionUV).a;
+        } else {
+          gl_FragColor = color;
+        }
       }
     `
   }
@@ -74,13 +85,19 @@ class BrushTool extends BaseBrushTool {
   }
 
   start(ev: ToolPointerEvent) {
+    if (!this.picture) {
+      return
+    }
     this.model.uniforms = {
+      uPictureSize: this.picture.size,
       uBrushSize: this.width,
       uColor: this.appState.color.toRgb(),
       uOpacity: this.opacity,
       uMinWidthRatio: this.minWidthRatio,
       uSpacingRatio: this.spacingRatio,
       uSoftness: this.softness,
+      uHasSelection: this.picture.selection.hasSelection,
+      uSelection: this.picture.selection.texture,
     }
     return super.start(ev)
   }
