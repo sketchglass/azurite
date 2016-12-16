@@ -74,6 +74,17 @@ class LayerTransform {
     return result
   }
 
+  transformSelection() {
+    const selection = new Selection(this.selection.size)
+    if (!this.boundingRect || !this.texture) {
+      return selection
+    }
+    const transform = Transform.translate(this.boundingRect.topLeft).merge(this.transform)
+    drawTexture(selection.drawTarget, this.texture, {transform, blendMode: "src", bicubic: true, srcRect: this.textureSubrect})
+    selection.checkHasSelection()
+    return selection
+  }
+
   dispose() {
     if (this.texture) {
       this.texture.dispose()

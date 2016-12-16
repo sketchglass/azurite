@@ -8,6 +8,7 @@ import {ImageLayerContent, GroupLayerContent} from "../models/LayerContent"
 import TiledTexture from "../models/TiledTexture"
 import {context} from "../GLContext"
 import LayerTransform from "../services/LayerTransform"
+import {SelectionChangeCommand} from "./SelectionCommand"
 
 function getSiblingsAndIndex(picture: Picture, path: number[]): [IObservableArray<Layer>, number] {
   const parent = picture.layerFromPath(path.slice(0, -1))
@@ -267,11 +268,13 @@ export
 class TransformLayerCommand implements UndoCommand {
   title = "Transform Layer"
   oldTiledTexture: TiledTexture|undefined
+  selectionChangeCommand: SelectionChangeCommand
 
   constructor(public picture: Picture, public path: number[], public transform: Transform) {
   }
 
   undo() {
+    this.selectionChangeCommand.undo()
     const content = getImageContent(this.picture, this.path)
     if (!content || !this.oldTiledTexture) {
       return
@@ -293,8 +296,11 @@ class TransformLayerCommand implements UndoCommand {
     this.oldTiledTexture = content.tiledTexture
     content.tiledTexture = layerTransform.transformToTiledTexture()
 
+    this.selectionChangeCommand = new SelectionChangeCommand(this.picture, layerTransform.transformSelection())
+
     layerTransform.dispose()
 
     this.picture.lastUpdate = {layer: content.layer}
+    this.selectionChangeCommand.redo()
   }
 }
