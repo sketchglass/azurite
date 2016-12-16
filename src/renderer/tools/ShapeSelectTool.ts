@@ -6,6 +6,7 @@ import {drawTexture} from "../GLUtil"
 import Tool, {ToolPointerEvent} from './Tool'
 import {frameDebounce} from "../../lib/Debounce"
 import {SelectionChangeCommand} from "../commands/SelectionCommand"
+import {renderer} from "../views/Renderer"
 
 abstract class ShapeSelectTool extends Tool {
   commitDrawOnEnd = true
@@ -45,8 +46,8 @@ abstract class ShapeSelectTool extends Tool {
 
       if (!this.adding) {
         selection.clear()
-        this.renderer.wholeDirty = true
-        this.renderer.update()
+        renderer.wholeDirty = true
+        renderer.update()
       }
     }
     this.update()
@@ -94,7 +95,7 @@ abstract class ShapeSelectTool extends Tool {
     context.setTransform(1, 0, 0, 1, 0, 0)
     context.clearRect(0, 0, this.canvas.width, this.canvas.height)
 
-    const transform = this.renderer.transformToPicture
+    const transform = renderer.transformToPicture
     context.setTransform(transform.m00, transform.m01, transform.m10, transform.m11, transform.m20, transform.m21)
     context.fillStyle = "white"
     context.beginPath()
@@ -117,8 +118,8 @@ abstract class ShapeSelectTool extends Tool {
     if (this.moving) {
       this.moveSelection()
     }
-    this.renderer.wholeDirty = true
-    this.renderer.renderNow()
+    renderer.wholeDirty = true
+    renderer.renderNow()
   })
 
   commit() {

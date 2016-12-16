@@ -97,7 +97,6 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   setTool(tool: Tool) {
     this.tool = tool
-    this.tool.renderer = renderer
     if (tool.renderOverlayCanvas) {
       const renderWithCanvas = tool.renderOverlayCanvas.bind(tool)
       renderer.overlay = {renderWithCanvas}

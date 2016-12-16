@@ -1,12 +1,11 @@
 import {computed} from "mobx"
 import Layer from "../models/Layer"
 import Selection from "../models/Selection"
-import Renderer from "../views/Renderer"
 import {Tile} from "../models/TiledTexture"
 import {UndoStack} from "../models/UndoStack"
 import {Vec2} from "paintvec"
 import React = require("react")
-import {AppState} from "../state/AppState"
+import {appState} from "../state/AppState"
 
 export
 interface ToolPointerEvent {
@@ -21,11 +20,8 @@ interface ToolPointerEvent {
 }
 
 abstract class Tool {
-  constructor(public appState: AppState) {
-  }
-
   @computed get picture() {
-    return this.appState.currentPicture
+    return appState.currentPicture
   }
   @computed get currentLayer() {
     if (this.picture) {
@@ -40,9 +36,8 @@ abstract class Tool {
     }
   }
   @computed get active() {
-    return this.appState.currentTool == this
+    return appState.currentTool == this
   }
-  renderer: Renderer
 
   abstract name: string
 

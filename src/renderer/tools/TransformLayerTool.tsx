@@ -5,10 +5,11 @@ import {Vec2} from "paintvec"
 import Layer from "../models/Layer"
 import {Tile} from "../models/TiledTexture"
 import {ToolPointerEvent} from './Tool'
-import {AppState} from "../state/AppState"
+import {appState} from "../state/AppState"
 import {TransformLayerCommand} from "../commands/LayerCommand"
 import RectMoveTool, {DragType} from "./RectMoveTool"
 import LayerTransform from "../services/LayerTransform"
+import {renderer} from "../views/Renderer"
 
 const HANDLE_RADIUS = 4
 
@@ -34,8 +35,8 @@ class TransformLayerTool extends RectMoveTool {
 
   layerTransform: LayerTransform|undefined
 
-  constructor(appState: AppState) {
-    super(appState)
+  constructor() {
+    super()
     reaction(() => this.active, () => this.endEditing())
     reaction(() => [this.currentContent, this.active], () => this.reset())
     reaction(() => appState.currentPicture && appState.currentPicture.lastUpdate, () => this.reset())
@@ -97,12 +98,12 @@ class TransformLayerTool extends RectMoveTool {
   }
 
   update() {
-    if (!this.picture || !this.renderer) {
+    if (!this.picture) {
       return
     }
     this.picture.layerBlender.wholeDirty = true
-    this.renderer.wholeDirty = true
-    this.renderer.update()
+    renderer.wholeDirty = true
+    renderer.update()
   }
 
   previewLayerTile(layer: Layer, tileKey: Vec2) {
@@ -129,7 +130,7 @@ class TransformLayerTool extends RectMoveTool {
     const transformPos = (pos: Vec2) => {
       return pos
         .transform(this.transform)
-        .transform(this.renderer.transformFromPicture)
+        .transform(renderer.transformFromPicture)
     }
 
     const vertices = originalRect.vertices().map(transformPos)

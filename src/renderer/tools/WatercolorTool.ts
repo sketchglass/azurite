@@ -8,6 +8,7 @@ import TiledTexture, {Tile} from "../models/TiledTexture"
 import WatercolorSettings from "../views/WatercolorSettings"
 import {ToolPointerEvent} from "./Tool"
 import React = require("react")
+import {appState} from "../state/AppState"
 
 enum ShapeClipModes {
   Shape, Clip
@@ -177,7 +178,7 @@ class WatercolorTool extends BaseBrushTool {
       uSampleSize: this.sampleSize,
       uBlending: this.blending,
       uThickness: this.thickness,
-      uColor: this.appState.color.toRgb(),
+      uColor: appState.color.toRgb(),
       uOpacity: this.opacity,
       uPreserveOpacity: preserveOpacity,
     }

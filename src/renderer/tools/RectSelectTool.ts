@@ -1,7 +1,6 @@
 import {Vec2, Rect} from "paintvec"
 import ShapeSelectTool from "./ShapeSelectTool"
 import {ToolPointerEvent} from "./Tool"
-import {AppState} from "../state/AppState"
 
 type RectSelectType = "rect"|"ellipse"
 
@@ -20,8 +19,8 @@ class RectSelectTool extends ShapeSelectTool {
     }
   }
 
-  constructor(public type: RectSelectType, appState: AppState) {
-    super(appState)
+  constructor(public type: RectSelectType) {
+    super()
   }
 
   start(ev: ToolPointerEvent) {

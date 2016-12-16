@@ -8,8 +8,8 @@ import {ImageLayerContent} from "../models/LayerContent"
 import TiledTexture from "../models/TiledTexture"
 import {ChangeLayerImageCommand} from "../commands/LayerCommand"
 import {context} from "../GLContext"
-import {AppState} from "../state/AppState"
 import {float32ArrayTo16} from "../../lib/Float"
+import {renderer} from "../views/Renderer"
 
 function stabilizeWaypoint(waypoints: Waypoint[], level: number, index: number) {
   const nWaypoints = waypoints.length
@@ -67,8 +67,8 @@ abstract class BaseBrushTool extends Tool {
     return this._cursorImageSize
   }
 
-  constructor(appState: AppState) {
-    super(appState)
+  constructor() {
+    super()
     autorun(() => this.updateCursor())
   }
 
@@ -110,8 +110,8 @@ abstract class BaseBrushTool extends Tool {
       return
     }
     this.picture.layerBlender.addDirtyRect(rect)
-    this.renderer.addPictureDirtyRect(rect)
-    this.renderer.renderNow()
+    renderer.addPictureDirtyRect(rect)
+    renderer.renderNow()
   }
 
   previewLayerTile(layer: Layer, tileKey: Vec2) {
@@ -140,7 +140,7 @@ abstract class BaseBrushTool extends Tool {
     this.lastStabilizeWaypoints = []
     this.lastInterpolateWaypoints = []
 
-    this.renderer.selectionAnimationEnabled = false
+    renderer.selectionAnimationEnabled = false
 
     this.stabilizeMove(new Waypoint(ev.picturePos, ev.pressure))
   }
@@ -156,7 +156,7 @@ abstract class BaseBrushTool extends Tool {
       this.targetContent.updateThumbnail()
       this.targetContent = undefined
     }
-    this.renderer.selectionAnimationEnabled = true
+    renderer.selectionAnimationEnabled = true
   }
 
   stabilizeMove(waypoint: Waypoint) {

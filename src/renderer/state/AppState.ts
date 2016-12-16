@@ -31,20 +31,8 @@ class AppState {
     return this.currentPictureState && this.currentPictureState.picture
   }
 
-  readonly tools = observable<Tool>([
-    new BrushTool(this),
-    new WatercolorTool(this),
-    new PanTool(this),
-    new ZoomTool(this),
-    new RotateTool(this),
-    new TransformLayerTool(this),
-    new RectSelectTool("rect", this),
-    new RectSelectTool("ellipse", this),
-    new FreehandSelectTool(this),
-    new PolygonSelectTool(this),
-    new CanvasAreaTool(this),
-  ])
-  @observable currentTool: Tool = this.tools[0]
+  readonly tools = observable<Tool>([])
+  @observable currentTool: Tool
   @observable overrideTool: Tool|undefined
 
   @observable color = new HSVColor(0, 0, 1)
@@ -68,6 +56,23 @@ class AppState {
         }
       }
     })
+  }
+
+  initTools() {
+    this.tools.replace([
+      new BrushTool(),
+      new WatercolorTool(),
+      new PanTool(),
+      new ZoomTool(),
+      new RotateTool(),
+      new TransformLayerTool(),
+      new RectSelectTool("rect"),
+      new RectSelectTool("ellipse"),
+      new FreehandSelectTool(),
+      new PolygonSelectTool(),
+      new CanvasAreaTool(),
+    ])
+    this.currentTool = this.tools[0]
   }
 
   addPictureState(pictureState: PictureState) {
@@ -125,6 +130,7 @@ class AppState {
 }
 
 export const appState = new AppState()
+appState.initTools()
 
 IPCChannels.quit.listen().forEach(() => {
   appState.quit()

@@ -4,10 +4,10 @@ import {observer} from "mobx-react"
 import {Vec2, Rect} from "paintvec"
 import RectMoveTool, {DragType} from "./RectMoveTool"
 import {ToolPointerEvent} from "./Tool"
-import {AppState} from "../state/AppState"
 import {ChangeCanvasAreaCommand} from "../commands/PictureCommand"
 import DimensionSelectState from "../state/DimensionSelectState"
 import DimensionSelect from "../views/DimensionSelect"
+import {renderer} from "../views/Renderer"
 
 const HANDLE_RADIUS = 4
 
@@ -41,8 +41,8 @@ class CanvasAreaTool extends RectMoveTool {
     return new Rect(topLeft, topLeft.add(size))
   }
 
-  constructor(appState: AppState) {
-    super(appState)
+  constructor() {
+    super()
     reaction(() => this.active, active => {
       this.reset()
       if (!active) {
@@ -127,7 +127,7 @@ class CanvasAreaTool extends RectMoveTool {
     const transformPos = (pos: Vec2) => {
       return pos
         .transform(this.transform)
-        .transform(this.renderer.transformFromPicture)
+        .transform(renderer.transformFromPicture)
     }
 
     const vertices = originalRect.vertices().map(transformPos)
