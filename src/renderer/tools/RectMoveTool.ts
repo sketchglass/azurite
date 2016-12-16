@@ -3,6 +3,7 @@ import {observable, computed, action} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import Tool, {ToolPointerEvent} from './Tool'
 import {UndoStack, UndoCommand} from "../models/UndoStack"
+import {renderer} from "../views/Renderer"
 
 export
 enum DragType {
@@ -118,7 +119,7 @@ abstract class RectMoveTool extends Tool {
     this.lastAdditionalTransform = this.additionalTransform
 
     const [topLeft, topRight, bottomRight, bottomLeft] = this.originalRect.vertices().map(
-      v => v.transform(this.transform).transform(this.renderer.transformFromPicture)
+      v => v.transform(this.transform).transform(renderer.transformFromPicture)
     )
 
     const handlePoints = new Map<DragType, Vec2>([

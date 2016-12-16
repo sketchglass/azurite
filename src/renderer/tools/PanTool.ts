@@ -1,5 +1,6 @@
 import {Vec2, Transform} from "paintvec"
 import Tool, {ToolPointerEvent} from './Tool'
+import {renderer} from "../views/Renderer"
 
 export default
 class PanTool extends Tool {
@@ -15,7 +16,7 @@ class PanTool extends Tool {
     if (!this.picture) {
       return
     }
-    this.originalRendererToPicture = this.renderer.transformToPicture
+    this.originalRendererToPicture = renderer.transformToPicture
     this.originalPos = ev.rendererPos.transform(this.originalRendererToPicture)
     this.originalTranslation = this.picture.navigation.translation
   }

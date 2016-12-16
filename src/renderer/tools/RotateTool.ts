@@ -1,5 +1,6 @@
 import {Vec2} from "paintvec"
 import Tool, {ToolPointerEvent} from './Tool'
+import {renderer} from "../views/Renderer"
 
 export default
 class RotateTool extends Tool {
@@ -38,7 +39,7 @@ class RotateTool extends Tool {
     if (!this.picture) {
       return 0
     }
-    const offset = rendererPos.sub(this.renderer.size.mulScalar(0.5).round())
+    const offset = rendererPos.sub(renderer.size.mulScalar(0.5).round())
     return this.picture.navigation.horizontalFlip ? new Vec2(-offset.x, offset.y).angle() : offset.angle()
   }
 

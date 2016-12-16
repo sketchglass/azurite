@@ -1,7 +1,6 @@
 import {computed} from "mobx"
 import Layer from "../models/Layer"
 import Selection from "../models/Selection"
-import Renderer from "../views/Renderer"
 import {Tile} from "../models/TiledTexture"
 import {UndoStack} from "../models/UndoStack"
 import {Vec2} from "paintvec"
@@ -39,7 +38,6 @@ abstract class Tool {
   @computed get active() {
     return appState.currentTool == this
   }
-  renderer: Renderer
 
   abstract name: string
 

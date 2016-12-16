@@ -9,6 +9,7 @@ import {appState} from "../state/AppState"
 import {TransformLayerCommand} from "../commands/LayerCommand"
 import RectMoveTool, {DragType} from "./RectMoveTool"
 import LayerTransform from "../services/LayerTransform"
+import {renderer} from "../views/Renderer"
 
 const HANDLE_RADIUS = 4
 
@@ -97,12 +98,12 @@ class TransformLayerTool extends RectMoveTool {
   }
 
   update() {
-    if (!this.picture || !this.renderer) {
+    if (!this.picture) {
       return
     }
     this.picture.layerBlender.wholeDirty = true
-    this.renderer.wholeDirty = true
-    this.renderer.update()
+    renderer.wholeDirty = true
+    renderer.update()
   }
 
   previewLayerTile(layer: Layer, tileKey: Vec2) {
@@ -129,7 +130,7 @@ class TransformLayerTool extends RectMoveTool {
     const transformPos = (pos: Vec2) => {
       return pos
         .transform(this.transform)
-        .transform(this.renderer.transformFromPicture)
+        .transform(renderer.transformFromPicture)
     }
 
     const vertices = originalRect.vertices().map(transformPos)
