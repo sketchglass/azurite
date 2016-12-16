@@ -268,13 +268,15 @@ export
 class TransformLayerCommand implements UndoCommand {
   title = "Transform Layer"
   oldTiledTexture: TiledTexture|undefined
-  selectionChangeCommand: SelectionChangeCommand
+  selectionChangeCommand: SelectionChangeCommand|undefined
 
   constructor(public picture: Picture, public path: number[], public transform: Transform) {
   }
 
   undo() {
-    this.selectionChangeCommand.undo()
+    if (this.selectionChangeCommand) {
+      this.selectionChangeCommand.undo()
+    }
     const content = getImageContent(this.picture, this.path)
     if (!content || !this.oldTiledTexture) {
       return
@@ -296,11 +298,15 @@ class TransformLayerCommand implements UndoCommand {
     this.oldTiledTexture = content.tiledTexture
     content.tiledTexture = layerTransform.transformToTiledTexture()
 
-    this.selectionChangeCommand = new SelectionChangeCommand(this.picture, layerTransform.transformSelection())
+    if (this.picture.selection.hasSelection) {
+      this.selectionChangeCommand = new SelectionChangeCommand(this.picture, layerTransform.transformSelection())
+      this.selectionChangeCommand.redo()
+    } else {
+      this.selectionChangeCommand = undefined
+    }
 
     layerTransform.dispose()
 
     this.picture.lastUpdate = {layer: content.layer}
-    this.selectionChangeCommand.redo()
   }
 }
