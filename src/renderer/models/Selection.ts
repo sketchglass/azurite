@@ -8,7 +8,7 @@ export default
 class Selection {
   readonly texture = new Texture(context, {size: this.size})
   readonly drawTarget = new TextureDrawTarget(context, this.texture)
-  @observable hasSelection = true
+  @observable hasSelection = false
 
   constructor(public readonly size: Vec2) {
   }
@@ -37,6 +37,7 @@ class Selection {
     if (this.hasSelection) {
       selection.drawTarget.clear(new Color(1, 1, 1, 1))
       drawTexture(selection.drawTarget, this.texture, {blendMode: "dst-out"})
+      selection.checkHasSelection()
     } else {
       selection.selectAll()
     }
@@ -48,16 +49,35 @@ class Selection {
     selection.hasSelection = this.hasSelection
     if (this.hasSelection) {
       drawTexture(selection.drawTarget, this.texture, {blendMode: "src", transform, ...opts})
+      selection.checkHasSelection()
     }
     return selection
   }
 
   clone() {
-    return this.transform(this.size, new Transform())
+    const selection = new Selection(this.size)
+    selection.hasSelection = this.hasSelection
+    if (this.hasSelection) {
+      drawTexture(selection.drawTarget, this.texture, {blendMode: "src"})
+    }
+    return selection
   }
 
   dispose() {
     this.drawTarget.dispose()
     this.texture.dispose()
+  }
+
+  checkHasSelection() {
+    const area = this.size.width * this.size.height
+    const data = new Uint8Array(area * 4)
+    this.drawTarget.readPixels(new Rect(new Vec2(), this.size), data)
+    for (let i = 0; i < area; ++i) {
+      if (data[i * 4 + 3] != 0) {
+        this.hasSelection = true
+        return
+      }
+    }
+    this.hasSelection = false
   }
 }
