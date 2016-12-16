@@ -76,8 +76,8 @@ class ToolSelection extends React.Component<{}, {}> {
     })
     const menuTemplate = [
       {label: '追加', submenu: [
-        {label: "BrushTool", click: appendTool(new BrushTool(appState))},
-        {label: "WatercolorTool", click: appendTool(new WatercolorTool(appState))}
+        {label: "BrushTool", click: appendTool(new BrushTool())},
+        {label: "WatercolorTool", click: appendTool(new WatercolorTool())}
       ]},
       {label: '削除', click: removeTool}
     ]

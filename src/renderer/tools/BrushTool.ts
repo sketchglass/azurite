@@ -6,9 +6,9 @@ import BaseBrushTool from "./BaseBrushTool";
 import {context} from "../GLContext"
 import BrushSettings from "../views/BrushSettings"
 import TiledTexture, {Tile} from "../models/TiledTexture"
-import {AppState} from "../state/AppState"
 import {ToolPointerEvent} from "./Tool"
 import React = require("react")
+import {appState} from "../state/AppState"
 
 class BrushShader extends Shader {
   get additionalVertexShader() {
@@ -77,8 +77,8 @@ class BrushTool extends BaseBrushTool {
   name = "Brush"
   @observable eraser = false
 
-  constructor(appState: AppState) {
-    super(appState)
+  constructor() {
+    super()
     this.shape = new Shape(context)
     this.shape.setVec2Attributes("aCenter", [])
     this.model = new Model(context, {shape: this.shape, shader: BrushShader})
@@ -91,7 +91,7 @@ class BrushTool extends BaseBrushTool {
     this.model.uniforms = {
       uPictureSize: this.picture.size,
       uBrushSize: this.width,
-      uColor: this.appState.color.toRgb(),
+      uColor: appState.color.toRgb(),
       uOpacity: this.opacity,
       uMinWidthRatio: this.minWidthRatio,
       uSpacingRatio: this.spacingRatio,

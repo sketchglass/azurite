@@ -4,7 +4,6 @@ import {observer} from "mobx-react"
 import {Vec2, Rect} from "paintvec"
 import RectMoveTool, {DragType} from "./RectMoveTool"
 import {ToolPointerEvent} from "./Tool"
-import {AppState} from "../state/AppState"
 import {ChangeCanvasAreaCommand} from "../commands/PictureCommand"
 import DimensionSelectState from "../state/DimensionSelectState"
 import DimensionSelect from "../views/DimensionSelect"
@@ -41,8 +40,8 @@ class CanvasAreaTool extends RectMoveTool {
     return new Rect(topLeft, topLeft.add(size))
   }
 
-  constructor(appState: AppState) {
-    super(appState)
+  constructor() {
+    super()
     reaction(() => this.active, active => {
       this.reset()
       if (!active) {

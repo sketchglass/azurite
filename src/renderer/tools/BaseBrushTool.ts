@@ -8,7 +8,6 @@ import {ImageLayerContent} from "../models/LayerContent"
 import TiledTexture from "../models/TiledTexture"
 import {ChangeLayerImageCommand} from "../commands/LayerCommand"
 import {context} from "../GLContext"
-import {AppState} from "../state/AppState"
 import {float32ArrayTo16} from "../../lib/Float"
 
 function stabilizeWaypoint(waypoints: Waypoint[], level: number, index: number) {
@@ -67,8 +66,8 @@ abstract class BaseBrushTool extends Tool {
     return this._cursorImageSize
   }
 
-  constructor(appState: AppState) {
-    super(appState)
+  constructor() {
+    super()
     autorun(() => this.updateCursor())
   }
 

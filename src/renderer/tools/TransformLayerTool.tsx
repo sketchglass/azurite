@@ -5,7 +5,7 @@ import {Vec2} from "paintvec"
 import Layer from "../models/Layer"
 import {Tile} from "../models/TiledTexture"
 import {ToolPointerEvent} from './Tool'
-import {AppState} from "../state/AppState"
+import {appState} from "../state/AppState"
 import {TransformLayerCommand} from "../commands/LayerCommand"
 import RectMoveTool, {DragType} from "./RectMoveTool"
 import LayerTransform from "../services/LayerTransform"
@@ -34,8 +34,8 @@ class TransformLayerTool extends RectMoveTool {
 
   layerTransform: LayerTransform|undefined
 
-  constructor(appState: AppState) {
-    super(appState)
+  constructor() {
+    super()
     reaction(() => this.active, () => this.endEditing())
     reaction(() => [this.currentContent, this.active], () => this.reset())
     reaction(() => appState.currentPicture && appState.currentPicture.lastUpdate, () => this.reset())
