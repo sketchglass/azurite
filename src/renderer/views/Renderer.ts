@@ -4,6 +4,7 @@ import {Texture, Model, RectShape, Shader, TextureShader, CanvasDrawTarget, Colo
 import {context, canvas} from "../GLContext"
 import {frameDebounce} from "../../lib/Debounce"
 import Picture from "../models/Picture"
+import Selection from "../models/Selection"
 
 const BOX_SHADOW_RADIUS = 4
 const BOX_SHADOW_OPACITY = 0.5
@@ -133,6 +134,7 @@ interface RendererOverlay {
 export default
 class Renderer {
   @observable overlay: RendererOverlay|undefined
+  previewSelection: () => Selection|false = () => false
 
   @observable picture: Picture|undefined
   private readonly pictureShape = new RectShape(context, {
@@ -329,8 +331,9 @@ class Renderer {
       drawTarget.draw(this.pictureModel)
 
       // render selection
+      let previewSelection = this.previewSelection()
+      const selection = previewSelection != false ? previewSelection : this.picture.selection
 
-      const {selection} = this.picture
       if (selection.hasSelection) {
         if (selection.texture.filter != filter) {
           selection.texture.filter = filter

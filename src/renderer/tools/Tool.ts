@@ -1,5 +1,6 @@
 import {computed} from "mobx"
 import Layer from "../models/Layer"
+import Selection from "../models/Selection"
 import Renderer from "../views/Renderer"
 import {Tile} from "../models/TiledTexture"
 import {UndoStack} from "../models/UndoStack"
@@ -67,5 +68,6 @@ abstract class Tool {
   renderSettings(): JSX.Element { return React.createElement("div") }
   renderOverlayCanvas?(context: CanvasRenderingContext2D): void
   previewLayerTile(layer: Layer, tileKey: Vec2): Tile|undefined|false { return false }
+  previewSelection(): Selection|false { return false }
 }
 export default Tool
