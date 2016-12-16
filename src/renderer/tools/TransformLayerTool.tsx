@@ -35,6 +35,14 @@ class TransformLayerTool extends RectMoveTool {
 
   layerTransform: LayerTransform|undefined
 
+  @computed get selectionShowMode() {
+    if (this.modal) {
+      return "none"
+    } else {
+      return "normal"
+    }
+  }
+
   constructor() {
     super()
     reaction(() => this.active, () => this.endEditing())
