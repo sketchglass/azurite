@@ -56,20 +56,22 @@ class LayerTransform {
   }
 
   transformToTiledTexture() {
+    const result = new TiledTexture()
     if (!this.boundingRect || !this.texture) {
-      return new TiledTexture()
+      return result
     }
-    const transform = Transform.translate(this.boundingRect.topLeft).merge(this.transform)
+    let rect = this.boundingRect.transform(this.transform)
+    const tileKeys = new Set(TiledTexture.keysForRect(rect))
     if (this.selection.hasSelection) {
-      const result = this.tiledTexture.clone()
-      result.drawTexture(this.selection.texture, {blendMode: "dst-out", transform: new Transform()})
-      result.drawTexture(this.texture, {transform, blendMode: "src-over", bicubic: true, srcRect: this.textureSubrect})
-      return result
-    } else {
-      const result = new TiledTexture()
-      result.drawTexture(this.texture, {transform, blendMode: "src", bicubic: true, srcRect: this.textureSubrect})
-      return result
+      for (const key of this.tiledTexture.keys()) {
+        tileKeys.add(key)
+      }
     }
+    for (const key of tileKeys) {
+      this.transformToTile(result.get(key), key)
+    }
+    result.shrink()
+    return result
   }
 
   dispose() {
