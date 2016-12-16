@@ -1,7 +1,8 @@
 import {Vec2, Transform} from "paintvec"
-import {Texture, TextureDrawTarget, Color} from "paintgl"
+import {Texture, Color} from "paintgl"
+import Selection from "../models/Selection"
 import {context} from "../GLContext"
-import {drawTexture, duplicateTexture} from "../GLUtil"
+import {drawTexture} from "../GLUtil"
 import Tool, {ToolPointerEvent} from './Tool'
 import {frameDebounce} from "../../lib/Debounce"
 import {SelectionChangeCommand} from "../commands/SelectionCommand"
@@ -18,9 +19,7 @@ abstract class ShapeSelectTool extends Tool {
   private canvas = document.createElement("canvas")
   private context = this.canvas.getContext("2d")!
   private canvasTexture = new Texture(context, {})
-  private hasOriginal = false
-  private originalSelectionTexture = new Texture(context, {})
-  private originalSelectionDrawTarget = new TextureDrawTarget(context, this.originalSelectionTexture)
+  private workingSelection: Selection|undefined
 
   start(ev: ToolPointerEvent) {
     if (!this.picture) {
@@ -70,30 +69,26 @@ abstract class ShapeSelectTool extends Tool {
       this.canvas.width = selection.size.width
       this.canvas.height = selection.size.height
     }
-    if (!this.originalSelectionTexture.size.equals(selection.size)) {
-      this.originalSelectionTexture.size = selection.size
-    }
-    this.hasOriginal = selection.hasSelection
-
-    drawTexture(this.originalSelectionDrawTarget, selection.texture, {blendMode: "src"})
+    this.workingSelection = selection.clone()
+    this.workingSelection.hasSelection = true
     this.context.clearRect(0, 0, this.canvas.width, this.canvas.height)
   }
 
   private moveSelection() {
-    if (!this.picture || !this.moving) {
+    if (!this.picture || !this.moving || !this.workingSelection) {
       return
     }
-    const {selection} = this.picture
+    const selection = this.workingSelection
     const offset = this.currentPicturePos.sub(this.startPicturePos)
     selection.drawTarget.clear(new Color(0, 0, 0, 0))
-    drawTexture(selection.drawTarget, this.originalSelectionTexture, {blendMode: "src", transform: Transform.translate(offset)})
+    drawTexture(selection.drawTarget, this.picture.selection.texture, {blendMode: "src", transform: Transform.translate(offset)})
   }
 
   private drawSelection() {
-    if (!this.picture || !this.drawing) {
+    if (!this.picture || !this.drawing || !this.workingSelection) {
       return
     }
-    const {selection} = this.picture
+    const selection = this.workingSelection
     const {context} = this
 
     context.setTransform(1, 0, 0, 1, 0, 0)
@@ -110,7 +105,7 @@ abstract class ShapeSelectTool extends Tool {
     this.canvasTexture.setImage(this.canvas)
 
     if (this.adding) {
-      drawTexture(selection.drawTarget, this.originalSelectionTexture, {blendMode: "src"})
+      drawTexture(selection.drawTarget, this.picture.selection.texture, {blendMode: "src"})
       drawTexture(selection.drawTarget, this.canvasTexture, {blendMode: "src-over"})
     } else {
       drawTexture(selection.drawTarget, this.canvasTexture, {blendMode: "src"})
@@ -127,7 +122,7 @@ abstract class ShapeSelectTool extends Tool {
   })
 
   commit() {
-    if (!this.picture) {
+    if (!this.picture || !this.workingSelection) {
       return
     }
     if (this.drawing) {
@@ -136,11 +131,9 @@ abstract class ShapeSelectTool extends Tool {
     if (this.moving) {
       this.moveSelection()
     }
-    const {selection} = this.picture
-    const oldTexture = this.hasOriginal ? duplicateTexture(this.originalSelectionTexture) : undefined
-    const newTexture = selection.hasSelection ? duplicateTexture(selection.texture) : undefined
-    const command = new SelectionChangeCommand(this.picture, oldTexture, newTexture)
-    this.picture.undoStack.push(command)
+    const command = new SelectionChangeCommand(this.picture, this.workingSelection)
+    this.picture.undoStack.redoAndPush(command)
+    this.workingSelection = undefined
 
     this.moving = false
     this.drawing = false
@@ -169,5 +162,13 @@ abstract class ShapeSelectTool extends Tool {
   }
 
   abstract drawShape(context: CanvasRenderingContext2D): void
+
+  previewSelection() {
+    if (this.workingSelection) {
+      return this.workingSelection
+    } else {
+      return false
+    }
+  }
 }
 export default ShapeSelectTool
