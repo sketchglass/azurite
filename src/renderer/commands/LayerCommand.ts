@@ -1,4 +1,4 @@
-import {Vec2, Rect, Transform} from "paintvec"
+import {Rect, Transform} from "paintvec"
 import {Texture} from "paintgl"
 import {IObservableArray} from "mobx"
 import {UndoCommand} from "../models/UndoStack"
@@ -7,6 +7,7 @@ import Layer, {LayerProps} from "../models/Layer"
 import {ImageLayerContent, GroupLayerContent} from "../models/LayerContent"
 import TiledTexture from "../models/TiledTexture"
 import {context} from "../GLContext"
+import LayerTransform from "../services/LayerTransform"
 
 function getSiblingsAndIndex(picture: Picture, path: number[]): [IObservableArray<Layer>, number] {
   const parent = picture.layerFromPath(path.slice(0, -1))
@@ -286,23 +287,13 @@ class TransformLayerCommand implements UndoCommand {
     if (!content) {
       return
     }
-    const rect = content.tiledTexture.boundingRect()
-    if (!rect) {
-      return
-    }
-
-    const textureRect = rect.inflate(2)
-    const texture = content.tiledTexture.cropToTexture(textureRect)
-    const subrect = new Rect(new Vec2(), textureRect.size).inflate(-2)
-    texture.filter = "bilinear"
+    const layerTransform = new LayerTransform(content.tiledTexture)
+    layerTransform.transform = this.transform
 
     this.oldTiledTexture = content.tiledTexture
-    const newTiledTexture = new TiledTexture()
-    const transform = Transform.translate(rect.topLeft).merge(this.transform)
-    newTiledTexture.drawTexture(texture, {transform, blendMode: "src", bicubic: true, srcRect: subrect})
-    content.tiledTexture = newTiledTexture
+    content.tiledTexture = layerTransform.transformToTiledTexture()
 
-    texture.dispose()
+    layerTransform.dispose()
 
     this.picture.lastUpdate = {layer: content.layer}
   }
