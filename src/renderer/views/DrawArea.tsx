@@ -1,4 +1,4 @@
-import {observable, autorun, runInAction} from "mobx"
+import {observable, autorun, runInAction, reaction} from "mobx"
 import {observer} from "mobx-react"
 import {Subscription} from "rxjs/Subscription"
 import React = require("react")
@@ -93,6 +93,9 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     this.picture = renderer.picture = props.picture
     this.setTool(props.tool)
     autorun(() => this.updateCursor())
+    reaction(() => this.tool.selectionShowMode, mode => {
+      renderer.selectionShowMode = mode
+    })
   }
 
   setTool(tool: Tool) {
