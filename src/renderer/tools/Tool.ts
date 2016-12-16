@@ -6,6 +6,7 @@ import {UndoStack} from "../models/UndoStack"
 import {Vec2} from "paintvec"
 import React = require("react")
 import {appState} from "../state/AppState"
+import {SelectionShowMode} from "../views/Renderer"
 
 export
 interface ToolPointerEvent {
@@ -64,5 +65,6 @@ abstract class Tool {
   renderOverlayCanvas?(context: CanvasRenderingContext2D): void
   previewLayerTile(layer: Layer, tileKey: Vec2): Tile|undefined|false { return false }
   previewSelection(): Selection|false { return false }
+  get selectionShowMode(): SelectionShowMode { return "normal" }
 }
 export default Tool

@@ -67,6 +67,14 @@ abstract class BaseBrushTool extends Tool {
     return this._cursorImageSize
   }
 
+  @computed get selectionShowMode() {
+    if (this.targetContent) {
+      return "stopped"
+    } else {
+      return "normal"
+    }
+  }
+
   constructor() {
     super()
     autorun(() => this.updateCursor())
@@ -140,8 +148,6 @@ abstract class BaseBrushTool extends Tool {
     this.lastStabilizeWaypoints = []
     this.lastInterpolateWaypoints = []
 
-    renderer.selectionAnimationEnabled = false
-
     this.stabilizeMove(new Waypoint(ev.picturePos, ev.pressure))
   }
 
@@ -156,7 +162,6 @@ abstract class BaseBrushTool extends Tool {
       this.targetContent.updateThumbnail()
       this.targetContent = undefined
     }
-    renderer.selectionAnimationEnabled = true
   }
 
   stabilizeMove(waypoint: Waypoint) {

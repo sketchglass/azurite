@@ -131,6 +131,9 @@ interface RendererOverlay {
   // renderWithGL?: (drawTarget: DrawTarget) => void
 }
 
+export
+type SelectionShowMode = "normal"|"stopped"|"none"
+
 export default
 class Renderer {
   @observable overlay: RendererOverlay|undefined
@@ -148,7 +151,7 @@ class Renderer {
   @observable size = new Vec2(100, 100)
   readonly background = new Color(46 / 255, 48 / 255, 56 / 255, 1)
 
-  @observable selectionAnimationEnabled = true
+  @observable selectionShowMode: SelectionShowMode = "normal"
 
   private readonly rendererShape = new RectShape(context, {
     usage: "static",
@@ -269,7 +272,7 @@ class Renderer {
       this.update()
     })
     setInterval(() => {
-      if (this.picture && this.picture.selection.hasSelection && this.selectionAnimationEnabled) {
+      if (this.picture && this.picture.selection.hasSelection && this.selectionShowMode == "normal") {
         this.wholeDirty = true
         this.update()
       }
@@ -334,7 +337,7 @@ class Renderer {
       let previewSelection = this.previewSelection()
       const selection = previewSelection != false ? previewSelection : this.picture.selection
 
-      if (selection.hasSelection) {
+      if (selection.hasSelection && this.selectionShowMode != "none") {
         if (selection.texture.filter != filter) {
           selection.texture.filter = filter
         }
