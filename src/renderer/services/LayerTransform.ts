@@ -8,15 +8,15 @@ const tileDrawTarget = new TextureDrawTarget(context)
 
 export default
 class LayerTransform {
-  readonly rect = this.tiledTexture.boundingRect()
+  readonly boundingRect = this.tiledTexture.boundingRect()
   transform = new Transform()
   readonly texture: Texture|undefined
   readonly textureSubrect = new Rect()
 
   constructor(public readonly tiledTexture: TiledTexture) {
-    if (this.rect) {
+    if (this.boundingRect) {
       // TODO: support image larger than max texture size
-      const textureRect = this.rect.inflate(2)
+      const textureRect = this.boundingRect.inflate(2)
       this.texture = this.tiledTexture.cropToTexture(textureRect)
       this.textureSubrect = new Rect(new Vec2(), textureRect.size).inflate(-2)
       this.texture.filter = "bilinear"
@@ -24,12 +24,12 @@ class LayerTransform {
   }
 
   transformToTile(tile: Tile, tileKey: Vec2) {
-    if (!this.rect || !this.texture) {
+    if (!this.boundingRect || !this.texture) {
       return
     }
     tileDrawTarget.texture = tile.texture
     tileDrawTarget.clear(new Color(0, 0, 0, 0))
-    const transform = Transform.translate(this.rect.topLeft)
+    const transform = Transform.translate(this.boundingRect.topLeft)
       .merge(this.transform)
       .translate(tileKey.mulScalar(-Tile.width))
 
@@ -39,10 +39,10 @@ class LayerTransform {
 
   transformToTiledTexture() {
     const newTiledTexture = new TiledTexture()
-    if (!this.rect || !this.texture) {
+    if (!this.boundingRect || !this.texture) {
       return newTiledTexture
     }
-    const transform = Transform.translate(this.rect.topLeft).merge(this.transform)
+    const transform = Transform.translate(this.boundingRect.topLeft).merge(this.transform)
     newTiledTexture.drawTexture(this.texture, {transform, blendMode: "src", bicubic: true, srcRect: this.textureSubrect})
     return newTiledTexture
   }

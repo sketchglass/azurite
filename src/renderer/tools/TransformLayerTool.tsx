@@ -49,7 +49,7 @@ class TransformLayerTool extends RectMoveTool {
         this.layerTransform.dispose()
       }
       this.layerTransform = new LayerTransform(content.tiledTexture)
-      this.resetRect(this.layerTransform.rect)
+      this.resetRect(this.layerTransform.boundingRect)
     } else {
       this.resetRect()
     }
