@@ -57,4 +57,7 @@
   &.crop {
     mask: url("../../../bundles/icons/flaticon/svg/crop.svg");
   }
+  &.magic-wand {
+    mask: url("../../../bundles/icons/flaticon/svg/magic-wand.svg");
+  }
 }

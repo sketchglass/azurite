@@ -11,6 +11,7 @@ import RectSelectTool from "../tools/RectSelectTool"
 import FreehandSelectTool from "../tools/FreehandSelectTool"
 import PolygonSelectTool from "../tools/PolygonSelectTool"
 import CanvasAreaTool from "../tools/CanvasAreaTool"
+import FloodFillTool from "../tools/FloodFillTool"
 import {HSVColor} from "../../lib/Color"
 import {PictureState} from "./PictureState"
 import * as IPCChannels from "../../common/IPCChannels"
@@ -70,6 +71,7 @@ class AppState {
       new RectSelectTool("ellipse"),
       new FreehandSelectTool(),
       new PolygonSelectTool(),
+      new FloodFillTool(),
       new CanvasAreaTool(),
     ])
     this.currentTool = this.tools[0]
