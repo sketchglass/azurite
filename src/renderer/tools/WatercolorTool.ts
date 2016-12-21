@@ -200,8 +200,8 @@ class WatercolorTool extends BaseBrushTool {
   }
 
   renderWaypoints(waypoints: Waypoint[], rect: Rect) {
-    const tiledTexture = this.newTiledTexture
-    if (!tiledTexture) {
+    const {targetContent} = this
+    if (!targetContent) {
       return
     }
 
@@ -213,7 +213,7 @@ class WatercolorTool extends BaseBrushTool {
 
       const topLeft = waypoint.pos.floor().sub(new Vec2(this.sampleSize / 2))
 
-      tiledTexture.drawToDrawTarget(this.originalDrawTarget, {offset: topLeft.neg(), blendMode: "src"})
+      targetContent.tiledTexture.drawToDrawTarget(this.originalDrawTarget, {offset: topLeft.neg(), blendMode: "src"})
 
       this.shapeClipModel.uniforms["uOriginalTexture"] = this.originalTexture
 
@@ -233,7 +233,11 @@ class WatercolorTool extends BaseBrushTool {
       this.model.uniforms["uShapeClipTexture"] = this.shapeClipTexture
 
       for (const key of TiledTexture.keysForRect(rect)) {
-        this.drawTarget.texture = tiledTexture.get(key).texture
+        const tile = this.prepareTile(key)
+        if (!tile) {
+          continue
+        }
+        this.drawTarget.texture = tile.texture
         this.model.transform = Transform.translate(topLeft.sub(key.mulScalar(Tile.width)))
         this.drawTarget.draw(this.model)
       }

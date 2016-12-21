@@ -87,6 +87,13 @@ class TiledTexture {
     this.tiles.set(keyToString(key), tile)
   }
 
+  take(key: Vec2) {
+    const keyStr = keyToString(key)
+    const tile = this.tiles.get(keyStr)
+    this.tiles.delete(keyStr)
+    return tile
+  }
+
   clone() {
     const cloned = new TiledTexture()
     for (const key of this.keys()) {
@@ -244,11 +251,15 @@ class TiledTexture {
     return tiledTexture
   }
 
-  dispose() {
+  clear() {
     for (const tile of this.tiles.values()) {
       tile.dispose()
     }
     this.tiles.clear()
+  }
+
+  dispose() {
+    this.clear()
   }
 
   static keysForRect(rect: Rect) {

@@ -1,12 +1,11 @@
-import {Rect, Transform} from "paintvec"
-import {Texture} from "paintgl"
+import {Transform} from "paintvec"
 import {IObservableArray} from "mobx"
+import {Rect} from "paintvec"
 import {UndoCommand} from "../models/UndoStack"
 import Picture from "../models/Picture"
 import Layer, {LayerProps} from "../models/Layer"
 import {ImageLayerContent, GroupLayerContent} from "../models/LayerContent"
 import TiledTexture from "../models/TiledTexture"
-import {context} from "../GLContext"
 import LayerTransform from "../services/LayerTransform"
 import {SelectionChangeCommand} from "./SelectionCommand"
 
@@ -234,33 +233,45 @@ function getImageContent(picture: Picture, path: number[]) {
 
 export
 class ChangeLayerImageCommand implements UndoCommand {
-  constructor(public picture: Picture, public path: number[], public title: string, public rect: Rect, public oldData: Uint16Array, public newData: Uint16Array) {
+  oldTiles = new TiledTexture()
+
+  constructor(public picture: Picture, public path: number[], public title: string, public newTiles: TiledTexture, public rect?: Rect) {
   }
 
-  replace(data: Uint16Array) {
-    const content = getImageContent(this.picture, this.path)
-    if (!content) {
-      return
-    }
+  private notifyChange(content: ImageLayerContent) {
     const {layer} = content
-
     const {rect} = this
-    const texture = new Texture(context, {
-      size: rect.size,
-      pixelType: "half-float",
-      data
-    })
-    content.tiledTexture.drawTexture(texture, {transform: Transform.translate(rect.topLeft), blendMode: "src"})
-    texture.dispose()
-    content.layer.picture.lastUpdate = {rect, layer}
+    content.layer.picture.lastUpdate = {layer, rect}
     content.updateThumbnail()
   }
 
   undo() {
-    this.replace(this.oldData)
+    const content = getImageContent(this.picture, this.path)
+    if (!content) {
+      return
+    }
+    for (const key of this.newTiles.keys()) {
+      if (this.oldTiles.has(key)) {
+        content.tiledTexture.set(key, this.oldTiles.take(key)!)
+      } else {
+        content.tiledTexture.take(key)
+      }
+    }
+    this.notifyChange(content)
   }
+
   redo() {
-    this.replace(this.newData)
+    const content = getImageContent(this.picture, this.path)
+    if (!content) {
+      return
+    }
+    for (const key of this.newTiles.keys()) {
+      if (content.tiledTexture.has(key)) {
+        this.oldTiles.set(key, content.tiledTexture.take(key)!)
+      }
+      content.tiledTexture.set(key, this.newTiles.get(key).clone())
+    }
+    this.notifyChange(content)
   }
 }
 
