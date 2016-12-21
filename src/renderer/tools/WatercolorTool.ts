@@ -4,6 +4,7 @@ import {Model, Shader, RectShape, Texture, TextureDrawTarget} from "paintgl"
 import Waypoint from "../models/Waypoint"
 import BaseBrushTool from "./BaseBrushTool"
 import {context} from "../GLContext"
+import {drawTexture} from "../GLUtil"
 import TiledTexture, {Tile} from "../models/TiledTexture"
 import WatercolorSettings from "../views/WatercolorSettings"
 import {ToolPointerEvent} from "./Tool"
@@ -213,7 +214,14 @@ class WatercolorTool extends BaseBrushTool {
 
       const topLeft = waypoint.pos.floor().sub(new Vec2(this.sampleSize / 2))
 
-      targetContent.tiledTexture.drawToDrawTarget(this.originalDrawTarget, {offset: topLeft.neg(), blendMode: "src"})
+      for (const key of TiledTexture.keysForRect(rect)) {
+        const tile = this.prepareTile(key)
+        if (!tile) {
+          continue
+        }
+        const offset = key.mulScalar(Tile.width).sub(topLeft)
+        drawTexture(this.originalDrawTarget, tile.texture, {blendMode: "src", transform: Transform.translate(offset)})
+      }
 
       this.shapeClipModel.uniforms["uOriginalTexture"] = this.originalTexture
 
