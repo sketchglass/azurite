@@ -82,7 +82,7 @@ class FindFillableRegionShader extends Shader {
     return `
       precision highp float;
 
-      uniform float maxDifference;
+      uniform float tolerance;
       uniform sampler2D image;
 
       varying vec2 vTexCoord;
@@ -91,7 +91,7 @@ class FindFillableRegionShader extends Shader {
       void main(void) {
         vec3 color = texture2D(image, vTexCoord).rgb;
         float diff = distance(color, vReferenceColor);
-        float opacity = 1.0 - clamp(diff / maxDifference, 0.0, 1.0);
+        float opacity = 1.0 - clamp(diff / tolerance, 0.0, 1.0);
         gl_FragColor = vec4(opacity);
       }
     `
@@ -107,9 +107,10 @@ class FloodFill {
   private readonly findFillableRegionModel = new Model(context, {
     shape: this.shape,
     shader: FindFillableRegionShader,
+    blendMode: "src",
   })
 
-  maxDifference = 0.5 / 255
+  tolerance = 0.5 / 255 // 0 ... 1
 
   constructor(public readonly picture: Picture) {
   }
@@ -127,7 +128,7 @@ class FloodFill {
     this.findFillableRegionModel.uniforms = {
       referenceTexCoord,
       image: this.picture.layerBlender.getBlendedTexture(),
-      maxDifference: this.maxDifference
+      tolerance: this.tolerance
     }
     this.drawTarget.draw(this.findFillableRegionModel)
   }
