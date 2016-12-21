@@ -31,7 +31,7 @@ class FloodFillTool extends Tool {
   end(ev: ToolPointerEvent) {
     if (this.picture && this.picture.rect.includes(ev.picturePos)) {
       if (this.floodFill) {
-        this.floodFill.tolerance = Math.max(0.5, this.tolerance / 255) // allow small tolerance for antialiasing
+        this.floodFill.tolerance = Math.max(0.5, this.tolerance) / 255 // allow small tolerance for antialiasing
         const selection = this.picture.selection.clone()
         this.floodFill.floodFill(ev.picturePos.floor(), selection)
         const command = new SelectionChangeCommand(this.picture, selection)
