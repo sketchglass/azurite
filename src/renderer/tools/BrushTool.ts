@@ -103,9 +103,8 @@ class BrushTool extends BaseBrushTool {
   }
 
   renderWaypoints(waypoints: Waypoint[], rect: Rect) {
-    const tiledTexture = this.newTiledTexture
     const layer = this.currentLayer
-    if (!tiledTexture || !layer) {
+    if (!layer) {
       return
     }
 
@@ -142,7 +141,11 @@ class BrushTool extends BaseBrushTool {
     this.model.blendMode = this.eraser ? "dst-out" : (layer.preserveOpacity ? "src-atop" : "src-over")
 
     for (const key of TiledTexture.keysForRect(rect)) {
-      this.drawTarget.texture = tiledTexture.get(key).texture
+      const tile = this.prepareTile(key)
+      if (!tile) {
+        continue
+      }
+      this.drawTarget.texture = tile.texture
       this.model.transform = Transform.translate(key.mulScalar(-Tile.width))
       this.drawTarget.draw(this.model)
     }

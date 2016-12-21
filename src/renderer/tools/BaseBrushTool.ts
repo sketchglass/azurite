@@ -1,14 +1,11 @@
 import {observable, action, autorun, computed} from "mobx"
 import {Vec2, Rect} from "paintvec"
-import {Texture, TextureDrawTarget} from "paintgl"
 import Waypoint from "../models/Waypoint"
 import Tool, {ToolPointerEvent} from "./Tool"
 import Layer from "../models/Layer"
 import {ImageLayerContent} from "../models/LayerContent"
-import TiledTexture from "../models/TiledTexture"
+import TiledTexture, {Tile} from "../models/TiledTexture"
 import {ChangeLayerImageCommand} from "../commands/LayerCommand"
-import {context} from "../GLContext"
-import {float32ArrayTo16} from "../../lib/Float"
 import {renderer} from "../views/Renderer"
 
 function stabilizeWaypoint(waypoints: Waypoint[], level: number, index: number) {
@@ -48,8 +45,8 @@ abstract class BaseBrushTool extends Tool {
   @observable stabilizingLevel = 2
 
   @observable targetContent: ImageLayerContent|undefined
-  newTiledTexture: TiledTexture|undefined
-  editedRect: Rect|undefined
+  private newTiledTexture = new TiledTexture()
+  private editedRect: Rect|undefined
 
   private _cursorImage = document.createElement("canvas")
   private _cursorImageSize = 0
@@ -105,7 +102,7 @@ abstract class BaseBrushTool extends Tool {
     this._cursorImageSize = canvasSize
   }
 
-  addEditedRect(rect: Rect) {
+  private addEditedRect(rect: Rect) {
     if (this.editedRect) {
       this.editedRect = this.editedRect.union(rect)
     } else {
@@ -113,7 +110,7 @@ abstract class BaseBrushTool extends Tool {
     }
   }
 
-  renderRect(rect: Rect) {
+  private renderRect(rect: Rect) {
     if (!this.picture) {
       return
     }
@@ -123,9 +120,11 @@ abstract class BaseBrushTool extends Tool {
   }
 
   previewLayerTile(layer: Layer, tileKey: Vec2) {
-    if (this.targetContent && this.newTiledTexture && layer == this.targetContent.layer) {
+    if (this.targetContent && layer == this.targetContent.layer) {
       if (this.newTiledTexture.has(tileKey)) {
         return this.newTiledTexture.get(tileKey)
+      } else if (this.targetContent.tiledTexture.has(tileKey)) {
+        return this.targetContent.tiledTexture.get(tileKey)
       } else {
         return undefined
       }
@@ -141,9 +140,7 @@ abstract class BaseBrushTool extends Tool {
     }
     const content = layer.content
     this.targetContent = content
-    const {tiledTexture} = content
-
-    this.newTiledTexture = tiledTexture.clone() // TODO: avoid cloning whole image
+    this.newTiledTexture.clear()
 
     this.lastStabilizeWaypoints = []
     this.lastInterpolateWaypoints = []
@@ -164,7 +161,7 @@ abstract class BaseBrushTool extends Tool {
     }
   }
 
-  stabilizeMove(waypoint: Waypoint) {
+  private stabilizeMove(waypoint: Waypoint) {
     const waypoints = this.lastStabilizeWaypoints
     waypoints.push(waypoint)
     const level = this.stabilizingLevel
@@ -180,7 +177,7 @@ abstract class BaseBrushTool extends Tool {
     }
   }
 
-  stabilizeEnd() {
+  private stabilizeEnd() {
     const waypoints = this.lastStabilizeWaypoints
     const level = this.stabilizingLevel
     let firstUndrawnIndex = 0
@@ -193,7 +190,7 @@ abstract class BaseBrushTool extends Tool {
     this.interpolateEnd()
   }
 
-  interpolateMove(waypoint: Waypoint) {
+  private interpolateMove(waypoint: Waypoint) {
     const lastWaypoints = this.lastInterpolateWaypoints
     if (lastWaypoints.length == 4) {
       lastWaypoints.shift()
@@ -225,7 +222,7 @@ abstract class BaseBrushTool extends Tool {
     this.renderRect(rect)
   }
 
-  interpolateEnd() {
+  private interpolateEnd() {
     const getSpacing = this.brushSpacing.bind(this)
     const lastWaypoints = this.lastInterpolateWaypoints
     if (lastWaypoints.length < 2) {
@@ -256,50 +253,22 @@ abstract class BaseBrushTool extends Tool {
     }
     this.editedRect = undefined
 
-    const {newTiledTexture} = this
-    if (!newTiledTexture) {
-      return
-    }
     const content = this.targetContent
     if (!content) {
       return
     }
-    const oldTiledTexture = content.tiledTexture
-
-    // can't read directly from half float texture so read it to float texture first
-
-    const texture = new Texture(context, {size: rect.size, pixelType: "float"})
-    const drawTarget = new TextureDrawTarget(context, texture)
-    const data = new Float32Array(rect.width * rect.height * 4)
-
-    const offset = rect.topLeft.neg()
-
-    oldTiledTexture.drawToDrawTarget(drawTarget, {offset, blendMode: "src"})
-    drawTarget.readPixels(new Rect(new Vec2(0), rect.size), data)
-    const oldData = float32ArrayTo16(data)
-
-    newTiledTexture.drawToDrawTarget(drawTarget, {offset, blendMode: "src"})
-    drawTarget.readPixels(new Rect(new Vec2(0), rect.size), data)
-    const newData = float32ArrayTo16(data)
-
-    drawTarget.dispose()
-    texture.dispose()
-
-    content.tiledTexture = newTiledTexture
-    this.newTiledTexture = undefined
-    oldTiledTexture.dispose()
-
     const {layer} = content
     const {picture} = layer
-    const command = new ChangeLayerImageCommand(picture, layer.path(), this.name, rect, oldData, newData)
-    picture.undoStack.push(command)
+    const command = new ChangeLayerImageCommand(picture, layer.path(), this.name, this.newTiledTexture)
+    this.newTiledTexture = new TiledTexture()
+    picture.undoStack.redoAndPush(command)
     picture.lastUpdate = {layer, rect}
   }
 
-  brushSize(waypoint: Waypoint) {
+  private brushSize(waypoint: Waypoint) {
     return this.width * (this.minWidthRatio + (1 - this.minWidthRatio) * waypoint.pressure)
   }
-  brushSpacing(waypoint: Waypoint) {
+  private brushSpacing(waypoint: Waypoint) {
     return Math.max(this.brushSize(waypoint) * this.spacingRatio, 1)
   }
 
@@ -313,7 +282,24 @@ abstract class BaseBrushTool extends Tool {
     return Rect.union(...rects)!.intBounding()
   }
 
-  abstract renderWaypoints(waypoints: Waypoint[], rect: Rect): void
+  protected abstract renderWaypoints(waypoints: Waypoint[], rect: Rect): void
+
+  protected prepareTile(key: Vec2) {
+    if (!this.targetContent) {
+      return
+    }
+    if (this.newTiledTexture.has(key)) {
+      return this.newTiledTexture.get(key)
+    } else if (this.targetContent.tiledTexture.has(key)) {
+      const tile = this.targetContent.tiledTexture.get(key).clone()
+      this.newTiledTexture.set(key, tile)
+      return tile
+    } else {
+      const tile = new Tile()
+      this.newTiledTexture.set(key, tile)
+      return tile
+    }
+  }
 }
 
 export default BaseBrushTool
