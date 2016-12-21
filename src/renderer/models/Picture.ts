@@ -34,6 +34,9 @@ class Picture {
   @computed get size() {
     return new Vec2(this.dimension.width, this.dimension.height)
   }
+  @computed get rect() {
+    return new Rect(new Vec2(), this.size)
+  }
   layerThumbnailGenerator: ThumbnailGenerator
 
   selection: Selection
