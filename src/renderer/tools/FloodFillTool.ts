@@ -6,13 +6,12 @@ import {SelectionChangeCommand} from "../commands/SelectionCommand"
 export default
 class FloodFillTool extends Tool {
   name = "Flood Fill"
-  private floodFillDirty = true
   private floodFill: FloodFill|undefined
 
   constructor() {
     super()
-    reaction(() => [this.picture, this.picture && this.picture.size, this.picture && this.picture.lastUpdate], () => {
-      this.floodFillDirty = true
+    reaction(() => [this.picture, this.picture && this.picture.size], () => {
+      this.renewFloodFill()
     })
   }
 
@@ -24,19 +23,16 @@ class FloodFillTool extends Tool {
 
   end(ev: ToolPointerEvent) {
     if (this.picture && this.picture.rect.includes(ev.picturePos)) {
-      this.renewFloodFill()
       if (this.floodFill) {
-        this.floodFill.floodFill(ev.picturePos.floor())
-        const command = new SelectionChangeCommand(this.picture, this.floodFill.selection.clone())
+        const selection = this.picture.selection.clone()
+        this.floodFill.floodFill(ev.picturePos.floor(), selection)
+        const command = new SelectionChangeCommand(this.picture, selection)
         this.picture.undoStack.redoAndPush(command)
       }
     }
   }
 
   private renewFloodFill() {
-    if (!this.floodFillDirty) {
-      return
-    }
     if (this.floodFill) {
       this.floodFill.dispose()
       this.floodFill = undefined
@@ -44,6 +40,5 @@ class FloodFillTool extends Tool {
     if (this.picture) {
       this.floodFill = new FloodFill(this.picture)
     }
-    this.floodFillDirty = false
   }
 }

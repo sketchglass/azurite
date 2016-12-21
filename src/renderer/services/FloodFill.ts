@@ -3,6 +3,7 @@ import Selection from "../models/Selection"
 import {Vec2} from "paintvec"
 import {Texture, Shader, RectShape, Model, TextureDrawTarget} from "paintgl"
 import {context} from "../GLContext"
+import {drawTexture} from "../GLUtil"
 
 class BinaryImage {
   constructor(public width: number, public height: number, public rgba: Uint8Array) {
@@ -99,8 +100,8 @@ class FindFillableRegionShader extends Shader {
 
 export default
 class FloodFill {
-  selection = new Selection(this.picture.size)
   private readonly fillableRegionTexture = new Texture(context, {size: this.picture.size})
+  private readonly filledTexture = new Texture(context, {size: this.picture.size})
   private readonly drawTarget = new TextureDrawTarget(context)
   private readonly shape = new RectShape(context, {rect: this.picture.rect})
   private readonly findFillableRegionModel = new Model(context, {
@@ -118,7 +119,6 @@ class FloodFill {
     this.shape.dispose()
     this.drawTarget.dispose()
     this.fillableRegionTexture.dispose()
-    this.selection.dispose()
   }
 
   private updateFillableRegion(pos: Vec2) {
@@ -132,8 +132,10 @@ class FloodFill {
     this.drawTarget.draw(this.findFillableRegionModel)
   }
 
-  floodFill(pos: Vec2) {
+  floodFill(pos: Vec2, selection: Selection) {
     this.updateFillableRegion(pos)
+
+    // Do flood fill (on CPU)
     const {width, height} = this.picture.size
     const {x, y} = pos
     const src = new Uint8Array(width * height * 4)
@@ -144,7 +146,11 @@ class FloodFill {
       new BinaryImage(width, height, src),
       new BinaryImage(width, height, dst)
     )
-    this.selection.texture.setData(this.picture.size, dst)
-    this.selection.checkHasSelection()
+
+    this.filledTexture.setData(this.picture.size, dst)
+    this.drawTarget.texture = this.filledTexture
+    drawTexture(this.drawTarget, this.fillableRegionTexture, {blendMode: "src-in"})
+    drawTexture(selection.drawTarget, this.filledTexture, {blendMode: "src-over"})
+    selection.checkHasSelection()
   }
 }
