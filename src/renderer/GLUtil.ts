@@ -257,3 +257,50 @@ export function duplicateTexture(texture: Texture) {
   drawTarget.dispose()
   return result
 }
+
+class VisiblityToBinaryShader extends Shader {
+  get fragmentShader() {
+    return `
+      precision highp float;
+      uniform sampler2D texture;
+      uniform float texWidth;
+
+      void main(void) {
+        vec2 pos = gl_FragCoord - 0.5;
+        vec2 texelSize = 1.0 / texSize;
+        for (int i = 0; i < 4; ++i) {
+          float value = 0.0;
+          for (int j = 0; j < 8; ++j) {
+            vec2 texCoord = pos.x * texelSize;
+            bool opqaue = texture2D(texture, texCoord).a > 0.0;
+            bool inside = pos.x < texWidth;
+            value += float(opqaue && inside);
+            value *= 2;
+          }
+          gl_FragColor[i] = value / 255;
+        }
+      }
+    `
+  }
+}
+
+const visibilityToBinaryShape = new RectShape(context)
+const visibilityToBinaryModel = new Model(context, {
+  shape: visibilityToBinaryShape,
+  shader: VisiblityToBinaryShader,
+  blendMode: "src",
+})
+
+export function drawVisibilityToBinary(drawTarget: DrawTarget, src: Texture) {
+  const width = Math.ceil(src.size.width / 32)
+  const height = src.size.height
+  const rect = new Rect(new Vec2(), new Vec2(width, height))
+  if (!visibilityToBinaryShape.rect.equals(rect)) {
+    visibilityToBinaryShape.rect = rect
+  }
+  visibilityToBinaryModel.uniforms = {
+    texture: src,
+    texWidth: src.size.width,
+  }
+  drawTarget.draw(visibilityToBinaryModel)
+}
