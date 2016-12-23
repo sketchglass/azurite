@@ -2,7 +2,7 @@ import * as zlib from "zlib"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Texture, DrawTarget, TextureDrawTarget, Model, TextureShader, RectShape, BlendMode} from "paintgl"
 import {context} from "../GLContext"
-import {drawTexture} from "../GLUtil"
+import {drawTexture, drawVisibilityToBinary} from "../GLUtil"
 import {float32ArrayTo16} from "../../lib/Float"
 import {getBoundingRect} from "./util"
 
@@ -22,12 +22,9 @@ class Tile {
   }
 
   boundingRect() {
-    tileModel.uniforms = {texture: this.texture}
-    byteAlphaDrawTarget.draw(tileModel)
-    const {width, rect} = Tile
-    byteAlphaDrawTarget.readPixels(rect, byteAlphaData)
-
-    return getBoundingRect(byteAlphaData, new Vec2(width))
+    drawVisibilityToBinary(binaryDrawTarget, this.texture)
+    binaryDrawTarget.readPixels(new Rect(new Vec2(), binaryTexture.size), new Uint8Array(binaryData.buffer))
+    return getBoundingRect(binaryData, new Vec2(Tile.width))
   }
 
   toData() {
@@ -296,8 +293,8 @@ const floatData = new Float32Array(Tile.width * Tile.width * 4)
 const floatTile = new Texture(context, {size: Tile.size, pixelType: "float"})
 const floatDrawTarget = new TextureDrawTarget(context, floatTile)
 
-const byteAlphaData = new Uint8Array(Tile.width * Tile.width * 4)
-const byteAlphaTile = new Texture(context, {size: Tile.size, pixelType: "byte"})
-const byteAlphaDrawTarget = new TextureDrawTarget(context, byteAlphaTile)
+const binaryData = new Int32Array(Tile.width / 32 * Tile.width)
+const binaryTexture = new Texture(context, {size: new Vec2(Tile.width / 32, Tile.width), pixelType: "byte"})
+const binaryDrawTarget = new TextureDrawTarget(context, binaryTexture)
 
 const tileDrawTarget = new TextureDrawTarget(context)

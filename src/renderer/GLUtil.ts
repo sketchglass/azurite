@@ -257,3 +257,110 @@ export function duplicateTexture(texture: Texture) {
   drawTarget.dispose()
   return result
 }
+
+class VisiblityToBinaryShader extends Shader {
+  get fragmentShader() {
+    return `
+      precision highp float;
+      uniform sampler2D srcTexture;
+      uniform vec2 srcSize;
+
+      void main(void) {
+        vec2 texelSize = 1.0 / srcSize;
+        vec2 pos = gl_FragCoord.xy - 0.5;
+        vec2 texPos = pos * vec2(32.0, 1.0) + 0.5;
+        vec2 texCoord = texPos * texelSize;
+
+        for (int i = 0; i < 4; ++i) {
+          float value = 0.0;
+          for (int j = 0; j < 8; ++j) {
+            bool opaque = texture2D(srcTexture, texCoord).a > 0.0;
+            bool inside = texCoord.x < 1.0;
+            value *= 0.5;
+            value += (opaque && inside) ? 128.0 : 0.0;
+            texCoord += vec2(texelSize.x, 0.0);
+          }
+          gl_FragColor[i] = value / 255.0;
+        }
+      }
+    `
+  }
+}
+
+const visibilityToBinaryShape = new RectShape(context)
+const visibilityToBinaryModel = new Model(context, {
+  shape: visibilityToBinaryShape,
+  shader: VisiblityToBinaryShader,
+  blendMode: "src",
+})
+
+export function drawVisibilityToBinary(drawTarget: DrawTarget, src: Texture) {
+  const width = Math.ceil(src.size.width / 32)
+  const height = src.size.height
+  const rect = new Rect(new Vec2(), new Vec2(width, height))
+  if (!visibilityToBinaryShape.rect.equals(rect)) {
+    visibilityToBinaryShape.rect = rect
+  }
+  visibilityToBinaryModel.uniforms = {
+    srcTexture: src,
+    srcSize: src.size,
+  }
+  drawTarget.draw(visibilityToBinaryModel)
+}
+
+class BinaryToVisibilityShader extends Shader {
+  get fragmentShader() {
+    return `
+      precision highp float;
+      uniform sampler2D srcTexture;
+      uniform vec2 srcSize;
+
+      bool isOdd(int x) {
+        int r = x / 2;
+        return x - r * 2 == 1;
+      }
+
+      void main(void) {
+        vec2 pos = gl_FragCoord.xy - 0.5;
+        vec2 srcPos = pos * vec2(1.0 / 32.0, 1.0);
+        vec2 srcTexCoord = (floor(srcPos) + 0.5) / srcSize;
+        vec4 srcColor = texture2D(srcTexture, srcTexCoord);
+        int bitOffset = int(fract(srcPos.x) * 32.0);
+
+        bool on = false;
+        int offset = 0;
+        for (int i = 0; i < 4; ++i) {
+          int c = int(srcColor[i] * 255.0 + 0.5);
+          for (int j = 0; j < 8; ++j) {
+            if (offset == bitOffset && isOdd(c)) {
+              on = true;
+            }
+            c /= 2;
+            ++offset;
+          }
+        }
+        gl_FragColor = vec4(float(on));
+      }
+    `
+  }
+}
+
+const binaryToVisibilityShape = new RectShape(context)
+
+const binaryToVisibilityModel = new Model(context, {
+  shape: binaryToVisibilityShape,
+  shader: BinaryToVisibilityShader,
+  blendMode: "src",
+})
+
+export function drawBinaryToVisibility(drawTarget: DrawTarget, src: Texture) {
+  const rect = new Rect(new Vec2(), drawTarget.size)
+  if (!binaryToVisibilityShape.rect.equals(rect)) {
+    binaryToVisibilityShape.rect = rect
+  }
+  binaryToVisibilityModel.uniforms = {
+    srcTexture: src,
+    srcSize: src.size,
+  }
+  drawTarget.draw(binaryToVisibilityModel)
+}
