@@ -262,11 +262,11 @@ class VisiblityToBinaryShader extends Shader {
   get fragmentShader() {
     return `
       precision highp float;
-      uniform sampler2D texture;
-      uniform vec2 texSize;
+      uniform sampler2D srcTexture;
+      uniform vec2 srcSize;
 
       void main(void) {
-        vec2 texelSize = 1.0 / texSize;
+        vec2 texelSize = 1.0 / srcSize;
         vec2 pos = gl_FragCoord.xy - 0.5;
         vec2 texPos = pos * vec2(32.0, 1.0) + 0.5;
         vec2 texCoord = texPos * texelSize;
@@ -274,7 +274,7 @@ class VisiblityToBinaryShader extends Shader {
         for (int i = 0; i < 4; ++i) {
           float value = 0.0;
           for (int j = 0; j < 8; ++j) {
-            bool opaque = texture2D(texture, texCoord).a > 0.0;
+            bool opaque = texture2D(srcTexture, texCoord).a > 0.0;
             bool inside = texCoord.x < 1.0;
             value *= 0.5;
             value += (opaque && inside) ? 128.0 : 0.0;
@@ -302,8 +302,8 @@ export function drawVisibilityToBinary(drawTarget: DrawTarget, src: Texture) {
     visibilityToBinaryShape.rect = rect
   }
   visibilityToBinaryModel.uniforms = {
-    texture: src,
-    texSize: src.size,
+    srcTexture: src,
+    srcSize: src.size,
   }
   drawTarget.draw(visibilityToBinaryModel)
 }
