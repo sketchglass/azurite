@@ -2,8 +2,11 @@ import {observable} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import {Texture, TextureDrawTarget, Color} from "paintgl"
 import {context} from "../GLContext"
-import {drawTexture} from "../GLUtil"
+import {drawTexture, drawVisibilityToBinary} from "../GLUtil"
 import {getBoundingRect} from "./util"
+
+const binaryTexture = new Texture(context, {})
+const binaryDrawTarget = new TextureDrawTarget(context, binaryTexture)
 
 export default
 class Selection {
@@ -33,9 +36,15 @@ class Selection {
   }
 
   boundingRect() {
-    const area = this.size.width * this.size.height
-    const data = new Uint8Array(area * 4)
-    this.drawTarget.readPixels(new Rect(new Vec2(), this.size), data)
+    const binaryWidth = Math.ceil(this.size.width / 32)
+    const binarySize = new Vec2(binaryWidth, this.size.height)
+    if (!binaryTexture.size.equals(binarySize)) {
+      binaryTexture.size = binarySize
+    }
+    drawVisibilityToBinary(binaryDrawTarget, this.texture)
+
+    const data = new Int32Array(binarySize.width * binarySize.height)
+    binaryDrawTarget.readPixels(new Rect(new Vec2(), binarySize), new Uint8Array(data.buffer))
     return getBoundingRect(data, this.size)
   }
 

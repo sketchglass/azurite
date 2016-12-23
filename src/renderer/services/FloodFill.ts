@@ -1,20 +1,33 @@
 import Picture from "../models/Picture"
 import Selection from "../models/Selection"
-import {Vec2} from "paintvec"
+import {Vec2, Rect} from "paintvec"
 import {Texture, Shader, RectShape, Model, TextureDrawTarget} from "paintgl"
 import {context} from "../GLContext"
-import {drawTexture} from "../GLUtil"
+import {drawTexture, drawVisibilityToBinary, drawBinaryToVisibility} from "../GLUtil"
 
 class BinaryImage {
-  constructor(public width: number, public height: number, public rgba: Uint8Array) {
+  data: Int32Array
+  readonly stride = Math.ceil(this.width / 32)
+
+  constructor(public readonly width: number, public readonly height: number, data?: Int32Array) {
+    this.data = data || new Int32Array(this.stride * height)
   }
+
   get(x: number, y: number) {
-    const i = (this.width * y + x) * 4 + 3
-    return this.rgba[i]
+    const xcell = x >> 5
+    const xbit = x - (xcell << 5)
+    const cell = this.data[y * this.stride + xcell]
+    return (cell >> xbit) & 1
   }
+
   set(x: number, y: number, value: number) {
-    const i = (this.width * y + x) * 4 + 3
-    this.rgba[i] = value ? 255 : 0
+    const xcell = x >> 5
+    const xbit = x - (xcell << 5)
+    if (value) {
+      this.data[y * this.stride + xcell] |= (1 << xbit)
+    } else {
+      this.data[y * this.stride + xcell] &= ~(1 << xbit)
+    }
   }
 }
 
@@ -109,6 +122,9 @@ class FloodFill {
     shader: FindFillableRegionShader,
     blendMode: "src",
   })
+  private readonly binaryTexture = new Texture(context, {
+    size: new Vec2(Math.ceil(this.picture.size.width / 32), this.picture.size.height)
+  })
 
   tolerance = 0.5 / 255 // 0 ... 1
 
@@ -138,18 +154,21 @@ class FloodFill {
 
     // Do flood fill (on CPU)
     const {width, height} = this.picture.size
+    const stride = Math.ceil(width / 32)
     const {x, y} = pos
-    const src = new Uint8Array(width * height * 4)
-    this.drawTarget.texture = this.fillableRegionTexture
-    this.drawTarget.readPixels(this.picture.rect, src)
-    const dst = new Uint8Array(width * height * 4)
+    const src = new Int32Array(stride * height)
+    this.drawTarget.texture = this.binaryTexture
+    drawVisibilityToBinary(this.drawTarget, this.fillableRegionTexture)
+    this.drawTarget.readPixels(new Rect(new Vec2(), new Vec2(stride, height)), new Uint8Array(src.buffer))
+    const dst = new Int32Array(stride * height)
     floodFill(x, y,
       new BinaryImage(width, height, src),
       new BinaryImage(width, height, dst)
     )
+    this.binaryTexture.setData(this.binaryTexture.size, new Uint8Array(dst.buffer))
 
-    this.filledTexture.setData(this.picture.size, dst)
     this.drawTarget.texture = this.filledTexture
+    drawBinaryToVisibility(this.drawTarget, this.binaryTexture)
     drawTexture(this.drawTarget, this.fillableRegionTexture, {blendMode: "src-in"})
     drawTexture(selection.drawTarget, this.filledTexture, {blendMode: "src-over"})
     selection.checkHasSelection()
