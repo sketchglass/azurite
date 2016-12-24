@@ -1,58 +1,53 @@
 import {reaction} from "mobx"
 import Picture from "./Picture"
 import {Vec2, Rect, Transform} from "paintvec"
-import {Model, Texture, TextureDrawTarget, Shader, RectShape, Color} from "paintgl"
+import {ShapeModel, Texture, TextureDrawTarget, RectShape, Color} from "paintgl"
 import {context} from "../GLContext"
 import TiledTexture, {Tile} from "./TiledTexture"
 import Layer, {LayerBlendMode} from "./Layer"
 import {drawTexture} from "../GLUtil"
 
-class NormalBlendShader extends Shader {
-  get fragmentShader() {
-    return `
-      precision mediump float;
-      varying highp vec2 vTexCoord;
-      uniform sampler2D srcTexture;
-      uniform float opacity;
-      void main(void) {
-        gl_FragColor = texture2D(srcTexture, vTexCoord) * opacity;
-      }
-    `
-  }
+const normalBlendShader = {
+  fragment: `
+    uniform sampler2D srcTexture;
+    uniform float opacity;
+    void fragmentMain(vec2 pos, vec2 uv, out vec4 color) {
+      color = texture2D(srcTexture, uv) * opacity;
+    }
+  `
 }
 
 // Nice reference: https://www.w3.org/TR/SVGCompositing/#alphaCompositing
-abstract class BlendShader extends Shader {
-  abstract get blendOp(): string
-
-  get fragmentShader() {
-    return `
-      precision mediump float;
-      varying highp vec2 vTexCoord;
+function makeBlendShader(blendOp: string) {
+  return {
+    fragment: `
       uniform sampler2D srcTexture;
       uniform sampler2D dstTexture;
       uniform float opacity;
       uniform bool clipping;
       uniform bool startClipping;
+
       vec3 blendOp(vec3 src, vec3 dst) {
-        ${this.blendOp}
+        ${blendOp}
       }
+
       vec3 getColor(vec4 pixel) {
         return pixel.a < 0.0001 ? vec3(0.0) : pixel.rgb / pixel.a;
       }
-      void main(void) {
-        vec4 src = texture2D(srcTexture, vTexCoord) * opacity;
-        vec4 dst = texture2D(dstTexture, vTexCoord);
+
+      void main(vec2 pos, vec2 uv, out vec4 color) {
+        vec4 src = texture2D(srcTexture, uv) * opacity;
+        vec4 dst = texture2D(dstTexture, uv);
         vec4 blended = vec4(clamp(blendOp(getColor(src), getColor(dst)), 0.0, 1.0), 1.0);
         if (startClipping) {
           // clip to src
-          gl_FragColor = blended * (src.a * dst.a) + src * (1.0 - dst.a);
+          color = blended * (src.a * dst.a) + src * (1.0 - dst.a);
         } else if (clipping) {
           // clip to dst
-          gl_FragColor = blended * (src.a * dst.a) + dst * (1.0 - src.a);
+          color = blended * (src.a * dst.a) + dst * (1.0 - src.a);
         } else {
           // normal blending
-          gl_FragColor = blended * (src.a * dst.a) + src * (1.0 - dst.a) + dst * (1.0 - src.a);
+          color = blended * (src.a * dst.a) + src * (1.0 - dst.a) + dst * (1.0 - src.a);
         }
       }
     `
@@ -72,22 +67,18 @@ const tileShape = new RectShape(context, {
   rect: Tile.rect
 })
 const tileBlendModels = new Map(Array.from(blendOps).map(([type, op]) => {
-  const shader = class extends BlendShader {
-    get blendOp() {
-      return op
-    }
-  }
-  const model = new Model(context, {
+  const shader = makeBlendShader(op)
+  const model = new ShapeModel(context, {
     shape: tileShape,
     shader: shader,
     blendMode: "src",
   })
-  return [type, model] as [LayerBlendMode, Model]
+  return [type, model] as [LayerBlendMode, ShapeModel]
 }))
 
-const tileNormalModel = new Model(context, {
+const tileNormalModel = new ShapeModel(context, {
   shape: tileShape,
-  shader: NormalBlendShader,
+  shader: normalBlendShader,
 })
 
 export

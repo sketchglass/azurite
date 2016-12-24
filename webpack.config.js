@@ -21,6 +21,7 @@ module.exports = {
       {
         test: /\.tsx?$/,
         loader: "babel-loader?plugins=glslify!ts-loader",
+        exclude: /node_modules/,
       },
       {
         test: /\.css$/,
