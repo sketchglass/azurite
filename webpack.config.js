@@ -13,6 +13,9 @@ module.exports = {
     __filename: false,
     __dirname: false,
   },
+  externals: {
+    "glslify": "undefined",
+  },
   resolve: {
     extensions: ["", ".ts", ".tsx", ".js"],
   },
