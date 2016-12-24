@@ -27,9 +27,9 @@ const brushShader = {
 
     void vertexMain(vec2 pos, vec2 uv) {
       vSelectionUV = pos / uPictureSize;
-      vOffset = aPosition - aCenter;
+      vOffset = pos - aCenter;
 
-      float brushSize = uBrushSize * (uMinWidthRatio + (1.0 - uMinWidthRatio) * aTexCoord.x);
+      float brushSize = uBrushSize * (uMinWidthRatio + (1.0 - uMinWidthRatio) * uv.x);
       float radius = brushSize * 0.5;
       vRadius = radius;
 

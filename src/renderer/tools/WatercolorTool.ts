@@ -29,7 +29,7 @@ const shapeClipShader = {
 
     void vertexMain(vec2 pos, vec2 uv) {
       vRadius = uBrushRadius * (uMinWidthRatio + (1.0 - uMinWidthRatio) * uPressure);
-      vOffset = aPosition - uSampleSize * 0.5;
+      vOffset = pos - uSampleSize * 0.5;
       vSelectionUV = (vOffset + floor(uBrushPos)) / uPictureSize;
     }
   `,

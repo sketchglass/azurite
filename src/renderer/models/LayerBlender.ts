@@ -35,7 +35,7 @@ function makeBlendShader(blendOp: string) {
         return pixel.a < 0.0001 ? vec3(0.0) : pixel.rgb / pixel.a;
       }
 
-      void main(vec2 pos, vec2 uv, out vec4 color) {
+      void fragmentMain(vec2 pos, vec2 uv, out vec4 color) {
         vec4 src = texture2D(srcTexture, uv) * opacity;
         vec4 dst = texture2D(dstTexture, uv);
         vec4 blended = vec4(clamp(blendOp(getColor(src), getColor(dst)), 0.0, 1.0), 1.0);
