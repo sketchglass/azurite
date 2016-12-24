@@ -20,7 +20,7 @@ module.exports = {
     loaders: [
       {
         test: /\.tsx?$/,
-        loader: "ts-loader",
+        loader: "babel-loader?plugins=glslify!ts-loader",
       },
       {
         test: /\.css$/,
