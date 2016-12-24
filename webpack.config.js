@@ -14,7 +14,7 @@ module.exports = {
     __dirname: false,
   },
   externals: {
-    "glslify": "undefined",
+    "glslify": "undefined", // glslify will be transformed with babel-plugin-glslify so don't have to be required
   },
   resolve: {
     extensions: ["", ".ts", ".tsx", ".js"],
@@ -24,7 +24,6 @@ module.exports = {
       {
         test: /\.tsx?$/,
         loader: "babel-loader?plugins=glslify!ts-loader",
-        exclude: /node_modules/,
       },
       {
         test: /\.css$/,
