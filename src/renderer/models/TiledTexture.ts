@@ -1,6 +1,6 @@
 import * as zlib from "zlib"
 import {Vec2, Rect, Transform} from "paintvec"
-import {Texture, DrawTarget, TextureDrawTarget, Model, TextureShader, RectShape, BlendMode} from "paintgl"
+import {Texture, DrawTarget, TextureDrawTarget, ShapeModel, textureShader, RectShape, BlendMode} from "paintgl"
 import {context} from "../GLContext"
 import {drawTexture, drawVisibilityToBinary} from "../GLUtil"
 import {float32ArrayTo16} from "../../lib/Float"
@@ -283,9 +283,9 @@ function stringToKey(str: string) {
   return new Vec2(parseInt(strs[0]), parseInt(strs[1]))
 }
 
-const tileModel = new Model(context, {
+const tileModel = new ShapeModel(context, {
   shape: new RectShape(context, {usage: "static", rect: Tile.rect}),
-  shader: TextureShader,
+  shader: textureShader,
   blendMode: "src",
 })
 

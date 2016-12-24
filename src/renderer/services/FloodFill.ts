@@ -1,7 +1,7 @@
 import Picture from "../models/Picture"
 import Selection from "../models/Selection"
 import {Vec2, Rect} from "paintvec"
-import {Texture, Shader, RectShape, Model, TextureDrawTarget} from "paintgl"
+import {Texture, RectShape, ShapeModel, TextureDrawTarget} from "paintgl"
 import {context} from "../GLContext"
 import {drawTexture, drawVisibilityToBinary, drawBinaryToVisibility} from "../GLUtil"
 
@@ -78,37 +78,28 @@ export function floodFill(x: number, y: number, src: BinaryImage, dst: BinaryIma
   }
 }
 
-class FindFillableRegionShader extends Shader {
-  get additionalVertexShader() {
-    return `
-      uniform vec2 referenceTexCoord;
-      uniform sampler2D image;
-      varying vec3 vReferenceColor;
+const findFillableRegionShader = {
+  vertex: `
+    uniform vec2 referenceTexCoord;
+    uniform sampler2D image;
+    varying vec3 vReferenceColor;
 
-      void paintgl_additional() {
-        vReferenceColor = texture2D(image, referenceTexCoord).rgb;
-      }
-    `
-  }
+    void vertexMain(vec2 pos, vec2 uv) {
+      vReferenceColor = texture2D(image, referenceTexCoord).rgb;
+    }
+  `,
+  fragment: `
+    uniform float tolerance;
+    uniform sampler2D image;
+    varying vec3 vReferenceColor;
 
-  get fragmentShader() {
-    return `
-      precision highp float;
-
-      uniform float tolerance;
-      uniform sampler2D image;
-
-      varying vec2 vTexCoord;
-      varying vec3 vReferenceColor;
-
-      void main(void) {
-        vec3 color = texture2D(image, vTexCoord).rgb;
-        float diff = distance(color, vReferenceColor);
-        float opacity = 1.0 - clamp(diff / tolerance, 0.0, 1.0);
-        gl_FragColor = vec4(opacity);
-      }
-    `
-  }
+    void fragmentMain(vec2 pos, vec2 uv, out vec4 outColor) {
+      vec3 color = texture2D(image, uv).rgb;
+      float diff = distance(color, vReferenceColor);
+      float opacity = 1.0 - clamp(diff / tolerance, 0.0, 1.0);
+      outColor = vec4(opacity);
+    }
+  `
 }
 
 export default
@@ -117,9 +108,9 @@ class FloodFill {
   private readonly filledTexture = new Texture(context, {size: this.picture.size})
   private readonly drawTarget = new TextureDrawTarget(context)
   private readonly shape = new RectShape(context, {rect: this.picture.rect})
-  private readonly findFillableRegionModel = new Model(context, {
+  private readonly findFillableRegionModel = new ShapeModel(context, {
     shape: this.shape,
-    shader: FindFillableRegionShader,
+    shader: findFillableRegionShader,
     blendMode: "src",
   })
   private readonly binaryTexture = new Texture(context, {

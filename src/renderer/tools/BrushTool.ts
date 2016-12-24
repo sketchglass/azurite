@@ -1,6 +1,6 @@
 import {observable} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
-import {Model, TextureDrawTarget, Shape, Shader}  from "paintgl"
+import {ShapeModel, TextureDrawTarget, Shape}  from "paintgl"
 import Waypoint from "../models/Waypoint"
 import BaseBrushTool from "./BaseBrushTool";
 import {context} from "../GLContext"
@@ -10,69 +10,63 @@ import {ToolPointerEvent} from "./Tool"
 import React = require("react")
 import {appState} from "../state/AppState"
 
-class BrushShader extends Shader {
-  get additionalVertexShader() {
-    return `
-      uniform float uBrushSize;
-      uniform float uSpacingRatio;
-      uniform float uMinWidthRatio;
-      uniform float uOpacity;
-      uniform vec2 uPictureSize;
+const brushShader = {
+  vertex: `
+    uniform float uBrushSize;
+    uniform float uSpacingRatio;
+    uniform float uMinWidthRatio;
+    uniform float uOpacity;
+    uniform vec2 uPictureSize;
 
-      attribute vec2 aCenter;
+    attribute vec2 aCenter;
 
-      varying float vRadius;
-      varying float vOpacity;
-      varying vec2 vOffset;
-      varying vec2 vSelectionUV;
+    varying float vRadius;
+    varying float vOpacity;
+    varying vec2 vOffset;
+    varying vec2 vSelectionUV;
 
-      void paintgl_additional() {
-        vSelectionUV = aPosition / uPictureSize;
-        vOffset = aPosition - aCenter;
+    void vertexMain(vec2 pos, vec2 uv) {
+      vSelectionUV = pos / uPictureSize;
+      vOffset = pos - aCenter;
 
-        float brushSize = uBrushSize * (uMinWidthRatio + (1.0 - uMinWidthRatio) * aTexCoord.x);
-        float radius = brushSize * 0.5;
-        vRadius = radius;
+      float brushSize = uBrushSize * (uMinWidthRatio + (1.0 - uMinWidthRatio) * uv.x);
+      float radius = brushSize * 0.5;
+      vRadius = radius;
 
-        // transparency = (overlap count) √ (final transparency)
-        float spacing = max(brushSize * uSpacingRatio, 1.0);
-        vOpacity = 1.0 - pow(1.0 - min(uOpacity, 0.998), spacing / brushSize);
+      // transparency = (overlap count) √ (final transparency)
+      float spacing = max(brushSize * uSpacingRatio, 1.0);
+      vOpacity = 1.0 - pow(1.0 - min(uOpacity, 0.998), spacing / brushSize);
+    }
+  `,
+  fragment: `
+    uniform float uBrushSize;
+    uniform float uSoftness;
+    uniform vec4 uColor;
+    uniform bool uHasSelection;
+    uniform sampler2D uSelection;
+
+    varying float vRadius;
+    varying float vOpacity;
+    varying vec2 vOffset;
+    varying vec2 vSelectionUV;
+
+    void fragmentMain(vec2 pos, vec2 uv, out vec4 outColor) {
+      float r = length(vOffset);
+      float opacity = smoothstep(vRadius, vRadius - max(1.0, vRadius * uSoftness), r);
+      vec4 color = uColor * opacity * vOpacity;
+      if (uHasSelection) {
+        outColor = color * texture2D(uSelection, vSelectionUV).a;
+      } else {
+        outColor = color;
       }
-    `
-  }
-  get fragmentShader() {
-    return `
-      precision highp float;
-
-      uniform highp float uBrushSize;
-      uniform float uSoftness;
-      uniform vec4 uColor;
-      uniform bool uHasSelection;
-      uniform sampler2D uSelection;
-
-      varying float vRadius;
-      varying float vOpacity;
-      varying vec2 vOffset;
-      varying vec2 vSelectionUV;
-
-      void main(void) {
-        float r = length(vOffset);
-        float opacity = smoothstep(vRadius, vRadius - max(1.0, vRadius * uSoftness), r);
-        vec4 color = uColor * opacity * vOpacity;
-        if (uHasSelection) {
-          gl_FragColor = color * texture2D(uSelection, vSelectionUV).a;
-        } else {
-          gl_FragColor = color;
-        }
-      }
-    `
-  }
+    }
+  `
 }
 
 export default
 class BrushTool extends BaseBrushTool {
   shape: Shape
-  model: Model
+  model: ShapeModel
   drawTarget = new TextureDrawTarget(context)
   name = "Brush"
   @observable eraser = false
@@ -81,7 +75,7 @@ class BrushTool extends BaseBrushTool {
     super()
     this.shape = new Shape(context)
     this.shape.setVec2Attributes("aCenter", [])
-    this.model = new Model(context, {shape: this.shape, shader: BrushShader})
+    this.model = new ShapeModel(context, {shape: this.shape, shader: brushShader})
   }
 
   start(ev: ToolPointerEvent) {

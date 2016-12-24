@@ -1,6 +1,6 @@
 import {observable, computed, reaction} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
-import {Texture, Model, RectShape, Shader, TextureShader, CanvasDrawTarget, Color, TextureFilter} from "paintgl"
+import {Texture, ShapeModel, RectShape, textureShader, CanvasDrawTarget, Color, TextureFilter} from "paintgl"
 import {context, canvas} from "../GLContext"
 import {frameDebounce} from "../../lib/Debounce"
 import Picture from "../models/Picture"
@@ -9,119 +9,106 @@ import Selection from "../models/Selection"
 const BOX_SHADOW_RADIUS = 4
 const BOX_SHADOW_OPACITY = 0.5
 
-class BoxShadowShader extends Shader {
-  get additionalVertexShader() {
-    return `
-      varying mediump vec2 vPicturePos;
-      uniform mat3 transformToPicture;
+const boxShadowShader = {
+  vertex: `
+    varying mediump vec2 vPicturePos;
+    uniform mat3 transformToPicture;
 
-      void paintgl_additional() {
-        vPicturePos = (transformToPicture * vec3(aPosition, 1.0)).xy;
-      }
-    `
-  }
-
+    void vertexMain(vec2 pos, vec2 uv) {
+      vPicturePos = (transformToPicture * vec3(pos, 1.0)).xy;
+    }
+  `,
   // http://madebyevan.com/shaders/fast-rounded-rectangle-shadows/
-  get fragmentShader() {
-    return `
-      precision mediump float;
-      varying vec2 vPicturePos;
-      uniform vec2 pictureSize;
+  fragment: `
+    varying vec2 vPicturePos;
+    uniform vec2 pictureSize;
 
-      // This approximates the error function, needed for the gaussian integral
-      vec4 erf(vec4 x) {
-        vec4 s = sign(x), a = abs(x);
-        x = 1.0 + (0.278393 + (0.230389 + 0.078108 * (a * a)) * a) * a;
-        x *= x;
-        return s - s / (x * x);
-      }
+    // This approximates the error function, needed for the gaussian integral
+    vec4 erf(vec4 x) {
+      vec4 s = sign(x), a = abs(x);
+      x = 1.0 + (0.278393 + (0.230389 + 0.078108 * (a * a)) * a) * a;
+      x *= x;
+      return s - s / (x * x);
+    }
 
-      // Return the mask for the shadow of a box from lower to upper
-      float boxShadow(vec2 lower, vec2 upper, vec2 point, float sigma) {
-        vec4 query = vec4(point - lower, point - upper);
-        vec4 integral = 0.5 + 0.5 * erf(query * (sqrt(0.5) / sigma));
-        return (integral.z - integral.x) * (integral.w - integral.y);
-      }
+    // Return the mask for the shadow of a box from lower to upper
+    float boxShadow(vec2 lower, vec2 upper, vec2 point, float sigma) {
+      vec4 query = vec4(point - lower, point - upper);
+      vec4 integral = 0.5 + 0.5 * erf(query * (sqrt(0.5) / sigma));
+      return (integral.z - integral.x) * (integral.w - integral.y);
+    }
 
-      void main(void) {
-        float a = boxShadow(vec2(0.0), pictureSize, vPicturePos, ${BOX_SHADOW_RADIUS.toFixed(1)});
-        gl_FragColor = vec4(0.0, 0.0, 0.0, a * ${BOX_SHADOW_OPACITY});
-      }
-    `
-  }
+    void fragmentMain(vec2 pos, vec2 uv, out vec4 color) {
+      float a = boxShadow(vec2(0.0), pictureSize, vPicturePos, ${BOX_SHADOW_RADIUS.toFixed(1)});
+      color = vec4(0.0, 0.0, 0.0, a * ${BOX_SHADOW_OPACITY});
+    }
+  `
 }
 
 const SELECTION_DURATION = 100
 
-class SelectionShader extends Shader {
-  get additionalVertexShader() {
-    return `
-      varying mat2 vToTexOffset;
-      uniform vec2 pictureSize;
-      uniform mat3 transformToPicture;
+const selectionShader = {
+  vertex: `
+    varying mat2 vToTexOffset;
+    uniform vec2 pictureSize;
+    uniform mat3 transformToPicture;
 
-      mat2 getScaleRotation(mat3 m) {
-        return mat2(m[0][0], m[0][1], m[1][0], m[1][1]);
+    mat2 getScaleRotation(mat3 m) {
+      return mat2(m[0][0], m[0][1], m[1][0], m[1][1]);
+    }
+
+    void vertexMain(vec2 pos, vec2 uv) {
+      vec2 texelSize = 1.0 / pictureSize;
+      vToTexOffset = mat2(texelSize.x, 0.0, 0.0, texelSize.y) * getScaleRotation(transformToPicture);
+    }
+  `,
+  fragment: `
+    uniform sampler2D texture;
+    uniform float milliseconds;
+    varying mat2 vToTexOffset;
+
+    #define STRIPE_WIDTH 4.0
+    #define STEP 2.0
+
+    bool isSelected(vec2 texCoord) {
+      float x = texCoord.x;
+      float y = texCoord.y;
+      if (0.0 <= x && x <= 1.0 && 0.0 <= y && y <= 1.0) {
+        return texture2D(texture, texCoord).a != 0.0;
+      } else {
+        return false;
       }
+    }
 
-      void paintgl_additional() {
-        vec2 texelSize = 1.0 / pictureSize;
-        vToTexOffset = mat2(texelSize.x, 0.0, 0.0, texelSize.y) * getScaleRotation(transformToPicture);
-      }
-    `
-  }
-  get fragmentShader() {
-    return `
-      precision highp float;
-
-      uniform sampler2D texture;
-      uniform float milliseconds;
-      varying vec2 vTexCoord;
-      varying mat2 vToTexOffset;
-
-      #define STRIPE_WIDTH 4.0
-      #define STEP 2.0
-
-      bool isSelected(vec2 texCoord) {
-        float x = texCoord.x;
-        float y = texCoord.y;
-        if (0.0 <= x && x <= 1.0 && 0.0 <= y && y <= 1.0) {
-          return texture2D(texture, texCoord).a != 0.0;
-        } else {
-          return false;
-        }
-      }
-
-      void main(void) {
-        bool isOutline = false;
-        if (isSelected(vTexCoord)) {
-          for (int y = -1; y <= 1; ++y) {
-            for (int x = -1; x <= 1; ++x) {
-              if (x != 0 && y != 0) {
-                vec2 texCoord = vTexCoord + vToTexOffset * vec2(float(x), float(y));
-                if (!isSelected(texCoord)) {
-                  isOutline = true;
-                }
+    void fragmentMain(vec2 position, vec2 texCoord, out vec4 color) {
+      bool isOutline = false;
+      if (isSelected(texCoord)) {
+        for (int y = -1; y <= 1; ++y) {
+          for (int x = -1; x <= 1; ++x) {
+            if (x != 0 && y != 0) {
+              vec2 uv = texCoord + vToTexOffset * vec2(float(x), float(y));
+              if (!isSelected(uv)) {
+                isOutline = true;
               }
             }
           }
         }
-
-        if (isOutline) {
-          vec2 coord = gl_FragCoord.xy - vec2(0.5);
-          float d = coord.x + coord.y + floor(milliseconds / ${SELECTION_DURATION}.0) * STEP;
-          float stripe = mod(d / STRIPE_WIDTH, 2.0);
-          if (stripe < 1.0) {
-            gl_FragColor = vec4(0.0, 0.0, 0.0, 1.0);
-          } else {
-            gl_FragColor = vec4(1.0, 1.0, 1.0, 1.0);
-          }
-        } else {
-          gl_FragColor = vec4(0.0);
-        }
       }
-    `
-  }
+
+      if (isOutline) {
+        vec2 coord = gl_FragCoord.xy - vec2(0.5);
+        float d = coord.x + coord.y + floor(milliseconds / ${SELECTION_DURATION}.0) * STEP;
+        float stripe = mod(d / STRIPE_WIDTH, 2.0);
+        if (stripe < 1.0) {
+          color = vec4(0.0, 0.0, 0.0, 1.0);
+        } else {
+          color = vec4(1.0, 1.0, 1.0, 1.0);
+        }
+      } else {
+        color = vec4(0.0);
+      }
+    }
+  `
 }
 
 export
@@ -143,9 +130,9 @@ class Renderer {
   private readonly pictureShape = new RectShape(context, {
     usage: "static",
   })
-  private readonly pictureModel = new Model(context, {
+  private readonly pictureModel = new ShapeModel(context, {
     shape: this.pictureShape,
-    shader: TextureShader,
+    shader: textureShader,
   })
 
   @observable size = new Vec2(100, 100)
@@ -156,13 +143,13 @@ class Renderer {
   private readonly rendererShape = new RectShape(context, {
     usage: "static",
   })
-  private readonly boxShadowModel = new Model(context, {
+  private readonly boxShadowModel = new ShapeModel(context, {
     shape: this.rendererShape,
-    shader: BoxShadowShader,
+    shader: boxShadowShader,
   })
-  private readonly selectionModel = new Model(context, {
+  private readonly selectionModel = new ShapeModel(context, {
     shape: this.pictureShape,
-    shader: SelectionShader,
+    shader: selectionShader,
   })
 
   private readonly cursorShape = new RectShape(context, {
@@ -170,9 +157,9 @@ class Renderer {
     rect: new Rect(new Vec2(0), new Vec2(1)),
   })
   readonly cursorTexture = new Texture(context, {})
-  private readonly cursorModel = new Model(context, {
+  private readonly cursorModel = new ShapeModel(context, {
     shape: this.cursorShape,
-    shader: TextureShader,
+    shader: textureShader,
     uniforms: {
       texture: this.cursorTexture
     }
@@ -193,9 +180,9 @@ class Renderer {
   private readonly overlayCanvas = document.createElement("canvas")
   private readonly overlayCanvasContext = this.overlayCanvas.getContext("2d")!
   private readonly overlayTexture = new Texture(context, {})
-  private readonly overlayModel = new Model(context, {
+  private readonly overlayModel = new ShapeModel(context, {
     shape: this.rendererShape,
-    shader: TextureShader,
+    shader: textureShader,
     uniforms: {
       texture: this.overlayTexture
     }

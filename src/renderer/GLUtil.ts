@@ -1,5 +1,5 @@
 import {Vec2, Rect, Transform} from "paintvec"
-import {Model, Texture, Shader, RectShape, QuadShape, TextureShader, DrawTarget, TextureDrawTarget, BlendMode} from "paintgl"
+import {ShapeModel, Texture, RectShape, QuadShape, textureShader, DrawTarget, TextureDrawTarget, BlendMode} from "paintgl"
 import {context} from "./GLContext"
 
 // http://www.java-gaming.org/index.php?topic=35123.0
@@ -15,7 +15,7 @@ const textureBicubic = `
     return vec4(x, y, z, w) * (1.0/6.0);
   }
 
-  mediump vec4 textureBicubic(sampler2D sampler, vec2 texSize, vec2 texCoords) {
+  vec4 textureBicubic(sampler2D sampler, vec2 texSize, vec2 texCoords) {
     vec2 invTexSize = 1.0 / texSize;
     texCoords = texCoords * texSize - 0.5;
 
@@ -32,10 +32,10 @@ const textureBicubic = `
 
     offset *= invTexSize.xxyy;
 
-    mediump vec4 sample0 = texture2D(sampler, offset.xz);
-    mediump vec4 sample1 = texture2D(sampler, offset.yz);
-    mediump vec4 sample2 = texture2D(sampler, offset.xw);
-    mediump vec4 sample3 = texture2D(sampler, offset.yw);
+    vec4 sample0 = texture2D(sampler, offset.xz);
+    vec4 sample1 = texture2D(sampler, offset.yz);
+    vec4 sample2 = texture2D(sampler, offset.xw);
+    vec4 sample3 = texture2D(sampler, offset.yw);
 
     float sx = s.x / (s.x + s.y);
     float sy = s.z / (s.z + s.w);
@@ -46,30 +46,26 @@ const textureBicubic = `
   }
 `
 
-class BicubicTextureShader extends Shader {
-  get fragmentShader() {
-    return `
-      precision highp float;
-      varying vec2 vTexCoord;
-      uniform sampler2D texture;
-      uniform vec2 texSize;
-      ${textureBicubic}
-      void main(void) {
-        gl_FragColor = textureBicubic(texture, texSize, vTexCoord);
-      }
-    `
-  }
+const bicubicTextureShader = {
+  fragment: `
+    uniform sampler2D texture;
+    uniform vec2 texSize;
+    ${textureBicubic}
+    void fragmentMain(vec2 pos, vec2 uv, out vec4 color) {
+      color = textureBicubic(texture, texSize, uv);
+    }
+  `
 }
 
 const drawTextureShape = new RectShape(context, {usage: "stream"})
-const drawTextureModel = new Model(context, {
+const drawTextureModel = new ShapeModel(context, {
   shape: drawTextureShape,
-  shader: TextureShader,
+  shader: textureShader,
 })
 
-const drawTextureBicubicModel = new Model(context, {
+const drawTextureBicubicModel = new ShapeModel(context, {
   shape: drawTextureShape,
-  shader: BicubicTextureShader,
+  shader: bicubicTextureShader,
 })
 
 interface DrawTextureParams {
@@ -142,79 +138,74 @@ function verticesEquals(xs: Vec2[], ys: Vec2[]) {
   return true
 }
 
-class InverseBilinearTextureShader extends Shader {
-  get fragmentShader() {
-    return `
-      precision highp float;
-      varying vec2 vPosition;
-      uniform sampler2D texture;
-      uniform vec2 texSize;
-      uniform float useBicubic;
-      uniform vec2 a;
-      uniform vec2 b;
-      uniform vec2 c;
-      uniform vec2 d;
-      uniform vec2 uvOffset;
-      uniform vec2 uvSize;
+const inverseBilinearTextureShader = {
+  fragment: `
+    uniform sampler2D texture;
+    uniform vec2 texSize;
+    uniform float useBicubic;
+    uniform vec2 a;
+    uniform vec2 b;
+    uniform vec2 c;
+    uniform vec2 d;
+    uniform vec2 uvOffset;
+    uniform vec2 uvSize;
 
-      // http://www.iquilezles.org/www/articles/ibilinear/ibilinear.htm
+    // http://www.iquilezles.org/www/articles/ibilinear/ibilinear.htm
 
-      ${textureBicubic}
+    ${textureBicubic}
 
-      float cross(vec2 a, vec2 b) {
-        return a.x*b.y - a.y*b.x;
+    float cross(vec2 a, vec2 b) {
+      return a.x*b.y - a.y*b.x;
+    }
+
+    vec2 invBilinear(vec2 p, vec2 a, vec2 b, vec2 c, vec2 d) {
+      vec2 e = b-a;
+      vec2 f = d-a;
+      vec2 g = a-b+c-d;
+      vec2 h = p-a;
+
+      float k2 = cross( g, f );
+      float k1 = cross( e, f ) + cross( h, g );
+      float k0 = cross( h, e );
+
+      float w = k1*k1 - 4.0*k0*k2;
+
+      if( w<0.0 ) return vec2(-1.0);
+
+      w = sqrt( w );
+
+      if (abs(k2) < 0.001) {
+        float v = -k0/k1;
+        float u = (h.x - f.x*v)/(e.x + g.x*v);
+        return vec2(u, v);
       }
 
-      vec2 invBilinear(vec2 p, vec2 a, vec2 b, vec2 c, vec2 d) {
-        vec2 e = b-a;
-        vec2 f = d-a;
-        vec2 g = a-b+c-d;
-        vec2 h = p-a;
+      float v1 = (-k1 - w)/(2.0*k2);
+      float v2 = (-k1 + w)/(2.0*k2);
+      float u1 = (h.x - f.x*v1)/(e.x + g.x*v1);
+      float u2 = (h.x - f.x*v2)/(e.x + g.x*v2);
+      bool  b1 = v1>0.0 && v1<1.0 && u1>0.0 && u1<1.0;
+      bool  b2 = v2>0.0 && v2<1.0 && u2>0.0 && u2<1.0;
 
-        float k2 = cross( g, f );
-        float k1 = cross( e, f ) + cross( h, g );
-        float k0 = cross( h, e );
+      vec2 res = vec2(-1.0);
 
-        float w = k1*k1 - 4.0*k0*k2;
+      if(  b1 && !b2 ) res = vec2( u1, v1 );
+      if( !b1 &&  b2 ) res = vec2( u2, v2 );
 
-        if( w<0.0 ) return vec2(-1.0);
+      return res;
+    }
 
-        w = sqrt( w );
-
-        if (abs(k2) < 0.001) {
-          float v = -k0/k1;
-          float u = (h.x - f.x*v)/(e.x + g.x*v);
-          return vec2(u, v);
-        }
-
-        float v1 = (-k1 - w)/(2.0*k2);
-        float v2 = (-k1 + w)/(2.0*k2);
-        float u1 = (h.x - f.x*v1)/(e.x + g.x*v1);
-        float u2 = (h.x - f.x*v2)/(e.x + g.x*v2);
-        bool  b1 = v1>0.0 && v1<1.0 && u1>0.0 && u1<1.0;
-        bool  b2 = v2>0.0 && v2<1.0 && u2>0.0 && u2<1.0;
-
-        vec2 res = vec2(-1.0);
-
-        if(  b1 && !b2 ) res = vec2( u1, v1 );
-        if( !b1 &&  b2 ) res = vec2( u2, v2 );
-
-        return res;
-      }
-
-      void main(void) {
-        vec2 uv = uvOffset + invBilinear(vPosition, a, b, c, d) * uvSize;
-        mediump vec4 color = (useBicubic == 1.0) ? textureBicubic(texture, texSize, uv) : texture2D(texture, uv);
-        gl_FragColor = color;
-      }
-    `
-  }
+    void fragmentMain(vec2 pos, vec2 texCoord, out vec4 color) {
+      vec2 uv = uvOffset + invBilinear(pos, a, b, c, d) * uvSize;
+      color = (useBicubic == 1.0) ? textureBicubic(texture, texSize, uv) : texture2D(texture, uv);
+    }
+  `
 }
 
 const inverseBilinearShape = new QuadShape(context, {usage: "stream"})
-const inverseBilinearModel = new Model(context, {
+const inverseBilinearModel = new ShapeModel(context, {
   shape: inverseBilinearShape,
-  shader: InverseBilinearTextureShader,
+  shader: inverseBilinearTextureShader,
 })
 
 function drawTextureInverseBilinear(dst: DrawTarget, src: Texture, opts: {
@@ -258,39 +249,36 @@ export function duplicateTexture(texture: Texture) {
   return result
 }
 
-class VisiblityToBinaryShader extends Shader {
-  get fragmentShader() {
-    return `
-      precision highp float;
-      uniform sampler2D srcTexture;
-      uniform vec2 srcSize;
+const visiblityToBinaryShader = {
+  fragment: `
+    uniform sampler2D srcTexture;
+    uniform vec2 srcSize;
 
-      void main(void) {
-        vec2 texelSize = 1.0 / srcSize;
-        vec2 pos = gl_FragCoord.xy - 0.5;
-        vec2 texPos = pos * vec2(32.0, 1.0) + 0.5;
-        vec2 texCoord = texPos * texelSize;
+    void fragmentMain(vec2 vpos, vec2 uv, out vec4 color) {
+      vec2 texelSize = 1.0 / srcSize;
+      vec2 pos = gl_FragCoord.xy - 0.5;
+      vec2 texPos = pos * vec2(32.0, 1.0) + 0.5;
+      vec2 texCoord = texPos * texelSize;
 
-        for (int i = 0; i < 4; ++i) {
-          float value = 0.0;
-          for (int j = 0; j < 8; ++j) {
-            bool opaque = texture2D(srcTexture, texCoord).a > 0.0;
-            bool inside = texCoord.x < 1.0;
-            value *= 0.5;
-            value += (opaque && inside) ? 128.0 : 0.0;
-            texCoord += vec2(texelSize.x, 0.0);
-          }
-          gl_FragColor[i] = value / 255.0;
+      for (int i = 0; i < 4; ++i) {
+        float value = 0.0;
+        for (int j = 0; j < 8; ++j) {
+          bool opaque = texture2D(srcTexture, texCoord).a > 0.0;
+          bool inside = texCoord.x < 1.0;
+          value *= 0.5;
+          value += (opaque && inside) ? 128.0 : 0.0;
+          texCoord += vec2(texelSize.x, 0.0);
         }
+        color[i] = value / 255.0;
       }
-    `
-  }
+    }
+  `
 }
 
 const visibilityToBinaryShape = new RectShape(context)
-const visibilityToBinaryModel = new Model(context, {
+const visibilityToBinaryModel = new ShapeModel(context, {
   shape: visibilityToBinaryShape,
-  shader: VisiblityToBinaryShader,
+  shader: visiblityToBinaryShader,
   blendMode: "src",
 })
 
@@ -308,48 +296,45 @@ export function drawVisibilityToBinary(drawTarget: DrawTarget, src: Texture) {
   drawTarget.draw(visibilityToBinaryModel)
 }
 
-class BinaryToVisibilityShader extends Shader {
-  get fragmentShader() {
-    return `
-      precision highp float;
-      uniform sampler2D srcTexture;
-      uniform vec2 srcSize;
+const binaryToVisibilityShader = {
+  fragment: `
+    uniform sampler2D srcTexture;
+    uniform vec2 srcSize;
 
-      bool isOdd(int x) {
-        int r = x / 2;
-        return x - r * 2 == 1;
-      }
+    bool isOdd(int x) {
+      int r = x / 2;
+      return x - r * 2 == 1;
+    }
 
-      void main(void) {
-        vec2 pos = gl_FragCoord.xy - 0.5;
-        vec2 srcPos = pos * vec2(1.0 / 32.0, 1.0);
-        vec2 srcTexCoord = (floor(srcPos) + 0.5) / srcSize;
-        vec4 srcColor = texture2D(srcTexture, srcTexCoord);
-        int bitOffset = int(fract(srcPos.x) * 32.0);
+    void fragmentMain(vec2 vpos, vec2 uv, out vec4 color) {
+      vec2 pos = gl_FragCoord.xy - 0.5;
+      vec2 srcPos = pos * vec2(1.0 / 32.0, 1.0);
+      vec2 srcTexCoord = (floor(srcPos) + 0.5) / srcSize;
+      vec4 srcColor = texture2D(srcTexture, srcTexCoord);
+      int bitOffset = int(fract(srcPos.x) * 32.0);
 
-        bool on = false;
-        int offset = 0;
-        for (int i = 0; i < 4; ++i) {
-          int c = int(srcColor[i] * 255.0 + 0.5);
-          for (int j = 0; j < 8; ++j) {
-            if (offset == bitOffset && isOdd(c)) {
-              on = true;
-            }
-            c /= 2;
-            ++offset;
+      bool on = false;
+      int offset = 0;
+      for (int i = 0; i < 4; ++i) {
+        int c = int(srcColor[i] * 255.0 + 0.5);
+        for (int j = 0; j < 8; ++j) {
+          if (offset == bitOffset && isOdd(c)) {
+            on = true;
           }
+          c /= 2;
+          ++offset;
         }
-        gl_FragColor = vec4(float(on));
       }
-    `
-  }
+      color = vec4(float(on));
+    }
+  `
 }
 
 const binaryToVisibilityShape = new RectShape(context)
 
-const binaryToVisibilityModel = new Model(context, {
+const binaryToVisibilityModel = new ShapeModel(context, {
   shape: binaryToVisibilityShape,
-  shader: BinaryToVisibilityShader,
+  shader: binaryToVisibilityShader,
   blendMode: "src",
 })
 

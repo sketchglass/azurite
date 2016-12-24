@@ -1,22 +1,18 @@
 import {Vec2, Rect} from "paintvec"
-import {Model, Texture, Shader, RectShape, TextureDrawTarget, Color} from "paintgl"
+import {ShapeModel, Texture, RectShape, TextureDrawTarget, Color} from "paintgl"
 import {context} from "../GLContext"
 
-class TextureToCanvasShader extends Shader {
-  get fragmentShader() {
-    return `
-      precision mediump float;
-      varying highp vec2 vTexCoord;
-      uniform sampler2D texture;
-      uniform vec4 background;
-      void main(void) {
-        vec4 texColor = texture2D(texture, vTexCoord);
-        vec4 color = texColor + background * (1.0 - texColor.a);
-        vec4 nonPremultColor = vec4(color.rgb / color.a, color.a);
-        gl_FragColor = nonPremultColor;
-      }
-    `
-  }
+const textureToCanvasShader = {
+  fragment: `
+    uniform sampler2D texture;
+    uniform vec4 background;
+    void fragmentMain(vec2 pos, vec2 uv, out vec4 outColor) {
+      vec4 texColor = texture2D(texture, vTexCoord);
+      vec4 color = texColor + background * (1.0 - texColor.a);
+      vec4 nonPremultColor = vec4(color.rgb / color.a, color.a);
+      outColor = nonPremultColor;
+    }
+  `
 }
 
 // render texture content to canvas element
@@ -32,9 +28,9 @@ class TextureToCanvas {
     usage: "static",
     rect: new Rect(new Vec2(), this.size),
   })
-  model = new Model(context, {
+  model = new ShapeModel(context, {
     shape: this.shape,
-    shader: TextureToCanvasShader,
+    shader: textureToCanvasShader,
   })
 
   constructor(public size: Vec2) {
