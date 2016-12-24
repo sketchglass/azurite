@@ -5,9 +5,7 @@ import {context, canvas} from "../GLContext"
 import {frameDebounce} from "../../lib/Debounce"
 import Picture from "../models/Picture"
 import Selection from "../models/Selection"
-
-const BOX_SHADOW_RADIUS = 4
-const BOX_SHADOW_OPACITY = 0.5
+const glsl = require("glslify")
 
 const boxShadowShader = {
   vertex: `
@@ -18,29 +16,16 @@ const boxShadowShader = {
       vPicturePos = (transformToPicture * vec3(pos, 1.0)).xy;
     }
   `,
-  // http://madebyevan.com/shaders/fast-rounded-rectangle-shadows/
-  fragment: `
+  fragment: glsl`
+    #pragma glslify: boxShadow = require('../../lib/glsl/boxShadow.glsl')
+    #define BOX_SHADOW_RADIUS 4.0
+    #define BOX_SHADOW_OPACITY 0.5
     varying vec2 vPicturePos;
     uniform vec2 pictureSize;
 
-    // This approximates the error function, needed for the gaussian integral
-    vec4 erf(vec4 x) {
-      vec4 s = sign(x), a = abs(x);
-      x = 1.0 + (0.278393 + (0.230389 + 0.078108 * (a * a)) * a) * a;
-      x *= x;
-      return s - s / (x * x);
-    }
-
-    // Return the mask for the shadow of a box from lower to upper
-    float boxShadow(vec2 lower, vec2 upper, vec2 point, float sigma) {
-      vec4 query = vec4(point - lower, point - upper);
-      vec4 integral = 0.5 + 0.5 * erf(query * (sqrt(0.5) / sigma));
-      return (integral.z - integral.x) * (integral.w - integral.y);
-    }
-
     void fragmentMain(vec2 pos, vec2 uv, out vec4 color) {
-      float a = boxShadow(vec2(0.0), pictureSize, vPicturePos, ${BOX_SHADOW_RADIUS.toFixed(1)});
-      color = vec4(0.0, 0.0, 0.0, a * ${BOX_SHADOW_OPACITY});
+      float a = boxShadow(vec2(0.0), pictureSize, vPicturePos, BOX_SHADOW_RADIUS);
+      color = vec4(0.0, 0.0, 0.0, a * BOX_SHADOW_OPACITY);
     }
   `
 }
