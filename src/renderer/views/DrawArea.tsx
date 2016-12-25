@@ -107,6 +107,8 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       renderer.overlay = undefined
     }
     renderer.previewSelection = () => tool.previewSelection()
+    renderer.wholeDirty = true
+    renderer.update()
   }
 
   componentWillReceiveProps(nextProps: DrawAreaProps) {
