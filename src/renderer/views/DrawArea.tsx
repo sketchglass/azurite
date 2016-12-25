@@ -184,9 +184,9 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const style = {visibility: this.picture ? "visible" : "hidden"}
 
     return (
-      <div className="DrawArea_wrapper">
+      <div className="DrawArea">
         <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
-          <div ref={e => this.element = e} className="DrawArea" style={style} tabIndex={-1} onKeyDown={this.onKeyDown} />
+          <div ref={e => this.element = e} className="DrawArea_content" style={style} tabIndex={-1} onKeyDown={this.onKeyDown} />
         </PointerEvents>
         <DrawAreaScroll picture={this.picture} />
       </div>
