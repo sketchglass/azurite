@@ -78,7 +78,8 @@ abstract class BaseBrushTool extends Tool {
   }
 
   updateCursor() {
-    const radius = this.width / 2
+    const scale = this.picture ? this.picture.navigation.scale : 1
+    const radius = this.width / 2 * scale
     const dpr = window.devicePixelRatio
     const canvasSize = this.width + 4 * dpr
     const center = canvasSize / 2
