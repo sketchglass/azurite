@@ -128,7 +128,7 @@ class ChangePictureResolutionCommand {
     if (oldDimension.width != dimension.width || oldDimension.height != dimension.height) {
       const transform = Transform.scale(new Vec2(dimension.width / oldDimension.width, dimension.height / oldDimension.height))
       this.picture.forEachLayer(layer => {
-        const transformCommand = new TransformLayerCommand(this.picture, layer.path(), transform)
+        const transformCommand = new TransformLayerCommand(this.picture, layer.path(), transform, false)
         this.transformCommands.push(transformCommand)
         transformCommand.redo()
       })
@@ -146,6 +146,7 @@ export
 class ChangeCanvasAreaCommand {
   title = "Change Canvas Area"
   oldDimension: PictureDimension
+  oldSelection: Selection
 
   constructor(public picture: Picture, public dimension: PictureDimension, public offset: Vec2) {
   }
@@ -164,13 +165,21 @@ class ChangeCanvasAreaCommand {
 
   undo() {
     this.translatePicture(this.offset)
+
     this.picture.dimension = this.oldDimension
+    this.picture.selection = this.oldSelection
     this.picture.lastUpdate = {}
   }
   redo() {
     this.translatePicture(this.offset.neg())
+
+    this.oldSelection = this.picture.selection
     this.oldDimension = this.picture.dimension
+
+    const {width, height} = this.dimension
+    this.picture.selection = this.picture.selection.transform(new Vec2(width, height), Transform.translate(this.offset.neg()))
     this.picture.dimension = this.dimension
+
     this.picture.lastUpdate = {}
   }
 }

@@ -281,7 +281,7 @@ class TransformLayerCommand implements UndoCommand {
   oldTiledTexture: TiledTexture|undefined
   selectionChangeCommand: SelectionChangeCommand|undefined
 
-  constructor(public picture: Picture, public path: number[], public transform: Transform) {
+  constructor(public picture: Picture, public path: number[], public transform: Transform, public transformsSelection: boolean) {
   }
 
   undo() {
@@ -309,7 +309,7 @@ class TransformLayerCommand implements UndoCommand {
     this.oldTiledTexture = content.tiledTexture
     content.tiledTexture = layerTransform.transformToTiledTexture()
 
-    if (this.picture.selection.hasSelection) {
+    if (this.transformsSelection && this.picture.selection.hasSelection) {
       this.selectionChangeCommand = new SelectionChangeCommand(this.picture, layerTransform.transformSelection())
       this.selectionChangeCommand.redo()
     } else {

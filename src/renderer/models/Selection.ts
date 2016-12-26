@@ -65,7 +65,13 @@ class Selection {
     const selection = new Selection(newSize)
     selection.hasSelection = this.hasSelection
     if (this.hasSelection) {
+      if (opts.bicubic) {
+        this.texture.filter = "bilinear"
+      }
       drawTexture(selection.drawTarget, this.texture, {blendMode: "src", transform, ...opts})
+      if (opts.bicubic) {
+        this.texture.filter = "nearest"
+      }
       selection.checkHasSelection()
     }
     return selection
