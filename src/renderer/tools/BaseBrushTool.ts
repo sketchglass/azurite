@@ -81,14 +81,14 @@ abstract class BaseBrushTool extends Tool {
     const scale = this.picture ? this.picture.navigation.scale : 1
     const radius = this.width / 2 * scale
     const dpr = window.devicePixelRatio
-    const canvasSize = this.width + 4 * dpr
+    const canvasSize = (radius * 2 + 4) * dpr
     const center = canvasSize / 2
     this._cursorImage.width = canvasSize
     this._cursorImage.height = canvasSize
 
     const context = this.cursorContext
 
-    context.lineWidth = window.devicePixelRatio
+    context.lineWidth = dpr
     context.strokeStyle = "rgba(0,0,0,0.5)"
 
     context.beginPath()
