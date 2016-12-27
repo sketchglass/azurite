@@ -211,18 +211,21 @@ class Renderer {
   dirtyRect: Rect|undefined
   startupTime = Date.now()
 
+  backCanvas = document.createElement("canvas")
+  backCanvasContext = this.backCanvas.getContext("2d", {alpha: false})!
+
+  floatMode = false
+  floatX = 0
+  floatY = 0
+  floatDirtyRect: Rect|undefined
+
   constructor() {
     this.element.className = "Renderer"
     this.element.appendChild(this.backCanvas)
     this.element.appendChild(canvas)
-    canvas.width = RENDER_TILE_WIDTH * RENDER_TILE_GROUPING
-    canvas.height = RENDER_TILE_WIDTH * RENDER_TILE_GROUPING
-    canvas.style.width = `${RENDER_TILE_WIDTH * RENDER_TILE_GROUPING / devicePixelRatio}px`
-    canvas.style.height = `${RENDER_TILE_WIDTH * RENDER_TILE_GROUPING / devicePixelRatio}px`
-    canvas.style.left = "0px"
-    canvas.style.top = "0px"
     this.backCanvas.style.width = "100%"
     this.backCanvas.style.height = "100%"
+    this.backCanvasContext.globalCompositeOperation = "copy"
     reaction(() => this.picture, picture => {
       if (picture) {
         this.pictureModel.uniforms = {texture: picture.layerBlender.getBlendedTexture()}
@@ -236,6 +239,7 @@ class Renderer {
       }
     })
     reaction(() => this.size, size => {
+      this.floatModeOff()
       this.backCanvas.width = size.width
       this.backCanvas.height = size.height
       this.rendererShape.rect = new Rect(new Vec2(), size)
@@ -275,6 +279,18 @@ class Renderer {
     })
   }
 
+  setCanvasSize(size: Vec2) {
+    canvas.width = size.width
+    canvas.height = size.height
+    canvas.style.width = `${size.width / devicePixelRatio}px`
+    canvas.style.height = `${size.height / devicePixelRatio}px`
+  }
+
+  setCanvasOffset(offset: Vec2) {
+    canvas.style.left = `${offset.x / devicePixelRatio}px`
+    canvas.style.top = `${offset.y / devicePixelRatio}px`
+  }
+
   addDirtyRect(rect: Rect) {
     if (this.dirtyRect) {
       this.dirtyRect = this.dirtyRect.union(rect)
@@ -294,18 +310,20 @@ class Renderer {
       return
     }
 
-    this.renderTiled(this.dirtyRect || new Rect(new Vec2(), this.size))
+    if (this.dirtyRect) {
+      this.renderTiled(this.dirtyRect)
+    } else {
+      this.renderWhole()
+    }
 
     this.dirtyRect = undefined
     this.wholeDirty = false
   }
 
-  backCanvas = document.createElement("canvas")
-  backCanvasContext = this.backCanvas.getContext("2d", {alpha: false})!
-
-  floatX = 0
-  floatY = 0
-  floatDirtyRect: Rect|undefined
+  renderWhole() {
+    this.floatModeOff()
+    this.renderGL(new Vec2())
+  }
 
   renderTiled(rect: Rect) {
     const left = Math.floor(rect.left / RENDER_TILE_WIDTH)
@@ -329,18 +347,34 @@ class Renderer {
     this.renderInCurrentFloat()
   }
 
+  floatModeOff() {
+    if (this.floatMode) {
+      this.renderInCurrentFloat()
+      this.floatMode = false
+      this.backCanvas.hidden = true
+      this.setCanvasSize(this.size)
+      this.setCanvasOffset(new Vec2())
+    }
+  }
+
   moveFloat(x: number, y: number) {
-    this.backCanvasContext.drawImage(context.canvas, this.floatX * RENDER_TILE_WIDTH, this.floatY * RENDER_TILE_WIDTH)
+    if (this.floatMode) {
+      this.backCanvasContext.drawImage(canvas, this.floatX * RENDER_TILE_WIDTH, this.floatY * RENDER_TILE_WIDTH)
+    } else {
+      this.floatMode = true
+      this.backCanvasContext.drawImage(canvas, 0, 0)
+      this.backCanvas.hidden = false
+      this.setCanvasSize(new Vec2(RENDER_TILE_WIDTH * RENDER_TILE_GROUPING))
+    }
     this.floatX = x
     this.floatY = y
-    canvas.style.left = `${x * RENDER_TILE_WIDTH / devicePixelRatio}px`
-    canvas.style.top = `${y * RENDER_TILE_WIDTH / devicePixelRatio}px`
+    this.setCanvasOffset(new Vec2(x, y).mulScalar(RENDER_TILE_WIDTH))
     this.floatDirtyRect = new Rect(new Vec2(), new Vec2(RENDER_TILE_WIDTH * RENDER_TILE_GROUPING))
   }
 
   renderInCurrentFloat() {
-    const offset = new Vec2(this.floatX, this.floatY).mulScalar(RENDER_TILE_WIDTH)
     if (this.floatDirtyRect) {
+      const offset = new Vec2(this.floatX, this.floatY).mulScalar(RENDER_TILE_WIDTH)
       this.renderGL(offset, this.floatDirtyRect)
       this.floatDirtyRect = undefined
     }
