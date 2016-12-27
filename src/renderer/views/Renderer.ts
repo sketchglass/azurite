@@ -1,6 +1,6 @@
 import {observable, computed, reaction} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
-import {Texture, ShapeModel, RectShape, textureShader, CanvasDrawTarget, Color, TextureFilter} from "paintgl"
+import {Texture, ShapeModel, RectShape, textureShader, Color, TextureFilter} from "paintgl"
 import {context, canvas} from "../GLContext"
 import {frameDebounce} from "../../lib/Debounce"
 import Picture from "../models/Picture"
@@ -95,6 +95,9 @@ const selectionShader = {
     }
   `
 }
+
+const RENDER_TILE_WIDTH = 256
+const RENDER_TILE_GROUPING = 3
 
 export
 interface RendererOverlay {
@@ -210,7 +213,16 @@ class Renderer {
 
   constructor() {
     this.element.className = "Renderer"
-    this.element.appendChild(context.canvas)
+    this.element.appendChild(this.backCanvas)
+    this.element.appendChild(canvas)
+    canvas.width = RENDER_TILE_WIDTH * RENDER_TILE_GROUPING
+    canvas.height = RENDER_TILE_WIDTH * RENDER_TILE_GROUPING
+    canvas.style.width = `${RENDER_TILE_WIDTH * RENDER_TILE_GROUPING / devicePixelRatio}px`
+    canvas.style.height = `${RENDER_TILE_WIDTH * RENDER_TILE_GROUPING / devicePixelRatio}px`
+    canvas.style.left = "0px"
+    canvas.style.top = "0px"
+    this.backCanvas.style.width = "100%"
+    this.backCanvas.style.height = "100%"
     reaction(() => this.picture, picture => {
       if (picture) {
         this.pictureModel.uniforms = {texture: picture.layerBlender.getBlendedTexture()}
@@ -224,8 +236,8 @@ class Renderer {
       }
     })
     reaction(() => this.size, size => {
-      canvas.width = size.width
-      canvas.height = size.height
+      this.backCanvas.width = size.width
+      this.backCanvas.height = size.height
       this.rendererShape.rect = new Rect(new Vec2(), size)
       this.overlayTexture.size = size
       this.overlayCanvas.width = size.width
@@ -278,16 +290,67 @@ class Renderer {
   update = frameDebounce(() => this.renderNow())
 
   renderNow() {
-    const milliseconds = Date.now() - this.startupTime
     if (!this.wholeDirty && !this.dirtyRect) {
       return
     }
 
-    const drawTarget = new CanvasDrawTarget(context)
-    if (!this.wholeDirty && this.dirtyRect) {
-      drawTarget.scissor = this.dirtyRect
+    this.renderTiled(this.dirtyRect || new Rect(new Vec2(), this.size))
+
+    this.dirtyRect = undefined
+    this.wholeDirty = false
+  }
+
+  backCanvas = document.createElement("canvas")
+  backCanvasContext = this.backCanvas.getContext("2d", {alpha: false})!
+
+  floatX = 0
+  floatY = 0
+  floatDirtyRect: Rect|undefined
+
+  renderTiled(rect: Rect) {
+    const left = Math.floor(rect.left / RENDER_TILE_WIDTH)
+    const right = Math.floor((rect.right - 1) / RENDER_TILE_WIDTH)
+    const top = Math.floor(rect.top / RENDER_TILE_WIDTH)
+    const bottom = Math.floor((rect.bottom - 1) / RENDER_TILE_WIDTH)
+    for (let y = top; y <= bottom; ++y) {
+      for (let x = left; x <= right; ++x) {
+        if (x < this.floatX || this.floatX + RENDER_TILE_GROUPING <= x || y < this.floatY || this.floatY + RENDER_TILE_GROUPING <= y) {
+          this.renderInCurrentFloat()
+          this.moveFloat(x, y)
+        }
+        const dirtyRect = rect.translate(new Vec2(this.floatX, this.floatY).mulScalar(-RENDER_TILE_WIDTH))
+        if (this.floatDirtyRect) {
+          this.floatDirtyRect = this.floatDirtyRect.union(dirtyRect)
+        } else {
+          this.floatDirtyRect = dirtyRect
+        }
+      }
     }
+    this.renderInCurrentFloat()
+  }
+
+  moveFloat(x: number, y: number) {
+    this.backCanvasContext.drawImage(context.canvas, this.floatX * RENDER_TILE_WIDTH, this.floatY * RENDER_TILE_WIDTH)
+    this.floatX = x
+    this.floatY = y
+    canvas.style.left = `${x * RENDER_TILE_WIDTH / devicePixelRatio}px`
+    canvas.style.top = `${y * RENDER_TILE_WIDTH / devicePixelRatio}px`
+    this.floatDirtyRect = new Rect(new Vec2(), new Vec2(RENDER_TILE_WIDTH * RENDER_TILE_GROUPING))
+  }
+
+  renderInCurrentFloat() {
+    const offset = new Vec2(this.floatX, this.floatY).mulScalar(RENDER_TILE_WIDTH)
+    if (this.floatDirtyRect) {
+      this.renderGL(offset, this.floatDirtyRect)
+      this.floatDirtyRect = undefined
+    }
+  }
+
+  renderGL(offset: Vec2, scissor?: Rect) {
+    const {drawTarget} = context
+    drawTarget.scissor = scissor
     drawTarget.clear(this.background)
+    drawTarget.transform = Transform.translate(offset.neg())
 
     if (this.picture) {
       // render background
@@ -313,6 +376,7 @@ class Renderer {
       const selection = previewSelection != false ? previewSelection : this.picture.selection
 
       if (selection.hasSelection && this.selectionShowMode != "none") {
+        const milliseconds = Date.now() - this.startupTime
         if (selection.texture.filter != filter) {
           selection.texture.filter = filter
         }
@@ -347,9 +411,6 @@ class Renderer {
       }
       drawTarget.draw(this.overlayModel)
     }
-
-    this.dirtyRect = undefined
-    this.wholeDirty = false
   }
 }
 
