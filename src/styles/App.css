@@ -9,7 +9,6 @@ div {
 }
 body {
   margin: 0;
-  background-color: var(--default-background-color);
   font-size: 13px;
   position: fixed;
 }
@@ -24,6 +23,7 @@ body {
 }
 .ToolSelection {
   z-index: 200;
+  transform: translateZ(0);
 }
 .CenterArea {
   flex: 1;
@@ -39,6 +39,7 @@ body {
   overflow-x: hidden;
   overflow-y: auto;
   background-color: var(--default-background-color);
+  transform: translateZ(0);
 }
 .Sidebar-left {
   border-right: 1px solid var(--default-border-color);
