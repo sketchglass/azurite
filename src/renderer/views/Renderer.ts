@@ -108,6 +108,7 @@ type SelectionShowMode = "normal"|"stopped"|"none"
 
 export default
 class Renderer {
+  element = document.createElement("div")
   @observable overlay: RendererOverlay|undefined
   previewSelection: () => Selection|false = () => false
 
@@ -208,6 +209,8 @@ class Renderer {
   startupTime = Date.now()
 
   constructor() {
+    this.element.className = "Renderer"
+    this.element.appendChild(context.canvas)
     reaction(() => this.picture, picture => {
       if (picture) {
         this.pictureModel.uniforms = {texture: picture.layerBlender.getBlendedTexture()}

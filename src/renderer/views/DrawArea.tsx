@@ -6,7 +6,6 @@ import Picture from "../models/Picture"
 import {Vec2, Transform} from "paintvec"
 import Tool, {ToolPointerEvent} from "../tools/Tool"
 import {TabletEvent} from "receive-tablet-event"
-import {canvas} from "../GLContext"
 import {renderer} from "./Renderer"
 import * as IPCChannels from "../../common/IPCChannels"
 import PointerEvents from "./components/PointerEvents"
@@ -119,7 +118,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   componentDidMount() {
     const element = this.element!
-    element.insertBefore(canvas, element.firstChild)
+    element.insertBefore(renderer.element, element.firstChild)
     this.updateCursor()
 
     this.tabletDownSubscription = IPCChannels.tabletDown.listen().subscribe(ev => {
@@ -153,17 +152,14 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const {cursor, cursorImage, cursorImageSize} = this.tool
     const {cursorPosition} = this
     runInAction(() => {
-      if (!this.element) {
-        return
-      }
       renderer.cursorVisible = !!cursorImage
       if (cursorImage) {
-        this.element.style.cursor = "none"
+        renderer.element.style.cursor = "none"
         renderer.cursorTexture.setImage(cursorImage)
         renderer.cursorPosition = cursorPosition.round()
         renderer.cursorSize = new Vec2(cursorImageSize)
       } else {
-        this.element.style.cursor = cursor
+        renderer.element.style.cursor = cursor
       }
     })
   }
