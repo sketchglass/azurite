@@ -228,6 +228,8 @@ class Renderer {
     this.element.className = "Renderer"
     this.element.appendChild(this.backCanvas)
     this.element.appendChild(canvas)
+    this.backCanvas.style.left = "0"
+    this.backCanvas.style.top = "0"
     this.backCanvas.style.width = "100%"
     this.backCanvas.style.height = "100%"
     this.backCanvasContext.globalCompositeOperation = "copy"
