@@ -2,6 +2,7 @@
   padding: 24px;
   display: flex;
   flex-direction: column;
+  background-color: var(--default-background-color);
   &_buttons {
     margin-top: 12px;
     align-self: flex-end;
