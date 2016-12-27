@@ -332,9 +332,28 @@ class Renderer {
     const bottom = Math.floor((rect.bottom - 1) / RENDER_TILE_WIDTH)
     for (let y = top; y <= bottom; ++y) {
       for (let x = left; x <= right; ++x) {
-        if (x < this.floatX || this.floatX + RENDER_TILE_GROUPING <= x || y < this.floatY || this.floatY + RENDER_TILE_GROUPING <= y) {
+        let needMove = false
+        let newX = this.floatX
+        let newY = this.floatY
+        if (x < this.floatX) {
+          needMove = true
+          newX = x
+        }
+        if (y < this.floatY) {
+          needMove = true
+          newY = y
+        }
+        if (this.floatX + RENDER_TILE_GROUPING <= x) {
+          needMove = true
+          newX = x - RENDER_TILE_GROUPING + 1
+        }
+        if (this.floatY + RENDER_TILE_GROUPING <= y) {
+          needMove = true
+          newY = y - RENDER_TILE_GROUPING + 1
+        }
+        if (needMove) {
           this.renderInCurrentFloat()
-          this.moveFloat(x, y)
+          this.moveFloat(newX, newY)
         }
         const dirtyRect = rect.translate(new Vec2(this.floatX, this.floatY).mulScalar(-RENDER_TILE_WIDTH))
         if (this.floatDirtyRect) {
