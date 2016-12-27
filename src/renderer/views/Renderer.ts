@@ -228,6 +228,7 @@ class Renderer {
     this.element.className = "Renderer"
     this.element.appendChild(this.backCanvas)
     this.element.appendChild(canvas)
+    this.setCanvasOffset(new Vec2())
     this.backCanvas.style.left = "0"
     this.backCanvas.style.top = "0"
     this.backCanvas.style.width = "100%"
@@ -246,6 +247,7 @@ class Renderer {
       }
     })
     reaction(() => this.size, size => {
+      this.setCanvasSize(size)
       this.rendererShape.rect = new Rect(new Vec2(), size)
       this.overlayTexture.size = size
       this.overlayCanvas.width = size.width
