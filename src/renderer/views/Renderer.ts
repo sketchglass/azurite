@@ -243,9 +243,6 @@ class Renderer {
       }
     })
     reaction(() => this.size, size => {
-      this.floatModeOff()
-      this.backCanvas.width = size.width
-      this.backCanvas.height = size.height
       this.rendererShape.rect = new Rect(new Vec2(), size)
       this.overlayTexture.size = size
       this.overlayCanvas.width = size.width
@@ -310,14 +307,14 @@ class Renderer {
   update = frameDebounce(() => this.renderNow())
 
   renderNow() {
-    if (!this.wholeDirty && !this.dirtyRect) {
-      return
-    }
+    const {wholeDirty, dirtyRect} = this
 
-    if (this.dirtyRect) {
-      this.renderTiled(this.dirtyRect)
-    } else {
+    if (wholeDirty) {
       this.renderWhole()
+    } else if (dirtyRect) {
+      this.renderTiled(dirtyRect)
+    } else {
+      return
     }
 
     this.dirtyRect = undefined
@@ -343,6 +340,9 @@ class Renderer {
         let needMove = false
         let newX = this.floatX
         let newY = this.floatY
+        if (!this.floatMode) {
+          needMove = true
+        }
         if (x < this.floatX) {
           needMove = true
           newX = x
@@ -376,7 +376,6 @@ class Renderer {
 
   floatModeOff() {
     if (this.floatMode) {
-      this.renderInCurrentFloat()
       this.floatMode = false
       this.backCanvas.hidden = true
       this.setCanvasSize(this.size)
@@ -389,6 +388,8 @@ class Renderer {
       this.backCanvasContext.drawImage(canvas, this.floatX * RENDER_TILE_WIDTH, this.floatY * RENDER_TILE_WIDTH)
     } else {
       this.floatMode = true
+      this.backCanvas.width = this.size.width
+      this.backCanvas.height = this.size.height
       this.backCanvasContext.drawImage(canvas, 0, 0)
       this.backCanvas.hidden = false
       this.setCanvasSize(new Vec2(RENDER_TILE_WIDTH * RENDER_TILE_GROUPING))
