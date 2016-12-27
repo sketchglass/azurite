@@ -127,6 +127,10 @@ class Renderer {
   @observable size = new Vec2(100, 100)
   readonly background = new Color(46 / 255, 48 / 255, 56 / 255, 1)
 
+  @computed get rect() {
+    return new Rect(new Vec2(), this.size)
+  }
+
   @observable selectionShowMode: SelectionShowMode = "normal"
 
   private readonly rendererShape = new RectShape(context, {
@@ -325,7 +329,11 @@ class Renderer {
     this.renderGL(new Vec2())
   }
 
-  renderTiled(rect: Rect) {
+  renderTiled(r: Rect) {
+    const rect = r.intersection(this.rect)
+    if (!rect) {
+      return
+    }
     const left = Math.floor(rect.left / RENDER_TILE_WIDTH)
     const right = Math.floor((rect.right - 1) / RENDER_TILE_WIDTH)
     const top = Math.floor(rect.top / RENDER_TILE_WIDTH)
