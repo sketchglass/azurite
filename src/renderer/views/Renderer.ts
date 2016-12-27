@@ -5,6 +5,7 @@ import {context, canvas} from "../GLContext"
 import {frameDebounce} from "../../lib/Debounce"
 import Picture from "../models/Picture"
 import Selection from "../models/Selection"
+import Dirtiness from "../models/Dirtiness"
 const glsl = require("glslify")
 
 const boxShadowShader = {
@@ -221,7 +222,7 @@ class Renderer {
   floatMode = false
   floatX = 0
   floatY = 0
-  floatDirtyRect: Rect|undefined
+  floatDirtiness = new Dirtiness()
 
   constructor() {
     this.element.className = "Renderer"
@@ -363,12 +364,7 @@ class Renderer {
           this.renderInCurrentFloat()
           this.moveFloat(newX, newY)
         }
-        const dirtyRect = rect.translate(new Vec2(this.floatX, this.floatY).mulScalar(-RENDER_TILE_WIDTH))
-        if (this.floatDirtyRect) {
-          this.floatDirtyRect = this.floatDirtyRect.union(dirtyRect)
-        } else {
-          this.floatDirtyRect = dirtyRect
-        }
+        this.floatDirtiness.addRect(rect.translate(new Vec2(this.floatX, this.floatY).mulScalar(-RENDER_TILE_WIDTH)))
       }
     }
     this.renderInCurrentFloat()
@@ -397,14 +393,14 @@ class Renderer {
     this.floatX = x
     this.floatY = y
     this.setCanvasOffset(new Vec2(x, y).mulScalar(RENDER_TILE_WIDTH))
-    this.floatDirtyRect = new Rect(new Vec2(), new Vec2(RENDER_TILE_WIDTH * RENDER_TILE_GROUPING))
+    this.floatDirtiness.addWhole()
   }
 
   renderInCurrentFloat() {
-    if (this.floatDirtyRect) {
+    if (this.floatDirtiness.dirty) {
       const offset = new Vec2(this.floatX, this.floatY).mulScalar(RENDER_TILE_WIDTH)
-      this.renderGL(offset, this.floatDirtyRect)
-      this.floatDirtyRect = undefined
+      this.renderGL(offset, this.floatDirtiness.rect)
+      this.floatDirtiness.clear()
     }
   }
 
