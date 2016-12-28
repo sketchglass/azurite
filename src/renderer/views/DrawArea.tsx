@@ -140,7 +140,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     this.onResize()
     window.addEventListener("resize", this.onResize)
     document.addEventListener("pointermove", this.onDocumentPointerMove)
-    reaction(() => appState.sidebarVisible, () => setImmediate(() => this.onResize()))
+    reaction(() => appState.uiVisible, () => setImmediate(() => this.onResize()))
   }
 
   componentWillUnmount() {

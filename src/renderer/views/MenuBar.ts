@@ -249,9 +249,9 @@ class MenuBar {
           type: 'separator'
         },
         {
-          label: appState.sidebarVisible ? "Hide Sidebars" : "Show Sidebars",
+          label: appState.uiVisible ? "Hide UI Panels" : "Show UI Panels",
           accelerator: "Tab",
-          click: () => appState.sidebarVisible = !appState.sidebarVisible,
+          click: () => appState.toggleUIVisible(),
         },
         {
           type: 'separator'

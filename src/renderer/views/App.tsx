@@ -34,26 +34,26 @@ class App extends React.Component<{}, {}> {
       }
     })
     Mousetrap.bind("tab", () => {
-      appState.sidebarVisible = !appState.sidebarVisible
+      appState.toggleUIVisible()
     })
   }
   render() {
-    const {currentTool, overrideTool, sidebarVisible} = appState
+    const {currentTool, overrideTool, uiVisible} = appState
     const picture = appState.currentPicture
     return (
       <div className="App">
-        <ToolSelection hidden={!sidebarVisible} />
-        <aside className="Sidebar Sidebar-left" hidden={!sidebarVisible}>
+        <ToolSelection hidden={!uiVisible} />
+        <aside className="Sidebar Sidebar-left" hidden={!uiVisible}>
           <div className="PanelTitle">Color</div>
           <ColorPanel />
           <div className="PanelTitle">Tool</div>
           <ToolSettingsPanel />
         </aside>
         <div className="CenterArea">
-          <PictureTabBar hidden={!sidebarVisible} />
+          <PictureTabBar hidden={!uiVisible} />
           <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
         </div>
-        <aside className="Sidebar Sidebar-right" hidden={!sidebarVisible}>
+        <aside className="Sidebar Sidebar-right" hidden={!uiVisible}>
           <div className="PanelTitle">Navigator</div>
           <NavigatorPanel />
           <div className="PanelTitle">Layers</div>

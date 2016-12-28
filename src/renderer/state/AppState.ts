@@ -49,7 +49,7 @@ class AppState {
     return this.currentTool.modalUndoStack
   }
 
-  @observable sidebarVisible = true
+  @observable uiVisible = true
 
   constructor() {
     reaction(() => [this.currentPictureState, this.currentTool], () => {
@@ -79,6 +79,10 @@ class AppState {
       new CanvasAreaTool(),
     ])
     this.currentTool = this.tools[0]
+  }
+
+  toggleUIVisible() {
+    this.uiVisible = !this.uiVisible
   }
 
   async loadConfig() {
