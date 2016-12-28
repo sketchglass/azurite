@@ -242,7 +242,6 @@ class ChangeLayerImageCommand implements UndoCommand {
     const {layer} = content
     const {rect} = this
     content.layer.picture.lastUpdate = {layer, rect}
-    content.updateThumbnail()
   }
 
   undo() {

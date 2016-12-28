@@ -18,10 +18,13 @@ class NavigatorMinimap extends React.Component<{}, {} > {
   @computed private get picture() {
     return appState.currentPicture
   }
+  @computed private get pictureState() {
+    return appState.currentPictureState
+  }
 
   componentDidMount() {
     this.disposer = reaction(
-      () => renderer.transformToPicture,
+      () => [renderer.transformToPicture, this.picture && this.picture.lastUpdate],
       frameDebounce(() => this.redraw())
     )
   }
@@ -36,17 +39,18 @@ class NavigatorMinimap extends React.Component<{}, {} > {
     context.setTransform(1, 0, 0, 1, 0, 0)
     context.clearRect(0, 0, width, height)
 
-    if (!this.picture) {
+    const {pictureState} = this
+    if (!pictureState) {
       return
     }
+    const {thumbnailManager} = pictureState
     context.translate(width / 2, height / 2)
 
-    this.picture.updateNavigatorThumbnail()
-    const thumbnail = this.picture.navigatorThumbnail
-    const thumbanilScale = this.picture.navigatorThumbnailScale
+    const thumbnail = thumbnailManager.navigatorThumbnail
+    const thumbanilScale = thumbnailManager.navigatorThumbnailScale
     context.drawImage(thumbnail, -thumbnail.width / 2, -thumbnail.height / 2)
 
-    const {scale, rotation, translation} = this.picture.navigation
+    const {scale, rotation, translation} = pictureState.picture.navigation
     const transform = Transform.rotate(-rotation).scale(new Vec2(1 / scale)).translate(translation.neg()).scale(new Vec2(thumbanilScale))
     const rendererSize = renderer.size
     const rendererTopLeft = rendererSize.divScalar(2).neg()
@@ -65,11 +69,14 @@ class NavigatorMinimap extends React.Component<{}, {} > {
   }
 
   private picturePosForEvent(e: {offsetX: number, offsetY: number}) {
-    if (!this.picture) {
+    const {pictureState} = this
+    if (!pictureState) {
       return new Vec2()
     }
     const {clientWidth, clientHeight} = this.minimap
-    return new Vec2(e.offsetX - clientWidth / 2, e.offsetY - clientHeight / 2).mulScalar(devicePixelRatio).divScalar(this.picture.navigatorThumbnailScale).round()
+    return new Vec2(e.offsetX - clientWidth / 2, e.offsetY - clientHeight / 2)
+      .mulScalar(devicePixelRatio)
+      .divScalar(pictureState.thumbnailManager.navigatorThumbnailScale).round()
   }
 
   private onPointerDown = (e: PointerEvent) => {

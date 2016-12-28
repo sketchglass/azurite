@@ -12,10 +12,7 @@ export
 class ImageLayerContent {
   type: "image" = "image"
 
-  @observable thumbnail = ""
-
   constructor(public readonly layer: Layer, public tiledTexture: TiledTexture = new TiledTexture()) {
-    this.updateThumbnail()
   }
 
   toData(): ImageLayerContentData {
@@ -37,12 +34,6 @@ class ImageLayerContent {
   static fromData(layer: Layer, data: ImageLayerContentData) {
     const tiledTexture = TiledTexture.fromData(data.image)
     return new ImageLayerContent(layer, tiledTexture)
-  }
-
-  @action updateThumbnail() {
-    const {layerThumbnailGenerator} = this.layer.picture
-    layerThumbnailGenerator.loadTiledTexture(this.tiledTexture)
-    this.thumbnail = layerThumbnailGenerator.thumbnail.toDataURL()
   }
 }
 

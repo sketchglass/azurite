@@ -157,7 +157,6 @@ abstract class BaseBrushTool extends Tool {
     this.stabilizeEnd()
     this.pushUndoStack()
     if (this.targetContent) {
-      this.targetContent.updateThumbnail()
       this.targetContent = undefined
     }
   }

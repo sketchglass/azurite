@@ -1,9 +1,8 @@
 import * as path from "path"
-import {observable, computed, reaction, action} from "mobx"
+import {observable, computed, reaction} from "mobx"
 import {Vec2, Rect} from "paintvec"
 import Layer, {LayerData} from "./Layer"
 import {GroupLayerContent, ImageLayerContent} from "./LayerContent"
-import ThumbnailGenerator from "./ThumbnailGenerator"
 import LayerBlender from "./LayerBlender"
 import {UndoStack} from "./UndoStack"
 import {Navigation} from "./Navigation"
@@ -16,6 +15,7 @@ interface PictureData {
   layers: LayerData[]
 }
 
+export
 interface PictureUpdate {
   rect?: Rect
   layer?: Layer
@@ -37,7 +37,6 @@ class Picture {
   @computed get rect() {
     return new Rect(new Vec2(), this.size)
   }
-  layerThumbnailGenerator: ThumbnailGenerator
 
   selection: Selection
 
@@ -64,13 +63,7 @@ class Picture {
     }
   }
 
-  private navigatorThumbnailGenerator: ThumbnailGenerator
-  private navigatorThumbnailDirty = true
-  navigatorThumbnail: HTMLCanvasElement
-  navigatorThumbnailScale: number
-
   constructor(dimension: PictureDimension) {
-    reaction(() => this.size, () => this.onResize())
     this.dimension = dimension
 
     this.selection = new Selection(this.size)
@@ -85,10 +78,8 @@ class Picture {
       } else {
         this.layerBlender.wholeDirty = true
       }
-      this.navigatorThumbnailDirty = true
     })
     this.layerBlender.renderNow()
-    this.updateNavigatorThumbnail()
     this.undoStack.commands.observe(() => {
       this.edited = true
     })
@@ -100,18 +91,7 @@ class Picture {
     }
   }
 
-  updateNavigatorThumbnail() {
-    if (this.navigatorThumbnailDirty) {
-      this.navigatorThumbnailGenerator.loadTexture(this.layerBlender.getBlendedTexture())
-      this.navigatorThumbnail = this.navigatorThumbnailGenerator.thumbnail
-      this.navigatorThumbnailScale = this.navigatorThumbnailGenerator.scale
-      this.navigatorThumbnailDirty = false
-    }
-  }
-
   dispose() {
-    this.layerThumbnailGenerator.dispose()
-    this.navigatorThumbnailGenerator.dispose()
     this.layerBlender.dispose()
     for (const layer of this.layers) {
       layer.dispose()
@@ -141,22 +121,5 @@ class Picture {
     const layers = data.layers.map(l => Layer.fromData(picture, l))
     picture.layers.splice(0, 1, ...layers)
     return picture
-  }
-
-  @action private onResize() {
-    if (this.layerThumbnailGenerator) {
-      this.layerThumbnailGenerator.dispose()
-    }
-    if (this.navigatorThumbnailGenerator) {
-      this.navigatorThumbnailGenerator.dispose()
-    }
-    this.layerThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(40).mulScalar(window.devicePixelRatio))
-    this.navigatorThumbnailGenerator = new ThumbnailGenerator(this.size, new Vec2(96, 96).mulScalar(window.devicePixelRatio))
-
-    this.forEachLayer(layer => {
-      if (layer.content.type == "image") {
-        layer.content.updateThumbnail()
-      }
-    })
   }
 }

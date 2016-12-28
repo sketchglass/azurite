@@ -1,5 +1,6 @@
 import {observable, computed, reaction} from "mobx"
 import {remote} from "electron"
+import Picture from "../models/Picture"
 import Tool from "../tools/Tool"
 import BrushTool from "../tools/BrushTool"
 import WatercolorTool from "../tools/WatercolorTool"
@@ -80,6 +81,14 @@ class AppState {
   addPictureState(pictureState: PictureState) {
     this.pictureStates.push(pictureState)
     this.currentPictureIndex = this.pictureStates.length - 1
+  }
+
+  stateForPicture(picture: Picture) {
+    for (const state of this.pictureStates) {
+      if (state.picture == picture) {
+        return state
+      }
+    }
   }
 
   async newPicture() {
