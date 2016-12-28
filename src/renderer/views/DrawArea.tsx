@@ -192,7 +192,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       }
     }
     this.clientRect = newRect
-    renderer.size = new Vec2(roundRect.width, roundRect.height).mulScalar(window.devicePixelRatio)
+    renderer.size = size.mulScalar(window.devicePixelRatio)
 
     IPCChannels.setTabletCaptureArea.send(roundRect)
   }
