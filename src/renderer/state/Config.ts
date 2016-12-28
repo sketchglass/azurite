@@ -21,6 +21,7 @@ interface ConfigValues {
   window: {
     fullscreen: boolean
     bounds?: RectData
+    maximized: boolean
   }
   tools: {
     [name: string]: Object
@@ -37,6 +38,7 @@ class Config {
   private _values: ConfigValues = {
     window: {
       fullscreen: false,
+      maximized: false,
     },
     tools: {
     },
