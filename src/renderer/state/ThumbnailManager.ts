@@ -5,6 +5,9 @@ import Layer from "../models/Layer"
 import ThumbnailGenerator from "../services/ThumbnailGenerator"
 import ObservableWeakMap from "../../lib/ObservableWeakMap"
 
+const LAYER_THUMBNAIL_SIZE = new Vec2(40)
+const NAVIGATOR_THUMBNAIL_SIZE = new Vec2(96, 96)
+
 export default
 class ThumbnailManager {
   private layerThumbnailGenerator: ThumbnailGenerator
@@ -59,8 +62,8 @@ class ThumbnailManager {
     if (this.navigatorThumbnailGenerator) {
       this.navigatorThumbnailGenerator.dispose()
     }
-    this.layerThumbnailGenerator = new ThumbnailGenerator(size, new Vec2(40).mulScalar(window.devicePixelRatio))
-    this.navigatorThumbnailGenerator = new ThumbnailGenerator(size, new Vec2(96, 96).mulScalar(window.devicePixelRatio))
+    this.layerThumbnailGenerator = new ThumbnailGenerator(size, LAYER_THUMBNAIL_SIZE.mulScalar(window.devicePixelRatio))
+    this.navigatorThumbnailGenerator = new ThumbnailGenerator(size, NAVIGATOR_THUMBNAIL_SIZE.mulScalar(window.devicePixelRatio))
 
     this.picture.forEachLayer(layer => {
       this.updateLayerThumbnail(layer)
