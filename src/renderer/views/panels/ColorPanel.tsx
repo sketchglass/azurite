@@ -27,7 +27,10 @@ class ColorPanel extends React.Component<{}, {}> {
     if (e.shiftKey) {
       appState.palette[index] = appState.color
     } else {
-      appState.color = appState.palette[index]
+      const color = appState.palette[index]
+      if (color) {
+        appState.color = color
+      }
     }
   })
 

@@ -40,7 +40,7 @@ class AppState {
 
   @observable color = new HSVColor(0, 0, 1)
   @observable paletteIndex: number = 0
-  readonly palette = observable<HSVColor>(new Array(100).fill(HSVColor.transparent))
+  readonly palette = observable<HSVColor|undefined>(new Array(100).fill(undefined))
 
   @computed get modal() {
     return this.currentTool.modal
@@ -93,11 +93,7 @@ class AppState {
       }
     }
     for (const [i, color] of values.palette.entries()) {
-      if (color) {
-        this.palette[i] = new HSVColor(color.h, color.s, color.v)
-      } else {
-        this.palette[i] = HSVColor.transparent
-      }
+      this.palette[i] = color ? new HSVColor(color.h, color.s, color.v) : undefined
     }
   }
 
@@ -112,7 +108,7 @@ class AppState {
       values.tools[tool.name] = tool.config
     }
     values.palette = this.palette.map(color => {
-      if (color.a) {
+      if (color) {
         const {h, s, v} = color
         return {h, s, v}
       }
