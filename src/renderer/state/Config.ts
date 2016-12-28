@@ -1,6 +1,7 @@
 import * as fs from "fs"
 import * as path from "path"
 import {remote} from "electron"
+const deepAssign = require('deep-assign');
 
 interface RectData {
   x: number
@@ -58,7 +59,7 @@ class Config {
   constructor() {
     try {
       const data = fs.readFileSync(this.path, "utf8")
-      Object.assign(this.values, JSON.parse(data))
+      deepAssign(this.values, JSON.parse(data))
     } catch (e) {
     }
   }
