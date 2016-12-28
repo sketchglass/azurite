@@ -96,6 +96,7 @@ class AppState {
     if (currentTool) {
       this.currentTool = currentTool
     }
+    this.color = new HSVColor(values.color.h, values.color.s, values.color.v)
     for (const [i, color] of values.palette.entries()) {
       this.palette[i] = color ? new HSVColor(color.h, color.s, color.v) : undefined
     }
@@ -109,26 +110,32 @@ class AppState {
   }
 
   saveConfig() {
-    const {values} = config
+    const colorToData = (color: HSVColor) => {
+      const {h, s, v} = color
+      return {h, s, v}
+    }
     const win = remote.getCurrentWindow()
-    values.window = {
-      fullscreen: win.isFullScreen(),
-      bounds: win.getBounds(),
+    const values = {
+      window: {
+        fullscreen: win.isFullScreen(),
+        bounds: win.getBounds(),
+      },
+      tools: {},
+      currentTool: this.currentTool.name,
+      color: colorToData(this.color),
+      palette: this.palette.map(color => {
+        if (color) {
+          return colorToData(color)
+        }
+      }),
+      files: this.pictureStates
+        .map(state => state.picture.filePath)
+        .filter(path => path)
     }
     for (const tool of this.tools) {
       values.tools[tool.name] = tool.config
     }
-    values.currentTool = this.currentTool.name
-    values.palette = this.palette.map(color => {
-      if (color) {
-        const {h, s, v} = color
-        return {h, s, v}
-      }
-    })
-    values.files = this.pictureStates
-      .map(state => state.picture.filePath)
-      .filter(path => path)
-    config.save()
+    config.values = values
   }
 
   addPictureState(pictureState: PictureState) {

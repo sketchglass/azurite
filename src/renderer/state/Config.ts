@@ -16,7 +16,7 @@ interface ColorData {
 }
 
 export
-interface ConfigData {
+interface ConfigValues {
   window: {
     fullscreen: boolean
     bounds?: RectData
@@ -25,6 +25,7 @@ interface ConfigData {
     [name: string]: Object
   }
   currentTool: string
+  color: ColorData
   palette: (ColorData|undefined)[]
   files: string[]
   // TODO: preferences
@@ -32,17 +33,27 @@ interface ConfigData {
 
 export default
 class Config {
-  values: ConfigData = {
+  private _values: ConfigValues = {
     window: {
       fullscreen: false,
     },
     tools: {
     },
     currentTool: "",
+    color: {h: 0, s: 0, v: 0},
     palette: [],
     files: [],
   }
   path = path.join(remote.app.getPath("userData"), "config.json")
+
+  get values() {
+    return this._values
+  }
+
+  set values(values: ConfigValues) {
+    fs.writeFileSync(this.path, JSON.stringify(values, null, 2))
+    this._values = values
+  }
 
   constructor() {
     try {
@@ -50,10 +61,6 @@ class Config {
       Object.assign(this.values, JSON.parse(data))
     } catch (e) {
     }
-  }
-
-  save() {
-    fs.writeFileSync(this.path, JSON.stringify(this.values, null, 2))
   }
 }
 
