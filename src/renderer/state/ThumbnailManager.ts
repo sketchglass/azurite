@@ -11,8 +11,12 @@ class ThumbnailManager {
   private navigatorThumbnailGenerator: ThumbnailGenerator
   private disposers: (() => void)[] = []
   private layerThumbnails = new ObservableWeakMap<Layer, string>()
-  navigatorThumbnail: HTMLCanvasElement
-  navigatorThumbnailScale: number
+  get navigatorThumbnail() {
+    return this.navigatorThumbnailGenerator.thumbnail
+  }
+  get navigatorThumbnailScale() {
+    return this.navigatorThumbnailGenerator.scale
+  }
 
   constructor(public readonly picture: Picture) {
     this.disposers.push(
@@ -29,8 +33,6 @@ class ThumbnailManager {
 
   private updateNavigatorThumbnail() {
     this.navigatorThumbnailGenerator.loadTexture(this.picture.layerBlender.getBlendedTexture())
-    this.navigatorThumbnail = this.navigatorThumbnailGenerator.thumbnail
-    this.navigatorThumbnailScale = this.navigatorThumbnailGenerator.scale
   }
 
   private updateLayerThumbnail(layer: Layer) {
