@@ -84,6 +84,10 @@ async function openWindow() {
       dialogsWindow.destroy()
     }
   })
+
+  win.on("ready-to-show", () => {
+    win.show()
+  })
 }
 
 app.on("ready", async () => {
