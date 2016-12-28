@@ -12,6 +12,7 @@ import * as IPCChannels from "../../common/IPCChannels"
 import PointerEvents from "./components/PointerEvents"
 import ScrollBar, {ScrollBarDirection} from "./components/ScrollBar"
 import FrameDebounced from "./components/FrameDebounced"
+import {appState} from "../state/AppState"
 
 @observer
 class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined}, {}> {
@@ -139,6 +140,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     this.onResize()
     window.addEventListener("resize", this.onResize)
     document.addEventListener("pointermove", this.onDocumentPointerMove)
+    reaction(() => appState.sidebarVisible, () => setImmediate(() => this.onResize()))
   }
 
   componentWillUnmount() {
