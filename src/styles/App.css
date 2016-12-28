@@ -40,6 +40,9 @@ body {
   overflow-y: auto;
   background-color: var(--default-background-color);
   transform: translateZ(0);
+  &[hidden] {
+    display: none;
+  }
 }
 .Sidebar-left {
   border-right: 1px solid var(--default-border-color);

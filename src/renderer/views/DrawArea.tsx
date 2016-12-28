@@ -3,7 +3,7 @@ import {observer} from "mobx-react"
 import {Subscription} from "rxjs/Subscription"
 import React = require("react")
 import Picture from "../models/Picture"
-import {Vec2, Transform} from "paintvec"
+import {Vec2, Transform, Rect} from "paintvec"
 import Tool, {ToolPointerEvent} from "../tools/Tool"
 import {TabletEvent} from "receive-tablet-event"
 import {canvas} from "../GLContext"
@@ -12,6 +12,7 @@ import * as IPCChannels from "../../common/IPCChannels"
 import PointerEvents from "./components/PointerEvents"
 import ScrollBar, {ScrollBarDirection} from "./components/ScrollBar"
 import FrameDebounced from "./components/FrameDebounced"
+import {appState} from "../state/AppState"
 
 @observer
 class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined}, {}> {
@@ -86,7 +87,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   tabletDownSubscription: Subscription
   tabletMoveSubscription: Subscription
   tabletUpSubscription: Subscription
-  clientTopLeft = new Vec2()
+  clientRect = new Rect()
 
   constructor(props: DrawAreaProps) {
     super(props)
@@ -136,9 +137,10 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       this.onUp(this.toToolEvent(ev))
     })
 
-    this.onResize()
+    this.resizeRenderer(true)
     window.addEventListener("resize", this.onResize)
     document.addEventListener("pointermove", this.onDocumentPointerMove)
+    reaction(() => appState.uiVisible, () => setImmediate(() => this.onResize()))
   }
 
   componentWillUnmount() {
@@ -169,6 +171,10 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
 
   onResize = () => {
+    this.resizeRenderer(false)
+  }
+
+  resizeRenderer(init: boolean) {
     const rect = this.element!.getBoundingClientRect()
     const roundRect = {
       left: Math.round(rect.left),
@@ -176,8 +182,17 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
       width: Math.round(rect.width),
       height: Math.round(rect.height),
     }
-    this.clientTopLeft = new Vec2(roundRect.left, roundRect.top)
-    renderer.size = new Vec2(roundRect.width, roundRect.height).mulScalar(window.devicePixelRatio)
+    const topLeft = new Vec2(roundRect.left, roundRect.top)
+    const size = new Vec2(roundRect.width, roundRect.height)
+    const newRect = new Rect(topLeft, topLeft.add(size))
+    if (!init) {
+      const offset = newRect.center.sub(this.clientRect.center).mulScalar(devicePixelRatio).round()
+      if (this.picture) {
+        this.picture.navigation.translation = this.picture.navigation.translation.sub(offset)
+      }
+    }
+    this.clientRect = newRect
+    renderer.size = size.mulScalar(window.devicePixelRatio)
 
     IPCChannels.setTabletCaptureArea.send(roundRect)
   }
@@ -195,7 +210,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   }
 
   offsetPos(ev: {clientX: number, clientY: number}) {
-    return new Vec2(ev.clientX, ev.clientY).sub(this.clientTopLeft)
+    return new Vec2(ev.clientX, ev.clientY).sub(this.clientRect.topLeft)
   }
 
   toToolEvent(ev: PointerEvent | TabletEvent): ToolPointerEvent {

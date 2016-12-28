@@ -249,6 +249,14 @@ class MenuBar {
           type: 'separator'
         },
         {
+          label: appState.uiVisible ? "Hide UI Panels" : "Show UI Panels",
+          accelerator: "Tab",
+          click: () => appState.toggleUIVisible(),
+        },
+        {
+          type: 'separator'
+        },
+        {
           role: 'togglefullscreen'
         }
       ]

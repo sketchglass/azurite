@@ -19,10 +19,10 @@ const PictureTab = observer((props: {picture: Picture, current: boolean, onClick
 })
 
 export
-const PictureTabBar = observer(() => {
+const PictureTabBar = observer((props: {hidden: boolean}) => {
   const {pictureStates, currentPictureIndex} = appState
   return (
-    <div className="PictureTabBar">
+    <div className="PictureTabBar" hidden={props.hidden}>
       {
         pictureStates.map((p, i) => {
           const onClick = () => appState.currentPictureIndex = i

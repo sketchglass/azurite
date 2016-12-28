@@ -1,5 +1,6 @@
 import React = require("react")
 import {observer} from "mobx-react"
+import * as Mousetrap from "mousetrap"
 
 import DrawArea from "./DrawArea"
 import {PictureTabBar} from "./PictureTabBar"
@@ -32,24 +33,27 @@ class App extends React.Component<{}, {}> {
         appState.overrideTool = undefined
       }
     })
+    Mousetrap.bind("tab", () => {
+      appState.toggleUIVisible()
+    })
   }
   render() {
-    const {currentTool, overrideTool} = appState
+    const {currentTool, overrideTool, uiVisible} = appState
     const picture = appState.currentPicture
     return (
       <div className="App">
-        <ToolSelection />
-        <aside className="Sidebar Sidebar-left">
+        <ToolSelection hidden={!uiVisible} />
+        <aside className="Sidebar Sidebar-left" hidden={!uiVisible}>
           <div className="PanelTitle">Color</div>
           <ColorPanel />
           <div className="PanelTitle">Tool</div>
           <ToolSettingsPanel />
         </aside>
         <div className="CenterArea">
-          <PictureTabBar />
+          <PictureTabBar hidden={!uiVisible} />
           <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
         </div>
-        <aside className="Sidebar Sidebar-right">
+        <aside className="Sidebar Sidebar-right" hidden={!uiVisible}>
           <div className="PanelTitle">Navigator</div>
           <NavigatorPanel />
           <div className="PanelTitle">Layers</div>

@@ -35,13 +35,14 @@ const toolToIcon = (tool: Tool) => {
 
 @observer
 export default
-class ToolSelection extends React.Component<{}, {}> {
+class ToolSelection extends React.Component<{hidden: boolean}, {}> {
   render() {
+    const {hidden} = this.props
     const {tools, currentTool} = appState
     const nonBrushTools = tools.filter(tool => !(tool instanceof BaseBrushTool))
     const brushTools = tools.filter(tool => tool instanceof BaseBrushTool)
     return (
-      <div className="ToolSelection">{
+      <div className="ToolSelection" hidden={hidden}>{
           nonBrushTools.map((tool, i) => {
             const selected = tool === currentTool
             const className = classNames("ToolSelection_button", {"ToolSelection_button-selected": selected})
