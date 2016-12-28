@@ -34,22 +34,22 @@ class App extends React.Component<{}, {}> {
     })
   }
   render() {
-    const {currentTool, overrideTool} = appState
+    const {currentTool, overrideTool, sidebarVisible} = appState
     const picture = appState.currentPicture
     return (
       <div className="App">
-        <ToolSelection />
-        <aside className="Sidebar Sidebar-left">
+        <ToolSelection hidden={!sidebarVisible} />
+        <aside className="Sidebar Sidebar-left" hidden={!sidebarVisible}>
           <div className="PanelTitle">Color</div>
           <ColorPanel />
           <div className="PanelTitle">Tool</div>
           <ToolSettingsPanel />
         </aside>
         <div className="CenterArea">
-          <PictureTabBar />
+          <PictureTabBar hidden={!sidebarVisible} />
           <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
         </div>
-        <aside className="Sidebar Sidebar-right">
+        <aside className="Sidebar Sidebar-right" hidden={!sidebarVisible}>
           <div className="PanelTitle">Navigator</div>
           <NavigatorPanel />
           <div className="PanelTitle">Layers</div>

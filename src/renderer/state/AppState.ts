@@ -49,6 +49,8 @@ class AppState {
     return this.currentTool.modalUndoStack
   }
 
+  @observable sidebarVisible = true
+
   constructor() {
     reaction(() => [this.currentPictureState, this.currentTool], () => {
       for (const pictureState of this.pictureStates) {

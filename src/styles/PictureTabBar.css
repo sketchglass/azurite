@@ -6,6 +6,9 @@
   font-size: 13px;
   background-color: var(--default-background-color);
   transform: translateZ(0);
+  &[hidden] {
+    display: none;
+  }
 }
 .PictureTab {
   display: flex;

@@ -249,6 +249,14 @@ class MenuBar {
           type: 'separator'
         },
         {
+          label: appState.sidebarVisible ? "Hide Sidebars" : "Show Sidebars",
+          accelerator: "Tab",
+          click: () => appState.sidebarVisible = !appState.sidebarVisible,
+        },
+        {
+          type: 'separator'
+        },
+        {
           role: 'togglefullscreen'
         }
       ]
