@@ -25,16 +25,15 @@ class ThumbnailManager {
       reaction(() => picture.size, () => this.onResize())
     )
     this.onResize()
-    this.updateNavigatorThumbnail()
   }
 
-  updateNavigatorThumbnail() {
+  private updateNavigatorThumbnail() {
     this.navigatorThumbnailGenerator.loadTexture(this.picture.layerBlender.getBlendedTexture())
     this.navigatorThumbnail = this.navigatorThumbnailGenerator.thumbnail
     this.navigatorThumbnailScale = this.navigatorThumbnailGenerator.scale
   }
 
-  updateLayerThumbnail(layer: Layer) {
+  private updateLayerThumbnail(layer: Layer) {
     if (layer.content.type != "image") {
       return
     }
@@ -64,6 +63,8 @@ class ThumbnailManager {
     this.picture.forEachLayer(layer => {
       this.updateLayerThumbnail(layer)
     })
+
+    this.updateNavigatorThumbnail()
   }
 
   dispose() {
