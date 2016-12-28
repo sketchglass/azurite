@@ -186,7 +186,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const size = new Vec2(roundRect.width, roundRect.height)
     const newRect = new Rect(topLeft, topLeft.add(size))
     if (!init) {
-      const offset = newRect.center.sub(this.clientRect.center).mulScalar(devicePixelRatio)
+      const offset = newRect.center.sub(this.clientRect.center).mulScalar(devicePixelRatio).round()
       if (this.picture) {
         this.picture.navigation.translation = this.picture.navigation.translation.sub(offset)
       }
