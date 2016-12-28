@@ -70,6 +70,13 @@ class PictureState {
     }
   }
 
+  static async openFromPath(filePath: string) {
+    const picture = await PictureSave.openFromPath(filePath)
+    if (picture) {
+      return new PictureState(picture)
+    }
+  }
+
   flip(orientation: "horizontal"|"vertical") {
     this.picture.undoStack.redoAndPush(new FlipPictureCommand(this.picture, orientation))
   }

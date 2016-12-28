@@ -15,6 +15,7 @@ import CanvasAreaTool from "../tools/CanvasAreaTool"
 import FloodFillTool from "../tools/FloodFillTool"
 import {HSVColor} from "../../lib/Color"
 import {PictureState} from "./PictureState"
+import {config} from "./Config"
 import * as IPCChannels from "../../common/IPCChannels"
 
 export
@@ -39,7 +40,7 @@ class AppState {
 
   @observable color = new HSVColor(0, 0, 1)
   @observable paletteIndex: number = 0
-  readonly palette = observable<HSVColor>(new Array(100).fill(HSVColor.transparent))
+  readonly palette = observable<HSVColor|undefined>(new Array(100).fill(undefined))
 
   @computed get modal() {
     return this.currentTool.modal
@@ -76,6 +77,65 @@ class AppState {
       new CanvasAreaTool(),
     ])
     this.currentTool = this.tools[0]
+  }
+
+  async loadConfig() {
+    const {values} = config
+    const win = remote.getCurrentWindow()
+    win.setFullScreen(values.window.fullscreen)
+    if (values.window.bounds) {
+      win.setBounds(values.window.bounds)
+    }
+    for (const toolName in values.tools) {
+      const tool = this.tools.find(t => t.name == toolName)
+      if (tool) {
+        tool.config = values.tools[toolName]
+      }
+    }
+    const currentTool = this.tools.find(t => t.name == values.currentTool)
+    if (currentTool) {
+      this.currentTool = currentTool
+    }
+    this.color = new HSVColor(values.color.h, values.color.s, values.color.v)
+    for (const [i, color] of values.palette.entries()) {
+      this.palette[i] = color ? new HSVColor(color.h, color.s, color.v) : undefined
+    }
+    for (const filePath of values.files) {
+      const pictureState = await PictureState.openFromPath(filePath)
+      if (pictureState) {
+      this.addPictureState(pictureState)
+    }
+      this.openPicture
+    }
+  }
+
+  saveConfig() {
+    const colorToData = (color: HSVColor) => {
+      const {h, s, v} = color
+      return {h, s, v}
+    }
+    const win = remote.getCurrentWindow()
+    const values = {
+      window: {
+        fullscreen: win.isFullScreen(),
+        bounds: win.getBounds(),
+      },
+      tools: {},
+      currentTool: this.currentTool.name,
+      color: colorToData(this.color),
+      palette: this.palette.map(color => {
+        if (color) {
+          return colorToData(color)
+        }
+      }),
+      files: this.pictureStates
+        .map(state => state.picture.filePath)
+        .filter(path => path)
+    }
+    for (const tool of this.tools) {
+      values.tools[tool.name] = tool.config
+    }
+    config.values = values
   }
 
   addPictureState(pictureState: PictureState) {
@@ -131,6 +191,7 @@ class AppState {
   }
 
   async quit() {
+    this.saveConfig()
     // TODO: save app state
     if (await appState.closePictures()) {
       remote.getCurrentWindow().destroy()
@@ -142,6 +203,7 @@ class AppState {
 
 export const appState = new AppState()
 appState.initTools()
+appState.loadConfig()
 
 IPCChannels.quit.listen().forEach(() => {
   appState.quit()
