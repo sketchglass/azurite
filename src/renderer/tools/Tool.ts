@@ -66,5 +66,11 @@ abstract class Tool {
   previewLayerTile(layer: Layer, tileKey: Vec2): Tile|undefined|false { return false }
   previewSelection(): Selection|false { return false }
   get selectionShowMode(): SelectionShowMode { return "normal" }
+
+  get config(): Object {
+    return {}
+  }
+  set config(config: Object) {
+  }
 }
 export default Tool

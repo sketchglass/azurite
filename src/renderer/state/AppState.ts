@@ -15,6 +15,7 @@ import CanvasAreaTool from "../tools/CanvasAreaTool"
 import FloodFillTool from "../tools/FloodFillTool"
 import {HSVColor} from "../../lib/Color"
 import {PictureState} from "./PictureState"
+import {config} from "./Config"
 import * as IPCChannels from "../../common/IPCChannels"
 
 export
@@ -78,6 +79,51 @@ class AppState {
     this.currentTool = this.tools[0]
   }
 
+  loadConfig() {
+    const {values} = config
+    const win = remote.getCurrentWindow()
+    win.setFullScreen(values.window.fullscreen)
+    if (values.window.bounds) {
+      win.setBounds(values.window.bounds)
+    }
+    for (const toolName in values.tools) {
+      const tool = this.toolForName(toolName)
+      if (tool) {
+        tool.config = values.tools[toolName]
+      }
+    }
+    for (const [i, color] of values.palette.entries()) {
+      if (color) {
+        this.palette[i] = new HSVColor(color.h, color.s, color.v)
+      } else {
+        this.palette[i] = HSVColor.transparent
+      }
+    }
+  }
+
+  saveConfig() {
+    const {values} = config
+    const win = remote.getCurrentWindow()
+    values.window = {
+      fullscreen: win.isFullScreen(),
+      bounds: win.getBounds(),
+    }
+    for (const tool of this.tools) {
+      values.tools[tool.name] = tool.config
+    }
+    values.palette = this.palette.map(color => {
+      if (color.a) {
+        const {h, s, v} = color
+        return {h, s, v}
+      }
+    })
+    config.save()
+  }
+
+  toolForName(name: string) {
+    return this.tools.find(tool => tool.name == name)
+  }
+
   addPictureState(pictureState: PictureState) {
     this.pictureStates.push(pictureState)
     this.currentPictureIndex = this.pictureStates.length - 1
@@ -131,6 +177,7 @@ class AppState {
   }
 
   async quit() {
+    this.saveConfig()
     // TODO: save app state
     if (await appState.closePictures()) {
       remote.getCurrentWindow().destroy()
