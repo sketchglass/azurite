@@ -13,9 +13,14 @@ import LayerPanel from "./panels/LayerPanel"
 
 import NavigationKeyBinding from "./NavigationKeyBinding"
 import {appState} from "../state/AppState"
+import {isTextInput} from "./util"
 
 import "./MenuBar"
 import "../../styles/main.css"
+
+Mousetrap.prototype.stopCallback = function (e: KeyboardEvent, element: Element, combo: string) {
+  return isTextInput(element)
+}
 
 @observer export default
 class App extends React.Component<{}, {}> {
@@ -33,7 +38,8 @@ class App extends React.Component<{}, {}> {
         appState.overrideTool = undefined
       }
     })
-    Mousetrap.bind("tab", () => {
+    Mousetrap.bind("tab", e => {
+      e.preventDefault()
       appState.toggleUIVisible()
     })
   }
