@@ -28,8 +28,6 @@ class PolygonSelectTool extends ShapeSelectTool {
     this.update()
   }
 
-  // TODO: handle hover event
-
   drawShape(context: CanvasRenderingContext2D) {
     for (let [i, pos] of this.positions.entries()) {
       if (i == 0) {
