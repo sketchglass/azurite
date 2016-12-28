@@ -68,6 +68,10 @@ class PictureSave {
       return
     }
     const filePath = filePaths[0]
+    return await this.openFromPath(filePath)
+  }
+
+  static async openFromPath(filePath: string) {
     const fileData = await new Promise<Buffer>((resolve, reject) => {
       fs.readFile(filePath, (err, data) => {
         if (err) {

@@ -25,7 +25,7 @@ interface ConfigData {
     [name: string]: Object
   }
   palette: (ColorData|undefined)[]
-  // TODO: open files
+  files: string[]
   // TODO: preferences
 }
 
@@ -38,6 +38,7 @@ class Config {
     tools: {
     },
     palette: [],
+    files: [],
   }
   path = path.join(remote.app.getPath("userData"), "config.json")
 

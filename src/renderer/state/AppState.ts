@@ -79,7 +79,7 @@ class AppState {
     this.currentTool = this.tools[0]
   }
 
-  loadConfig() {
+  async loadConfig() {
     const {values} = config
     const win = remote.getCurrentWindow()
     win.setFullScreen(values.window.fullscreen)
@@ -94,6 +94,13 @@ class AppState {
     }
     for (const [i, color] of values.palette.entries()) {
       this.palette[i] = color ? new HSVColor(color.h, color.s, color.v) : undefined
+    }
+    for (const filePath of values.files) {
+      const pictureState = await PictureState.openFromPath(filePath)
+      if (pictureState) {
+      this.addPictureState(pictureState)
+    }
+      this.openPicture
     }
   }
 
@@ -113,6 +120,9 @@ class AppState {
         return {h, s, v}
       }
     })
+    values.files = this.pictureStates
+      .map(state => state.picture.filePath)
+      .filter(path => path)
     config.save()
   }
 
