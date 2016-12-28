@@ -1,5 +1,6 @@
 import React = require("react")
 import {observer} from "mobx-react"
+import * as Mousetrap from "mousetrap"
 
 import DrawArea from "./DrawArea"
 import {PictureTabBar} from "./PictureTabBar"
@@ -31,6 +32,9 @@ class App extends React.Component<{}, {}> {
       } else {
         appState.overrideTool = undefined
       }
+    })
+    Mousetrap.bind("tab", () => {
+      appState.sidebarVisible = !appState.sidebarVisible
     })
   }
   render() {
