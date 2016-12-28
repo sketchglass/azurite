@@ -50,8 +50,7 @@ const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
     }
   }
 
-  const {content} = layer
-  const thumbnail = (content.type == "image") ? content.thumbnail : ""
+  const thumbnail = appState.stateForPicture(picture)!.thumbnailManager.thumbnailForLayer(layer)
 
   const onVisibleToggle = (e: React.FormEvent<HTMLInputElement>) => {
     const visible = (e.target as HTMLInputElement).checked

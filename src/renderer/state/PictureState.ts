@@ -6,9 +6,12 @@ import {PictureExport, PictureExportFormat} from "../services/PictureExport"
 import {dialogLauncher} from "../views/dialogs/DialogLauncher"
 import {FlipPictureCommand, Rotate90PictureCommand, Rotate180PictureCommand, ChangePictureResolutionCommand} from "../commands/PictureCommand"
 import {SelectAllCommand, ClearSelectionCommand, InvertSelectionCommand} from "../commands/SelectionCommand"
+import ThumbnailManager from "./ThumbnailManager"
 
 export
 class PictureState {
+  thumbnailManager = new ThumbnailManager(this.picture)
+
   constructor(public readonly picture: Picture) {
   }
 
@@ -49,6 +52,7 @@ class PictureState {
   }
 
   dispose() {
+    this.thumbnailManager.dispose()
     this.picture.dispose()
   }
 
