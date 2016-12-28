@@ -1,6 +1,6 @@
 import {reaction, action} from "mobx"
 import {Vec2} from "paintvec"
-import Picture from "../models/Picture"
+import Picture, {PictureUpdate} from "../models/Picture"
 import Layer from "../models/Layer"
 import ThumbnailGenerator from "../services/ThumbnailGenerator"
 import ObservableWeakMap from "../../lib/ObservableWeakMap"
@@ -14,6 +14,7 @@ class ThumbnailManager {
   private navigatorThumbnailGenerator: ThumbnailGenerator
   private disposers: (() => void)[] = []
   private layerThumbnails = new ObservableWeakMap<Layer, string>()
+
   get navigatorThumbnail() {
     return this.navigatorThumbnailGenerator.thumbnail
   }
@@ -23,13 +24,8 @@ class ThumbnailManager {
 
   constructor(public readonly picture: Picture) {
     this.disposers.push(
-      reaction(() => picture.lastUpdate, update => {
-        this.updateNavigatorThumbnail()
-        if (update.layer) {
-          this.updateLayerThumbnail(update.layer)
-        }
-      }),
-      reaction(() => picture.size, () => this.onResize())
+      reaction(() => picture.lastUpdate, update => this.onUpdate(update)),
+      reaction(() => picture.size, () => this.onResize()),
     )
     this.onResize()
   }
@@ -54,6 +50,13 @@ class ThumbnailManager {
     return this.layerThumbnails.get(layer)
   }
 
+  @action private onUpdate(update: PictureUpdate) {
+    this.updateNavigatorThumbnail()
+    if (update.layer) {
+      this.updateLayerThumbnail(update.layer)
+    }
+  }
+
   @action private onResize() {
     const {size} = this.picture
     if (this.layerThumbnailGenerator) {
@@ -65,11 +68,10 @@ class ThumbnailManager {
     this.layerThumbnailGenerator = new ThumbnailGenerator(size, LAYER_THUMBNAIL_SIZE.mulScalar(window.devicePixelRatio))
     this.navigatorThumbnailGenerator = new ThumbnailGenerator(size, NAVIGATOR_THUMBNAIL_SIZE.mulScalar(window.devicePixelRatio))
 
+    this.updateNavigatorThumbnail()
     this.picture.forEachLayer(layer => {
       this.updateLayerThumbnail(layer)
     })
-
-    this.updateNavigatorThumbnail()
   }
 
   dispose() {

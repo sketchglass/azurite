@@ -46,7 +46,6 @@ class NavigatorMinimap extends React.Component<{}, {} > {
     const {thumbnailManager} = pictureState
     context.translate(width / 2, height / 2)
 
-    thumbnailManager.updateNavigatorThumbnail()
     const thumbnail = thumbnailManager.navigatorThumbnail
     const thumbanilScale = thumbnailManager.navigatorThumbnailScale
     context.drawImage(thumbnail, -thumbnail.width / 2, -thumbnail.height / 2)

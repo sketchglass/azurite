@@ -15,6 +15,7 @@ interface PictureData {
   layers: LayerData[]
 }
 
+export
 interface PictureUpdate {
   rect?: Rect
   layer?: Layer
