@@ -15,7 +15,7 @@ import CanvasAreaTool from "../tools/CanvasAreaTool"
 import FloodFillTool from "../tools/FloodFillTool"
 import {HSVColor} from "../../lib/Color"
 import {PictureState} from "./PictureState"
-import {config} from "./Config"
+import {config, ConfigValues} from "./Config"
 import * as IPCChannels from "../../common/IPCChannels"
 
 export
@@ -92,6 +92,9 @@ class AppState {
     if (values.window.bounds) {
       win.setBounds(values.window.bounds)
     }
+    if (values.window.maximized) {
+      win.maximize()
+    }
     for (const toolName in values.tools) {
       const tool = this.tools.find(t => t.name == toolName)
       if (tool) {
@@ -121,10 +124,11 @@ class AppState {
       return {h, s, v}
     }
     const win = remote.getCurrentWindow()
-    const values = {
+    const values: ConfigValues = {
       window: {
         fullscreen: win.isFullScreen(),
         bounds: win.getBounds(),
+        maximized: win.isMaximized(),
       },
       tools: {},
       currentTool: this.currentTool.name,
