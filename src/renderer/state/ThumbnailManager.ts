@@ -47,7 +47,7 @@ class ThumbnailManager {
     if (layer.content.type == "image" && !this.layerThumbnails.get(layer)) {
       this.updateLayerThumbnail(layer)
     }
-    return this.layerThumbnails.get(layer)
+    return this.layerThumbnails.get(layer) || ""
   }
 
   @action private onUpdate(update: PictureUpdate) {
