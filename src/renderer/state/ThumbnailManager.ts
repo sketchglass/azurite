@@ -1,21 +1,18 @@
-import {reaction, action, observable} from "mobx"
+import {reaction, action} from "mobx"
 import {Vec2} from "paintvec"
 import Picture from "../models/Picture"
 import Layer from "../models/Layer"
 import ThumbnailGenerator from "../services/ThumbnailGenerator"
-
-class LayerThumbnailContainer {
-  @observable thumbnail: string = ""
-}
+import ObservableWeakMap from "../../lib/ObservableWeakMap"
 
 export default
 class ThumbnailManager {
   private layerThumbnailGenerator: ThumbnailGenerator
   private navigatorThumbnailGenerator: ThumbnailGenerator
+  private disposers: (() => void)[] = []
+  private layerThumbnails = new ObservableWeakMap<Layer, string>()
   navigatorThumbnail: HTMLCanvasElement
   navigatorThumbnailScale: number
-  private disposers: (() => void)[] = []
-  layerThumbnails = new WeakMap<Layer, LayerThumbnailContainer>()
 
   constructor(public readonly picture: Picture) {
     this.disposers.push(
@@ -42,19 +39,15 @@ class ThumbnailManager {
       return
     }
     this.layerThumbnailGenerator.loadTiledTexture(layer.content.tiledTexture)
-    if (!this.layerThumbnails.has(layer)) {
-      this.layerThumbnails.set(layer, new LayerThumbnailContainer())
-    }
-    this.layerThumbnails.get(layer)!.thumbnail = this.layerThumbnailGenerator.thumbnail.toDataURL()
+    const thumbnail = this.layerThumbnailGenerator.thumbnail.toDataURL()
+    this.layerThumbnails.set(layer, thumbnail)
   }
 
   thumbnailForLayer(layer: Layer) {
-    const container = this.layerThumbnails.get(layer)
-    if (container) {
-      return container.thumbnail
-    } else {
-      return ""
+    if (layer.content.type == "image" && !this.layerThumbnails.get(layer)) {
+      this.updateLayerThumbnail(layer)
     }
+    return this.layerThumbnails.get(layer)
   }
 
   @action private onResize() {
