@@ -45,7 +45,11 @@ async function openWindow() {
     await installExtension(REACT_DEVELOPER_TOOLS)
   }
 
-  const win = mainWindow = new BrowserWindow({width: 1200, height: 768})
+  const win = mainWindow = new BrowserWindow({
+    width: 1200,
+    height: 768,
+    show: false,
+  })
 
   win.loadURL(`${contentBase}/index.html`)
   if (process.env.NODE_ENV === "development") {

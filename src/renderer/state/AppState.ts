@@ -189,6 +189,7 @@ class AppState {
 
 export const appState = new AppState()
 appState.initTools()
+appState.loadConfig()
 
 IPCChannels.quit.listen().forEach(() => {
   appState.quit()
