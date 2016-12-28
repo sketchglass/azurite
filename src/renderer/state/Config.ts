@@ -1,4 +1,6 @@
-const ElectronConfig = require("electron-config")
+import * as fs from "fs"
+import * as path from "path"
+import {remote} from "electron"
 
 interface RectData {
   x: number
@@ -37,14 +39,18 @@ class Config {
     },
     palette: [],
   }
-  config = new ElectronConfig()
+  path = path.join(remote.app.getPath("userData"), "config.json")
 
   constructor() {
-    Object.assign(this.values, this.config.store)
+    try {
+      const data = fs.readFileSync(this.path, "utf8")
+      Object.assign(this.values, JSON.parse(data))
+    } catch (e) {
+    }
   }
 
   save() {
-    this.config.store = this.values
+    fs.writeFileSync(this.path, JSON.stringify(this.values, null, 2))
   }
 }
 
