@@ -24,6 +24,7 @@ interface ConfigData {
   tools: {
     [name: string]: Object
   }
+  currentTool: string
   palette: (ColorData|undefined)[]
   files: string[]
   // TODO: preferences
@@ -37,6 +38,7 @@ class Config {
     },
     tools: {
     },
+    currentTool: "",
     palette: [],
     files: [],
   }

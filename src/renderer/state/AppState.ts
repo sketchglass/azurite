@@ -87,10 +87,14 @@ class AppState {
       win.setBounds(values.window.bounds)
     }
     for (const toolName in values.tools) {
-      const tool = this.toolForName(toolName)
+      const tool = this.tools.find(t => t.name == toolName)
       if (tool) {
         tool.config = values.tools[toolName]
       }
+    }
+    const currentTool = this.tools.find(t => t.name == values.currentTool)
+    if (currentTool) {
+      this.currentTool = currentTool
     }
     for (const [i, color] of values.palette.entries()) {
       this.palette[i] = color ? new HSVColor(color.h, color.s, color.v) : undefined
@@ -114,6 +118,7 @@ class AppState {
     for (const tool of this.tools) {
       values.tools[tool.name] = tool.config
     }
+    values.currentTool = this.currentTool.name
     values.palette = this.palette.map(color => {
       if (color) {
         const {h, s, v} = color
@@ -124,10 +129,6 @@ class AppState {
       .map(state => state.picture.filePath)
       .filter(path => path)
     config.save()
-  }
-
-  toolForName(name: string) {
-    return this.tools.find(tool => tool.name == name)
   }
 
   addPictureState(pictureState: PictureState) {
