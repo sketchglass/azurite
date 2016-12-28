@@ -46,7 +46,7 @@ abstract class ShapeSelectTool extends Tool {
 
       if (!this.adding) {
         selection.clear()
-        renderer.wholeDirty = true
+        renderer.dirtiness.addWhole()
         renderer.update()
       }
     }
@@ -118,7 +118,7 @@ abstract class ShapeSelectTool extends Tool {
     if (this.moving) {
       this.moveSelection()
     }
-    renderer.wholeDirty = true
+    renderer.dirtiness.addWhole()
     renderer.renderNow()
   })
 

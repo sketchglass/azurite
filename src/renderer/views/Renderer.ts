@@ -5,6 +5,7 @@ import {context, canvas} from "../GLContext"
 import {frameDebounce} from "../../lib/Debounce"
 import Picture from "../models/Picture"
 import Selection from "../models/Selection"
+import Dirtiness from "../../lib/Dirtiness"
 const glsl = require("glslify")
 
 const boxShadowShader = {
@@ -203,8 +204,7 @@ class Renderer {
     return this.transformFromPicture.invert()!
   }
 
-  wholeDirty = true
-  dirtyRect: Rect|undefined
+  dirtiness = new Dirtiness()
   startupTime = Date.now()
 
   constructor() {
@@ -229,7 +229,7 @@ class Renderer {
       this.overlayCanvas.height = size.height
     })
     reaction(() => [this.size, this.transformToPicture], () => {
-      this.wholeDirty = true
+      this.dirtiness.addWhole()
       this.update()
     })
     reaction(() => this.picture && this.picture.lastUpdate, update => {
@@ -239,51 +239,40 @@ class Renderer {
       if (update.rect) {
         this.addPictureDirtyRect(update.rect)
       } else {
-        this.wholeDirty = true
+        this.dirtiness.addWhole()
       }
       this.update()
     })
     setInterval(() => {
       if (this.picture && this.picture.selection.hasSelection && this.selectionShowMode == "normal") {
-        this.wholeDirty = true
+        this.dirtiness.addWhole()
         this.update()
       }
     }, SELECTION_DURATION)
     reaction(() => [this.cursorRect, this.cursorVisible], () => {
       if (this.cursorVisible) {
         if (this.lastCursorRect) {
-          this.addDirtyRect(this.lastCursorRect)
+          this.dirtiness.addRect(this.lastCursorRect)
         }
-        this.addDirtyRect(this.cursorRect)
+        this.dirtiness.addRect(this.cursorRect)
       }
       this.update()
     })
   }
 
-  addDirtyRect(rect: Rect) {
-    if (this.dirtyRect) {
-      this.dirtyRect = this.dirtyRect.union(rect)
-    } else {
-      this.dirtyRect = rect
-    }
-  }
-
   addPictureDirtyRect(rect: Rect) {
-    this.addDirtyRect(rect.transform(this.transformFromPicture))
+    this.dirtiness.addRect(rect.transform(this.transformFromPicture))
   }
 
   update = frameDebounce(() => this.renderNow())
 
   renderNow() {
-    const milliseconds = Date.now() - this.startupTime
-    if (!this.wholeDirty && !this.dirtyRect) {
+    if (!this.dirtiness.dirty) {
       return
     }
 
     const drawTarget = new CanvasDrawTarget(context)
-    if (!this.wholeDirty && this.dirtyRect) {
-      drawTarget.scissor = this.dirtyRect
-    }
+    drawTarget.scissor = this.dirtiness.rect
     drawTarget.clear(this.background)
 
     if (this.picture) {
@@ -310,6 +299,7 @@ class Renderer {
       const selection = previewSelection != false ? previewSelection : this.picture.selection
 
       if (selection.hasSelection && this.selectionShowMode != "none") {
+        const milliseconds = Date.now() - this.startupTime
         if (selection.texture.filter != filter) {
           selection.texture.filter = filter
         }
@@ -345,8 +335,7 @@ class Renderer {
       drawTarget.draw(this.overlayModel)
     }
 
-    this.dirtyRect = undefined
-    this.wholeDirty = false
+    this.dirtiness.clear()
   }
 }
 
