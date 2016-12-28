@@ -72,11 +72,11 @@ class Picture {
     this.layers.push(defaultLayer)
     this.selectedLayers.push(defaultLayer)
 
-    reaction(() => this.lastUpdate, (update: PictureUpdate) => {
+    reaction(() => this.lastUpdate, update => {
       if (update.rect) {
-        this.layerBlender.addDirtyRect(update.rect)
+        this.layerBlender.dirtiness.addRect(update.rect)
       } else {
-        this.layerBlender.wholeDirty = true
+        this.layerBlender.dirtiness.addWhole()
       }
     })
     this.layerBlender.renderNow()

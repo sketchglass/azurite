@@ -6,6 +6,7 @@ import {context} from "../GLContext"
 import TiledTexture, {Tile} from "./TiledTexture"
 import Layer, {LayerBlendMode} from "./Layer"
 import {drawTexture} from "../GLUtil"
+import Dirtiness from "../../lib/Dirtiness"
 
 const normalBlendShader = {
   fragment: `
@@ -177,32 +178,20 @@ class LayerBlender {
 
   replaceTile: ReplaceTile|undefined
 
-  wholeDirty = true
-  dirtyRect: Rect|undefined
+  dirtiness = new Dirtiness()
 
   constructor(public picture: Picture) {
+    this.dirtiness.addWhole()
     reaction(() => picture.size, size => {
       this.blendedTexture.size = size
     })
   }
 
-  addDirtyRect(rect: Rect) {
-    if (this.dirtyRect) {
-      this.dirtyRect = this.dirtyRect.union(rect)
-    } else {
-      this.dirtyRect = rect
-    }
-  }
-
   renderNow() {
-    let rect: Rect|undefined
-    if (this.wholeDirty) {
-      this.drawTarget.scissor = undefined
-    } else if (this.dirtyRect) {
-      rect = this.drawTarget.scissor = this.dirtyRect
-    } else {
+    if (!this.dirtiness.dirty) {
       return
     }
+    const rect = this.drawTarget.scissor = this.dirtiness.rect
     this.drawTarget.clear(new Color(1, 1, 1, 1))
     const tileKeys = TiledTexture.keysForRect(rect || new Rect(new Vec2(0), this.picture.size))
     for (const key of tileKeys) {
@@ -213,8 +202,7 @@ class LayerBlender {
       this.renderLayers(this.picture.layers, key, tileScissor, 0)
       drawTexture(this.drawTarget, tileBlenders[0].currentTile.texture, {transform: Transform.translate(offset), blendMode: "src-over"})
     }
-    this.dirtyRect = undefined
-    this.wholeDirty = false
+    this.dirtiness.clear()
   }
 
   getBlendedTexture() {
