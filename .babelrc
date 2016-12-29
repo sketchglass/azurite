@@ -1,8 +1,0 @@
-{
-  "presets": [
-  ],
-  "plugins": [
-    "espower",
-    "glslify"
-  ]
-}
