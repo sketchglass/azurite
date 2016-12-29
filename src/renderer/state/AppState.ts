@@ -200,10 +200,14 @@ class AppState {
     return true
   }
 
-  async quit() {
+  async prepareQuit() {
     this.saveConfig()
+    return await appState.closePictures()
+  }
+
+  async quit() {
     // TODO: save app state
-    if (await appState.closePictures()) {
+    if (this.prepareQuit()) {
       remote.getCurrentWindow().destroy()
       return true
     }
