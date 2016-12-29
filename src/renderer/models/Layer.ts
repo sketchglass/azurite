@@ -1,6 +1,6 @@
-import {observable, reaction} from "mobx"
+import {observable, reaction, action, IArrayChange, IArraySplice} from "mobx"
 import Picture from "./Picture"
-import {LayerContent, GroupLayerContent, ImageLayerContent, LayerContentData} from "./LayerContent"
+import TiledTexture, {TiledTextureData} from "./TiledTexture"
 
 export
 type LayerBlendMode = "normal" | "plus" | "multiply" // TODO: add more
@@ -16,22 +16,18 @@ interface LayerProps {
 }
 
 export
-interface LayerData extends LayerProps {
-  content: LayerContentData
-}
+type LayerData = ImageLayerData|GroupLayerData
 
-export default
-class Layer implements LayerProps {
+abstract class Layer implements LayerProps {
   @observable name: string
   @observable visible: boolean
   @observable blendMode: LayerBlendMode
   @observable opacity: number
   @observable preserveOpacity: boolean
   @observable clippingGroup: boolean
-  parent: Layer|undefined
-  public readonly content: LayerContent
+  parent: GroupLayer|undefined
 
-  constructor(public picture: Picture, props: Partial<LayerProps>, makeContent: (layer: Layer) => LayerContent) {
+  constructor(public picture: Picture, props: Partial<LayerProps>) {
     this.name = props.name || "Layer"
     this.visible = props.visible != undefined ? props.visible : true
     this.blendMode = props.blendMode || "normal"
@@ -39,7 +35,6 @@ class Layer implements LayerProps {
     this.preserveOpacity = props.preserveOpacity != undefined ? props.preserveOpacity : false
     this.clippingGroup = props.clippingGroup != undefined ? props.clippingGroup : false
 
-    this.content = makeContent(this)
     reaction(() => [this.visible, this.blendMode, this.opacity, this.clippingGroup], () => {
       picture.lastUpdate = {layer: this}
     })
@@ -50,18 +45,9 @@ class Layer implements LayerProps {
     return {name, visible, blendMode, opacity, preserveOpacity, clippingGroup}
   }
 
-  dispose() {
-    this.content.dispose()
-  }
-
-  toData(): LayerData {
-    const content = this.content.toData()
-    return {...this.props, content}
-  }
-
-  clone(): Layer {
-    return new Layer(this.picture, this.props, layer => this.content.clone(layer))
-  }
+  abstract dispose(): void
+  abstract toData(): LayerData
+  abstract clone(): Layer
 
   path(): number[] {
     if (this.parent) {
@@ -75,6 +61,84 @@ class Layer implements LayerProps {
     }
   }
 
+  static fromData(picture: Picture, data: ImageLayerData|GroupLayerData): Layer {
+    switch (data.type) {
+      case "image":
+        return ImageLayer.fromData(picture, data)
+      case "group":
+        return GroupLayer.fromData(picture, data)
+    }
+  }
+}
+
+export default Layer
+
+interface ImageLayerData extends LayerProps {
+  type: "image"
+  image: TiledTextureData
+}
+
+export
+class ImageLayer extends Layer {
+
+  constructor(picture: Picture, props: Partial<LayerProps>, public tiledTexture: TiledTexture = new TiledTexture()) {
+    super(picture, props)
+  }
+
+  clone() {
+    return new ImageLayer(this.picture, this.props, this.tiledTexture.clone())
+  }
+
+  dispose() {
+    this.tiledTexture.dispose()
+  }
+
+  toData(): ImageLayerData {
+    const image = this.tiledTexture.toData()
+    return {type: "image", ...this.props, image}
+  }
+
+  static fromData(picture: Picture, data: ImageLayerData) {
+    const tiledTexture = TiledTexture.fromData(data.image)
+    return new ImageLayer(picture, data, tiledTexture)
+  }
+}
+
+interface GroupLayerData extends LayerProps {
+  type: "group"
+  children: LayerData[]
+}
+
+export
+class GroupLayer extends Layer {
+  @observable collapsed = false
+  children = observable<Layer>([])
+
+  constructor(picture: Picture, props: Partial<LayerProps>, children: Layer[]) {
+    super(picture, props)
+    this.children.observe(change => this.onChildChange(change))
+    this.children.replace(children)
+  }
+
+  clone() {
+    return new GroupLayer(this.picture, this.props, this.children.map(c => c.clone()))
+  }
+
+  dispose() {
+    for (let c of this.children) {
+      c.dispose()
+    }
+  }
+
+  forEachDescendant(action: (layer: Layer) => void) {
+    for (const child of this.children) {
+      action(child)
+      if (child instanceof GroupLayer) {
+        child.forEachDescendant(action)
+      }
+    }
+  }
+
   descendantFromPath(path: number[]): Layer|undefined {
     if (path.length == 0) {
       return this
@@ -82,35 +146,45 @@ class Layer implements LayerProps {
     const {children} = this
     const index = path[0]
     if (0 <= index && index < children.length) {
-      return this.children[index].descendantFromPath(path.slice(1))
-    }
-  }
-
-  get children() {
-    if (this.content.type == "group") {
-      return Array.from(this.content.children)
-    } else {
-      return []
-    }
-  }
-
-  forEachDescendant(action: (layer: Layer) => void) {
-    for (const child of this.children) {
-      action(child)
-      child.forEachDescendant(action)
-    }
-  }
-
-  static fromData(picture: Picture, data: LayerData): Layer {
-    const makeContent: (layer: Layer) => LayerContent = layer => {
-      switch (data.content.type) {
-        default:
-        case "image":
-          return ImageLayerContent.fromData(layer, data.content)
-        case "group":
-          return GroupLayerContent.fromData(layer, data.content)
+      const child = this.children[index]
+      if (path.length == 1) {
+        return child
+      } else if (child instanceof GroupLayer) {
+        return child.descendantFromPath(path.slice(1))
       }
     }
-    return new Layer(picture, data, makeContent)
+  }
+
+  @action private onChildChange(change: IArrayChange<Layer>|IArraySplice<Layer>) {
+    const onAdded = (child: Layer) => {
+      child.parent = this
+    }
+    const onRemoved = (child: Layer) => {
+      child.parent = undefined
+      const selected = this.picture.selectedLayers
+      for (let i = selected.length - 1; i >= 0; --i) {
+        if (selected[i] == child) {
+          selected.splice(i, 1)
+        }
+      }
+    }
+    if (change.type == "splice") {
+      change.added.forEach(onAdded)
+      change.removed.forEach(onRemoved)
+    } else {
+      onRemoved(change.oldValue)
+      onAdded(change.newValue)
+    }
+    this.picture.lastUpdate = {}
+  }
+
+  toData(): GroupLayerData {
+    const children = this.children.map(c => c.toData())
+    return {type: "group", ...this.props, children}
+  }
+
+  static fromData(picture: Picture, data: GroupLayerData) {
+    const children = data.children.map(c => Layer.fromData(picture, c))
+    return new GroupLayer(picture, data, children)
   }
 }

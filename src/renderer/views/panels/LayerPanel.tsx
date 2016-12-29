@@ -4,7 +4,7 @@ import React = require("react")
 import * as classNames from "classnames"
 import {Tree, TreeNode, NodeInfo} from "react-draggable-tree"
 import "react-draggable-tree/lib/index.css"
-import Layer from "../../models/Layer"
+import Layer, {GroupLayer} from "../../models/Layer"
 import {MoveLayerCommand, CopyLayerCommand, GroupLayerCommand, AddLayerCommand, RemoveLayerCommand, ChangeLayerPropsCommand} from "../../commands/LayerCommand"
 import ClickToEdit from "../components/ClickToEdit"
 import SVGIcon from "../components/SVGIcon"
@@ -26,12 +26,11 @@ function getLayerKey(layer: Layer) {
 }
 
 function layerToNode(layer: Layer): LayerNode {
-  const {content} = layer
   let children: LayerNode[] | undefined
   let collapsed = false
-  if (content.type == "group") {
-    children = content.children.map(layerToNode)
-    collapsed = content.collapsed
+  if (layer instanceof GroupLayer) {
+    children = layer.children.map(layerToNode)
+    collapsed = layer.collapsed
   } else {
     children = undefined
   }
@@ -86,8 +85,8 @@ class LayerPanel extends React.Component<{}, {}> {
   })
   onCollapsedChange = action((nodeInfo: NodeInfo<LayerNode>, collapsed: boolean) => {
     const {layer} = nodeInfo.node
-    if (layer.content.type == "group") {
-      layer.content.collapsed = collapsed
+    if (layer instanceof GroupLayer) {
+      layer.collapsed = collapsed
     }
   })
   onMove = action((src: NodeInfo<LayerNode>[], dest: NodeInfo<LayerNode>, destIndex: number) => {

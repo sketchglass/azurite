@@ -2,7 +2,7 @@ import * as React from "react"
 import {reaction, computed, action} from "mobx"
 import {observer} from "mobx-react"
 import {Vec2} from "paintvec"
-import Layer from "../models/Layer"
+import Layer, {ImageLayer} from "../models/Layer"
 import {Tile} from "../models/TiledTexture"
 import {ToolPointerEvent} from './Tool'
 import {appState} from "../state/AppState"
@@ -48,13 +48,13 @@ class TransformLayerTool extends RectMoveTool {
   constructor() {
     super()
     reaction(() => this.active, () => this.endEditing())
-    reaction(() => [this.currentContent, this.active], () => this.reset())
+    reaction(() => [this.currentImageLayer, this.active], () => this.reset())
     reaction(() => appState.currentPicture && appState.currentPicture.lastUpdate, () => this.reset())
     reaction(() => this.transform, () => this.update())
   }
 
   reset() {
-    const content = this.currentContent
+    const content = this.currentImageLayer
     if (content && this.active && this.picture) {
       if (this.layerTransform) {
         this.layerTransform.dispose()
@@ -66,10 +66,10 @@ class TransformLayerTool extends RectMoveTool {
     }
   }
 
-  @computed get currentContent() {
+  @computed get currentImageLayer() {
     const {currentLayer} = this
-    if (currentLayer && currentLayer.content.type == "image") {
-      return currentLayer.content
+    if (currentLayer && currentLayer instanceof ImageLayer) {
+      return currentLayer
     }
   }
 
@@ -95,8 +95,8 @@ class TransformLayerTool extends RectMoveTool {
   }
 
   endEditing() {
-    if (this.modal && this.picture && this.currentContent && this.originalRect) {
-      const command = new TransformLayerCommand(this.picture, this.currentContent.layer.path(), this.transform, false)
+    if (this.modal && this.picture && this.currentImageLayer && this.originalRect) {
+      const command = new TransformLayerCommand(this.picture, this.currentImageLayer.path(), this.transform, false)
       this.picture.undoStack.redoAndPush(command)
     }
     this.cancelEditing()
@@ -117,8 +117,7 @@ class TransformLayerTool extends RectMoveTool {
   }
 
   previewLayerTile(layer: Layer, tileKey: Vec2) {
-    const content = this.currentContent
-    if (this.modal && content && layer == content.layer && this.layerTransform) {
+    if (this.modal && layer == this.currentImageLayer && this.layerTransform) {
       this.layerTransform.transform = this.transform
       this.layerTransform.transformToTile(transformedTile, tileKey)
       return transformedTile

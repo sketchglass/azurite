@@ -1,8 +1,7 @@
 import * as path from "path"
 import {observable, computed, reaction} from "mobx"
 import {Vec2, Rect} from "paintvec"
-import Layer, {LayerData} from "./Layer"
-import {GroupLayerContent, ImageLayerContent} from "./LayerContent"
+import Layer, {LayerData, ImageLayer, GroupLayer} from "./Layer"
 import LayerBlender from "./LayerBlender"
 import {UndoStack} from "./UndoStack"
 import {Navigation} from "./Navigation"
@@ -40,13 +39,11 @@ class Picture {
 
   selection: Selection
 
-  readonly rootLayer = new Layer(this, "root", layer =>
-    new GroupLayerContent(layer, [])
-  )
+  readonly rootLayer = new GroupLayer(this, "root", [])
   readonly selectedLayers = observable<Layer>([])
   readonly layerBlender = new LayerBlender(this)
   @computed get layers() {
-    return (this.rootLayer.content as GroupLayerContent).children
+    return this.rootLayer.children
   }
 
   readonly undoStack = new UndoStack()
@@ -68,7 +65,7 @@ class Picture {
 
     this.selection = new Selection(this.size)
 
-    const defaultLayer = new Layer(this, "Layer", layer => new ImageLayerContent(layer))
+    const defaultLayer = new ImageLayer(this, {name: "Layer"})
     this.layers.push(defaultLayer)
     this.selectedLayers.push(defaultLayer)
 
