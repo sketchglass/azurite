@@ -95,13 +95,13 @@ class AppState {
     if (values.window.maximized) {
       win.maximize()
     }
-    for (const toolName in values.tools) {
-      const tool = this.tools.find(t => t.name == toolName)
+    for (const toolId in values.tools) {
+      const tool = this.tools.find(t => t.id == toolId)
       if (tool) {
-        tool.config = values.tools[toolName]
+        tool.config = values.tools[toolId]
       }
     }
-    const currentTool = this.tools.find(t => t.name == values.currentTool)
+    const currentTool = this.tools.find(t => t.id == values.currentTool)
     if (currentTool) {
       this.currentTool = currentTool
     }
@@ -131,7 +131,7 @@ class AppState {
         maximized: win.isMaximized(),
       },
       tools: {},
-      currentTool: this.currentTool.name,
+      currentTool: this.currentTool.id,
       color: colorToData(this.color),
       palette: this.palette.map(color => {
         if (color) {
@@ -143,7 +143,7 @@ class AppState {
         .filter(path => path)
     }
     for (const tool of this.tools) {
-      values.tools[tool.name] = tool.config
+      values.tools[tool.id] = tool.config
     }
     config.values = values
   }

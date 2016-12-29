@@ -9,6 +9,7 @@ import SVGIcon from "./components/SVGIcon"
 import {appState} from "../state/AppState"
 
 import Tool from "../tools/Tool"
+import ToolIDs from "../tools/ToolIDs"
 import BaseBrushTool from "../tools/BaseBrushTool"
 import BrushTool from "../tools/BrushTool"
 import WatercolorTool from "../tools/WatercolorTool"
@@ -17,20 +18,20 @@ const {Menu} = remote
 
 const toolToIcon = (tool: Tool) => {
   const map = {
-    "Watercolor": "paint-brush",
-    "Brush": "pen",
-    "Pan": "move",
-    "Rotate": "rotate",
-    "Move": "transform",
-    "Zoom": "search",
-    "Rectangle Select": "rect-select",
-    "Ellipse Select": "ellipse-select",
-    "Freehand Select": "freehand-select",
-    "Polygon Select": "polygon-select",
-    "Canvas Area": "crop",
-    "Flood Fill": "magic-wand",
+    [ToolIDs.watercolor]: "paint-brush",
+    [ToolIDs.brush]: "pen",
+    [ToolIDs.pan]: "move",
+    [ToolIDs.rotate]: "rotate",
+    [ToolIDs.zoom]: "search",
+    [ToolIDs.transformLayer]: "transform",
+    [ToolIDs.rectSelect]: "rect-select",
+    [ToolIDs.ellipseSelect]: "ellipse-select",
+    [ToolIDs.freehandSelect]: "freehand-select",
+    [ToolIDs.polygonSelect]: "polygon-select",
+    [ToolIDs.floodFill]: "magic-wand",
+    [ToolIDs.canvasArea]: "crop",
   }
-  return <SVGIcon className={map[tool.name]} />
+  return <SVGIcon className={map[tool.id]} />
 }
 
 @observer

@@ -1,11 +1,13 @@
 import {Vec2} from "paintvec"
 import ShapeSelectTool from "./ShapeSelectTool"
 import {ToolPointerEvent} from "./Tool"
+import ToolIDs from "./ToolIDs"
 
 export default
 class PolygonSelectTool extends ShapeSelectTool {
   commitDrawOnEnd = false
-  name = "Polygon Select"
+  readonly id = ToolIDs.polygonSelect
+  readonly title = "Polygon Select"
   get cursor() {
     return "crosshair"
   }

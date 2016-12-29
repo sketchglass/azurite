@@ -1,12 +1,14 @@
 import {Vec2, Rect} from "paintvec"
 import ShapeSelectTool from "./ShapeSelectTool"
 import {ToolPointerEvent} from "./Tool"
+import ToolIDs from "./ToolIDs"
 
 type RectSelectType = "rect"|"ellipse"
 
 export default
 class RectSelectTool extends ShapeSelectTool {
-  name = this.type == "rect" ? "Rectangle Select" : "Ellipse Select"
+  readonly id = this.type == "rect" ? ToolIDs.rectSelect : ToolIDs.ellipseSelect
+  readonly title = this.type == "rect" ? "Rectangle Select" : "Ellipse Select"
   get cursor() {
     return "crosshair"
   }

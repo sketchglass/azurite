@@ -1,10 +1,12 @@
 import {Vec2, Transform} from "paintvec"
 import Tool, {ToolPointerEvent} from './Tool'
 import {renderer} from "../views/Renderer"
+import ToolIDs from "./ToolIDs"
 
 export default
 class PanTool extends Tool {
-  name = "Pan"
+  readonly id = ToolIDs.pan
+  readonly title = "Pan"
   get cursor() {
     return "all-scroll"
   }

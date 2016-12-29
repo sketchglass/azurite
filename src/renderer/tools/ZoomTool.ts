@@ -1,47 +1,6 @@
 import {Vec2} from "paintvec"
 import Tool, {ToolPointerEvent} from './Tool'
-
-export
-class ZoomInTool extends Tool {
-  name = "Zoom In"
-  get cursor() {
-    return "zoom-in"
-  }
-
-  start(ev: ToolPointerEvent) {
-    if (!this.picture) {
-      return
-    }
-    this.picture.navigation.zoomIn()
-  }
-
-  move(ev: ToolPointerEvent) {
-  }
-
-  end() {
-  }
-}
-
-export
-class ZoomOutTool extends Tool {
-  name = "Zoom Out"
-  get cursor() {
-    return "zoom-out"
-  }
-
-  start(ev: ToolPointerEvent) {
-    if (!this.picture) {
-      return
-    }
-    this.picture.navigation.zoomOut()
-  }
-
-  move(ev: ToolPointerEvent) {
-  }
-
-  end() {
-  }
-}
+import ToolIDs from "./ToolIDs"
 
 const modScale = (scale: number) => {
   return (scale < 0.25) ? 0.25 : (scale > 32) ? 32 : scale
@@ -49,7 +8,8 @@ const modScale = (scale: number) => {
 
 export
 class ZoomTool extends Tool {
-  name = "Zoom"
+  readonly id = ToolIDs.zoom
+  readonly title = "Zoom"
   get cursor() {
     return "zoom-in"
   }
