@@ -13,7 +13,7 @@
     "app": "cross-env NODE_ENV=development electron . --devserver",
     "start": "npm-run-all build --parallel devserver app",
     "lint": "tslint 'src/**/*.{ts,tsx}'",
-    "test": "cross-env NODE_ENV=test electron . --devserver",
+    "test:dev": "cross-env NODE_ENV=test electron . --devserver",
     "postinstall": "electron-rebuild -e node_modules/electron -w receive-tablet-event",
     "package": "ts-node scripts/package.ts"
   },
