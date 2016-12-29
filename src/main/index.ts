@@ -3,9 +3,9 @@ type BrowserWindow = Electron.BrowserWindow
 const {app, BrowserWindow, ipcMain} = Electron
 import {TabletEventReceiver} from "receive-tablet-event"
 import * as IPCChannels from "../common/IPCChannels"
-import {contentBase} from "../common/contentBase"
+const argv = require('minimist')(process.argv.slice(2));
 
-app.commandLine.appendSwitch("enable-experimental-web-platform-features")
+let contentBase = argv.devserver ? "http://localhost:23000" : `file://${app.getAppPath()}/dist`
 
 let mainWindow: BrowserWindow|undefined
 let dialogsWindow: BrowserWindow|undefined
@@ -102,6 +102,8 @@ function openTestWindow() {
     testWindow = undefined
   })
 }
+
+app.commandLine.appendSwitch("enable-experimental-web-platform-features")
 
 app.on("ready", async () => {
   if (process.env.NODE_ENV == "test") {
