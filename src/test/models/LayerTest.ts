@@ -98,6 +98,13 @@ describe("GroupLayer", () => {
     ])
   })
 
+  describe("clone", () => {
+    it("deep clones layer", () => {
+      const cloned = layer.clone()
+      compareLayers(layer, cloned)
+    })
+  })
+
   describe("toData/fromData", () => {
     it("convers layer <-> data", () => {
       const data = layer.toData()
