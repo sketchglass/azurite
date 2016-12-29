@@ -73,6 +73,7 @@
     "msgpack-lite": "^0.1.26",
     "paintgl": "github:sketchglass/paintgl#4ce0d8fb55186ffa4cc9ad29bb53672ff79c4a86",
     "paintvec": "github:sketchglass/paintvec#d61499dd347ff2890feab6b5e0c02ea3fff10d18",
+    "promise-semaphore": "^0.2.8",
     "react": "^15.4.1",
     "react-dom": "^15.4.1",
     "react-draggable-tree": "sketchglass/react-draggable-tree#9177b1b6de7f5bde9a8e1fe63d25bea0884ffde7",

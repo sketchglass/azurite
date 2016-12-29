@@ -191,7 +191,7 @@ class AppState {
     return true
   }
 
-  async closePictures() {
+  async confirmClosePictures() {
     for (const pictureState of this.pictureStates) {
       if (!await pictureState.confirmClose()) {
         return false
@@ -201,8 +201,9 @@ class AppState {
   }
 
   async prepareQuit() {
+    const ok = await appState.confirmClosePictures()
     this.saveConfig()
-    return await appState.closePictures()
+    return ok
   }
 
   async quit() {
