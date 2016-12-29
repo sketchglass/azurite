@@ -2,6 +2,7 @@ module.exports = {
   entry: {
     renderer: "./src/renderer/index.tsx",
     dialogs: "./src/renderer/views/dialogs/DialogIndex.tsx",
+    test: "./src/test/index.ts",
   },
   output: {
     path: "./dist/assets",

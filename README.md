@@ -25,6 +25,19 @@ npm run watch
 npm run app
 ```
 
+## Test
+
+```
+npm test
+```
+
+### with webpack devserver
+
+```
+# assuming you are running `npm run watch`
+npm run test:dev
+```
+
 ## Package app
 
 ```
