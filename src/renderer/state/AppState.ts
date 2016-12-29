@@ -213,6 +213,14 @@ class AppState {
     }
     return false
   }
+
+  async reload() {
+    if (await appState.prepareQuit()) {
+      location.reload()
+      return true
+    }
+    return false
+  }
 }
 
 export const appState = new AppState()

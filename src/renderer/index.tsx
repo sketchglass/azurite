@@ -13,9 +13,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
 if (module["hot"]) {
   module["hot"].accept()
-  module["hot"].dispose(async () => {
-    if (await appState.prepareQuit()) {
-      location.reload()
-    }
+  module["hot"].dispose(() => {
+    appState.reload()
   })
 }

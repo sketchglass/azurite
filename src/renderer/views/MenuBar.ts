@@ -216,9 +216,7 @@ class MenuBar {
         {
           label: 'Reload',
           accelerator: 'CmdOrCtrl+R',
-          click (item: MenuItem, focusedWindow: BrowserWindow) {
-            if (focusedWindow) focusedWindow.reload()
-          }
+          click: () => appState.reload(),
         },
         {
           label: 'Toggle Developer Tools',
