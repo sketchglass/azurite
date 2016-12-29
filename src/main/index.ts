@@ -101,6 +101,13 @@ function openTestWindow() {
   win.on("closed", () => {
     testWindow = undefined
   })
+  ipcMain.on("testDone", (e, failCount) => {
+    if (!argv.devserver) {
+      setImmediate(() => {
+        process.exit(failCount)
+      })
+    }
+  })
 }
 
 app.commandLine.appendSwitch("enable-experimental-web-platform-features")

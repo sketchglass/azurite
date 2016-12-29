@@ -1,4 +1,5 @@
 import * as assert from "assert"
+import {ipcRenderer} from "electron"
 require("mocha/mocha.css")
 require("mocha/mocha")
 
@@ -8,6 +9,11 @@ describe("mocha", () => {
   it("runs", () => {
     assert(true)
   })
+  it("fails", () => {
+    assert(false)
+  })
 })
 
-mocha.run()
+mocha.run(failCount => {
+  ipcRenderer.send("testDone", failCount)
+})
