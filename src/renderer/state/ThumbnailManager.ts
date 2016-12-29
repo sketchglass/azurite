@@ -11,14 +11,17 @@ const NAVIGATOR_THUMBNAIL_SIZE = new Vec2(96, 96)
 export default
 class ThumbnailManager {
   private layerThumbnailGenerator: ThumbnailGenerator
+  private navigatorThumbnailDirty = true
   private navigatorThumbnailGenerator: ThumbnailGenerator
   private disposers: (() => void)[] = []
   private layerThumbnails = new ObservableWeakMap<Layer, string>()
 
   get navigatorThumbnail() {
+    this.updateNavigatorThumbnail()
     return this.navigatorThumbnailGenerator.thumbnail
   }
   get navigatorThumbnailScale() {
+    this.updateNavigatorThumbnail()
     return this.navigatorThumbnailGenerator.scale
   }
 
@@ -31,7 +34,10 @@ class ThumbnailManager {
   }
 
   private updateNavigatorThumbnail() {
-    this.navigatorThumbnailGenerator.loadTexture(this.picture.layerBlender.getBlendedTexture())
+    if (this.navigatorThumbnailDirty) {
+      this.navigatorThumbnailGenerator.loadTexture(this.picture.layerBlender.getBlendedTexture())
+      this.navigatorThumbnailDirty = false
+    }
   }
 
   private updateLayerThumbnail(layer: Layer) {
@@ -51,7 +57,7 @@ class ThumbnailManager {
   }
 
   @action private onUpdate(update: PictureUpdate) {
-    this.updateNavigatorThumbnail()
+    this.navigatorThumbnailDirty = true
     if (update.layer) {
       this.updateLayerThumbnail(update.layer)
     }
@@ -68,7 +74,7 @@ class ThumbnailManager {
     this.layerThumbnailGenerator = new ThumbnailGenerator(size, LAYER_THUMBNAIL_SIZE.mulScalar(window.devicePixelRatio))
     this.navigatorThumbnailGenerator = new ThumbnailGenerator(size, NAVIGATOR_THUMBNAIL_SIZE.mulScalar(window.devicePixelRatio))
 
-    this.updateNavigatorThumbnail()
+    this.navigatorThumbnailDirty = true
     this.picture.forEachLayer(layer => {
       this.updateLayerThumbnail(layer)
     })
