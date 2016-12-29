@@ -14,6 +14,8 @@ describe("mocha", () => {
   })
 })
 
+require("./models/PictureTest")
+
 mocha.run(failCount => {
   ipcRenderer.send("testDone", failCount)
 })
