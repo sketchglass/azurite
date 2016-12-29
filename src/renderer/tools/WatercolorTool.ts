@@ -10,6 +10,7 @@ import WatercolorSettings from "../views/WatercolorSettings"
 import {ToolPointerEvent} from "./Tool"
 import React = require("react")
 import {appState} from "../state/AppState"
+import ToolIDs from "./ToolIDs"
 
 enum ShapeClipModes {
   Shape, Clip
@@ -139,7 +140,8 @@ class WatercolorTool extends BaseBrushTool {
   @observable blending = 0.5
   @observable thickness = 0.5
 
-  name = "Watercolor"
+  readonly id = ToolIDs.watercolor
+  readonly title = "Watercolor"
 
   shape = new RectShape(context, {rect: new Rect()})
   model = new ShapeModel(context, {shape: this.shape, blendMode: "src", shader: watercolorShader})

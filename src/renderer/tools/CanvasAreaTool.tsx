@@ -8,6 +8,7 @@ import {ChangeCanvasAreaCommand} from "../commands/PictureCommand"
 import DimensionSelectState from "../state/DimensionSelectState"
 import DimensionSelect from "../views/DimensionSelect"
 import {renderer} from "../views/Renderer"
+import ToolIDs from "./ToolIDs"
 
 const HANDLE_RADIUS = 4
 
@@ -28,7 +29,8 @@ const CanvasAreaToolSettings = observer((props: {tool: CanvasAreaTool}) => {
 
 export default
 class CanvasAreaTool extends RectMoveTool {
-  name = "Canvas Area"
+  readonly id = ToolIDs.canvasArea
+  readonly title = "Canvas Area"
   handleRadius = HANDLE_RADIUS
   canRotate = false
   canDistort = false

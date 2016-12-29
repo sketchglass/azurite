@@ -1,10 +1,12 @@
 import {Vec2} from "paintvec"
 import Tool, {ToolPointerEvent} from './Tool'
 import {renderer} from "../views/Renderer"
+import ToolIDs from "./ToolIDs"
 
 export default
 class RotateTool extends Tool {
-  name = "Rotate"
+  readonly id = ToolIDs.rotate
+  readonly title = "Rotate"
   get cursor() {
     return "ew-resize" // TODO: use more rotate-like cursor
   }

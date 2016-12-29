@@ -40,7 +40,8 @@ abstract class Tool {
     return appState.currentTool == this
   }
 
-  abstract name: string
+  abstract id: string
+  abstract title: string
 
   get cursor() {
     return "auto"

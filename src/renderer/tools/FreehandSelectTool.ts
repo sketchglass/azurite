@@ -1,10 +1,12 @@
 import {Vec2} from "paintvec"
 import ShapeSelectTool from "./ShapeSelectTool"
 import {ToolPointerEvent} from "./Tool"
+import ToolIDs from "./ToolIDs"
 
 export default
 class FreehandSelectTool extends ShapeSelectTool {
-  name = "Freehand Select"
+  readonly id = ToolIDs.freehandSelect
+  readonly title = "Freehand Select"
   get cursor() {
     return "crosshair"
   }

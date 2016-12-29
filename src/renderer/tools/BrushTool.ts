@@ -9,6 +9,7 @@ import TiledTexture, {Tile} from "../models/TiledTexture"
 import {ToolPointerEvent} from "./Tool"
 import React = require("react")
 import {appState} from "../state/AppState"
+import ToolIDs from "./ToolIDs"
 
 const brushShader = {
   vertex: `
@@ -68,7 +69,8 @@ class BrushTool extends BaseBrushTool {
   shape: Shape
   model: ShapeModel
   drawTarget = new TextureDrawTarget(context)
-  name = "Brush"
+  readonly id = ToolIDs.brush
+  readonly title = "Brush"
   @observable eraser = false
 
   constructor() {

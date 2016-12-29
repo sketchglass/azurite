@@ -10,6 +10,7 @@ import {TransformLayerCommand} from "../commands/LayerCommand"
 import RectMoveTool, {DragType} from "./RectMoveTool"
 import LayerTransform from "../services/LayerTransform"
 import {renderer} from "../views/Renderer"
+import ToolIDs from "./ToolIDs"
 
 const HANDLE_RADIUS = 4
 
@@ -29,7 +30,8 @@ const transformedTile = new Tile()
 
 export default
 class TransformLayerTool extends RectMoveTool {
-  name = "Move"
+  readonly id = ToolIDs.transformLayer
+  readonly title = "Transform Layer"
 
   handleRadius = HANDLE_RADIUS
 

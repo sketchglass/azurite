@@ -4,10 +4,12 @@ import Tool, {ToolPointerEvent} from './Tool'
 import FloodFill from "../services/FloodFill"
 import {SelectionChangeCommand} from "../commands/SelectionCommand"
 import FloodFillSettings from "../views/FloodFillSettings"
+import ToolIDs from "./ToolIDs"
 
 export default
 class FloodFillTool extends Tool {
-  readonly name = "Flood Fill"
+  readonly id = ToolIDs.floodFill
+  readonly title = "Flood Fill"
   @observable tolerance = 0 // 0 ... 255
   private floodFill: FloodFill|undefined
 
