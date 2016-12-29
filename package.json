@@ -60,6 +60,7 @@
     "postcss-url": "^5.1.2",
     "power-assert": "^1.4.2",
     "shelljs": "^0.7.5",
+    "stack-source-map": "^1.0.6",
     "style-loader": "^0.13.1",
     "ts-loader": "^1.2.2",
     "ts-node": "^1.7.0",
