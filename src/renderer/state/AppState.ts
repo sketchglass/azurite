@@ -191,7 +191,7 @@ class AppState {
     return true
   }
 
-  async closePictures() {
+  async confirmClosePictures() {
     for (const pictureState of this.pictureStates) {
       if (!await pictureState.confirmClose()) {
         return false
@@ -200,11 +200,23 @@ class AppState {
     return true
   }
 
-  async quit() {
+  async prepareQuit() {
+    const ok = await appState.confirmClosePictures()
     this.saveConfig()
-    // TODO: save app state
-    if (await appState.closePictures()) {
+    return ok
+  }
+
+  async quit() {
+    if (await this.prepareQuit()) {
       remote.getCurrentWindow().destroy()
+      return true
+    }
+    return false
+  }
+
+  async reload() {
+    if (await appState.prepareQuit()) {
+      location.reload()
       return true
     }
     return false
