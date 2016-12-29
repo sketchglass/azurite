@@ -23,8 +23,12 @@ module.exports = {
   module: {
     loaders: [
       {
+        test: /\.json$/,
+        loader: 'json-loader'
+      },
+      {
         test: /\.tsx?$/,
-        loader: "babel-loader?plugins=glslify!ts-loader",
+        loader: "babel-loader!ts-loader",
       },
       {
         test: /\.css$/,
