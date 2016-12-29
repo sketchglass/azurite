@@ -2,8 +2,7 @@ import {observable, action, autorun, computed} from "mobx"
 import {Vec2, Rect} from "paintvec"
 import Waypoint from "../models/Waypoint"
 import Tool, {ToolPointerEvent} from "./Tool"
-import Layer from "../models/Layer"
-import {ImageLayerContent} from "../models/LayerContent"
+import Layer, {ImageLayer} from "../models/Layer"
 import TiledTexture, {Tile} from "../models/TiledTexture"
 import {ChangeLayerImageCommand} from "../commands/LayerCommand"
 import {renderer} from "../views/Renderer"
@@ -44,7 +43,7 @@ abstract class BaseBrushTool extends Tool {
   // how many neighbor event positions used to stabilize stroke
   @observable stabilizingLevel = 2
 
-  @observable targetContent: ImageLayerContent|undefined
+  @observable targetLayer: ImageLayer|undefined
   private newTiledTexture = new TiledTexture()
   private editedRect: Rect|undefined
 
@@ -56,7 +55,7 @@ abstract class BaseBrushTool extends Tool {
     return "not-allowed"
   }
   @computed get cursorImage() {
-    if (this.currentLayer && this.currentLayer.content.type == "image") {
+    if (this.currentLayer && this.currentLayer instanceof ImageLayer) {
       return this._cursorImage
     }
   }
@@ -65,7 +64,7 @@ abstract class BaseBrushTool extends Tool {
   }
 
   @computed get selectionShowMode() {
-    if (this.targetContent) {
+    if (this.targetLayer) {
       return "stopped"
     } else {
       return "normal"
@@ -121,11 +120,11 @@ abstract class BaseBrushTool extends Tool {
   }
 
   previewLayerTile(layer: Layer, tileKey: Vec2) {
-    if (this.targetContent && layer == this.targetContent.layer) {
+    if (this.targetLayer && layer == this.targetLayer) {
       if (this.newTiledTexture.has(tileKey)) {
         return this.newTiledTexture.get(tileKey)
-      } else if (this.targetContent.tiledTexture.has(tileKey)) {
-        return this.targetContent.tiledTexture.get(tileKey)
+      } else if (this.targetLayer.tiledTexture.has(tileKey)) {
+        return this.targetLayer.tiledTexture.get(tileKey)
       } else {
         return undefined
       }
@@ -136,11 +135,10 @@ abstract class BaseBrushTool extends Tool {
 
   start(ev: ToolPointerEvent) {
     const layer = this.currentLayer
-    if (!layer || layer.content.type != "image") {
+    if (!(layer && layer instanceof ImageLayer)) {
       return
     }
-    const content = layer.content
-    this.targetContent = content
+    this.targetLayer = layer
     this.newTiledTexture.clear()
 
     this.lastStabilizeWaypoints = []
@@ -156,8 +154,8 @@ abstract class BaseBrushTool extends Tool {
   @action end() {
     this.stabilizeEnd()
     this.pushUndoStack()
-    if (this.targetContent) {
-      this.targetContent = undefined
+    if (this.targetLayer) {
+      this.targetLayer = undefined
     }
   }
 
@@ -253,11 +251,10 @@ abstract class BaseBrushTool extends Tool {
     }
     this.editedRect = undefined
 
-    const content = this.targetContent
-    if (!content) {
+    const layer = this.targetLayer
+    if (!layer) {
       return
     }
-    const {layer} = content
     const {picture} = layer
     const command = new ChangeLayerImageCommand(picture, layer.path(), this.title, this.newTiledTexture)
     this.newTiledTexture = new TiledTexture()
@@ -285,13 +282,13 @@ abstract class BaseBrushTool extends Tool {
   protected abstract renderWaypoints(waypoints: Waypoint[], rect: Rect): void
 
   protected prepareTile(key: Vec2) {
-    if (!this.targetContent) {
+    if (!this.targetLayer) {
       return
     }
     if (this.newTiledTexture.has(key)) {
       return this.newTiledTexture.get(key)
-    } else if (this.targetContent.tiledTexture.has(key)) {
-      const tile = this.targetContent.tiledTexture.get(key).clone()
+    } else if (this.targetLayer.tiledTexture.has(key)) {
+      const tile = this.targetLayer.tiledTexture.get(key).clone()
       this.newTiledTexture.set(key, tile)
       return tile
     } else {

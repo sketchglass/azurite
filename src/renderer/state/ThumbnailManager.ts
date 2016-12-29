@@ -1,7 +1,7 @@
 import {reaction, action} from "mobx"
 import {Vec2} from "paintvec"
 import Picture, {PictureUpdate} from "../models/Picture"
-import Layer from "../models/Layer"
+import Layer, {ImageLayer} from "../models/Layer"
 import ThumbnailGenerator from "../services/ThumbnailGenerator"
 import ObservableWeakMap from "../../lib/ObservableWeakMap"
 
@@ -41,16 +41,16 @@ class ThumbnailManager {
   }
 
   private updateLayerThumbnail(layer: Layer) {
-    if (layer.content.type != "image") {
+    if (!(layer instanceof ImageLayer)) {
       return
     }
-    this.layerThumbnailGenerator.loadTiledTexture(layer.content.tiledTexture)
+    this.layerThumbnailGenerator.loadTiledTexture(layer.tiledTexture)
     const thumbnail = this.layerThumbnailGenerator.thumbnail.toDataURL()
     this.layerThumbnails.set(layer, thumbnail)
   }
 
   thumbnailForLayer(layer: Layer) {
-    if (layer.content.type == "image" && !this.layerThumbnails.get(layer)) {
+    if (layer instanceof ImageLayer && !this.layerThumbnails.get(layer)) {
       this.updateLayerThumbnail(layer)
     }
     return this.layerThumbnails.get(layer) || ""

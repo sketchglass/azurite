@@ -156,10 +156,10 @@ class WatercolorTool extends BaseBrushTool {
 
   start(ev: ToolPointerEvent) {
     super.start(ev)
-    if (!this.targetContent || !this.picture) {
+    if (!this.targetLayer || !this.picture) {
       return
     }
-    const {preserveOpacity} = this.targetContent.layer
+    const {preserveOpacity} = this.targetLayer
 
     this.sampleSize = Math.pow(2, Math.ceil(Math.log2(this.width + 2)))
 
@@ -189,11 +189,6 @@ class WatercolorTool extends BaseBrushTool {
   }
 
   renderWaypoints(waypoints: Waypoint[], rect: Rect) {
-    const {targetContent} = this
-    if (!targetContent) {
-      return
-    }
-
     for (let i = 0; i < waypoints.length; ++i) {
       const waypoint = waypoints[i]
       this.shapeClipModel.uniforms["uBrushPos"] = waypoint.pos

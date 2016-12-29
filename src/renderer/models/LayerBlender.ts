@@ -4,7 +4,7 @@ import {Vec2, Rect, Transform} from "paintvec"
 import {ShapeModel, Texture, TextureDrawTarget, RectShape, Color} from "paintgl"
 import {context} from "../GLContext"
 import TiledTexture, {Tile} from "./TiledTexture"
-import Layer, {LayerBlendMode} from "./Layer"
+import Layer, {LayerBlendMode, ImageLayer, GroupLayer} from "./Layer"
 import {drawTexture} from "../GLUtil"
 import Dirtiness from "../../lib/Dirtiness"
 
@@ -211,16 +211,15 @@ class LayerBlender {
   }
 
   private renderLayer(layer: Layer, nextLayer: Layer|undefined, key: Vec2, scissor: Rect|undefined, depth: number): boolean {
-    const {content} = layer
     let tile: Tile|undefined = undefined
 
     if (layer.visible) {
-      if (content.type == "image") {
-        if (content.tiledTexture.has(key)) {
-          tile = content.tiledTexture.get(key)
+      if (layer instanceof ImageLayer) {
+        if (layer.tiledTexture.has(key)) {
+          tile = layer.tiledTexture.get(key)
         }
-      } else {
-        const {children} = content
+      } else if (layer instanceof GroupLayer) {
+        const {children} = layer
         const rendered = this.renderLayers(children, key, scissor, depth + 1)
         if (rendered) {
           tile = tileBlenders[depth + 1].currentTile

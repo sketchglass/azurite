@@ -2,16 +2,15 @@ import {Vec2, Transform} from "paintvec"
 import {UndoCommand} from "../models/UndoStack"
 import Picture, {PictureDimension} from "../models/Picture"
 import Selection from "../models/Selection"
-import Layer from "../models/Layer"
+import Layer, {ImageLayer} from "../models/Layer"
 import {TransformLayerCommand} from "./LayerCommand"
 
 function transformPicture(picture: Picture, newSize: Vec2, transform: Transform) {
   picture.forEachLayer(layer => {
-    const content = layer.content
-    if (content.type != "image") {
+    if (!(layer instanceof ImageLayer)) {
       return
     }
-    content.tiledTexture = content.tiledTexture.transform(transform)
+    layer.tiledTexture = layer.tiledTexture.transform(transform)
   })
   picture.selection = picture.selection.transform(newSize, transform)
   const {width, height} = newSize
@@ -152,11 +151,10 @@ class ChangeCanvasAreaCommand {
   }
 
   translateLayer(layer: Layer, offset: Vec2) {
-    const content = layer.content
-    if (content.type != "image") {
+    if (!(layer instanceof ImageLayer)) {
       return
     }
-    content.tiledTexture = content.tiledTexture.transform(Transform.translate(offset))
+    layer.tiledTexture = layer.tiledTexture.transform(Transform.translate(offset))
   }
 
   translatePicture(offset: Vec2) {
