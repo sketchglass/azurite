@@ -207,7 +207,7 @@ class AppState {
 
   async quit() {
     // TODO: save app state
-    if (this.prepareQuit()) {
+    if (await this.prepareQuit()) {
       remote.getCurrentWindow().destroy()
       return true
     }
