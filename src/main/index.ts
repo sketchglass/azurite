@@ -9,6 +9,7 @@ app.commandLine.appendSwitch("enable-experimental-web-platform-features")
 
 let mainWindow: BrowserWindow|undefined
 let dialogsWindow: BrowserWindow|undefined
+let testWindow: BrowserWindow|undefined
 
 function openDialogsWindow() {
   const win = dialogsWindow = new BrowserWindow({
@@ -90,7 +91,23 @@ async function openWindow() {
   })
 }
 
+function openTestWindow() {
+  const win = testWindow = new BrowserWindow({
+    width: 1200,
+    height: 768,
+  })
+  win.loadURL(`${contentBase}/test.html`)
+  win.webContents.openDevTools()
+  win.on("closed", () => {
+    testWindow = undefined
+  })
+}
+
 app.on("ready", async () => {
-  await openWindow()
-  openDialogsWindow()
+  if (process.env.NODE_ENV == "test") {
+    openTestWindow()
+  } else {
+    await openWindow()
+    openDialogsWindow()
+  }
 })
