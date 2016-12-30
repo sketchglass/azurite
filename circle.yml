@@ -1,4 +1,4 @@
 test:
   override:
     - npm run lint
-    - npm test
+    - xvfb-run npm test
