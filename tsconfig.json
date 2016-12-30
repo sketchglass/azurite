@@ -9,6 +9,10 @@
         "strictNullChecks": true,
         "sourceMap": true,
         "jsx": "react",
+        "lib" :[
+            "es2016",
+            "dom"
+        ],
         "types": [
             "electron",
             "mocha"

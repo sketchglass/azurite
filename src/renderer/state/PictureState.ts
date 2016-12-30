@@ -54,6 +54,12 @@ class PictureState {
     })
   }
 
+  async import() {
+    const pictureExport = new PictureExport(this.picture)
+    await pictureExport.showImportDialog()
+    pictureExport.dispose()
+  }
+
   async export(format: ImageFormat) {
     const pictureExport = new PictureExport(this.picture)
     await pictureExport.showExportDialog(format)

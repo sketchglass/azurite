@@ -146,13 +146,12 @@ export
 class AddLayerCommand implements UndoCommand {
   title = "Add Layer"
 
-  constructor(public readonly picture: Picture, public readonly path: number[]) {
+  constructor(public readonly picture: Picture, public readonly path: number[], public layer: Layer) {
   }
 
   undo() {
     const [siblings, index] = getSiblingsAndIndex(this.picture, this.path)
-    const layer = siblings.splice(index, 1)[0]
-    layer.dispose()
+    siblings.splice(index, 1)
     const nextLayer = this.picture.layerFromPath(this.path)
     if (nextLayer) {
       this.picture.selectedLayers.replace([nextLayer])
@@ -160,9 +159,8 @@ class AddLayerCommand implements UndoCommand {
   }
   redo() {
     const [siblings, index] = getSiblingsAndIndex(this.picture, this.path)
-    const layer = new ImageLayer(this.picture, {name: "Layer"})
-    siblings.splice(index, 0, layer)
-    this.picture.selectedLayers.replace([layer])
+    siblings.splice(index, 0, this.layer)
+    this.picture.selectedLayers.replace([this.layer])
   }
 }
 

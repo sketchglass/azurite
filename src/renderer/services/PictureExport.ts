@@ -1,10 +1,15 @@
 import {Vec2} from "paintvec"
 import Picture from "../models/Picture"
+import {ImageLayer} from "../models/Layer"
 import TextureToCanvas from "../models/TextureToCanvas"
 import {remote} from "electron"
 const {dialog} = remote
 import * as fs from "fs"
+import * as path from "path"
 import ImageFormat from "../formats/ImageFormat"
+import {appState} from "../state/AppState"
+import {UndoCommand, CompositeUndoCommand} from "../models/UndoStack"
+import {AddLayerCommand} from "../commands/LayerCommand"
 
 export
 type PictureExportFormat = "png"|"jpeg"|"bmp"
@@ -29,6 +34,17 @@ class PictureExport {
     }
   }
 
+  async showImportDialog() {
+    const filters = appState.imageFormats.map(format => ({name: format.title, extensions: format.extensions}))
+    const fileNames = await new Promise<string[]>((resolve, reject) => {
+      dialog.showOpenDialog({
+        title: "Export...",
+        filters,
+      }, resolve)
+    })
+    await this.import(fileNames)
+  }
+
   async export(fileName: string, format: ImageFormat) {
     this.textureToCanvas.loadTexture(this.picture.layerBlender.getBlendedTexture(), new Vec2(0))
     this.textureToCanvas.updateCanvas()
@@ -36,6 +52,29 @@ class PictureExport {
     const image = context.getImageData(0, 0, context.canvas.width, context.canvas.height)
     const buffer = await format.export(image)
     fs.writeFileSync(fileName, buffer)
+  }
+
+  async import(fileNames: string[]) {
+    if (fileNames.length == 0) {
+      return
+    }
+    const indexPath = this.picture.currentLayer ? this.picture.currentLayer.path() : [0]
+    const commands: UndoCommand[] = []
+
+    for (const fileName of fileNames) {
+      const ext = path.extname(fileName).slice(1)
+      const format = appState.imageFormats.find(f => f.extensions.includes(ext))
+      if (format) {
+        const buffer = fs.readFileSync(fileName)
+        const image = await format.import(buffer)
+        const layer = new ImageLayer(this.picture, {name: path.basename(fileName)})
+        layer.tiledTexture.putImage(new Vec2(), image)
+        commands.push(new AddLayerCommand(this.picture, indexPath, layer))
+      }
+    }
+
+    const compositeCommand = new CompositeUndoCommand("Import Images", commands)
+    this.picture.undoStack.redoAndPush(compositeCommand)
   }
 
   dispose() {

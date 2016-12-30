@@ -4,7 +4,7 @@ import React = require("react")
 import * as classNames from "classnames"
 import {Tree, TreeNode, NodeInfo} from "react-draggable-tree"
 import "react-draggable-tree/lib/index.css"
-import Layer, {GroupLayer} from "../../models/Layer"
+import Layer, {ImageLayer, GroupLayer} from "../../models/Layer"
 import {MoveLayerCommand, CopyLayerCommand, GroupLayerCommand, AddLayerCommand, RemoveLayerCommand, ChangeLayerPropsCommand} from "../../commands/LayerCommand"
 import ClickToEdit from "../components/ClickToEdit"
 import SVGIcon from "../components/SVGIcon"
@@ -159,7 +159,7 @@ class LayerPanel extends React.Component<{}, {}> {
     const picture = appState.currentPicture
     if (picture) {
       const path = picture.currentLayer ? picture.currentLayer.path() : [0]
-      picture.undoStack.redoAndPush(new AddLayerCommand(picture, path))
+      picture.undoStack.redoAndPush(new AddLayerCommand(picture, path, new ImageLayer(picture, {name: "Layer"})))
     }
   }
 

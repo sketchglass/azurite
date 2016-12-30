@@ -65,6 +65,14 @@ class MenuBar {
           type: "separator",
         },
         {
+          label: "Import...",
+          enabled: !!this.pictureState,
+          click: () => this.pictureState && this.pictureState.import(),
+        },
+        {
+          type: "separator",
+        },
+        {
           label: "Save",
           accelerator: "CmdOrCtrl+S",
           enabled: !!this.pictureState,
