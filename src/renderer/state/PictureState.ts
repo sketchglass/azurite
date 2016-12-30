@@ -1,8 +1,9 @@
 import {remote} from "electron"
 const {dialog} = remote
 import Picture from "../models/Picture"
+import ImageFormat from "../formats/ImageFormat"
 import {PictureSave} from "../services/PictureSave"
-import {PictureExport, PictureExportFormat} from "../services/PictureExport"
+import {PictureExport} from "../services/PictureExport"
 import {dialogLauncher} from "../views/dialogs/DialogLauncher"
 import {FlipPictureCommand, Rotate90PictureCommand, Rotate180PictureCommand, ChangePictureResolutionCommand} from "../commands/PictureCommand"
 import {SelectAllCommand, ClearSelectionCommand, InvertSelectionCommand} from "../commands/SelectionCommand"
@@ -53,7 +54,13 @@ class PictureState {
     })
   }
 
-  async export(format: PictureExportFormat) {
+  async import() {
+    const pictureExport = new PictureExport(this.picture)
+    await pictureExport.showImportDialog()
+    pictureExport.dispose()
+  }
+
+  async export(format: ImageFormat) {
     const pictureExport = new PictureExport(this.picture)
     await pictureExport.showExportDialog(format)
     pictureExport.dispose()

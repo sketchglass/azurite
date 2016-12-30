@@ -100,6 +100,13 @@ class TiledTexture {
     return cloned
   }
 
+  putImage(offset: Vec2, image: ImageData|HTMLVideoElement|HTMLImageElement|HTMLCanvasElement) {
+    const texture = new Texture(context, {size: new Vec2(image.width, image.height)})
+    texture.setImage(image)
+    this.drawTexture(texture, {transform: Transform.translate(offset), blendMode: "src"})
+    texture.dispose()
+  }
+
   drawTexture(src: Texture, opts: {transform: Transform, blendMode: BlendMode, bicubic?: boolean, srcRect?: Rect}) {
     const {blendMode, transform, bicubic, srcRect} = opts
     const rect = new Rect(new Vec2(), src.size).transform(transform)
