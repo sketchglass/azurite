@@ -92,6 +92,10 @@ class AppState {
     this.uiVisible = !this.uiVisible
   }
 
+  async bootstrap() {
+    await this.loadConfig()
+  }
+
   async loadConfig() {
     const {values} = config
     const win = remote.getCurrentWindow()
@@ -232,7 +236,6 @@ class AppState {
 
 export const appState = new AppState()
 appState.initTools()
-appState.loadConfig()
 
 IPCChannels.quit.listen().forEach(() => {
   appState.quit()
