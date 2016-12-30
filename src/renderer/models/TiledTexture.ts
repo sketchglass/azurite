@@ -1,6 +1,6 @@
 import * as zlib from "zlib"
 import {Vec2, Rect, Transform} from "paintvec"
-import {Texture, DrawTarget, TextureDrawTarget, ShapeModel, textureShader, RectShape, BlendMode} from "paintgl"
+import {Color, Texture, DrawTarget, TextureDrawTarget, ShapeModel, textureShader, RectShape, BlendMode} from "paintgl"
 import {context} from "../GLContext"
 import {drawTexture, drawVisibilityToBinary} from "../GLUtil"
 import {float32ArrayTo16} from "../../lib/Float"
@@ -19,6 +19,13 @@ class Tile {
       pixelType: "half-float",
       data
     })
+  }
+
+  colorAt(pos: Vec2) {
+    drawTexture(floatDrawTarget, this.texture, {blendMode: "src"})
+    const data = new Float32Array(4)
+    floatDrawTarget.readPixels(Rect.fromSize(pos, new Vec2(1)), data)
+    return new Color(data[0], data[1], data[2], data[3])
   }
 
   boundingRect() {
@@ -98,6 +105,16 @@ class TiledTexture {
       cloned.set(key, tile)
     }
     return cloned
+  }
+
+  colorAt(pos: Vec2) {
+    const tileKey = pos.divScalar(Tile.width).floor()
+    if (this.has(tileKey)) {
+      const tile = this.get(tileKey)
+      return tile.colorAt(pos.sub(tileKey.mulScalar(Tile.width)))
+    } else {
+      return new Color(0, 0, 0, 0)
+    }
   }
 
   putImage(offset: Vec2, image: ImageData|HTMLVideoElement|HTMLImageElement|HTMLCanvasElement) {

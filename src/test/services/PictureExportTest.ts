@@ -1,6 +1,7 @@
 import * as path from "path"
 import * as assert from "power-assert"
 import {Vec2} from "paintvec"
+import {Color} from "paintgl"
 import Picture from "../../renderer/models/Picture"
 import {ImageLayer} from "../../renderer/models/Layer"
 import {PictureExport} from "../../renderer/services/PictureExport"
@@ -46,7 +47,8 @@ describe("PictureExport", () => {
       const layer2 = children2[0] as ImageLayer
       assert(layer2.name == "test-export")
       assert(layer2.tiledTexture.keys().length > 0)
-      // TODO: check layer content
+      assert(layer2.tiledTexture.colorAt(new Vec2(5, 5)).equals(new Color(1, 0, 0, 1)))
+      assert(layer2.tiledTexture.colorAt(new Vec2(15, 30)).equals(new Color(0, 0, 1, 1)))
 
       picture1.dispose()
       picture2.dispose()
