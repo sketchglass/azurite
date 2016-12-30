@@ -49,11 +49,9 @@ module.exports = {
   plugins: [
     require("webpack-fail-plugin"),
   ],
-  postcss: function(webpack) {
+  postcss: (webpack) => {
     return [
-      require('postcss-import')({
-        addDependencyTo: webpack
-      }),
+      require('postcss-import'),
       require('postcss-url'),
       require('postcss-cssnext')({
         features: {
