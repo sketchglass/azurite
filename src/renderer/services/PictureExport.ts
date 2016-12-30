@@ -38,7 +38,7 @@ class PictureExport {
     const extensions = appState.imageFormats.map(f => f.extensions).reduce((a, b) => a.concat(b), [])
     const fileNames = await new Promise<string[]>((resolve, reject) => {
       dialog.showOpenDialog({
-        title: "Export...",
+        title: "Import...",
         filters: [{name: "Image", extensions}]
       }, resolve)
     })
@@ -60,12 +60,12 @@ class PictureExport {
     const commands: UndoCommand[] = []
 
     for (const fileName of fileNames) {
-      const ext = path.extname(fileName).slice(1)
-      const format = appState.imageFormats.find(f => f.extensions.includes(ext))
+      const ext = path.extname(fileName)
+      const format = appState.imageFormats.find(f => f.extensions.includes(ext.slice(1)))
       if (format) {
         const buffer = fs.readFileSync(fileName)
         const canvas = await format.import(buffer)
-        const layer = new ImageLayer(this.picture, {name: path.basename(fileName)})
+        const layer = new ImageLayer(this.picture, {name: path.basename(fileName, ext)})
         layer.tiledTexture.putImage(new Vec2(), canvas)
         commands.push(new AddLayerCommand(this.picture, indexPath, layer))
       }
