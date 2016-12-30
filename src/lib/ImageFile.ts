@@ -18,13 +18,7 @@ async function toBlob(canvas: HTMLCanvasElement, mimeType: string) {
   })
 }
 
-export async function encodeImageData(image: ImageData, mimeType: string) {
-  const canvas = document.createElement("canvas")
-  canvas.width = image.width
-  canvas.height = image.height
-  const context = canvas.getContext("2d")!
-  context.putImageData(image, 0, 0)
-
+export async function encodeImage(canvas: HTMLCanvasElement, mimeType: string) {
   const blob = await toBlob(canvas, mimeType)
   if (blob) {
     return blobToBuffer(blob)
@@ -46,7 +40,7 @@ function imageFromURL(url: string) {
   })
 }
 
-export async function decodeToImageData(buffer: Buffer, mimeType: string) {
+export async function decodeToImage(buffer: Buffer, mimeType: string) {
   const blob = new Blob([buffer], {type: mimeType})
   const url = URL.createObjectURL(blob)
   const image = await imageFromURL(url)
@@ -58,5 +52,5 @@ export async function decodeToImageData(buffer: Buffer, mimeType: string) {
   const context = canvas.getContext("2d")!
   context.drawImage(image, 0, 0)
 
-  return context.getImageData(0, 0, width, height)
+  return canvas
 }

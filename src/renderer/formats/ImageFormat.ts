@@ -1,4 +1,4 @@
-import {encodeImageData, decodeToImageData} from "../../lib/ImageFile"
+import {encodeImage, decodeToImage} from "../../lib/ImageFile"
 
 abstract class ImageFormat {
   abstract title: string
@@ -6,10 +6,10 @@ abstract class ImageFormat {
   abstract extensions: string[]
 
   async import(buffer: Buffer) {
-    return await decodeToImageData(buffer, this.mimeType)
+    return await decodeToImage(buffer, this.mimeType)
   }
-  async export(image: ImageData) {
-    return await encodeImageData(image, this.mimeType)
+  async export(canvas: HTMLCanvasElement) {
+    return await encodeImage(canvas, this.mimeType)
   }
 }
 export default ImageFormat

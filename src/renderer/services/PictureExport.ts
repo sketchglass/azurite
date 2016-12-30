@@ -48,9 +48,7 @@ class PictureExport {
   async export(fileName: string, format: ImageFormat) {
     this.textureToCanvas.loadTexture(this.picture.layerBlender.getBlendedTexture(), new Vec2(0))
     this.textureToCanvas.updateCanvas()
-    const {context} = this.textureToCanvas
-    const image = context.getImageData(0, 0, context.canvas.width, context.canvas.height)
-    const buffer = await format.export(image)
+    const buffer = await format.export(this.textureToCanvas.canvas)
     fs.writeFileSync(fileName, buffer)
   }
 
@@ -66,9 +64,9 @@ class PictureExport {
       const format = appState.imageFormats.find(f => f.extensions.includes(ext))
       if (format) {
         const buffer = fs.readFileSync(fileName)
-        const image = await format.import(buffer)
+        const canvas = await format.import(buffer)
         const layer = new ImageLayer(this.picture, {name: path.basename(fileName)})
-        layer.tiledTexture.putImage(new Vec2(), image)
+        layer.tiledTexture.putImage(new Vec2(), canvas)
         commands.push(new AddLayerCommand(this.picture, indexPath, layer))
       }
     }
