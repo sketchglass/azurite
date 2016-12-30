@@ -7,6 +7,7 @@ mocha.setup("bdd")
 
 require("./models/PictureTest")
 require("./models/LayerTest")
+require("./services/PictureExportTest")
 
 mocha.run(failCount => {
   ipcRenderer.send("testDone", failCount)

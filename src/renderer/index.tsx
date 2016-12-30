@@ -7,6 +7,8 @@ import {appState} from "./state/AppState"
 webFrame.setVisualZoomLevelLimits(1, 1)
 webFrame.setLayoutZoomLevelLimits(1, 1)
 
+appState.bootstrap()
+
 window.addEventListener("DOMContentLoaded", () => {
   ReactDOM.render(<App />, document.getElementById("app"))
 })
