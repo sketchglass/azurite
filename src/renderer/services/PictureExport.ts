@@ -35,11 +35,11 @@ class PictureExport {
   }
 
   async showImportDialog() {
-    const filters = appState.imageFormats.map(format => ({name: format.title, extensions: format.extensions}))
+    const extensions = appState.imageFormats.map(f => f.extensions).reduce((a, b) => a.concat(b), [])
     const fileNames = await new Promise<string[]>((resolve, reject) => {
       dialog.showOpenDialog({
         title: "Export...",
-        filters,
+        filters: [{name: "Image", extensions}]
       }, resolve)
     })
     await this.import(fileNames)
