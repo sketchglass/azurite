@@ -17,6 +17,7 @@ import {HSVColor} from "../../lib/Color"
 import {PictureState} from "./PictureState"
 import {config, ConfigValues} from "./Config"
 import * as IPCChannels from "../../common/IPCChannels"
+import ImageFormat, {JPEGImageFormat, PNGImageFormat, BMPImageFormat} from "../formats/ImageFormat"
 
 export
 class AppState {
@@ -50,6 +51,12 @@ class AppState {
   }
 
   @observable uiVisible = true
+
+  readonly imageFormats: ImageFormat[] = [
+    new JPEGImageFormat(),
+    new PNGImageFormat(),
+    new BMPImageFormat(),
+  ]
 
   constructor() {
     reaction(() => [this.currentPictureState, this.currentTool], () => {

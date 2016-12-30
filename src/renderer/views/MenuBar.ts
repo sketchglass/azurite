@@ -78,23 +78,13 @@ class MenuBar {
         },
         {
           label: "Export",
-          submenu: [
-            {
-              label: "PNG...",
+          submenu: appState.imageFormats.map(format => {
+            return {
+              label: `${format.title}...`,
               enabled: !!this.pictureState,
-              click: () => this.pictureState && this.pictureState.export("png"),
-            },
-            {
-              label: "JPEG...",
-              enabled: !!this.pictureState,
-              click: () => this.pictureState && this.pictureState.export("jpeg"),
-            },
-            {
-              label: "BMP...",
-              enabled: !!this.pictureState,
-              click: () => this.pictureState && this.pictureState.export("bmp"),
-            },
-          ],
+              click: () => this.pictureState && this.pictureState.export(format),
+            }
+          }),
         },
         {
           type: "separator",

@@ -7,7 +7,7 @@ const textureToCanvasShader = {
     uniform sampler2D texture;
     uniform vec4 background;
     void fragmentMain(vec2 pos, vec2 uv, out vec4 outColor) {
-      vec4 texColor = texture2D(texture, vTexCoord);
+      vec4 texColor = texture2D(texture, uv);
       vec4 color = texColor + background * (1.0 - texColor.a);
       vec4 nonPremultColor = vec4(color.rgb / color.a, color.a);
       outColor = nonPremultColor;
