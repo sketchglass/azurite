@@ -47,8 +47,8 @@ describe("PictureExport", () => {
       const layer2 = children2[0] as ImageLayer
       assert(layer2.name == "test-export")
       assert(layer2.tiledTexture.keys().length > 0)
-      assert(layer2.tiledTexture.colorAt(new Vec2(5, 5)).equals(new Color(1, 0, 0, 1)))
-      assert(layer2.tiledTexture.colorAt(new Vec2(15, 30)).equals(new Color(0, 0, 1, 1)))
+      assert.deepEqual(layer2.tiledTexture.colorAt(new Vec2(5, 5)), new Color(1, 0, 0, 1))
+      assert.deepEqual(layer2.tiledTexture.colorAt(new Vec2(15, 30)), new Color(0, 0, 1, 1))
 
       picture1.dispose()
       picture2.dispose()
