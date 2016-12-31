@@ -28,12 +28,11 @@ module.exports = {
       },
       {
         test: /\.tsx?$/,
-        exclude: /\/test\//,
+        exclude: /Test\.tsx?$/,
         loader: "babel-loader?plugins[]=glslify!ts-loader",
       },
       {
-        test: /\.tsx?$/,
-        include: /\/test\//,
+        test: /Test\.tsx?$/,
         loader: "babel-loader?plugins[]=espower!ts-loader",
       },
       {
