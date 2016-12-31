@@ -5,6 +5,10 @@ class IndexPath {
   constructor(public indices: number[] = []) {
   }
 
+  get empty() {
+    return this.length == 0
+  }
+
   get length() {
     return this.indices.length
   }
@@ -50,5 +54,26 @@ class IndexPath {
         return diff
       }
     }
+  }
+
+  clone() {
+    return new IndexPath([...this.indices])
+  }
+
+  isSibling(other: IndexPath) {
+    return this.parent && other.parent && this.parent.equals(other.parent)
+  }
+
+  afterRemove(pathsToRemove: IndexPath[]) {
+    const newPath = this.clone()
+    for (let len = this.length; len > 0; --len) {
+      const subPath = this.slice(0, len)
+      for (const pathToRemove of pathsToRemove) {
+        if (pathToRemove.isSibling(subPath) && pathToRemove.last < subPath.last) {
+          newPath.indices[len - 1]--
+        }
+      }
+    }
+    return newPath
   }
 }

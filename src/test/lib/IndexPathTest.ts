@@ -3,6 +3,15 @@ import IndexPath from "../../lib/IndexPath"
 
 describe("IndexPath", () => {
 
+  describe("empty", () => {
+    it("returns if empty", () => {
+      const path1 = new IndexPath([1, 2, 3])
+      const path2 = new IndexPath([])
+      assert(!path1.empty)
+      assert(path2.empty)
+    })
+  })
+
   describe("length", () => {
     it("returns its length", () => {
       const path = new IndexPath([1, 2, 3])
@@ -71,6 +80,37 @@ describe("IndexPath", () => {
       assert(path1.compare(path3) < 0)
       assert(path4.compare(path1) < 0)
       assert(path1.compare(path4) > 0)
+    })
+  })
+
+  describe("clone", () => {
+    it("clones path", () => {
+      const path = new IndexPath([1, 2, 3])
+      const cloned = path.clone()
+      assert(cloned != path)
+      assert.deepEqual(cloned.indices, path.indices)
+    })
+  })
+
+  describe("isSibling", () => {
+    it("returns if sibling", () => {
+      const path1 = new IndexPath([1, 2, 3])
+      const path2 = new IndexPath([1, 2, 4])
+      const path3 = new IndexPath([3, 2, 1])
+      assert(path1.isSibling(path2))
+      assert(!path1.isSibling(path3))
+    })
+  })
+
+  describe("afterRemove", () => {
+    it("returns new index path after some items are removed", () => {
+      const path = new IndexPath([1, 2, 3, 4])
+      const newPath = path.afterRemove([
+        new IndexPath([1, 2, 1]),
+        new IndexPath([1, 2, 2]),
+        new IndexPath([1, 2, 5])
+      ])
+      assert.deepEqual(newPath.indices, [1, 2, 1, 4])
     })
   })
 })

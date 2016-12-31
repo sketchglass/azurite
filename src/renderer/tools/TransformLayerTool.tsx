@@ -96,7 +96,7 @@ class TransformLayerTool extends RectMoveTool {
 
   endEditing() {
     if (this.modal && this.picture && this.currentImageLayer && this.originalRect) {
-      const command = new TransformLayerCommand(this.picture, this.currentImageLayer.path(), this.transform, false)
+      const command = new TransformLayerCommand(this.picture, this.currentImageLayer.path, this.transform, false)
       this.picture.undoStack.redoAndPush(command)
     }
     this.cancelEditing()

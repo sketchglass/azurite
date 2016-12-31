@@ -127,7 +127,7 @@ class ChangePictureResolutionCommand {
     if (oldDimension.width != dimension.width || oldDimension.height != dimension.height) {
       const transform = Transform.scale(new Vec2(dimension.width / oldDimension.width, dimension.height / oldDimension.height))
       this.picture.forEachLayer(layer => {
-        const transformCommand = new TransformLayerCommand(this.picture, layer.path(), transform, false)
+        const transformCommand = new TransformLayerCommand(this.picture, layer.path, transform, false)
         this.transformCommands.push(transformCommand)
         transformCommand.redo()
       })

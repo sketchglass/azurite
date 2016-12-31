@@ -30,7 +30,7 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
     if (layer) {
       const {picture} = layer
       const blendMode = (e.target as HTMLSelectElement).value as LayerBlendMode
-      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), "Change Layer Blend Mode", {blendMode}))
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path, "Change Layer Blend Mode", {blendMode}))
     }
   })
   onOpaictyChangeBegin = action(() => {
@@ -49,7 +49,7 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
       const {picture} = layer
       const opacity = value / 100
       layer.opacity = this.oldOpacity
-      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), "Change Layer Opacity", {opacity}))
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path, "Change Layer Opacity", {opacity}))
     }
   })
   onPreserveOpacityChange = action((e: React.FormEvent<HTMLInputElement>) => {
@@ -57,7 +57,7 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
     if (layer) {
       const {picture} = layer
       const preserveOpacity = (e.target as HTMLInputElement).checked
-      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), "Change Layer Preserve Opacity", {preserveOpacity}))
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path, "Change Layer Preserve Opacity", {preserveOpacity}))
     }
   })
   onClippingGroupChange = action((e: React.FormEvent<HTMLInputElement>) => {
@@ -65,7 +65,7 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
     if (layer) {
       const {picture} = layer
       const clippingGroup = (e.target as HTMLInputElement).checked
-      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), "Change Layer Clipping Group", {clippingGroup}))
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path, "Change Layer Clipping Group", {clippingGroup}))
     }
   })
 

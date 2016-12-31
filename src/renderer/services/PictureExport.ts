@@ -10,6 +10,7 @@ import ImageFormat from "../formats/ImageFormat"
 import {appState} from "../state/AppState"
 import {UndoCommand, CompositeUndoCommand} from "../models/UndoStack"
 import {AddLayerCommand} from "../commands/LayerCommand"
+import IndexPath from "../../lib/IndexPath"
 
 export
 type PictureExportFormat = "png"|"jpeg"|"bmp"
@@ -56,7 +57,7 @@ class PictureExport {
     if (fileNames.length == 0) {
       return
     }
-    const indexPath = this.picture.currentLayer ? this.picture.currentLayer.path() : [0]
+    const indexPath = this.picture.currentLayer ? this.picture.currentLayer.path : new IndexPath([0])
     const commands: UndoCommand[] = []
 
     for (const fileName of fileNames) {

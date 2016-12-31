@@ -1,6 +1,7 @@
 import {observable, reaction, action, IArrayChange, IArraySplice} from "mobx"
 import Picture from "./Picture"
 import TiledTexture, {TiledTextureData} from "./TiledTexture"
+import IndexPath from "../../lib/IndexPath"
 
 export
 type LayerBlendMode = "normal" | "plus" | "multiply" // TODO: add more
@@ -49,15 +50,15 @@ abstract class Layer implements LayerProps {
   abstract toData(): LayerData
   abstract clone(): Layer
 
-  path(): number[] {
+  get path(): IndexPath {
     if (this.parent) {
       const index = this.parent.children.indexOf(this)
       if (index < 0) {
         throw new Error("cannot find in children list")
       }
-      return [...this.parent.path(), index]
+      return this.parent.path.child(index)
     } else {
-      return []
+      return new IndexPath([])
     }
   }
 
@@ -139,18 +140,18 @@ class GroupLayer extends Layer {
     }
   }
 
-  descendantFromPath(path: number[]): Layer|undefined {
-    if (path.length == 0) {
+  descendantForPath(path: IndexPath): Layer|undefined {
+    if (path.empty) {
       return this
     }
     const {children} = this
-    const index = path[0]
+    const index = path.at(0)
     if (0 <= index && index < children.length) {
       const child = this.children[index]
       if (path.length == 1) {
         return child
       } else if (child instanceof GroupLayer) {
-        return child.descendantFromPath(path.slice(1))
+        return child.descendantForPath(path.slice(1))
       }
     }
   }
