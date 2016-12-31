@@ -1,7 +1,7 @@
 import * as assert from 'power-assert'
 import Picture from "../../renderer/models/Picture"
 import {GroupLayer, ImageLayer} from "../../renderer/models/Layer"
-import {MoveLayerCommand, CopyLayerCommand, GroupLayerCommand, AddLayerCommand, RemoveLayerCommand} from "../../renderer/commands/LayerCommand"
+import {MoveLayerCommand, CopyLayerCommand, GroupLayerCommand, AddLayerCommand, RemoveLayerCommand, ChangeLayerPropsCommand} from "../../renderer/commands/LayerCommand"
 
 interface LayerInfo {
   name: string
@@ -238,6 +238,51 @@ describe("Layer commands", () => {
         picture.undoStack.redoAndPush(command)
         picture.undoStack.undo()
         assertLayerStructure(picture.rootLayer, originalStructure)
+      })
+    })
+  })
+
+  describe("ChangeLayerPropsCommand", () => {
+    let command: ChangeLayerPropsCommand
+    beforeEach(() => {
+      command = new ChangeLayerPropsCommand(
+        picture,
+        [1, 0],
+        "Change Props",
+        {
+          name: "Foobar",
+          visible: false,
+          blendMode: "plus",
+          opacity: 0.9,
+          preserveOpacity: true,
+          clippingGroup: true
+        }
+      )
+    })
+    describe("redo", () => {
+      it("changes layer props", () => {
+        picture.undoStack.redoAndPush(command)
+        const layer = picture.layerFromPath([1, 0])!
+        assert(layer.name == "Foobar")
+        assert(layer.visible == false)
+        assert(layer.blendMode == "plus")
+        assert(layer.opacity == 0.9)
+        assert(layer.preserveOpacity == true)
+        assert(layer.clippingGroup == true)
+      })
+    })
+
+    describe("undo", () => {
+      it("restores layer", () => {
+        picture.undoStack.redoAndPush(command)
+        picture.undoStack.undo()
+        const layer = picture.layerFromPath([1, 0])!
+        assert(layer.name == "3")
+        assert(layer.visible == true)
+        assert(layer.blendMode == "normal")
+        assert(layer.opacity == 1)
+        assert(layer.preserveOpacity == false)
+        assert(layer.clippingGroup == false)
       })
     })
   })
