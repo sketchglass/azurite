@@ -1,6 +1,6 @@
 import * as zlib from "zlib"
 import {Vec2, Rect, Transform} from "paintvec"
-import {Color, Texture, DrawTarget, TextureDrawTarget, ShapeModel, textureShader, RectShape, BlendMode} from "paintgl"
+import {Color, Texture, DrawTarget, TextureDrawTarget, BlendMode} from "paintgl"
 import {context} from "../GLContext"
 import {drawTexture, drawVisibilityToBinary} from "../GLUtil"
 import {float32ArrayTo16} from "../../lib/Float"
@@ -35,8 +35,7 @@ class Tile {
   }
 
   toData() {
-    tileModel.uniforms = {texture: this.texture}
-    floatDrawTarget.draw(tileModel)
+    drawTexture(floatDrawTarget, this.texture, {blendMode: "src"})
     floatDrawTarget.readPixels(Tile.rect, floatData)
     return float32ArrayTo16(floatData)
   }
@@ -306,12 +305,6 @@ function stringToKey(str: string) {
   const strs = str.split(",")
   return new Vec2(parseInt(strs[0]), parseInt(strs[1]))
 }
-
-const tileModel = new ShapeModel(context, {
-  shape: new RectShape(context, {usage: "static", rect: Tile.rect}),
-  shader: textureShader,
-  blendMode: "src",
-})
 
 const floatData = new Float32Array(Tile.width * Tile.width * 4)
 const floatTile = new Texture(context, {size: Tile.size, pixelType: "float"})
