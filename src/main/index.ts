@@ -73,6 +73,12 @@ async function openWindow() {
     IPCChannels.tabletUp.send(win.webContents, ev)
   })
 
+  for (const ev of ["resize", "enter-full-screen", "leave-full-screen", "maximize", "unmaximize"]) {
+    win.on(ev, () => {
+      IPCChannels.windowResize.send(win.webContents, undefined)
+    })
+  }
+
   win.on("close", e => {
     e.preventDefault()
     IPCChannels.quit.send(win.webContents, undefined)

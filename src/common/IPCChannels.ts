@@ -7,3 +7,4 @@ export const tabletMove = new IPCToRenderer<TabletEvent>("tabletMove")
 export const tabletUp = new IPCToRenderer<TabletEvent>("tabletUp")
 
 export const quit = new IPCToRenderer<void>("quit")
+export const windowResize = new IPCToRenderer<void>("windowResize")

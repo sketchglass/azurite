@@ -138,7 +138,7 @@ class AppState {
     const values: ConfigValues = {
       window: {
         fullscreen: win.isFullScreen(),
-        bounds: win.getBounds(),
+        bounds: (win.isFullScreen() || win.isMaximized()) ? config.values.window.bounds : win.getBounds(),
         maximized: win.isMaximized(),
       },
       tools: {},
@@ -237,6 +237,9 @@ class AppState {
 export const appState = new AppState()
 appState.initTools()
 
+IPCChannels.windowResize.listen().forEach(() => {
+  appState.saveConfig()
+})
 IPCChannels.quit.listen().forEach(() => {
   appState.quit()
 })
