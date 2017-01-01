@@ -7,49 +7,28 @@ import Layer, {LayerProps, GroupLayer, ImageLayer} from "../models/Layer"
 import TiledTexture from "../models/TiledTexture"
 import LayerTransform from "../services/LayerTransform"
 import {SelectionChangeCommand} from "./SelectionCommand"
+import IndexPath from "../../lib/IndexPath"
 
-function getSiblingsAndIndex(picture: Picture, path: number[]): [IObservableArray<Layer>, number] {
-  const parent = picture.layerFromPath(path.slice(0, -1))
+function getSiblingsAndIndex(picture: Picture, path: IndexPath): [IObservableArray<Layer>, number] {
+  const parentPath = path.parent
+  if (!parentPath) {
+    throw new Error("invalid path")
+  }
+  const parent = picture.layerForPath(parentPath)
   if (!(parent && parent instanceof GroupLayer)) {
     throw new Error("invalid path")
   }
-  const index = path[path.length - 1]
+  const index = path.last
   return [parent.children, index]
-}
-
-function isUpperSibling(path: number[], from: number[]) {
-  if (path.length != from.length) {
-    return false
-  }
-  const count = path.length
-  for (let i = 0; i < count - 1; ++i) {
-    if (path[i] != from[i]) {
-      return false
-    }
-  }
-  return path[count - 1] < from[count - 1]
-}
-
-function dstPathAfterMove(srcPaths: number[][], dstPath: number[]) {
-  const newDstPath = [...dstPath]
-  for (let len = dstPath.length; len > 0; --len) {
-    const subPath = dstPath.slice(0, len)
-    for (const srcPath of srcPaths) {
-      if (isUpperSibling(srcPath, subPath)) {
-        newDstPath[len - 1]--
-      }
-    }
-  }
-  return newDstPath
 }
 
 export
 class MoveLayerCommand implements UndoCommand {
-  dstPathAfter = dstPathAfterMove(this.srcPaths, this.dstPath)
+  dstPathAfter = this.dstPath.afterRemove(this.srcPaths)
 
   title = "Move Layers"
 
-  constructor(public readonly picture: Picture, public readonly srcPaths: number[][], public readonly dstPath: number[]) {
+  constructor(public readonly picture: Picture, public readonly srcPaths: IndexPath[], public readonly dstPath: IndexPath) {
   }
 
   undo() {
@@ -81,7 +60,7 @@ export
 class CopyLayerCommand implements UndoCommand {
   title = "Copy Layers"
 
-  constructor(public readonly picture: Picture, public readonly srcPaths: number[][], public readonly dstPath: number[]) {
+  constructor(public readonly picture: Picture, public readonly srcPaths: IndexPath[], public readonly dstPath: IndexPath) {
   }
 
   undo() {
@@ -106,7 +85,7 @@ export
 class GroupLayerCommand implements UndoCommand {
   title = "Group Layers"
 
-  constructor(public readonly picture: Picture, public readonly srcPaths: number[][]) {
+  constructor(public readonly picture: Picture, public readonly srcPaths: IndexPath[]) {
   }
 
   undo() {
@@ -146,13 +125,13 @@ export
 class AddLayerCommand implements UndoCommand {
   title = "Add Layer"
 
-  constructor(public readonly picture: Picture, public readonly path: number[], public layer: Layer) {
+  constructor(public readonly picture: Picture, public readonly path: IndexPath, public layer: Layer) {
   }
 
   undo() {
     const [siblings, index] = getSiblingsAndIndex(this.picture, this.path)
     siblings.splice(index, 1)
-    const nextLayer = this.picture.layerFromPath(this.path)
+    const nextLayer = this.picture.layerForPath(this.path)
     if (nextLayer) {
       this.picture.selectedLayers.replace([nextLayer])
     }
@@ -169,7 +148,7 @@ class RemoveLayerCommand implements UndoCommand {
   title = "Remove Layers"
 
   removedLayers: Layer[] = []
-  constructor(public picture: Picture, public paths: number[][]) {
+  constructor(public picture: Picture, public paths: IndexPath[]) {
   }
   undo() {
     for (const [i, path] of this.paths.entries()) {
@@ -190,12 +169,15 @@ class RemoveLayerCommand implements UndoCommand {
   }
   reselect() {
     const nextPath = this.paths[0]
-    const parentPath = nextPath.slice(0, -1)
-    const prevPath = [...parentPath, nextPath[nextPath.length - 1] - 1]
-    const nextLayer = this.picture.layerFromPath(nextPath)
-    const prevLayer = this.picture.layerFromPath(prevPath)
-    const parentLayer = this.picture.layerFromPath(parentPath)
-    const selectedLayers = nextLayer ? [nextLayer] : prevLayer ? [prevLayer] : parentLayer ? [parentLayer] : []
+    const parentPath = nextPath.parent
+    if (!parentPath) {
+      return
+    }
+    const prevPath = parentPath.child(nextPath.last - 1)
+    const nextLayer = this.picture.layerForPath(nextPath)
+    const prevLayer = this.picture.layerForPath(prevPath)
+    const parentLayer = this.picture.layerForPath(parentPath)
+    const selectedLayers = nextLayer ? [nextLayer] : prevLayer ? [prevLayer] : (parentLayer && parentLayer.parent) ? [parentLayer] : []
     this.picture.selectedLayers.replace(selectedLayers)
   }
 }
@@ -204,16 +186,16 @@ export
 class ChangeLayerPropsCommand implements UndoCommand {
   oldProps: LayerProps
 
-  constructor(public picture: Picture, public path: number[], public title: string, public props: Partial<LayerProps>) {
+  constructor(public picture: Picture, public path: IndexPath, public title: string, public props: Partial<LayerProps>) {
   }
   undo() {
-    const layer = this.picture.layerFromPath(this.path)
+    const layer = this.picture.layerForPath(this.path)
     if (layer) {
       Object.assign(layer, this.oldProps)
     }
   }
   redo() {
-    const layer = this.picture.layerFromPath(this.path)
+    const layer = this.picture.layerForPath(this.path)
     if (layer) {
       this.oldProps = layer.props
       Object.assign(layer, this.props)
@@ -225,7 +207,7 @@ export
 class ChangeLayerImageCommand implements UndoCommand {
   oldTiles = new TiledTexture()
 
-  constructor(public picture: Picture, public path: number[], public title: string, public newTiles: TiledTexture, public rect?: Rect) {
+  constructor(public picture: Picture, public path: IndexPath, public title: string, public newTiles: TiledTexture, public rect?: Rect) {
   }
 
   private notifyChange(layer: ImageLayer) {
@@ -234,7 +216,7 @@ class ChangeLayerImageCommand implements UndoCommand {
   }
 
   undo() {
-    const layer = this.picture.layerFromPath(this.path)
+    const layer = this.picture.layerForPath(this.path)
     if (!(layer && layer instanceof ImageLayer)) {
       return
     }
@@ -249,7 +231,7 @@ class ChangeLayerImageCommand implements UndoCommand {
   }
 
   redo() {
-    const layer = this.picture.layerFromPath(this.path)
+    const layer = this.picture.layerForPath(this.path)
     if (!(layer && layer instanceof ImageLayer)) {
       return
     }
@@ -269,14 +251,14 @@ class TransformLayerCommand implements UndoCommand {
   oldTiledTexture: TiledTexture|undefined
   selectionChangeCommand: SelectionChangeCommand|undefined
 
-  constructor(public picture: Picture, public path: number[], public transform: Transform, public transformsSelection: boolean) {
+  constructor(public picture: Picture, public path: IndexPath, public transform: Transform, public transformsSelection: boolean) {
   }
 
   undo() {
     if (this.selectionChangeCommand) {
       this.selectionChangeCommand.undo()
     }
-    const layer = this.picture.layerFromPath(this.path)
+    const layer = this.picture.layerForPath(this.path)
     if (!(layer && layer instanceof ImageLayer)) {
       return
     }
@@ -290,7 +272,7 @@ class TransformLayerCommand implements UndoCommand {
   }
 
   redo() {
-    const layer = this.picture.layerFromPath(this.path)
+    const layer = this.picture.layerForPath(this.path)
     if (!(layer && layer instanceof ImageLayer)) {
       return
     }

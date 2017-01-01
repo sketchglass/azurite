@@ -10,6 +10,7 @@ import ClickToEdit from "../components/ClickToEdit"
 import SVGIcon from "../components/SVGIcon"
 import LayerDetail from "../LayerDetail"
 import {appState} from "../../state/AppState"
+import IndexPath from "../../../lib/IndexPath"
 
 interface LayerNode extends TreeNode {
   layer: Layer
@@ -45,7 +46,7 @@ const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
 
   const rename = (name: string) => {
     if (layer.name != name) {
-      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), "Rename Layer", {name}))
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path, "Rename Layer", {name}))
     }
   }
 
@@ -54,7 +55,7 @@ const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
   const onVisibleToggle = (e: React.FormEvent<HTMLInputElement>) => {
     const visible = (e.target as HTMLInputElement).checked
     if (layer.visible != visible) {
-      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path(), "Change Layer Visibility", {visible}))
+      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path, "Change Layer Visibility", {visible}))
     }
   }
   const onVisibleClick = (e: React.MouseEvent<HTMLInputElement>) => {
@@ -92,8 +93,8 @@ class LayerPanel extends React.Component<{}, {}> {
   onMove = action((src: NodeInfo<LayerNode>[], dest: NodeInfo<LayerNode>, destIndex: number) => {
     const picture = appState.currentPicture
     if (picture) {
-      const srcPaths = src.map(info => info.path)
-      const destPath = [...dest.path, destIndex]
+      const srcPaths = src.map(info => new IndexPath(info.path))
+      const destPath = new IndexPath(dest.path).child(destIndex)
       const command = new MoveLayerCommand(picture, srcPaths, destPath)
       picture.undoStack.redoAndPush(command)
     }
@@ -101,14 +102,14 @@ class LayerPanel extends React.Component<{}, {}> {
   onCopy = action((src: NodeInfo<LayerNode>[], dest: NodeInfo<LayerNode>, destIndex: number) => {
     const picture = appState.currentPicture
     if (picture) {
-      const srcPaths = src.map(info => info.path)
-      const destPath = [...dest.path, destIndex]
+      const srcPaths = src.map(info => new IndexPath(info.path))
+      const destPath = new IndexPath(dest.path).child(destIndex)
       const command = new CopyLayerCommand(picture, srcPaths, destPath)
       picture.undoStack.redoAndPush(command)
       const copiedLayers: Layer[] = []
       for (let i = 0; i < srcPaths.length; ++i) {
-        const path = [...dest.path, destIndex + i]
-        const layer = picture.layerFromPath(path)!
+        const path = new IndexPath(dest.path).child(destIndex + i)
+        const layer = picture.layerForPath(path)!
         copiedLayers.push(layer)
       }
       picture.selectedLayers.replace(copiedLayers)
@@ -149,7 +150,7 @@ class LayerPanel extends React.Component<{}, {}> {
     const picture = appState.currentPicture
     if (picture) {
       if (picture.selectedLayers.length > 0) {
-        const paths = picture.selectedLayers.map(l => l.path())
+        const paths = picture.selectedLayers.map(l => l.path)
         picture.undoStack.redoAndPush(new GroupLayerCommand(picture, paths))
       }
     }
@@ -158,7 +159,7 @@ class LayerPanel extends React.Component<{}, {}> {
   @action addLayer() {
     const picture = appState.currentPicture
     if (picture) {
-      const path = picture.currentLayer ? picture.currentLayer.path() : [0]
+      const path = picture.currentLayer ? picture.currentLayer.path : new IndexPath([0])
       picture.undoStack.redoAndPush(new AddLayerCommand(picture, path, new ImageLayer(picture, {name: "Layer"})))
     }
   }
@@ -166,7 +167,7 @@ class LayerPanel extends React.Component<{}, {}> {
   @action removeLayer() {
     const picture = appState.currentPicture
     if (picture) {
-      const paths = picture.selectedLayers.map(l => l.path())
+      const paths = picture.selectedLayers.map(l => l.path)
       picture.undoStack.redoAndPush(new RemoveLayerCommand(picture, paths))
     }
   }

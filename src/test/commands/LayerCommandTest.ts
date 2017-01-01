@@ -2,6 +2,7 @@ import * as assert from 'power-assert'
 import Picture from "../../renderer/models/Picture"
 import {GroupLayer, ImageLayer} from "../../renderer/models/Layer"
 import {MoveLayerCommand, CopyLayerCommand, GroupLayerCommand, AddLayerCommand, RemoveLayerCommand, ChangeLayerPropsCommand} from "../../renderer/commands/LayerCommand"
+import IndexPath from "../../lib/IndexPath"
 
 interface LayerInfo {
   name: string
@@ -60,8 +61,8 @@ describe("Layer commands", () => {
     beforeEach(() => {
       command = new MoveLayerCommand(
         picture,
-        [[1, 0], [1, 1, 0]],
-        [1, 2]
+        [new IndexPath([1, 0]), new IndexPath([1, 1, 0])],
+        new IndexPath([1, 2])
       )
     })
 
@@ -97,8 +98,8 @@ describe("Layer commands", () => {
     beforeEach(() => {
       command = new CopyLayerCommand(
         picture,
-        [[1, 0], [1, 1, 0]],
-        [1, 2]
+        [new IndexPath([1, 0]), new IndexPath([1, 1, 0])],
+        new IndexPath([1, 2])
       )
     })
 
@@ -137,7 +138,7 @@ describe("Layer commands", () => {
     beforeEach(() => {
       command = new GroupLayerCommand(
         picture,
-        [[1, 0], [1, 1, 0]],
+        [new IndexPath([1, 0]), new IndexPath([1, 1, 0])],
       )
     })
 
@@ -175,7 +176,7 @@ describe("Layer commands", () => {
     beforeEach(() => {
       command = new AddLayerCommand(
         picture,
-        [1, 1],
+        new IndexPath([1, 1]),
         new ImageLayer(picture, {name: "Foo"})
       )
     })
@@ -213,7 +214,7 @@ describe("Layer commands", () => {
     beforeEach(() => {
       command = new RemoveLayerCommand(
         picture,
-        [[1, 0], [1, 1, 1]],
+        [new IndexPath([1, 0]), new IndexPath([1, 1, 1])],
       )
     })
 
@@ -247,7 +248,7 @@ describe("Layer commands", () => {
     beforeEach(() => {
       command = new ChangeLayerPropsCommand(
         picture,
-        [1, 0],
+        new IndexPath([1, 0]),
         "Change Props",
         {
           name: "Foobar",
@@ -262,7 +263,7 @@ describe("Layer commands", () => {
     describe("redo", () => {
       it("changes layer props", () => {
         picture.undoStack.redoAndPush(command)
-        const layer = picture.layerFromPath([1, 0])!
+        const layer = picture.layerForPath(new IndexPath([1, 0]))!
         assert(layer.name == "Foobar")
         assert(layer.visible == false)
         assert(layer.blendMode == "plus")
@@ -276,7 +277,7 @@ describe("Layer commands", () => {
       it("restores layer", () => {
         picture.undoStack.redoAndPush(command)
         picture.undoStack.undo()
-        const layer = picture.layerFromPath([1, 0])!
+        const layer = picture.layerForPath(new IndexPath([1, 0]))!
         assert(layer.name == "3")
         assert(layer.visible == true)
         assert(layer.blendMode == "normal")

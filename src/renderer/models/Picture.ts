@@ -6,6 +6,7 @@ import LayerBlender from "./LayerBlender"
 import {UndoStack} from "./UndoStack"
 import {Navigation} from "./Navigation"
 import Selection from "./Selection"
+import IndexPath from "../../lib/IndexPath"
 
 export
 interface PictureData {
@@ -95,8 +96,8 @@ class Picture {
     }
   }
 
-  layerFromPath(path: number[]) {
-    return this.rootLayer.descendantFromPath(path)
+  layerForPath(path: IndexPath) {
+    return this.rootLayer.descendantForPath(path)
   }
 
   forEachLayer(action: (layer: Layer) => void) {

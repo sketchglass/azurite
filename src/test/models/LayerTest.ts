@@ -1,6 +1,7 @@
 import * as assert from 'power-assert'
 import Picture from "../../renderer/models/Picture"
 import Layer, {GroupLayer, ImageLayer} from "../../renderer/models/Layer"
+import IndexPath from "../../lib/IndexPath"
 import * as msgpack from "msgpack-lite"
 
 function createImageLayer(picture: Picture) {
@@ -128,10 +129,10 @@ describe("GroupLayer", () => {
   })
   describe("descendantFromPath", () => {
     it("finds describe from path", () => {
-      assert(layer.descendantFromPath([]) === layer)
-      assert(layer.descendantFromPath([0]) === layer.children[0])
-      assert(layer.descendantFromPath([1, 1]) === (layer.children[1] as GroupLayer).children[1])
-      assert(layer.descendantFromPath([2, 2, 3]) === undefined)
+      assert(layer.descendantForPath(new IndexPath([])) === layer)
+      assert(layer.descendantForPath(new IndexPath([0])) === layer.children[0])
+      assert(layer.descendantForPath(new IndexPath([1, 1])) === (layer.children[1] as GroupLayer).children[1])
+      assert(layer.descendantForPath(new IndexPath([2, 2, 3])) === undefined)
     })
   })
 })
