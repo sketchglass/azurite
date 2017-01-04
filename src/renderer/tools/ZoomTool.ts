@@ -1,4 +1,4 @@
-import {Vec2} from "paintvec"
+import {Vec2, Transform} from "paintvec"
 import Tool, {ToolPointerEvent} from './Tool'
 import ToolIDs from "./ToolIDs"
 
@@ -14,6 +14,7 @@ class ZoomTool extends Tool {
     return "zoom-in"
   }
   originalScale = 1.0
+  originalTranslation = new Vec2()
   startPos: Vec2
 
   start(ev: ToolPointerEvent) {
@@ -24,8 +25,9 @@ class ZoomTool extends Tool {
       this.picture.navigation.scale = 1
       return
     }
-    const {scale} = this.picture.navigation
+    const {scale, translation} = this.picture.navigation
     this.originalScale = scale
+    this.originalTranslation = translation
     this.startPos = ev.rendererPos
   }
 
@@ -40,6 +42,8 @@ class ZoomTool extends Tool {
     const distance = Math.pow(2, offset.x / 100)
     const scale = modScale(this.originalScale * distance)
     this.picture.navigation.scale = scale
+    this.picture.navigation.translation = this.originalTranslation
+      .transform(Transform.scale(new Vec2(scale / this.originalScale)))
   }
 
   end() {
