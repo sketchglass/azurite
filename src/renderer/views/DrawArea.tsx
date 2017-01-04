@@ -17,15 +17,14 @@ import {appState} from "../state/AppState"
 @observer
 class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined}, {}> {
 
-  originalRendererTranslation = new Vec2()
+  originalTranslation = new Vec2()
 
   onScrollBegin = () => {
     const {picture} = this.props
     if (!picture) {
       return
     }
-    const {scale, rotation, translation} = picture.navigation
-    this.originalRendererTranslation = translation.transform(Transform.scale(new Vec2(scale)).rotate(rotation))
+    this.originalTranslation = picture.navigation.translation
   }
 
   onXScroll = (value: number) => {
@@ -41,9 +40,7 @@ class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined}, {}> {
     if (!picture) {
       return
     }
-    const {scale, rotation} = picture.navigation
-    const rendererTranslation = this.originalRendererTranslation.sub(offset)
-    picture.navigation.translation = rendererTranslation.transform(Transform.scale(new Vec2(1 / scale)).rotate(-rotation)).floor()
+    picture.navigation.translation = this.originalTranslation.sub(offset.mulScalar(devicePixelRatio)).round()
   }
 
   renderDebounced() {
