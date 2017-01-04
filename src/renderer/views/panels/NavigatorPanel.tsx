@@ -51,7 +51,7 @@ class NavigatorMinimap extends React.Component<{}, {} > {
     context.drawImage(thumbnail, -thumbnail.width / 2, -thumbnail.height / 2)
 
     const {scale, rotation, translation} = pictureState.picture.navigation
-    const transform = Transform.rotate(-rotation).scale(new Vec2(1 / scale)).translate(translation.neg()).scale(new Vec2(thumbanilScale))
+    const transform = Transform.translate(translation.neg()).rotate(-rotation).scale(new Vec2(1 / scale)).scale(new Vec2(thumbanilScale))
     const rendererSize = renderer.size
     const rendererTopLeft = rendererSize.divScalar(2).neg()
     const rendererBottomRight = rendererSize.add(rendererTopLeft)
