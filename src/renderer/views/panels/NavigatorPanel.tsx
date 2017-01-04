@@ -12,8 +12,9 @@ class NavigatorMinimap extends React.Component<{}, {} > {
   private minimap: HTMLCanvasElement
   private disposer: () => void
   private dragging = false
-  private dragStartPos = new Vec2()
+  private dragStartTranslation = new Vec2()
   private originalTranslation = new Vec2()
+  private originalTransformFromPicture = new Transform()
 
   @computed private get picture() {
     return appState.currentPicture
@@ -68,15 +69,17 @@ class NavigatorMinimap extends React.Component<{}, {} > {
     context.stroke()
   }
 
-  private picturePosForEvent(e: {offsetX: number, offsetY: number}) {
-    const {pictureState} = this
-    if (!pictureState) {
+  private translationForEvent(e: {offsetX: number, offsetY: number}) {
+    const {pictureState, picture} = this
+    if (!pictureState || !picture) {
       return new Vec2()
     }
     const {clientWidth, clientHeight} = this.minimap
-    return new Vec2(e.offsetX - clientWidth / 2, e.offsetY - clientHeight / 2)
+    const picturePos = new Vec2(e.offsetX - clientWidth / 2, e.offsetY - clientHeight / 2)
       .mulScalar(devicePixelRatio)
-      .divScalar(pictureState.thumbnailManager.navigatorThumbnailScale).round()
+      .divScalar(pictureState.thumbnailManager.navigatorThumbnailScale)
+    const toRenderer = Transform.scale(new Vec2(picture.navigation.scale)).rotate(picture.navigation.rotation)
+    return picturePos.transform(toRenderer).neg()
   }
 
   private onPointerDown = (e: PointerEvent) => {
@@ -84,16 +87,18 @@ class NavigatorMinimap extends React.Component<{}, {} > {
       return
     }
     this.minimap.setPointerCapture(e.pointerId)
-    const pos = this.picturePosForEvent(e)
-    const rendererPos = (pos.add(this.picture.size.mulScalar(0.5))).transform(renderer.transformFromPicture)
-    if (!new Rect(new Vec2(), renderer.size).includes(rendererPos)) {
-      this.picture.navigation.translation = pos.neg()
+    const translation = this.translationForEvent(e)
+    const offset = this.picture.navigation.translation.sub(translation).abs()
+    if (!new Rect(new Vec2(), renderer.size.mulScalar(0.5)).includes(offset)) {
+      this.picture.navigation.translation = translation
     }
 
     this.dragging = true
-    this.dragStartPos = pos
+    this.dragStartTranslation = translation
     this.originalTranslation = this.picture.navigation.translation
+    this.originalTransformFromPicture = renderer.transformFromPicture
   }
+
   private onPointerMove = (e: PointerEvent) => {
     if (!this.dragging) {
       return
@@ -101,10 +106,11 @@ class NavigatorMinimap extends React.Component<{}, {} > {
     if (!this.picture) {
       return
     }
-    const pos = this.picturePosForEvent(e)
-    const offset = this.dragStartPos.sub(pos)
+    const translation = this.translationForEvent(e)
+    const offset = translation.sub(this.dragStartTranslation)
     this.picture.navigation.translation = this.originalTranslation.add(offset)
   }
+
   private onPointerUp = (e: PointerEvent) => {
     this.dragging = false
   }
