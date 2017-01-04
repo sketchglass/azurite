@@ -1,4 +1,4 @@
-import {Vec2} from "paintvec"
+import {Vec2, Transform} from "paintvec"
 import Tool, {ToolPointerEvent} from './Tool'
 import {renderer} from "../views/Renderer"
 import ToolIDs from "./ToolIDs"
@@ -12,6 +12,7 @@ class RotateTool extends Tool {
   }
   originalAngle = 0
   originalRotation = 0
+  originalTranslation = new Vec2()
 
   start(ev: ToolPointerEvent) {
     if (!this.picture) {
@@ -23,6 +24,7 @@ class RotateTool extends Tool {
     }
     this.originalAngle = this.posAngle(ev.rendererPos)
     this.originalRotation = this.picture.navigation.rotation
+    this.originalTranslation = this.picture.navigation.translation
   }
 
   move(ev: ToolPointerEvent) {
@@ -33,8 +35,10 @@ class RotateTool extends Tool {
       return
     }
     const angle = this.posAngle(ev.rendererPos)
-    const rotation = angle - this.originalAngle + this.originalRotation
+    const diff = angle - this.originalAngle
+    const rotation = diff + this.originalRotation
     this.picture.navigation.setNormalizedRotation(rotation)
+    this.picture.navigation.translation = this.originalTranslation.transform(Transform.rotate(diff))
   }
 
   posAngle(rendererPos: Vec2) {
