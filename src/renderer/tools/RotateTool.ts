@@ -38,7 +38,7 @@ class RotateTool extends Tool {
     const diff = angle - this.originalAngle
     const rotation = diff + this.originalRotation
     this.picture.navigation.setNormalizedRotation(rotation)
-    this.picture.navigation.translation = this.originalTranslation.transform(Transform.rotate(diff))
+    this.picture.navigation.translation = this.originalTranslation.transform(Transform.rotate(diff)).round()
   }
 
   posAngle(rendererPos: Vec2) {

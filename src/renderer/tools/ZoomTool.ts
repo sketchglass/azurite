@@ -44,6 +44,7 @@ class ZoomTool extends Tool {
     this.picture.navigation.scale = scale
     this.picture.navigation.translation = this.originalTranslation
       .transform(Transform.scale(new Vec2(scale / this.originalScale)))
+      .round()
   }
 
   end() {
