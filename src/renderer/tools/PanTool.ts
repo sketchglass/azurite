@@ -1,6 +1,5 @@
-import {Vec2, Transform} from "paintvec"
+import {Vec2} from "paintvec"
 import Tool, {ToolPointerEvent} from './Tool'
-import {renderer} from "../views/Renderer"
 import ToolIDs from "./ToolIDs"
 
 export default
@@ -12,14 +11,12 @@ class PanTool extends Tool {
   }
   originalPos = new Vec2(0)
   originalTranslation = new Vec2(0)
-  originalRendererToPicture = new Transform()
 
   start(ev: ToolPointerEvent) {
     if (!this.picture) {
       return
     }
-    this.originalRendererToPicture = renderer.transformToPicture
-    this.originalPos = ev.rendererPos.transform(this.originalRendererToPicture)
+    this.originalPos = ev.rendererPos.round()
     this.originalTranslation = this.picture.navigation.translation
   }
 
@@ -27,9 +24,9 @@ class PanTool extends Tool {
     if (!this.picture) {
       return
     }
-    const pos = ev.rendererPos.transform(this.originalRendererToPicture)
+    const pos = ev.rendererPos.round()
     const offset = pos.sub(this.originalPos)
-    const translation = this.originalTranslation.add(offset).floor()
+    const translation = this.originalTranslation.add(offset)
     this.picture.navigation.translation = translation
   }
 
