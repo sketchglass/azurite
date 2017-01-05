@@ -88,6 +88,22 @@ class EditActionState {
       appState.currentPictureState.selectAll()
     }
   }
+
+  cut() {
+    remote.getCurrentWebContents().cut()
+  }
+
+  copy() {
+    remote.getCurrentWebContents().copy()
+  }
+
+  paste() {
+    remote.getCurrentWebContents().paste()
+  }
+
+  delete() {
+    remote.getCurrentWebContents().delete()
+  }
 }
 
 export const editActionState = new EditActionState()
