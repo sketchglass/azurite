@@ -1,11 +1,34 @@
 import {remote} from "electron"
 const {Menu, app} = remote
-type MenuItem = Electron.MenuItem
-type BrowserWindow = Electron.BrowserWindow
-type MenuItemOptions = Electron.MenuItemOptions
 import {computed, autorun} from "mobx"
 import {appState} from "../state/AppState"
-import {editActionState} from "../state/EditActionState"
+import ActionIDs from "../state/ActionIDs"
+
+interface MenuDescription extends Electron.MenuItemOptions {
+  action?: string
+  submenu?: MenuDescription[]
+}
+
+function resolveMenuDescription(description: MenuDescription): Electron.MenuItemOptions {
+  const options: Electron.MenuItemOptions = {}
+  Object.assign(options, description)
+  if (description.action) {
+    const action = appState.actions.get(description.action)
+    if (action) {
+      options.label = action.title
+      options.enabled = action.enabled
+      options.click = () => action.run()
+      const key = appState.keyBindings.get(description.action)
+      if (key) {
+        options.accelerator = key.toElectronAccelerator()
+      }
+    }
+  }
+  if (description.submenu) {
+    options.submenu = description.submenu.map(resolveMenuDescription)
+  }
+  return options
+}
 
 class MenuBar {
   @computed get pictureState() {
@@ -48,42 +71,16 @@ class MenuBar {
   }
 
   render() {
-    const fileMenu: MenuItemOptions = {
+    const fileMenu: MenuDescription = {
       label: "File",
       submenu: [
-        {
-          label: "New...",
-          accelerator: "CmdOrCtrl+N",
-          click: () => this.newPicture(),
-        },
-        {
-          label: "Open...",
-          accelerator: "CmdOrCtrl+O",
-          click: () => this.open(),
-        },
-        {
-          type: "separator",
-        },
-        {
-          label: "Import...",
-          enabled: !!this.pictureState,
-          click: () => this.pictureState && this.pictureState.import(),
-        },
-        {
-          type: "separator",
-        },
-        {
-          label: "Save",
-          accelerator: "CmdOrCtrl+S",
-          enabled: !!this.pictureState,
-          click: () => this.pictureState && this.pictureState.save(),
-        },
-        {
-          label: "Save As...",
-          accelerator: "CmdOrCtrl+Shift+S",
-          enabled: !!this.pictureState,
-          click: () => this.pictureState && this.pictureState.saveAs(),
-        },
+        {action: ActionIDs.fileNew},
+        {action: ActionIDs.fileOpen},
+        {type: "separator"},
+        {action: ActionIDs.fileImport},
+        {type: "separator"},
+        {action: ActionIDs.fileSave},
+        {action: ActionIDs.fileSaveAs},
         {
           label: "Export",
           submenu: appState.imageFormats.map(format => {
@@ -94,171 +91,64 @@ class MenuBar {
             }
           }),
         },
-        {
-          type: "separator",
-        },
-        {
-          label: "Close",
-          accelerator: "CmdOrCtrl+W",
-          enabled: !!this.pictureState,
-          click: () => this.close(),
-        },
+        {type: "separator"},
+        {action: ActionIDs.fileClose},
       ],
     }
 
-    const editMenu: MenuItemOptions = {
+    const editMenu: MenuDescription = {
       label: 'Edit',
       submenu: [
-        {
-          label: `Undo ${editActionState.undoName}`,
-          accelerator: "CmdOrCtrl+Z",
-          enabled: editActionState.canUndo,
-          click: () => editActionState.undo(),
-        },
-        {
-          label: `Redo ${editActionState.redoName}`,
-          accelerator: process.platform === 'darwin' ? 'Shift+Command+Z' : 'Ctrl+Y',
-          enabled: editActionState.canRedo,
-          click: () => editActionState.redo(),
-        },
-        {
-          type: 'separator'
-        },
-        {
-          role: 'cut'
-        },
-        {
-          role: 'copy'
-        },
-        {
-          role: 'paste'
-        },
-        {
-          role: 'pasteandmatchstyle'
-        },
-        {
-          role: 'delete'
-        },
+        {action: ActionIDs.editUndo},
+        {action: ActionIDs.editRedo},
+        {type: 'separator'},
+        {action: ActionIDs.editCut},
+        {action: ActionIDs.editCopy},
+        {action: ActionIDs.editPaste},
+        {action: ActionIDs.editDelete},
       ]
     }
 
-    const selectionMenu: MenuItemOptions = {
+    const selectionMenu: MenuDescription = {
       label: "Selection",
       submenu: [
-        {
-          label: "Select All",
-          enabled: editActionState.canSelectAll,
-          click: () => editActionState.selectAll(),
-          accelerator: "CmdOrCtrl+A",
-        },
-        {
-          label: "Clear Selection",
-          enabled: !!this.pictureState,
-          click: () => this.pictureState && this.pictureState.clearSelection(),
-          accelerator: "CmdOrCtrl+D",
-        },
-        {
-          label: "Invert Selection",
-          enabled: !!this.pictureState,
-          click: () => this.pictureState && this.pictureState.invertSelection(),
-          accelerator: "Shift+CmdOrCtrl+I",
-        },
+        {action: ActionIDs.selectionSelectAll},
+        {action: ActionIDs.selectionClear},
+        {action: ActionIDs.selectionInvert},
       ],
     }
 
-    const canvasMenu: MenuItemOptions = {
+    const canvasMenu: MenuDescription = {
       label: "Canvas",
       submenu: [
-        {
-          label: "Change Canvas Resolution...",
-          enabled: !!this.pictureState,
-          click: () => this.pictureState && this.pictureState.changeResolution(),
-        },
-        {
-          type: "separator",
-        },
-        {
-          label: "Rotate 90° Left",
-          enabled: !!this.pictureState,
-          click: () => this.pictureState && this.pictureState.rotate90("left"),
-        },
-        {
-          label: "Rotate 90° Right",
-          enabled: !!this.pictureState,
-          click: () => this.pictureState && this.pictureState.rotate90("right"),
-        },
-        {
-          label: "Rotate 180°",
-          enabled: !!this.pictureState,
-          click: () => this.pictureState && this.pictureState.rotate180(),
-        },
-        {
-          type: "separator",
-        },
-        {
-          label: "Flip Canvas Horizontally",
-          enabled: !!this.pictureState,
-          click: () => this.pictureState && this.pictureState.flip("horizontal"),
-        },
-        {
-          label: "Flip Canvas Vertically",
-          enabled: !!this.pictureState,
-          click: () => this.pictureState && this.pictureState.flip("vertical"),
-        },
+        {action: ActionIDs.canvasChangeResolution},
+        {type: "separator"},
+        {action: ActionIDs.canvasRotateLeft},
+        {action: ActionIDs.canvasRotateRight},
+        {action: ActionIDs.canvasRotate180},
+        {type: "separator"},
+        {action: ActionIDs.canvasFlipHorizontally},
+        {action: ActionIDs.canvasFlipVertically},
       ],
     }
 
-    const viewMenu: MenuItemOptions = {
+    const viewMenu: MenuDescription = {
       label: 'View',
       submenu: [
-        {
-          label: 'Reload',
-          accelerator: 'CmdOrCtrl+R',
-          click: () => appState.reload(),
-        },
-        {
-          label: 'Toggle Developer Tools',
-          accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I',
-          click (item: MenuItem, focusedWindow: BrowserWindow) {
-            if (focusedWindow) focusedWindow.webContents.toggleDevTools()
-          }
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: "Actual Size",
-          accelerator: "CmdOrCtrl+0",
-          click: () => this.resetZoom(),
-        },
-        {
-          label: "Zoom In",
-          accelerator: "CmdOrCtrl+Plus",
-          click: () => this.zoomIn(),
-        },
-        {
-          label: "Zoom Out",
-          accelerator: "CmdOrCtrl+-",
-          click: () => this.zoomOut(),
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: appState.uiVisible ? "Hide UI Panels" : "Show UI Panels",
-          accelerator: "Tab",
-          click: () => appState.toggleUIVisible(),
-        },
-        {
-          type: 'separator'
-        },
-        {
-          role: 'togglefullscreen'
-        }
+        {action: ActionIDs.viewReload},
+        {action: ActionIDs.viewToggleDevTools},
+        {type: 'separator'},
+        {action: ActionIDs.viewActualSize},
+        {action: ActionIDs.viewZoomIn},
+        {action: ActionIDs.viewZoomOut},
+        {type: 'separator'},
+        {action: ActionIDs.viewToggleUIPanels},
+        {type: 'separator'},
+        {action: ActionIDs.viewToggleFullscreen},
       ]
     }
 
-    const windowMenu: MenuItemOptions = {
+    const windowMenu: MenuDescription = {
       role: 'window',
       submenu: [
         {
@@ -270,7 +160,7 @@ class MenuBar {
       ]
     }
 
-    const helpMenu: MenuItemOptions = {
+    const helpMenu: MenuDescription = {
       role: 'help',
       submenu: [
         {
@@ -280,13 +170,13 @@ class MenuBar {
       ]
     }
 
-    const template: MenuItemOptions[] = [
+    const template: MenuDescription[] = [
       fileMenu, editMenu, selectionMenu, canvasMenu, viewMenu, windowMenu, helpMenu
     ]
 
     if (process.platform === 'darwin') {
       const name = app.getName()
-      const appMenu: MenuItemOptions = {
+      const appMenu: MenuDescription = {
         label: name,
         submenu: [
           {
@@ -320,7 +210,7 @@ class MenuBar {
         ]
       }
       template.unshift(appMenu);
-      (editMenu.submenu as MenuItemOptions[]).push(
+      (editMenu.submenu as MenuDescription[]).push(
         {
           type: 'separator'
         },
@@ -361,7 +251,7 @@ class MenuBar {
       ]
     }
 
-    return template
+    return template.map(resolveMenuDescription)
   }
 }
 

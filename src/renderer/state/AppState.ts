@@ -62,7 +62,7 @@ class AppState {
     new BMPImageFormat(),
   ]
 
-  actions: Action[] = []
+  actions = new Map<string, Action>()
   keyBindings = new Map<string, KeyInput>()
 
   constructor() {
@@ -77,8 +77,20 @@ class AppState {
     })
   }
 
+  addAction(...actions: Action[]) {
+    for (const action of actions) {
+      this.actions.set(action.id, action)
+    }
+  }
+
+  addKeyBinding(...keyBindings: [string, KeyInput][]) {
+    for (const [id, keyInput] of keyBindings) {
+      this.keyBindings.set(id, keyInput)
+    }
+  }
+
   initActions() {
-    this.actions.push(
+    this.addAction(
       {
         id: ActionIDs.fileNew,
         title: "New...",
@@ -238,7 +250,7 @@ class AppState {
   }
 
   initKeyBindings() {
-    this.keyBindings = new Map<string, KeyInput>([
+    this.addKeyBinding(
       [ActionIDs.fileNew, new KeyInput(["CommandOrControl"], "n")],
       [ActionIDs.fileOpen, new KeyInput(["CommandOrControl"], "o")],
       [ActionIDs.fileSave, new KeyInput(["CommandOrControl"], "s")],
@@ -262,7 +274,7 @@ class AppState {
       [ActionIDs.viewZoomOut, new KeyInput(["CommandOrControl"], "-")],
       [ActionIDs.viewToggleUIPanels, new KeyInput([], "Tab")],
       [ActionIDs.viewToggleFullscreen, process.platform == "darwn" ? new KeyInput(["Command"], "f") : new KeyInput([], "F11")],
-    ])
+    )
   }
 
   initTools() {
@@ -431,6 +443,8 @@ class AppState {
 
 export const appState = new AppState()
 appState.initTools()
+appState.initActions()
+appState.initKeyBindings()
 
 IPCChannels.windowResize.listen().forEach(() => {
   appState.saveConfig()
