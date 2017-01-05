@@ -173,7 +173,7 @@ class NavigatorPanel extends React.Component<{}, {}> {
   private onZoomReset = () => {
     const picture = appState.currentPicture
     if (picture) {
-      picture.navigation.scale = 1
+      picture.navigation.resetScale()
     }
   }
   private onRotateLeft = () => {
@@ -191,7 +191,7 @@ class NavigatorPanel extends React.Component<{}, {}> {
   private onRotateReset = () => {
     const picture = appState.currentPicture
     if (picture) {
-      picture.navigation.rotation = 0
+      picture.navigation.resetRotation()
     }
   }
 

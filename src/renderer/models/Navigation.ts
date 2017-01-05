@@ -102,4 +102,13 @@ class Navigation {
     const step = Math.round(this.rotation * (180 / Math.PI) / ROTATION_STEP_DEG)
     this.rotateAroundRendererCenter((step + 1) * ROTATION_STEP_DEG * (Math.PI / 180))
   }
+
+  @action resetScale() {
+    this.saveRendererCenter()
+    this.scaleAroundRendererCenter(1)
+  }
+  @action resetRotation() {
+    this.saveRendererCenter()
+    this.rotateAroundRendererCenter(0)
+  }
 }

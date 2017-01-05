@@ -13,28 +13,27 @@ class ZoomTool extends Tool {
   get cursor() {
     return "zoom-in"
   }
-  originalScale = 1.0
-  startPos: Vec2
+  private originalScale = 1.0
+  private dragging = false
+  private startPos = new Vec2()
 
   start(ev: ToolPointerEvent) {
     if (!this.picture) {
       return
     }
     if (ev.button == 2) {
-      this.picture.navigation.scale = 1
+      this.picture.navigation.resetScale()
       return
     }
     const {scale} = this.picture.navigation
     this.originalScale = scale
     this.picture.navigation.saveRendererCenter()
     this.startPos = ev.rendererPos
+    this.dragging = true
   }
 
   move(ev: ToolPointerEvent) {
-    if (!this.picture) {
-      return
-    }
-    if (ev.button == 2) {
+    if (!this.picture || !this.dragging) {
       return
     }
     const offset = ev.rendererPos.sub(this.startPos)
@@ -44,5 +43,6 @@ class ZoomTool extends Tool {
   }
 
   end() {
+    this.dragging = false
   }
 }
