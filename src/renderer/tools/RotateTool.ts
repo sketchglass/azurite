@@ -47,5 +47,6 @@ class RotateTool extends Tool {
   }
 
   end() {
+    this.dragging = false
   }
 }
