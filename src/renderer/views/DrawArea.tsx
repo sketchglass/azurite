@@ -3,7 +3,7 @@ import {observer} from "mobx-react"
 import {Subscription} from "rxjs/Subscription"
 import React = require("react")
 import Picture from "../models/Picture"
-import {Vec2, Transform, Rect} from "paintvec"
+import {Vec2, Rect} from "paintvec"
 import Tool, {ToolPointerEvent} from "../tools/Tool"
 import {TabletEvent} from "receive-tablet-event"
 import {canvas} from "../GLContext"
@@ -40,7 +40,7 @@ class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined}, {}> {
     if (!picture) {
       return
     }
-    picture.navigation.translation = this.originalTranslation.sub(offset.mulScalar(devicePixelRatio)).round()
+    picture.navigation.translation = this.originalTranslation.sub(offset).round()
   }
 
   renderDebounced() {
@@ -48,13 +48,12 @@ class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined}, {}> {
     if (!picture) {
       return <div />
     }
-    const {scale, rotation, translation} = picture.navigation
+    const {scale, translation} = picture.navigation
     const pictureSize = picture.size.mulScalar(scale)
     const contentMin = pictureSize.mulScalar(-1.5)
     const contentMax = pictureSize.mulScalar(1.5)
-    const rendererTranslation = translation.transform(Transform.scale(new Vec2(scale)).rotate(rotation))
-    const visibleMin = renderer.size.mulScalar(-0.5).sub(rendererTranslation)
-    const visibleMax = renderer.size.mulScalar(0.5).sub(rendererTranslation)
+    const visibleMin = renderer.size.mulScalar(-0.5).sub(translation)
+    const visibleMax = renderer.size.mulScalar(0.5).sub(translation)
 
     return (
       <div>
