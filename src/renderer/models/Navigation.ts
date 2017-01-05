@@ -1,5 +1,5 @@
 import {Vec2, Transform} from "paintvec"
-import {observable, action} from "mobx"
+import {observable, action, computed} from "mobx"
 
 const SCALE_STEPS = [
   0.125,
@@ -55,6 +55,17 @@ class Navigation {
   private originalTranslation = new Vec2()
   private originalScale = 1
   private originalRotation = 0
+
+  @computed get transform() {
+    let transform = Transform.scale(new Vec2(this.scale)).rotate(this.rotation).translate(this.translation.round())
+    if (this.horizontalFlip) {
+      transform = transform.scale(new Vec2(-1, 1))
+    }
+    return transform
+  }
+  @computed get invertedTransform() {
+    return this.transform.invert() || new Transform()
+  }
 
   saveRendererCenter() {
     this.originalTranslation = this.translation
