@@ -147,7 +147,7 @@ class NavigatorPanel extends React.Component<{}, {}> {
     if (picture) {
       const scale = Math.pow(2, scaleLog)
       picture.navigation.scale = scale
-      picture.navigation.translation = this.originalTranslation.mulScalar(scale / this.originalScale)
+      picture.navigation.translation = this.originalTranslation.mulScalar(scale / this.originalScale).round()
     }
   })
 
@@ -156,7 +156,7 @@ class NavigatorPanel extends React.Component<{}, {}> {
     if (picture) {
       const rotation = rotationDeg / 180 * Math.PI
       picture.navigation.rotation = rotation
-      picture.navigation.translation = this.originalTranslation.transform(Transform.rotate(rotation - this.originalRotation))
+      picture.navigation.translation = this.originalTranslation.transform(Transform.rotate(rotation - this.originalRotation)).round()
     }
   })
 
