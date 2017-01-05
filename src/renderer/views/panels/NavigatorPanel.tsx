@@ -1,5 +1,5 @@
 import {Transform, Vec2, Rect} from "paintvec"
-import {computed, reaction} from "mobx"
+import {computed, reaction, action} from "mobx"
 import {observer} from "mobx-react"
 import React = require("react")
 import {appState} from "../../state/AppState"
@@ -129,20 +129,36 @@ class NavigatorMinimap extends React.Component<{}, {} > {
 
 @observer export default
 class NavigatorPanel extends React.Component<{}, {}> {
+  private originalTranslation = new Vec2()
+  private originalScale = 1
+  private originalRotation = 0
 
-  private onScaleChange = (scaleLog: number) => {
+  private onSliderBegin = () => {
     const picture = appState.currentPicture
     if (picture) {
-      picture.navigation.scale = Math.pow(2, scaleLog)
+      this.originalTranslation = picture.navigation.translation
+      this.originalScale = picture.navigation.scale
+      this.originalRotation = picture.navigation.rotation
     }
   }
 
-  private onRotationChange = (rotationDeg: number) => {
+  private onScaleChange = action((scaleLog: number) => {
     const picture = appState.currentPicture
     if (picture) {
-      picture.navigation.rotation = rotationDeg / 180 * Math.PI
+      const scale = Math.pow(2, scaleLog)
+      picture.navigation.scale = scale
+      picture.navigation.translation = this.originalTranslation.mulScalar(scale / this.originalScale)
     }
-  }
+  })
+
+  private onRotationChange = action((rotationDeg: number) => {
+    const picture = appState.currentPicture
+    if (picture) {
+      const rotation = rotationDeg / 180 * Math.PI
+      picture.navigation.rotation = rotation
+      picture.navigation.translation = this.originalTranslation.transform(Transform.rotate(rotation - this.originalRotation))
+    }
+  })
 
   private onHorizontalFlipChange = (ev: React.FormEvent<HTMLInputElement>) => {
     const picture = appState.currentPicture
@@ -201,14 +217,14 @@ class NavigatorPanel extends React.Component<{}, {}> {
         <NavigatorMinimap />
         <div className="NavigatorPanel_sliderRow">
           <button onClick={this.onZoomOut}><SVGIcon className="zoom-out" /></button>
-          <RangeSlider min={-3} max={5} step={1 / 8} onChange={this.onScaleChange} value={scaleLog} />
+          <RangeSlider min={-3} max={5} step={1 / 8} onChangeBegin={this.onSliderBegin} onChange={this.onScaleChange} value={scaleLog} />
           <button onClick={this.onZoomIn}><SVGIcon className="zoom-in" /></button>
           <button className="NavigatorPanel_reset" onClick={this.onZoomReset} />
           {(scale * 100).toFixed(scale < 1 ? 1 : 0)}%
         </div>
         <div className="NavigatorPanel_sliderRow">
           <button onClick={this.onRotateLeft}><SVGIcon className="rotate-left" /></button>
-          <RangeSlider min={-180} max={180} step={3} onChange={this.onRotationChange} value={rotationDeg} />
+          <RangeSlider min={-180} max={180} step={3} onChangeBegin={this.onSliderBegin} onChange={this.onRotationChange} value={rotationDeg} />
           <button onClick={this.onRotateRight}><SVGIcon className="rotate-right" /></button>
           <button className="NavigatorPanel_reset" onClick={this.onRotateReset} />
           {rotationDeg.toFixed(0)}°
