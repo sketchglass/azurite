@@ -129,16 +129,10 @@ class NavigatorMinimap extends React.Component<{}, {} > {
 
 @observer export default
 class NavigatorPanel extends React.Component<{}, {}> {
-  private originalTranslation = new Vec2()
-  private originalScale = 1
-  private originalRotation = 0
-
   private onSliderBegin = () => {
     const picture = appState.currentPicture
     if (picture) {
-      this.originalTranslation = picture.navigation.translation
-      this.originalScale = picture.navigation.scale
-      this.originalRotation = picture.navigation.rotation
+      picture.navigation.saveRendererCenter()
     }
   }
 
@@ -146,8 +140,7 @@ class NavigatorPanel extends React.Component<{}, {}> {
     const picture = appState.currentPicture
     if (picture) {
       const scale = Math.pow(2, scaleLog)
-      picture.navigation.scale = scale
-      picture.navigation.translation = this.originalTranslation.mulScalar(scale / this.originalScale).round()
+      picture.navigation.scaleAroundRendererCenter(scale)
     }
   })
 
@@ -155,8 +148,7 @@ class NavigatorPanel extends React.Component<{}, {}> {
     const picture = appState.currentPicture
     if (picture) {
       const rotation = rotationDeg / 180 * Math.PI
-      picture.navigation.rotation = rotation
-      picture.navigation.translation = this.originalTranslation.transform(Transform.rotate(rotation - this.originalRotation)).round()
+      picture.navigation.rotateAroundRendererCenter(rotation)
     }
   })
 

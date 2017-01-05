@@ -1,4 +1,4 @@
-import {Vec2} from "paintvec"
+import {Vec2, Transform} from "paintvec"
 import {observable, action} from "mobx"
 
 const SCALE_STEPS = [
@@ -36,34 +36,59 @@ function prevScaleStep(scale: number) {
   return scale
 }
 
+function normalizeRotation(rotation: number) {
+  while (Math.PI < rotation) {
+    rotation -= 2 * Math.PI
+  }
+  while (rotation < -Math.PI) {
+    rotation += 2 * Math.PI
+  }
+  return rotation
+}
+
 export
 class Navigation {
-  @observable translation = new Vec2(0)
+  @observable translation = new Vec2()
   @observable scale = 1
   @observable rotation = 0
   @observable horizontalFlip = false
+  private originalTranslation = new Vec2()
+  private originalScale = 1
+  private originalRotation = 0
+
+  saveRendererCenter() {
+    this.originalTranslation = this.translation
+    this.originalScale = this.scale
+    this.originalRotation = this.rotation
+  }
+
+  @action scaleAroundRendererCenter(scale: number) {
+    this.scale = scale
+    this.translation = this.originalTranslation.mulScalar(scale / this.originalScale).round()
+  }
+
+  @action rotateAroundRendererCenter(rotation: number) {
+    rotation = normalizeRotation(rotation)
+    this.rotation = rotation
+    this.translation = this.originalTranslation.transform(Transform.rotate(rotation - this.originalRotation)).round()
+  }
 
   @action zoomIn() {
-    this.scale = nextScaleStep(this.scale)
+    this.saveRendererCenter()
+    this.scaleAroundRendererCenter(nextScaleStep(this.scale))
   }
   @action zoomOut() {
-    this.scale = prevScaleStep(this.scale)
+    this.saveRendererCenter()
+    this.scaleAroundRendererCenter(prevScaleStep(this.scale))
   }
   @action rotateLeft() {
+    this.saveRendererCenter()
     const step = Math.round(this.rotation * (180 / Math.PI) / ROTATION_STEP_DEG)
-    this.setNormalizedRotation((step - 1) * ROTATION_STEP_DEG * (Math.PI / 180))
+    this.rotateAroundRendererCenter((step - 1) * ROTATION_STEP_DEG * (Math.PI / 180))
   }
   @action rotateRight() {
+    this.saveRendererCenter()
     const step = Math.round(this.rotation * (180 / Math.PI) / ROTATION_STEP_DEG)
-    this.setNormalizedRotation((step + 1) * ROTATION_STEP_DEG * (Math.PI / 180))
-  }
-  @action setNormalizedRotation(rotation: number) {
-    while (Math.PI < rotation) {
-      rotation -= 2 * Math.PI
-    }
-    while (rotation < -Math.PI) {
-      rotation += 2 * Math.PI
-    }
-    this.rotation = rotation
+    this.rotateAroundRendererCenter((step + 1) * ROTATION_STEP_DEG * (Math.PI / 180))
   }
 }
