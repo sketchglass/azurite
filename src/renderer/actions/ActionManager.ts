@@ -4,7 +4,7 @@ export default
 class ActionManager {
   actions = new Map<string, Action>()
 
-  addAction(...actions: Action[]) {
+  add(...actions: Action[]) {
     for (const action of actions) {
       this.actions.set(action.id, action)
     }
@@ -14,5 +14,5 @@ class ActionManager {
 export const actionManager = new ActionManager()
 
 export function addAction(klass: {new(): Action}) {
-  actionManager.addAction(new klass())
+  actionManager.add(new klass())
 }

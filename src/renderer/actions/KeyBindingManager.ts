@@ -5,7 +5,7 @@ export default
 class KeyBindingManager {
   keyBindings = new Map<string, KeyInput>()
 
-  addKeyBinding(...keyBindings: [string, KeyInput][]) {
+  add(...keyBindings: [string, KeyInput][]) {
     for (const [id, keyInput] of keyBindings) {
       this.keyBindings.set(id, keyInput)
     }
@@ -14,7 +14,7 @@ class KeyBindingManager {
 
 export const keyBindingManager = new KeyBindingManager()
 
-keyBindingManager.addKeyBinding(
+keyBindingManager.add(
   [ActionIDs.fileNew, new KeyInput(["CommandOrControl"], "n")],
   [ActionIDs.fileOpen, new KeyInput(["CommandOrControl"], "o")],
   [ActionIDs.fileSave, new KeyInput(["CommandOrControl"], "s")],
