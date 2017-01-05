@@ -10,27 +10,26 @@ class RotateTool extends Tool {
   get cursor() {
     return "ew-resize" // TODO: use more rotate-like cursor
   }
-  originalAngle = 0
-  originalRotation = 0
+  private dragging = false
+  private originalAngle = 0
+  private originalRotation = 0
 
   start(ev: ToolPointerEvent) {
     if (!this.picture) {
       return
     }
     if (ev.button == 2) {
-      this.picture.navigation.rotation = 0
+      this.picture.navigation.resetRotation()
       return
     }
     this.originalAngle = this.posAngle(ev.rendererPos)
     this.originalRotation = this.picture.navigation.rotation
     this.picture.navigation.saveRendererCenter()
+    this.dragging = true
   }
 
   move(ev: ToolPointerEvent) {
-    if (!this.picture) {
-      return
-    }
-    if (ev.button == 2) {
+    if (!this.picture || !this.dragging) {
       return
     }
     const angle = this.posAngle(ev.rendererPos)
@@ -48,5 +47,6 @@ class RotateTool extends Tool {
   }
 
   end() {
+    this.dragging = false
   }
 }
