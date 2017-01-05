@@ -39,8 +39,11 @@ export default class RangeSlider extends React.Component<RangeSliderProps, void>
   }
   valueForEvent(e: PointerEvent) {
     const {min, max} = this.props
+    const range = max - min
     const rate = Math.max(0, Math.min(e.offsetX / this.slider.clientWidth, 1))
-    return Math.round(rate * (max - min) + min)
+    const step = this.props.step || 1
+    const offset = Math.round(rate * range / step) * step
+    return offset + min
   }
   onChangeBegin(e: PointerEvent) {
     if (this.props.onChangeBegin) {
