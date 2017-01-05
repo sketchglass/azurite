@@ -3,7 +3,7 @@ import {observer} from "mobx-react"
 import {Subscription} from "rxjs/Subscription"
 import React = require("react")
 import Picture from "../models/Picture"
-import {Vec2, Transform, Rect} from "paintvec"
+import {Vec2, Rect} from "paintvec"
 import Tool, {ToolPointerEvent} from "../tools/Tool"
 import {TabletEvent} from "receive-tablet-event"
 import {canvas} from "../GLContext"
@@ -17,15 +17,14 @@ import {appState} from "../state/AppState"
 @observer
 class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined}, {}> {
 
-  originalRendererTranslation = new Vec2()
+  originalTranslation = new Vec2()
 
   onScrollBegin = () => {
     const {picture} = this.props
     if (!picture) {
       return
     }
-    const {scale, rotation, translation} = picture.navigation
-    this.originalRendererTranslation = translation.transform(Transform.scale(new Vec2(scale)).rotate(rotation))
+    this.originalTranslation = picture.navigation.translation
   }
 
   onXScroll = (value: number) => {
@@ -41,9 +40,7 @@ class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined}, {}> {
     if (!picture) {
       return
     }
-    const {scale, rotation} = picture.navigation
-    const rendererTranslation = this.originalRendererTranslation.sub(offset)
-    picture.navigation.translation = rendererTranslation.transform(Transform.scale(new Vec2(1 / scale)).rotate(-rotation)).floor()
+    picture.navigation.translation = this.originalTranslation.sub(offset).round()
   }
 
   renderDebounced() {
@@ -51,13 +48,12 @@ class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined}, {}> {
     if (!picture) {
       return <div />
     }
-    const {scale, rotation, translation} = picture.navigation
+    const {scale, translation} = picture.navigation
     const pictureSize = picture.size.mulScalar(scale)
     const contentMin = pictureSize.mulScalar(-1.5)
     const contentMax = pictureSize.mulScalar(1.5)
-    const rendererTranslation = translation.transform(Transform.scale(new Vec2(scale)).rotate(rotation))
-    const visibleMin = renderer.size.mulScalar(-0.5).sub(rendererTranslation)
-    const visibleMax = renderer.size.mulScalar(0.5).sub(rendererTranslation)
+    const visibleMin = renderer.size.mulScalar(-0.5).sub(translation)
+    const visibleMax = renderer.size.mulScalar(0.5).sub(translation)
 
     return (
       <div>
@@ -187,7 +183,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     const newRect = new Rect(topLeft, topLeft.add(size))
     if (!init && this.picture) {
       const {navigation} = this.picture
-      const offset = newRect.center.sub(this.clientRect.center).divScalar(navigation.scale).mulScalar(devicePixelRatio).round()
+      const offset = newRect.center.sub(this.clientRect.center).mulScalar(devicePixelRatio).round()
       if (this.picture) {
         navigation.translation = navigation.translation.sub(offset)
       }

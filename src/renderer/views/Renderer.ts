@@ -186,15 +186,9 @@ class Renderer {
     if (!this.picture) {
       return new Transform()
     }
-    const {navigation} = this.picture
     const pictureCenter = this.picture.size.mulScalar(0.5).round()
     const viewportCenter = this.size.mulScalar(0.5).round()
-    let transform = Transform.translate(navigation.translation)
-      .merge(Transform.scale(new Vec2(navigation.scale)))
-      .merge(Transform.rotate(navigation.rotation))
-    if (navigation.horizontalFlip) {
-      transform = transform.merge(Transform.scale(new Vec2(-1, 1)))
-    }
+    let {transform} = this.picture.navigation
     return Transform.translate(pictureCenter.neg())
       .merge(transform)
       .merge(Transform.translate(viewportCenter))

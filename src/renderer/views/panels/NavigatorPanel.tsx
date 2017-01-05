@@ -1,5 +1,5 @@
 import {Transform, Vec2, Rect} from "paintvec"
-import {computed, reaction} from "mobx"
+import {computed, reaction, action} from "mobx"
 import {observer} from "mobx-react"
 import React = require("react")
 import {appState} from "../../state/AppState"
@@ -7,13 +7,15 @@ import {renderer} from "../Renderer"
 import {frameDebounce} from "../../../lib/Debounce"
 import PointerEvents from "../components/PointerEvents"
 import SVGIcon from "../components/SVGIcon"
+import RangeSlider from "../components/RangeSlider"
 
 class NavigatorMinimap extends React.Component<{}, {} > {
   private minimap: HTMLCanvasElement
   private disposer: () => void
   private dragging = false
-  private dragStartPos = new Vec2()
+  private dragStartTranslation = new Vec2()
   private originalTranslation = new Vec2()
+  private originalTransformFromPicture = new Transform()
 
   @computed private get picture() {
     return appState.currentPicture
@@ -50,8 +52,7 @@ class NavigatorMinimap extends React.Component<{}, {} > {
     const thumbanilScale = thumbnailManager.navigatorThumbnailScale
     context.drawImage(thumbnail, -thumbnail.width / 2, -thumbnail.height / 2)
 
-    const {scale, rotation, translation} = pictureState.picture.navigation
-    const transform = Transform.rotate(-rotation).scale(new Vec2(1 / scale)).translate(translation.neg()).scale(new Vec2(thumbanilScale))
+    const transform = pictureState.picture.navigation.invertedTransform.scale(new Vec2(thumbanilScale))
     const rendererSize = renderer.size
     const rendererTopLeft = rendererSize.divScalar(2).neg()
     const rendererBottomRight = rendererSize.add(rendererTopLeft)
@@ -68,15 +69,17 @@ class NavigatorMinimap extends React.Component<{}, {} > {
     context.stroke()
   }
 
-  private picturePosForEvent(e: {offsetX: number, offsetY: number}) {
-    const {pictureState} = this
-    if (!pictureState) {
+  private translationForEvent(e: {offsetX: number, offsetY: number}) {
+    const {pictureState, picture} = this
+    if (!pictureState || !picture) {
       return new Vec2()
     }
     const {clientWidth, clientHeight} = this.minimap
-    return new Vec2(e.offsetX - clientWidth / 2, e.offsetY - clientHeight / 2)
+    const picturePos = new Vec2(e.offsetX - clientWidth / 2, e.offsetY - clientHeight / 2)
       .mulScalar(devicePixelRatio)
-      .divScalar(pictureState.thumbnailManager.navigatorThumbnailScale).round()
+      .divScalar(pictureState.thumbnailManager.navigatorThumbnailScale)
+    const toRenderer = Transform.scale(new Vec2(picture.navigation.scale)).rotate(picture.navigation.rotation)
+    return picturePos.transform(toRenderer).neg()
   }
 
   private onPointerDown = (e: PointerEvent) => {
@@ -84,16 +87,18 @@ class NavigatorMinimap extends React.Component<{}, {} > {
       return
     }
     this.minimap.setPointerCapture(e.pointerId)
-    const pos = this.picturePosForEvent(e)
-    const rendererPos = (pos.add(this.picture.size.mulScalar(0.5))).transform(renderer.transformFromPicture)
-    if (!new Rect(new Vec2(), renderer.size).includes(rendererPos)) {
-      this.picture.navigation.translation = pos.neg()
+    const translation = this.translationForEvent(e)
+    const offset = this.picture.navigation.translation.sub(translation).abs()
+    if (!new Rect(new Vec2(), renderer.size.mulScalar(0.5)).includes(offset)) {
+      this.picture.navigation.translation = translation
     }
 
     this.dragging = true
-    this.dragStartPos = pos
+    this.dragStartTranslation = translation
     this.originalTranslation = this.picture.navigation.translation
+    this.originalTransformFromPicture = renderer.transformFromPicture
   }
+
   private onPointerMove = (e: PointerEvent) => {
     if (!this.dragging) {
       return
@@ -101,10 +106,11 @@ class NavigatorMinimap extends React.Component<{}, {} > {
     if (!this.picture) {
       return
     }
-    const pos = this.picturePosForEvent(e)
-    const offset = this.dragStartPos.sub(pos)
+    const translation = this.translationForEvent(e)
+    const offset = translation.sub(this.dragStartTranslation)
     this.picture.navigation.translation = this.originalTranslation.add(offset)
   }
+
   private onPointerUp = (e: PointerEvent) => {
     this.dragging = false
   }
@@ -122,21 +128,28 @@ class NavigatorMinimap extends React.Component<{}, {} > {
 
 @observer export default
 class NavigatorPanel extends React.Component<{}, {}> {
-
-  private onScaleChange = (ev: React.FormEvent<HTMLInputElement>) => {
+  private onSliderBegin = () => {
     const picture = appState.currentPicture
     if (picture) {
-      const scaleLog = parseFloat((ev.target as HTMLInputElement).value)
-      picture.navigation.scale = Math.pow(2, scaleLog)
+      picture.navigation.saveRendererCenter()
     }
   }
 
-  private onRotationChange = (ev: React.FormEvent<HTMLInputElement>) => {
+  private onScaleChange = action((scaleLog: number) => {
     const picture = appState.currentPicture
     if (picture) {
-      picture.navigation.rotation = parseInt((ev.target as HTMLInputElement).value) / 180 * Math.PI
+      const scale = Math.pow(2, scaleLog)
+      picture.navigation.scaleAroundRendererCenter(scale)
     }
-  }
+  })
+
+  private onRotationChange = action((rotationDeg: number) => {
+    const picture = appState.currentPicture
+    if (picture) {
+      const rotation = rotationDeg / 180 * Math.PI
+      picture.navigation.rotateAroundRendererCenter(rotation)
+    }
+  })
 
   private onHorizontalFlipChange = (ev: React.FormEvent<HTMLInputElement>) => {
     const picture = appState.currentPicture
@@ -195,14 +208,14 @@ class NavigatorPanel extends React.Component<{}, {}> {
         <NavigatorMinimap />
         <div className="NavigatorPanel_sliderRow">
           <button onClick={this.onZoomOut}><SVGIcon className="zoom-out" /></button>
-          <input type="range" min={-3} max={5} step={1 / 8} onChange={this.onScaleChange} value={scaleLog} />
+          <RangeSlider min={-3} max={5} step={1 / 8} onChangeBegin={this.onSliderBegin} onChange={this.onScaleChange} value={scaleLog} />
           <button onClick={this.onZoomIn}><SVGIcon className="zoom-in" /></button>
           <button className="NavigatorPanel_reset" onClick={this.onZoomReset} />
           {(scale * 100).toFixed(scale < 1 ? 1 : 0)}%
         </div>
         <div className="NavigatorPanel_sliderRow">
           <button onClick={this.onRotateLeft}><SVGIcon className="rotate-left" /></button>
-          <input type="range" min={-180} max={180} step={3} onChange={this.onRotationChange} value={rotationDeg} />
+          <RangeSlider min={-180} max={180} step={3} onChangeBegin={this.onSliderBegin} onChange={this.onRotationChange} value={rotationDeg} />
           <button onClick={this.onRotateRight}><SVGIcon className="rotate-right" /></button>
           <button className="NavigatorPanel_reset" onClick={this.onRotateReset} />
           {rotationDeg.toFixed(0)}°

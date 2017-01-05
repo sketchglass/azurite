@@ -26,6 +26,7 @@ class ZoomTool extends Tool {
     }
     const {scale} = this.picture.navigation
     this.originalScale = scale
+    this.picture.navigation.saveRendererCenter()
     this.startPos = ev.rendererPos
   }
 
@@ -39,7 +40,7 @@ class ZoomTool extends Tool {
     const offset = ev.rendererPos.sub(this.startPos)
     const distance = Math.pow(2, offset.x / 100)
     const scale = modScale(this.originalScale * distance)
-    this.picture.navigation.scale = scale
+    this.picture.navigation.scaleAroundRendererCenter(scale)
   }
 
   end() {

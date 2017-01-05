@@ -23,6 +23,7 @@ class RotateTool extends Tool {
     }
     this.originalAngle = this.posAngle(ev.rendererPos)
     this.originalRotation = this.picture.navigation.rotation
+    this.picture.navigation.saveRendererCenter()
   }
 
   move(ev: ToolPointerEvent) {
@@ -33,8 +34,9 @@ class RotateTool extends Tool {
       return
     }
     const angle = this.posAngle(ev.rendererPos)
-    const rotation = angle - this.originalAngle + this.originalRotation
-    this.picture.navigation.setNormalizedRotation(rotation)
+    const diff = angle - this.originalAngle
+    const rotation = diff + this.originalRotation
+    this.picture.navigation.rotateAroundRendererCenter(rotation)
   }
 
   posAngle(rendererPos: Vec2) {
