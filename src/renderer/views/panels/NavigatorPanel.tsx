@@ -7,6 +7,7 @@ import {renderer} from "../Renderer"
 import {frameDebounce} from "../../../lib/Debounce"
 import PointerEvents from "../components/PointerEvents"
 import SVGIcon from "../components/SVGIcon"
+import RangeSlider from "../components/RangeSlider"
 
 class NavigatorMinimap extends React.Component<{}, {} > {
   private minimap: HTMLCanvasElement
@@ -129,18 +130,17 @@ class NavigatorMinimap extends React.Component<{}, {} > {
 @observer export default
 class NavigatorPanel extends React.Component<{}, {}> {
 
-  private onScaleChange = (ev: React.FormEvent<HTMLInputElement>) => {
+  private onScaleChange = (scaleLog: number) => {
     const picture = appState.currentPicture
     if (picture) {
-      const scaleLog = parseFloat((ev.target as HTMLInputElement).value)
       picture.navigation.scale = Math.pow(2, scaleLog)
     }
   }
 
-  private onRotationChange = (ev: React.FormEvent<HTMLInputElement>) => {
+  private onRotationChange = (rotationDeg: number) => {
     const picture = appState.currentPicture
     if (picture) {
-      picture.navigation.rotation = parseInt((ev.target as HTMLInputElement).value) / 180 * Math.PI
+      picture.navigation.rotation = rotationDeg / 180 * Math.PI
     }
   }
 
@@ -201,14 +201,14 @@ class NavigatorPanel extends React.Component<{}, {}> {
         <NavigatorMinimap />
         <div className="NavigatorPanel_sliderRow">
           <button onClick={this.onZoomOut}><SVGIcon className="zoom-out" /></button>
-          <input type="range" min={-3} max={5} step={1 / 8} onChange={this.onScaleChange} value={scaleLog} />
+          <RangeSlider min={-3} max={5} step={1 / 8} onChange={this.onScaleChange} value={scaleLog} />
           <button onClick={this.onZoomIn}><SVGIcon className="zoom-in" /></button>
           <button className="NavigatorPanel_reset" onClick={this.onZoomReset} />
           {(scale * 100).toFixed(scale < 1 ? 1 : 0)}%
         </div>
         <div className="NavigatorPanel_sliderRow">
           <button onClick={this.onRotateLeft}><SVGIcon className="rotate-left" /></button>
-          <input type="range" min={-180} max={180} step={3} onChange={this.onRotationChange} value={rotationDeg} />
+          <RangeSlider min={-180} max={180} step={3} onChange={this.onRotationChange} value={rotationDeg} />
           <button onClick={this.onRotateRight}><SVGIcon className="rotate-right" /></button>
           <button className="NavigatorPanel_reset" onClick={this.onRotateReset} />
           {rotationDeg.toFixed(0)}°

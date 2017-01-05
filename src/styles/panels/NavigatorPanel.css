@@ -9,21 +9,31 @@
     align-items: center;
     margin: 0 4px 4px;
   }
-  & input[type="range"] {
-    --movable-range: 120px;
+  & .RangeSlider {
     --handle-size: 12px;
-    -webkit-appearance:none;
-    margin: 0 4px;
-    width: calc(var(--movable-range) + var(--handle-size));
-    height: 4px;
-    border-radius: 2px;
-    background-color: var(--ui-background-color);
-    &::-webkit-slider-thumb {
-      -webkit-appearance: none;
+    --rail-height: 4px;
+    width: 120px;
+    height: var(--handle-size);
+    margin: 0 10px;
+    &_border {
+      position: absolute;
+      height: var(--rail-height);
+      border: none;
+      border-radius: 2px;
+      top: calc((var(--handle-size) - var(--rail-height)) / 2);
+      background-color: var(--ui-background-color);
+    }
+    &_fill {
+      display: none;
+    }
+    &_handle {
       width: var(--handle-size);
       height: var(--handle-size);
+      border: none;
       border-radius: 50%;
       background-color: var(--default-color);
+      top: 0px;
+      left: calc(var(--slider-ratio) * 100% - var(--handle-size) / 2);
     }
   }
   & button {
