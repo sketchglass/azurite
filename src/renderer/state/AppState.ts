@@ -18,7 +18,11 @@ import {PictureState} from "./PictureState"
 import {config, ConfigValues} from "./Config"
 import * as IPCChannels from "../../common/IPCChannels"
 import ImageFormat, {JPEGImageFormat, PNGImageFormat, BMPImageFormat} from "../formats/ImageFormat"
-import "../actions/Actions"
+import "../actions/FileActions"
+import "../actions/EditActions"
+import "../actions/SelectionAction"
+import "../actions/CanvasActions"
+import "../actions/ViewActions"
 
 export
 class AppState {

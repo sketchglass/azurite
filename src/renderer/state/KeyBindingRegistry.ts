@@ -1,8 +1,8 @@
 import KeyInput from "../../lib/KeyInput"
-import ActionIDs from "./ActionIDs"
+import ActionIDs from "../actions/ActionIDs"
 
 export default
-class KeyBindingManager {
+class KeyBindingRegistry {
   keyBindings = new Map<string, KeyInput>()
 
   add(...keyBindings: [string, KeyInput][]) {
@@ -12,9 +12,9 @@ class KeyBindingManager {
   }
 }
 
-export const keyBindingManager = new KeyBindingManager()
+export const keyBindingRegistry = new KeyBindingRegistry()
 
-keyBindingManager.add(
+keyBindingRegistry.add(
   [ActionIDs.fileNew, new KeyInput(["CommandOrControl"], "n")],
   [ActionIDs.fileOpen, new KeyInput(["CommandOrControl"], "o")],
   [ActionIDs.fileSave, new KeyInput(["CommandOrControl"], "s")],

@@ -2,8 +2,8 @@ import {remote} from "electron"
 const {Menu, app} = remote
 import {computed, autorun} from "mobx"
 import {appState} from "../state/AppState"
-import {actionManager} from "../actions/ActionManager"
-import {keyBindingManager} from "../actions/KeyBindingManager"
+import {actionRegistry} from "../state/ActionRegistry"
+import {keyBindingRegistry} from "../state/KeyBindingRegistry"
 import ActionIDs from "../actions/ActionIDs"
 
 interface MenuDescription extends Electron.MenuItemOptions {
@@ -15,12 +15,12 @@ function resolveMenuDescription(description: MenuDescription): Electron.MenuItem
   const options: Electron.MenuItemOptions = {}
   Object.assign(options, description)
   if (description.action) {
-    const action = actionManager.actions.get(description.action)
+    const action = actionRegistry.actions.get(description.action)
     if (action) {
       options.label = action.title
       options.enabled = action.enabled
       options.click = () => action.run()
-      const key = keyBindingManager.keyBindings.get(description.action)
+      const key = keyBindingRegistry.keyBindings.get(description.action)
       if (key) {
         options.accelerator = key.toElectronAccelerator()
       }

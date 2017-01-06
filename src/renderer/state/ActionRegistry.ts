@@ -1,7 +1,7 @@
-import Action from "./Action"
+import Action from "../actions/Action"
 
 export default
-class ActionManager {
+class ActionRegistry {
   actions = new Map<string, Action>()
 
   add(...actions: Action[]) {
@@ -11,8 +11,8 @@ class ActionManager {
   }
 }
 
-export const actionManager = new ActionManager()
+export const actionRegistry = new ActionRegistry()
 
 export function addAction(klass: {new(): Action}) {
-  actionManager.add(new klass())
+  actionRegistry.add(new klass())
 }
