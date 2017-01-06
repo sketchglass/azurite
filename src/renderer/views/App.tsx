@@ -1,6 +1,5 @@
 import React = require("react")
 import {observer} from "mobx-react"
-import * as Mousetrap from "mousetrap"
 
 import DrawArea from "./DrawArea"
 import {PictureTabBar} from "./PictureTabBar"
@@ -13,14 +12,10 @@ import LayerPanel from "./panels/LayerPanel"
 
 import NavigationKeyBinding from "./NavigationKeyBinding"
 import {appState} from "../state/AppState"
-import {isTextInput} from "./util"
 
+import "./KeyBindingHandler"
 import "./MenuBar"
 import "../../styles/main.css"
-
-Mousetrap.prototype.stopCallback = function (e: KeyboardEvent, element: Element, combo: string) {
-  return isTextInput(element)
-}
 
 @observer export default
 class App extends React.Component<{}, {}> {
@@ -37,10 +32,6 @@ class App extends React.Component<{}, {}> {
       } else {
         appState.overrideTool = undefined
       }
-    })
-    Mousetrap.bind("tab", e => {
-      e.preventDefault()
-      appState.toggleUIVisible()
     })
   }
   render() {

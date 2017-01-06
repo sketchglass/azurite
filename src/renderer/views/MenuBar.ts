@@ -20,7 +20,7 @@ function resolveMenuDescription(description: MenuDescription): Electron.MenuItem
       options.label = action.title
       options.enabled = action.enabled
       options.click = () => action.run()
-      const key = keyBindingRegistry.keyBindings.get(description.action)
+      const key = keyBindingRegistry.keyInputForAction(description.action)
       if (key) {
         options.accelerator = key.toElectronAccelerator()
       }

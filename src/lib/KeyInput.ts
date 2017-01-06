@@ -16,4 +16,19 @@ class KeyInput {
     }
     return [...this.modifiers, key].join("+")
   }
+
+  matchesEvent(e: KeyboardEvent) {
+    if (e.key == this.key) {
+      const {modifiers} = this
+      if (modifiers.includes("CommandOrControl")) {
+        return (e.ctrlKey || e.metaKey) &&
+          e.altKey == modifiers.includes("Alt") && e.shiftKey == modifiers.includes("Shift")
+      } else {
+        return e.ctrlKey == modifiers.includes("Control") && e.metaKey == modifiers.includes("Command") &&
+          e.altKey == modifiers.includes("Alt") && e.shiftKey == modifiers.includes("Shift")
+      }
+    } else {
+      return false
+    }
+  }
 }

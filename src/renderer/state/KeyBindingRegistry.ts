@@ -1,13 +1,36 @@
 import KeyInput from "../../lib/KeyInput"
 import ActionIDs from "../actions/ActionIDs"
 
+interface KeyBinding {
+  action: string
+  keyInput: KeyInput
+}
+
 export default
 class KeyBindingRegistry {
-  keyBindings = new Map<string, KeyInput>()
+  keyBindings = new Map<string, KeyBinding>()
+  keyToKeyBindings = new Map<string, KeyBinding[]>()
+
+  keyInputForAction(id: string) {
+    const keyBinding = this.keyBindings.get(id)
+    if (keyBinding) {
+      return keyBinding.keyInput
+    }
+  }
+
+  keyBindingsForKey(key: string) {
+    return this.keyToKeyBindings.get(key) || []
+  }
 
   add(...keyBindings: [string, KeyInput][]) {
-    for (const [id, keyInput] of keyBindings) {
-      this.keyBindings.set(id, keyInput)
+    for (const [action, keyInput] of keyBindings) {
+      const keyBinding = {action, keyInput}
+      this.keyBindings.set(action, keyBinding)
+      if (this.keyToKeyBindings.has(keyInput.key)) {
+        this.keyToKeyBindings.get(keyInput.key)!.push(keyBinding)
+      } else {
+        this.keyToKeyBindings.set(keyInput.key, [keyBinding])
+      }
     }
   }
 }
