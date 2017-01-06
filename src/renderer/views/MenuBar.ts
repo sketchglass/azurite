@@ -153,12 +153,8 @@ class MenuBar {
     const windowMenu: MenuDescription = {
       role: 'window',
       submenu: [
-        {
-          role: 'minimize'
-        },
-        {
-          role: 'close'
-        }
+        {role: 'minimize'},
+        {role: 'close'},
       ]
     }
 
@@ -181,75 +177,31 @@ class MenuBar {
       const appMenu: MenuDescription = {
         label: name,
         submenu: [
-          {
-            role: 'about'
-          },
-          {
-            type: 'separator'
-          },
-          {
-            role: 'services',
-            submenu: []
-          },
-          {
-            type: 'separator'
-          },
-          {
-            role: 'hide'
-          },
-          {
-            role: 'hideothers'
-          },
-          {
-            role: 'unhide'
-          },
-          {
-            type: 'separator'
-          },
-          {
-            role: 'quit'
-          }
+          {role: 'about'},
+          {type: 'separator'},
+          {role: 'services', submenu: []},
+          {type: 'separator'},
+          {role: 'hide'},
+          {role: 'hideothers'},
+          {role: 'unhide'},
+          {type: 'separator'},
+          {role: 'quit'},
         ]
       }
       template.unshift(appMenu);
       (editMenu.submenu as MenuDescription[]).push(
-        {
-          type: 'separator'
-        },
-        {
-          label: 'Speech',
-          submenu: [
-            {
-              role: 'startspeaking'
-            },
-            {
-              role: 'stopspeaking'
-            }
-          ]
-        }
+        {type: 'separator'},
+        {label: 'Speech', submenu: [
+          {role: 'startspeaking'},
+          {role: 'stopspeaking'},
+        ]},
       )
       windowMenu.submenu = [
-        {
-          label: 'Close',
-          accelerator: 'CmdOrCtrl+W',
-          role: 'close'
-        },
-        {
-          label: 'Minimize',
-          accelerator: 'CmdOrCtrl+M',
-          role: 'minimize'
-        },
-        {
-          label: 'Zoom',
-          role: 'zoom'
-        },
-        {
-          type: 'separator'
-        },
-        {
-          label: 'Bring All to Front',
-          role: 'front'
-        }
+        {role: 'close'},
+        {role: 'minimize'},
+        {role: 'zoom'},
+        {type: 'separator'},
+        {role: 'front'},
       ]
     }
 
