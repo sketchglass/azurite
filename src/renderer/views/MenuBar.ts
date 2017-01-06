@@ -11,7 +11,7 @@ interface MenuDescription extends Electron.MenuItemOptions {
   submenu?: MenuDescription[]
 }
 
-function resolveMenuDescription(description: MenuDescription): Electron.MenuItemOptions {
+function menuDescriptionToElectron(description: MenuDescription): Electron.MenuItemOptions {
   const options: Electron.MenuItemOptions = {}
   Object.assign(options, description)
   if (description.action) {
@@ -27,7 +27,7 @@ function resolveMenuDescription(description: MenuDescription): Electron.MenuItem
     }
   }
   if (description.submenu) {
-    options.submenu = description.submenu.map(resolveMenuDescription)
+    options.submenu = description.submenu.map(menuDescriptionToElectron)
   }
   return options
 }
@@ -253,7 +253,7 @@ class MenuBar {
       ]
     }
 
-    return template.map(resolveMenuDescription)
+    return template.map(menuDescriptionToElectron)
   }
 }
 
