@@ -62,7 +62,7 @@ class PictureExport {
 
     for (const fileName of fileNames) {
       const ext = path.extname(fileName)
-      const format = formatRegistry.imageFormatForExtension(ext)
+      const format = formatRegistry.imageFormatForExtension(ext.slice(1))
       if (format) {
         const buffer = fs.readFileSync(fileName)
         const canvas = await format.import(buffer)
