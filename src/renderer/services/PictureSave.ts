@@ -36,7 +36,7 @@ class PictureSave {
       }, resolve)
     })
     if (filePath) {
-      this.saveToPath(filePath)
+      await this.saveToPath(filePath)
       return true
     } else {
       return false
