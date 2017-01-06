@@ -1,6 +1,8 @@
 import Action, {PictureAction} from "./Action"
 import ActionIDs from "./ActionIDs"
-import {addAction} from "../state/ActionRegistry"
+import {addAction, actionRegistry} from "../state/ActionRegistry"
+import ImageFormat from "../formats/ImageFormat"
+import {formatRegistry} from "../state/FormatRegistry"
 import {appState} from "../state/AppState"
 
 @addAction
@@ -48,6 +50,22 @@ export class FileImportAction extends PictureAction {
   run() {
     this.pictureState && this.pictureState.import()
   }
+}
+
+export class FileExportAction extends PictureAction {
+  id = `${ActionIDs.fileExport}:${this.format.mimeType}`
+  title = `Export ${this.format.title}...`
+  constructor(public format: ImageFormat) {
+    super()
+  }
+
+  run() {
+    this.pictureState && this.pictureState.export(this.format)
+  }
+}
+
+for (const format of formatRegistry.imageFormats) {
+  actionRegistry.add(new FileExportAction(format))
 }
 
 // TODO: implement export action

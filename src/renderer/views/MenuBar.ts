@@ -4,6 +4,7 @@ import {computed, autorun} from "mobx"
 import {appState} from "../state/AppState"
 import {actionRegistry} from "../state/ActionRegistry"
 import {keyBindingRegistry} from "../state/KeyBindingRegistry"
+import {formatRegistry} from "../state/FormatRegistry"
 import ActionIDs from "../actions/ActionIDs"
 
 interface MenuDescription extends Electron.MenuItemOptions {
@@ -17,7 +18,9 @@ function menuDescriptionToElectron(description: MenuDescription): Electron.MenuI
   if (description.action) {
     const action = actionRegistry.actions.get(description.action)
     if (action) {
-      options.label = action.title
+      if (!options.label) {
+        options.label = action.title
+      }
       options.enabled = action.enabled
       options.click = () => action.run()
       const key = keyBindingRegistry.keyInputForAction(description.action)
@@ -57,11 +60,10 @@ class MenuBar {
         {action: ActionIDs.fileSaveAs},
         {
           label: "Export",
-          submenu: appState.imageFormats.map(format => {
+          submenu: formatRegistry.imageFormats.map(format => {
             return {
+              action: `${ActionIDs.fileExport}:${format.mimeType}`,
               label: `${format.title}...`,
-              enabled: !!this.pictureState,
-              click: () => this.pictureState && this.pictureState.export(format),
             }
           }),
         },

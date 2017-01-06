@@ -5,7 +5,7 @@ import {Color} from "paintgl"
 import Picture from "../../renderer/models/Picture"
 import {ImageLayer} from "../../renderer/models/Layer"
 import {PictureExport} from "../../renderer/services/PictureExport"
-import {appState} from "../../renderer/state/AppState"
+import {formatRegistry} from "../../renderer/state/FormatRegistry"
 import {remote} from "electron"
 
 const tempPath = remote.app.getPath("temp")
@@ -33,7 +33,7 @@ describe("PictureExport", () => {
       const filePath = path.join(tempPath, "test-export.png")
 
       const pictureExport1 = new PictureExport(picture1)
-      const format = appState.imageFormats.find(f => f.extensions.includes("png"))!
+      const format = formatRegistry.imageFormatForExtension("png")!
       await pictureExport1.export(filePath, format)
       pictureExport1.dispose()
 

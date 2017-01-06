@@ -7,10 +7,10 @@ const {dialog} = remote
 import * as fs from "fs"
 import * as path from "path"
 import ImageFormat from "../formats/ImageFormat"
-import {appState} from "../state/AppState"
 import {UndoCommand, CompositeUndoCommand} from "../models/UndoStack"
 import {AddLayerCommand} from "../commands/LayerCommand"
 import IndexPath from "../../lib/IndexPath"
+import {formatRegistry} from "../state/FormatRegistry"
 
 export
 type PictureExportFormat = "png"|"jpeg"|"bmp"
@@ -36,7 +36,7 @@ class PictureExport {
   }
 
   async showImportDialog() {
-    const extensions = appState.imageFormats.map(f => f.extensions).reduce((a, b) => a.concat(b), [])
+    const extensions = formatRegistry.imageExtensions()
     const fileNames = await new Promise<string[]>((resolve, reject) => {
       dialog.showOpenDialog({
         title: "Import...",
@@ -62,7 +62,7 @@ class PictureExport {
 
     for (const fileName of fileNames) {
       const ext = path.extname(fileName)
-      const format = appState.imageFormats.find(f => f.extensions.includes(ext.slice(1)))
+      const format = formatRegistry.imageFormatForExtension(ext)
       if (format) {
         const buffer = fs.readFileSync(fileName)
         const canvas = await format.import(buffer)
