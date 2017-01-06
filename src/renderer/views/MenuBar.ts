@@ -44,34 +44,6 @@ class MenuBar {
     })
   }
 
-  newPicture() {
-    appState.newPicture()
-  }
-
-  open() {
-    appState.openPicture()
-  }
-
-  close() {
-    appState.closePicture(appState.currentPictureIndex)
-  }
-
-  zoomIn() {
-    if (appState.currentPictureState) {
-      appState.currentPictureState.picture.navigation.zoomIn()
-    }
-  }
-  zoomOut() {
-    if (appState.currentPictureState) {
-      appState.currentPictureState.picture.navigation.zoomOut()
-    }
-  }
-  resetZoom() {
-    if (appState.currentPictureState) {
-      appState.currentPictureState.picture.navigation.scale = 1
-    }
-  }
-
   render() {
     const fileMenu: MenuDescription = {
       label: "File",
