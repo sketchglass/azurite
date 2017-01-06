@@ -13,24 +13,3 @@ abstract class ImageFormat {
   }
 }
 export default ImageFormat
-
-export
-class JPEGImageFormat extends ImageFormat {
-  title = "JPEG"
-  extensions = ["jpg", "jpeg"]
-  mimeType = "image/jpeg"
-}
-
-export
-class PNGImageFormat extends ImageFormat {
-  title = "PNG"
-  extensions = ["png"]
-  mimeType = "image/png"
-}
-
-export
-class BMPImageFormat extends ImageFormat {
-  title = "BMP"
-  extensions = ["bmp"]
-  mimeType = "image/bmp"
-}
