@@ -25,7 +25,7 @@ class PictureExport {
   async showExportDialog(format: ImageFormat) {
     const filter = {name: format.title, extensions: format.extensions}
     const fileName = await new Promise<string|undefined>((resolve, reject) => {
-      dialog.showSaveDialog({
+      dialog.showSaveDialog(remote.getCurrentWindow(), {
         title: "Export...",
         filters: [filter]
       }, resolve)
@@ -38,7 +38,7 @@ class PictureExport {
   async showImportDialog() {
     const extensions = formatRegistry.imageExtensions()
     const fileNames = await new Promise<string[]>((resolve, reject) => {
-      dialog.showOpenDialog({
+      dialog.showOpenDialog(remote.getCurrentWindow(), {
         title: "Import...",
         filters: [{name: "Image", extensions}]
       }, resolve)
