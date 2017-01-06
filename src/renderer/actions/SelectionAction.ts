@@ -1,17 +1,22 @@
-import Action, {PictureAction} from "./Action"
+import {remote} from "electron"
+import {PictureAction} from "./Action"
 import ActionIDs from "./ActionIDs"
 import {addAction} from "../state/ActionRegistry"
-import {editActionState} from "../state/EditActionState"
+import {currentFocus} from "../views/CurrentFocus"
 
 @addAction
-export class SelectionSelectAllAction extends Action {
+export class SelectionSelectAllAction extends PictureAction {
   id = ActionIDs.selectionSelectAll
   title = "Select All"
   get enabled() {
-    return editActionState.canSelectAll
+    return currentFocus.isTextInput || !!this.pictureState
   }
   run() {
-    editActionState.selectAll()
+    if (currentFocus.isTextInput) {
+      remote.getCurrentWebContents().selectAll()
+    } else if (this.pictureState) {
+      this.pictureState.selectAll()
+    }
   }
 }
 

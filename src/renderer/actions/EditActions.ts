@@ -1,25 +1,65 @@
+import {remote} from "electron"
 import Action from "./Action"
 import ActionIDs from "./ActionIDs"
 import {addAction} from "../state/ActionRegistry"
-import {editActionState} from "../state/EditActionState"
+import {currentFocus} from "../views/CurrentFocus"
+import {appState} from "../state/AppState"
 
 @addAction
 export class EditUndoAction extends Action {
   id = ActionIDs.editUndo
-  get title() { return `Undo ${editActionState.undoName}` }
-  get enabled() { return editActionState.canUndo }
+  get title() {
+    if (!currentFocus.isTextInput && appState.undoStack) {
+      const {undoCommand} = appState.undoStack
+      if (undoCommand) {
+        return `Undo ${undoCommand.title}`
+      }
+    }
+    return "Undo"
+  }
+  get enabled() {
+    if (currentFocus.isTextInput) {
+      return true
+    } else if (appState.undoStack) {
+      return appState.undoStack.isUndoable
+    }
+    return false
+  }
   run() {
-    editActionState.undo()
+    if (currentFocus.isTextInput) {
+      remote.getCurrentWebContents().undo()
+    } else if (appState.undoStack) {
+      appState.undoStack.undo()
+    }
   }
 }
 
 @addAction
 export class EditRedoAction extends Action {
   id = ActionIDs.editRedo
-  get title() { return `Redo ${editActionState.redoName}` }
-  get enabled() { return editActionState.canRedo }
+  get title() {
+    if (!currentFocus.isTextInput && appState.undoStack) {
+      const {redoCommand} = appState.undoStack
+      if (redoCommand) {
+        return `Redo ${redoCommand.title}`
+      }
+    }
+    return "Redo"
+  }
+  get enabled() {
+    if (currentFocus.isTextInput) {
+      return true
+    } else if (appState.undoStack) {
+      return appState.undoStack.isRedoable
+    }
+    return false
+  }
   run() {
-    editActionState.redo()
+    if (currentFocus.isTextInput) {
+      remote.getCurrentWebContents().redo()
+    } else if (appState.undoStack) {
+      appState.undoStack.redo()
+    }
   }
 }
 
@@ -29,7 +69,7 @@ export class EditCutAction extends Action {
   title = "Cut"
   enabled = true
   run() {
-    editActionState.cut()
+    remote.getCurrentWebContents().cut()
   }
 }
 
@@ -39,7 +79,7 @@ export class EditCopyAction extends Action {
   title = "Copy"
   enabled = true
   run() {
-    editActionState.copy()
+    remote.getCurrentWebContents().copy()
   }
 }
 
@@ -49,7 +89,7 @@ export class EditPasteAction extends Action {
   title = "Paste"
   enabled = true
   run() {
-    editActionState.paste()
+    remote.getCurrentWebContents().paste()
   }
 }
 
@@ -59,6 +99,6 @@ export class EditDeleteAction extends Action {
   title = "Delete"
   enabled = true
   run() {
-    editActionState.delete()
+    remote.getCurrentWebContents().delete()
   }
 }

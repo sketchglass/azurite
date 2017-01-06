@@ -55,6 +55,16 @@ class AppState {
     return this.currentTool.modalUndoStack
   }
 
+  @computed get undoStack() {
+    const {modal, modalUndoStack, currentPictureState} = this
+    if (modal) {
+      return modalUndoStack
+    }
+    if (currentPictureState) {
+      return currentPictureState.picture.undoStack
+    }
+  }
+
   @observable uiVisible = true
 
   constructor() {
