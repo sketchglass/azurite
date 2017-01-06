@@ -7,15 +7,12 @@ class KeyBindingHandler {
   }
 
   onKeyDown(e: KeyboardEvent) {
-    console.log("keydown")
     const keyBindings = keyBindingRegistry.keyBindingsForKey(e.key)
-    console.log(keyBindings)
     for (const binding of keyBindings) {
       if (binding.keyInput.matchesEvent(e)) {
         const action = actionRegistry.actions.get(binding.action)
         if (action) {
           e.preventDefault()
-          console.log("executing", binding.action)
           action.run()
         }
       }
