@@ -94,6 +94,13 @@ class MenuBar {
       ],
     }
 
+    const layerMenu: MenuDescription = {
+      label: "Layer",
+      submenu: [
+        {action: ActionIDs.layerMerge},
+      ],
+    }
+
     const canvasMenu: MenuDescription = {
       label: "Canvas",
       submenu: [
@@ -143,7 +150,7 @@ class MenuBar {
     }
 
     const template: MenuDescription[] = [
-      fileMenu, editMenu, selectionMenu, canvasMenu, viewMenu, windowMenu, helpMenu
+      fileMenu, editMenu, selectionMenu, layerMenu, canvasMenu, viewMenu, windowMenu, helpMenu
     ]
 
     if (process.platform === 'darwin') {

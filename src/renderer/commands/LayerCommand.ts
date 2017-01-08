@@ -8,6 +8,7 @@ import TiledTexture from "../models/TiledTexture"
 import LayerTransform from "../services/LayerTransform"
 import {SelectionChangeCommand} from "./SelectionCommand"
 import IndexPath from "../../lib/IndexPath"
+import {layerBlender} from "../services/LayerBlender"
 
 function getSiblingsAndIndex(picture: Picture, path: IndexPath): [IObservableArray<Layer>, number] {
   const parentPath = path.parent
@@ -81,9 +82,8 @@ class CopyLayerCommand implements UndoCommand {
   }
 }
 
-export
-class GroupLayerCommand implements UndoCommand {
-  title = "Group Layers"
+abstract class BaseGroupLayerCommand implements UndoCommand {
+  abstract title: string
 
   constructor(public readonly picture: Picture, public readonly srcPaths: IndexPath[]) {
   }
@@ -113,11 +113,31 @@ class GroupLayerCommand implements UndoCommand {
       const src = srcSiblings.splice(srcIndex, 1)[0]
       srcs.unshift(src)
     }
-    const group = new GroupLayer(this.picture, {name: "Group"}, srcs)
+    const group = this.group(srcs)
 
     const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.srcPaths[0])
     dstSiblings.splice(dstIndex, 0, group)
     this.picture.selectedLayers.replace([group])
+  }
+
+  abstract group(srcs: Layer[]): Layer
+}
+
+export
+class GroupLayerCommand extends BaseGroupLayerCommand {
+  title = "Group Layers"
+
+  group(srcs: Layer[]) {
+    return new GroupLayer(this.picture, {name: "Group"}, srcs)
+  }
+}
+
+export
+class MergeLayerCommand extends BaseGroupLayerCommand {
+  title = "Merge Layers"
+
+  group(srcs: Layer[]) {
+    return new ImageLayer(this.picture, {name: "Merged"}, layerBlender.blendToTiledTexture(srcs))
   }
 }
 

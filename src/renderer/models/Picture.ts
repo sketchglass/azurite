@@ -2,7 +2,7 @@ import * as path from "path"
 import {observable, computed, reaction} from "mobx"
 import {Vec2, Rect} from "paintvec"
 import Layer, {LayerData, ImageLayer, GroupLayer} from "./Layer"
-import LayerBlender from "../services/LayerBlender"
+import PictureBlender from "../services/PictureBlender"
 import {UndoStack} from "./UndoStack"
 import {Navigation} from "./Navigation"
 import Selection from "./Selection"
@@ -42,7 +42,7 @@ class Picture {
 
   readonly rootLayer = new GroupLayer(this, "root", [])
   readonly selectedLayers = observable<Layer>([])
-  readonly layerBlender = new LayerBlender(this)
+  readonly blender = new PictureBlender(this)
   @computed get layers() {
     return this.rootLayer.children
   }
@@ -72,12 +72,12 @@ class Picture {
 
     reaction(() => this.lastUpdate, update => {
       if (update.rect) {
-        this.layerBlender.dirtiness.addRect(update.rect)
+        this.blender.dirtiness.addRect(update.rect)
       } else {
-        this.layerBlender.dirtiness.addWhole()
+        this.blender.dirtiness.addWhole()
       }
     })
-    this.layerBlender.renderNow()
+    this.blender.renderNow()
     this.undoStack.commands.observe(() => {
       this.edited = true
     })
@@ -90,7 +90,7 @@ class Picture {
   }
 
   dispose() {
-    this.layerBlender.dispose()
+    this.blender.dispose()
     for (const layer of this.layers) {
       layer.dispose()
     }

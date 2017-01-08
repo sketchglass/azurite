@@ -35,7 +35,7 @@ class ThumbnailManager {
 
   private updateNavigatorThumbnail() {
     if (this.navigatorThumbnailDirty) {
-      this.navigatorThumbnailGenerator.loadTexture(this.picture.layerBlender.getBlendedTexture())
+      this.navigatorThumbnailGenerator.loadTexture(this.picture.blender.getBlendedTexture())
       this.navigatorThumbnailDirty = false
     }
   }

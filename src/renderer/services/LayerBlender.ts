@@ -1,12 +1,9 @@
-import {reaction} from "mobx"
-import Picture from "../models/Picture"
-import {Vec2, Rect, Transform} from "paintvec"
-import {ShapeModel, Texture, TextureDrawTarget, RectShape, Color} from "paintgl"
+import {Vec2, Rect} from "paintvec"
+import {ShapeModel, TextureDrawTarget, RectShape, Color} from "paintgl"
 import {context} from "../GLContext"
 import TiledTexture, {Tile} from "../models/TiledTexture"
 import Layer, {LayerBlendMode, ImageLayer, GroupLayer} from "../models/Layer"
 import {drawTexture} from "../GLUtil"
-import Dirtiness from "../../lib/Dirtiness"
 
 const normalBlendShader = {
   fragment: `
@@ -82,7 +79,6 @@ const tileNormalModel = new ShapeModel(context, {
   shader: normalBlendShader,
 })
 
-export
 class TileBlender {
   tiles = [0, 1].map(i => new Tile())
   drawTargets = this.tiles.map(tile => new TextureDrawTarget(context, tile.texture))
@@ -162,55 +158,42 @@ class TileBlender {
   }
 }
 
-const tileBlenders = [new TileBlender()]
-
 export
 type ReplaceTile = (layer: Layer, tileKey: Vec2) => Tile|undefined|false
 
-export default
+export
 class LayerBlender {
-  private blendedTexture = new Texture(context, {
-    size: this.picture.size,
-    pixelFormat: "rgb",
-    pixelType: "byte",
-  })
-  private drawTarget = new TextureDrawTarget(context, this.blendedTexture)
-
+  private tileBlenders = [new TileBlender()]
   replaceTile: ReplaceTile|undefined
 
-  dirtiness = new Dirtiness()
-
-  constructor(public picture: Picture) {
-    this.dirtiness.addWhole()
-    reaction(() => picture.size, size => {
-      this.blendedTexture.size = size
-    })
+  get blendedTile() {
+    return this.tileBlenders[0].currentTile
   }
 
-  renderNow() {
-    if (!this.dirtiness.dirty) {
-      return
+  blend(layers: Layer[], tileKey: Vec2, tileScissor?: Rect) {
+    this.blendLayers(layers, tileKey, tileScissor, 0)
+  }
+
+  blendToTiledTexture(layers: Layer[]) {
+    const keyArrays: Vec2[][] = []
+    const addKeys = (layer: Layer) => {
+      if (layer instanceof GroupLayer) {
+        layer.children.forEach(addKeys)
+      } else if (layer instanceof ImageLayer) {
+        keyArrays.push(layer.tiledTexture.keys())
+      }
     }
-    const rect = this.drawTarget.scissor = this.dirtiness.rect
-    this.drawTarget.clear(new Color(1, 1, 1, 1))
-    const tileKeys = TiledTexture.keysForRect(rect || new Rect(new Vec2(0), this.picture.size))
-    for (const key of tileKeys) {
-      const offset = key.mulScalar(Tile.width)
-      const tileScissor = rect
-        ? new Rect(rect.topLeft.sub(offset), rect.bottomRight.sub(offset)).intersection(Tile.rect)
-        : undefined
-      this.renderLayers(this.picture.layers, key, tileScissor, 0)
-      drawTexture(this.drawTarget, tileBlenders[0].currentTile.texture, {transform: Transform.translate(offset), blendMode: "src-over"})
+    layers.forEach(addKeys)
+    const keys = TiledTexture.unionKeys(...keyArrays)
+    const tiledTexture = new TiledTexture()
+    for (const key of keys) {
+      this.blend(layers, key)
+      tiledTexture.set(key, this.blendedTile.clone())
     }
-    this.dirtiness.clear()
+    return tiledTexture
   }
 
-  getBlendedTexture() {
-    this.renderNow()
-    return this.blendedTexture
-  }
-
-  private renderLayer(layer: Layer, nextLayer: Layer|undefined, key: Vec2, scissor: Rect|undefined, depth: number): boolean {
+  private blendLayer(layer: Layer, nextLayer: Layer|undefined, key: Vec2, scissor: Rect|undefined, depth: number): boolean {
     let tile: Tile|undefined = undefined
 
     if (layer.visible) {
@@ -220,14 +203,14 @@ class LayerBlender {
         }
       } else if (layer instanceof GroupLayer) {
         const {children} = layer
-        const rendered = this.renderLayers(children, key, scissor, depth + 1)
+        const rendered = this.blendLayers(children, key, scissor, depth + 1)
         if (rendered) {
-          tile = tileBlenders[depth + 1].currentTile
+          tile = this.tileBlenders[depth + 1].currentTile
         }
       }
     }
 
-    const tileBlender = tileBlenders[depth]
+    const tileBlender = this.tileBlenders[depth]
 
     if (this.replaceTile) {
       const replace = this.replaceTile(layer, key)
@@ -240,22 +223,19 @@ class LayerBlender {
     return !!tile
   }
 
-  private renderLayers(layers: Layer[], key: Vec2, scissor: Rect|undefined, depth: number): boolean {
-    if (!tileBlenders[depth]) {
-      tileBlenders[depth] = new TileBlender()
+  private blendLayers(layers: Layer[], key: Vec2, scissor: Rect|undefined, depth: number): boolean {
+    if (!this.tileBlenders[depth]) {
+      this.tileBlenders[depth] = new TileBlender()
     }
-    tileBlenders[depth].setScissor(scissor)
-    tileBlenders[depth].clear()
+    this.tileBlenders[depth].setScissor(scissor)
+    this.tileBlenders[depth].clear()
     let rendered = false
     for (let i = layers.length - 1; i >= 0; --i) {
-      const childRendered = this.renderLayer(layers[i], layers[i - 1], key, scissor, depth)
+      const childRendered = this.blendLayer(layers[i], layers[i - 1], key, scissor, depth)
       rendered = rendered || childRendered
     }
     return rendered
   }
-
-  dispose() {
-    this.drawTarget.dispose()
-    this.blendedTexture.dispose()
-  }
 }
+
+export const layerBlender = new LayerBlender()

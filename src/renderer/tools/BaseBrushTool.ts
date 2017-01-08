@@ -114,7 +114,7 @@ abstract class BaseBrushTool extends Tool {
     if (!this.picture) {
       return
     }
-    this.picture.layerBlender.dirtiness.addRect(rect)
+    this.picture.blender.dirtiness.addRect(rect)
     renderer.addPictureDirtyRect(rect)
     renderer.update()
   }

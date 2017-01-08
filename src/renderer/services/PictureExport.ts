@@ -47,7 +47,7 @@ class PictureExport {
   }
 
   async export(fileName: string, format: ImageFormat) {
-    this.textureToCanvas.loadTexture(this.picture.layerBlender.getBlendedTexture(), new Vec2(0))
+    this.textureToCanvas.loadTexture(this.picture.blender.getBlendedTexture(), new Vec2(0))
     this.textureToCanvas.updateCanvas()
     const buffer = await format.export(this.textureToCanvas.canvas)
     fs.writeFileSync(fileName, buffer)

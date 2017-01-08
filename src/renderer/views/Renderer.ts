@@ -204,7 +204,7 @@ class Renderer {
   constructor() {
     reaction(() => this.picture, picture => {
       if (picture) {
-        this.pictureModel.uniforms = {texture: picture.layerBlender.getBlendedTexture()}
+        this.pictureModel.uniforms = {texture: picture.blender.getBlendedTexture()}
       } else {
         this.pictureModel.uniforms = {}
       }
@@ -281,7 +281,7 @@ class Renderer {
       // render picture
 
       const filter: TextureFilter = this.picture.navigation.scale < 2 ? "bilinear" : "nearest"
-      const texture = this.picture.layerBlender.getBlendedTexture()
+      const texture = this.picture.blender.getBlendedTexture()
       if (texture.filter != filter) {
         texture.filter = filter
       }

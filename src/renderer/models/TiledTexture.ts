@@ -295,6 +295,16 @@ class TiledTexture {
     }
     return keys
   }
+
+  static unionKeys(...keySets: Iterable<Vec2>[]) {
+    const set = new Set<string>()
+    for (const keys of keySets) {
+      for (const key of keys) {
+        set.add(keyToString(key))
+      }
+    }
+    return Array.from(set).map(stringToKey)
+  }
 }
 
 function keyToString(key: Vec2) {
