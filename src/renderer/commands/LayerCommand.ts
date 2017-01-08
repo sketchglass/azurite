@@ -151,7 +151,13 @@ class MergeLayerCommand implements UndoCommand {
       srcs.unshift(src)
     }
     this.srcs = srcs
-    const merged = new ImageLayer(this.picture, {name: "Merged"}, layerBlender.blendToTiledTexture(srcs))
+    let merged: ImageLayer
+    if (srcs.length == 1 && srcs[0] instanceof GroupLayer) {
+      const group = srcs[0] as GroupLayer
+      merged = new ImageLayer(this.picture, group.props, layerBlender.blendToTiledTexture(group.children))
+    } else {
+      merged = new ImageLayer(this.picture, {name: "Merged"}, layerBlender.blendToTiledTexture(srcs))
+    }
 
     const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.srcPaths[0])
     dstSiblings.splice(dstIndex, 0, merged)

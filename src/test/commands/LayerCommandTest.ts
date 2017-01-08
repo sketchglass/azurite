@@ -183,52 +183,77 @@ describe("Layer commands", () => {
 
   describe("MergeLayerCommand", () => {
     let command: MergeLayerCommand
-    beforeEach(() => {
-      const paths = [new IndexPath([1, 0]), new IndexPath([1, 1, 0])]
-      command = new MergeLayerCommand(picture, paths)
-      const layer1 = picture.layerForPath(paths[0]) as ImageLayer
-      const layer2 = picture.layerForPath(paths[1]) as ImageLayer
-
-      const canvas = document.createElement("canvas")
-      canvas.width = 100
-      canvas.height = 200
-      const context = canvas.getContext("2d")!
-      context.fillStyle = "red"
-      context.fillRect(0, 0, canvas.width, canvas.height)
-      context.fillStyle = "blue"
-      context.fillRect(10, 20, 30, 40)
-
-      layer1.tiledTexture.putImage(new Vec2(), canvas)
-      layer2.tiledTexture.putImage(new Vec2(500, 500), canvas)
-    })
-
-    describe("redo", () => {
-      it("merges layers", () => {
+    describe("when merging a group", () => {
+      beforeEach(() => {
+        const paths = [new IndexPath([1, 1])]
+        command = new MergeLayerCommand(picture, paths)
+        const layer1 = picture.layerForPath(paths[0]) as ImageLayer
+        layer1.opacity = 0.9
+      })
+      it("preserves properties of group", () => {
         picture.undoStack.redoAndPush(command)
         assertLayerStructure(picture.rootLayer, [
           {name: "1"},
           {name: "2", children: [
-            {name: "Merged"},
-            {name: "4", children: [
-              {name: "6"}
-            ]},
+            {name: "3"},
+            {name: "4"},
             {name: "7"},
           ]},
           {name: "8"}
         ])
-        const merged = picture.layerForPath(new IndexPath([1, 0])) as ImageLayer
-        assert.deepEqual(merged.tiledTexture.colorAt(new Vec2(5, 5)), new Color(1, 0, 0, 1))
-        assert.deepEqual(merged.tiledTexture.colorAt(new Vec2(15, 30)), new Color(0, 0, 1, 1))
-        assert.deepEqual(merged.tiledTexture.colorAt(new Vec2(505, 505)), new Color(1, 0, 0, 1))
-        assert.deepEqual(merged.tiledTexture.colorAt(new Vec2(515, 530)), new Color(0, 0, 1, 1))
+        const merged = picture.layerForPath(new IndexPath([1, 1])) as ImageLayer
+        assert(merged instanceof ImageLayer)
+        assert(merged.opacity == 0.9)
       })
     })
+    describe("when merging layers", () => {
+      beforeEach(() => {
+        const paths = [new IndexPath([1, 0]), new IndexPath([1, 1, 0])]
+        command = new MergeLayerCommand(picture, paths)
+        const layer1 = picture.layerForPath(paths[0]) as ImageLayer
+        const layer2 = picture.layerForPath(paths[1]) as ImageLayer
 
-    describe("undo", () => {
-      it("restores structure", () => {
-        picture.undoStack.redoAndPush(command)
-        picture.undoStack.undo()
-        assertLayerStructure(picture.rootLayer, originalStructure)
+        const canvas = document.createElement("canvas")
+        canvas.width = 100
+        canvas.height = 200
+        const context = canvas.getContext("2d")!
+        context.fillStyle = "red"
+        context.fillRect(0, 0, canvas.width, canvas.height)
+        context.fillStyle = "blue"
+        context.fillRect(10, 20, 30, 40)
+
+        layer1.tiledTexture.putImage(new Vec2(), canvas)
+        layer2.tiledTexture.putImage(new Vec2(500, 500), canvas)
+      })
+
+      describe("redo", () => {
+        it("merges layers", () => {
+          picture.undoStack.redoAndPush(command)
+          assertLayerStructure(picture.rootLayer, [
+            {name: "1"},
+            {name: "2", children: [
+              {name: "Merged"},
+              {name: "4", children: [
+                {name: "6"}
+              ]},
+              {name: "7"},
+            ]},
+            {name: "8"}
+          ])
+          const merged = picture.layerForPath(new IndexPath([1, 0])) as ImageLayer
+          assert.deepEqual(merged.tiledTexture.colorAt(new Vec2(5, 5)), new Color(1, 0, 0, 1))
+          assert.deepEqual(merged.tiledTexture.colorAt(new Vec2(15, 30)), new Color(0, 0, 1, 1))
+          assert.deepEqual(merged.tiledTexture.colorAt(new Vec2(505, 505)), new Color(1, 0, 0, 1))
+          assert.deepEqual(merged.tiledTexture.colorAt(new Vec2(515, 530)), new Color(0, 0, 1, 1))
+        })
+      })
+
+      describe("undo", () => {
+        it("restores structure", () => {
+          picture.undoStack.redoAndPush(command)
+          picture.undoStack.undo()
+          assertLayerStructure(picture.rootLayer, originalStructure)
+        })
       })
     })
   })
