@@ -82,8 +82,9 @@ class CopyLayerCommand implements UndoCommand {
   }
 }
 
-abstract class BaseGroupLayerCommand implements UndoCommand {
-  abstract title: string
+export
+class GroupLayerCommand implements UndoCommand {
+  title = "Group Layers"
 
   constructor(public readonly picture: Picture, public readonly srcPaths: IndexPath[]) {
   }
@@ -113,31 +114,48 @@ abstract class BaseGroupLayerCommand implements UndoCommand {
       const src = srcSiblings.splice(srcIndex, 1)[0]
       srcs.unshift(src)
     }
-    const group = this.group(srcs)
+    const group = new GroupLayer(this.picture, {name: "Group"}, srcs)
 
     const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.srcPaths[0])
     dstSiblings.splice(dstIndex, 0, group)
     this.picture.selectedLayers.replace([group])
   }
-
-  abstract group(srcs: Layer[]): Layer
 }
 
 export
-class GroupLayerCommand extends BaseGroupLayerCommand {
-  title = "Group Layers"
-
-  group(srcs: Layer[]) {
-    return new GroupLayer(this.picture, {name: "Group"}, srcs)
-  }
-}
-
-export
-class MergeLayerCommand extends BaseGroupLayerCommand {
+class MergeLayerCommand implements UndoCommand {
   title = "Merge Layers"
+  srcs: Layer[] = []
 
-  group(srcs: Layer[]) {
-    return new ImageLayer(this.picture, {name: "Merged"}, layerBlender.blendToTiledTexture(srcs))
+  constructor(public readonly picture: Picture, public readonly srcPaths: IndexPath[]) {
+  }
+
+  undo() {
+    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.srcPaths[0])
+    const merged = dstSiblings.splice(dstIndex, 1)[0]
+    merged.dispose()
+
+    for (const [i, srcPath] of this.srcPaths.entries()) {
+      const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
+      srcSiblings.splice(srcIndex, 0, this.srcs[i])
+    }
+
+    this.picture.selectedLayers.replace(this.srcs)
+  }
+
+  redo() {
+    const srcs: Layer[] = []
+    for (const srcPath of [...this.srcPaths].reverse()) {
+      const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
+      const src = srcSiblings.splice(srcIndex, 1)[0]
+      srcs.unshift(src)
+    }
+    this.srcs = srcs
+    const merged = new ImageLayer(this.picture, {name: "Merged"}, layerBlender.blendToTiledTexture(srcs))
+
+    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.srcPaths[0])
+    dstSiblings.splice(dstIndex, 0, merged)
+    this.picture.selectedLayers.replace([merged])
   }
 }
 
