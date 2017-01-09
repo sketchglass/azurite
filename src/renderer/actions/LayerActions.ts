@@ -1,4 +1,3 @@
-import IndexPath from "../../lib/IndexPath"
 import {PictureAction} from "./Action"
 import ActionIDs from "./ActionIDs"
 import {addAction} from "../state/ActionRegistry"
@@ -13,7 +12,7 @@ export class AddLayerAction extends PictureAction {
   run() {
     const {picture} = this
     if (picture) {
-      const path = picture.currentLayer ? picture.currentLayer.path : new IndexPath([0])
+      const path = picture.insertPath
       picture.undoStack.redoAndPush(new AddLayerCommand(picture, path, new ImageLayer(picture, {name: "Layer"})))
     }
   }
@@ -27,7 +26,7 @@ export class AddGroupAction extends PictureAction {
   run() {
     const {picture} = this
     if (picture) {
-      const path = picture.currentLayer ? picture.currentLayer.path : new IndexPath([0])
+      const path = picture.insertPath
       picture.undoStack.redoAndPush(new AddLayerCommand(picture, path, new GroupLayer(picture, {name: "Group"}, [])))
     }
   }

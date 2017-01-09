@@ -100,6 +100,10 @@ class Picture {
     return this.rootLayer.descendantForPath(path)
   }
 
+  get insertPath() {
+    return this.currentLayer ? this.currentLayer.path : new IndexPath([0])
+  }
+
   forEachLayer(action: (layer: Layer) => void) {
     this.rootLayer.forEachDescendant(action)
   }
