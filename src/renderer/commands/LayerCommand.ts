@@ -338,3 +338,33 @@ class TransformLayerCommand implements UndoCommand {
     this.picture.lastUpdate = {layer}
   }
 }
+
+export
+class ClearLayerCommand implements UndoCommand {
+  title = "Clear Layer"
+  oldTiles: TiledTexture|undefined
+
+  constructor(public picture: Picture, public path: IndexPath) {
+  }
+
+  undo() {
+    const layer = this.picture.layerForPath(this.path)
+    if (!(layer && layer instanceof ImageLayer)) {
+      return
+    }
+    if (!this.oldTiles) {
+      return
+    }
+    layer.tiledTexture = this.oldTiles
+    this.oldTiles = undefined
+  }
+
+  redo() {
+    const layer = this.picture.layerForPath(this.path)
+    if (!(layer && layer instanceof ImageLayer)) {
+      return
+    }
+    this.oldTiles = layer.tiledTexture
+    layer.tiledTexture = new TiledTexture()
+  }
+}

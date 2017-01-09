@@ -10,6 +10,7 @@ import {
   AddLayerCommand,
   RemoveLayerCommand,
   ChangeLayerPropsCommand,
+  ClearLayerCommand,
 } from "../../renderer/commands/LayerCommand"
 import IndexPath from "../../lib/IndexPath"
 import TestPattern from "../util/TestPattern"
@@ -363,6 +364,34 @@ describe("Layer commands", () => {
         assert(layer.opacity == 1)
         assert(layer.preserveOpacity == false)
         assert(layer.clippingGroup == false)
+      })
+    })
+  })
+
+
+  describe("ClearLayerCommand", () => {
+    let command: ClearLayerCommand
+    let pattern: TestPattern
+    beforeEach(() => {
+      command = new ClearLayerCommand(picture, new IndexPath([1, 0]))
+      const layer = picture.layerForPath(new IndexPath([1, 0])) as ImageLayer
+      pattern = new TestPattern()
+      layer.tiledTexture.putImage(new Vec2(), pattern.canvas)
+    })
+    describe("redo", () => {
+      it("clears layer", () => {
+        picture.undoStack.redoAndPush(command)
+        const layer = picture.layerForPath(new IndexPath([1, 0])) as ImageLayer
+        assert(layer.tiledTexture.tiles.size == 0)
+      })
+    })
+
+    describe("undo", () => {
+      it("restores layer", () => {
+        picture.undoStack.redoAndPush(command)
+        picture.undoStack.undo()
+        const layer = picture.layerForPath(new IndexPath([1, 0])) as ImageLayer
+        pattern.assert(layer.tiledTexture)
       })
     })
   })
