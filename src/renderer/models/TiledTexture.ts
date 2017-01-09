@@ -1,10 +1,11 @@
 import * as zlib from "zlib"
 import {Vec2, Rect, Transform} from "paintvec"
-import {Color, Texture, DrawTarget, TextureDrawTarget, BlendMode} from "paintgl"
+import {Color, Texture, DrawTarget, TextureDrawTarget, BlendMode, RectShape, ShapeModel, colorShader} from "paintgl"
 import {context} from "../GLContext"
 import {drawTexture, drawVisibilityToBinary} from "../GLUtil"
 import {float32ArrayTo16} from "../../lib/Float"
 import {getBoundingRect} from "./util"
+const glsl = require("glslify")
 
 export
 class Tile {
@@ -113,6 +114,27 @@ class TiledTexture {
       return tile.colorAt(pos.sub(tileKey.mulScalar(Tile.width)))
     } else {
       return new Color(0, 0, 0, 0)
+    }
+  }
+
+  fill(color: Color, rect: Rect, opts: {clip?: Texture, blendMode?: BlendMode} = {}) {
+    if (!fillShape.rect.equals(rect)) {
+      fillShape.rect = rect
+    }
+    let model: ShapeModel
+    const {clip} = opts
+    if (clip) {
+      model = fillModelClipped
+      model.uniforms = {color, clip}
+    } else {
+      model = fillModel
+      fillModel.uniforms = {color}
+    }
+    model.blendMode = opts.blendMode || "src-over"
+    for (const key of TiledTexture.keysForRect(rect)) {
+      tileDrawTarget.texture = this.get(key).texture
+      model.transform = Transform.translate(key.mulScalar(-Tile.width)),
+      tileDrawTarget.draw(model)
     }
   }
 
@@ -325,3 +347,23 @@ const binaryTexture = new Texture(context, {size: new Vec2(Tile.width / 32, Tile
 const binaryDrawTarget = new TextureDrawTarget(context, binaryTexture)
 
 const tileDrawTarget = new TextureDrawTarget(context)
+
+const fillShaderClipped = {
+  fragment: glsl`
+    uniform sampler2D clip;
+    uniform vec4 color;
+    void fragmentMain(vec2 pos, vec2 uv, out vec4 outColor) {
+      outColor = texture2D(clip, uv).a * color;
+    }
+  `
+}
+
+const fillShape = new RectShape(context)
+const fillModel = new ShapeModel(context, {
+  shape: fillShape,
+  shader: colorShader,
+})
+const fillModelClipped = new ShapeModel(context, {
+  shape: fillShape,
+  shader: fillShaderClipped,
+})

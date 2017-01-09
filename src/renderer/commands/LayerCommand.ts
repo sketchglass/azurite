@@ -1,5 +1,5 @@
-import {Transform} from "paintvec"
-import {Rect} from "paintvec"
+import {Transform, Rect} from "paintvec"
+import {Color} from "paintgl"
 import {UndoCommand, CompositeUndoCommand} from "../models/UndoStack"
 import Picture from "../models/Picture"
 import Layer, {LayerProps, GroupLayer, ImageLayer} from "../models/Layer"
@@ -256,6 +256,40 @@ class ChangeLayerImageCommand implements UndoCommand {
   }
 }
 
+abstract class ReplaceLayerImageCommand implements UndoCommand {
+  abstract title: string
+  abstract createNewTiledTexture(original: TiledTexture): TiledTexture
+  private oldTiles: TiledTexture|undefined
+
+  constructor(public picture: Picture, public path: IndexPath) {
+  }
+
+  undo() {
+    const layer = this.picture.layerForPath(this.path)
+    if (!(layer && layer instanceof ImageLayer)) {
+      return
+    }
+    if (!this.oldTiles) {
+      return
+    }
+    layer.tiledTexture = this.oldTiles
+    this.oldTiles = undefined
+
+    this.picture.lastUpdate = {layer}
+  }
+
+  redo() {
+    const layer = this.picture.layerForPath(this.path)
+    if (!(layer && layer instanceof ImageLayer)) {
+      return
+    }
+    this.oldTiles = layer.tiledTexture
+    layer.tiledTexture = this.createNewTiledTexture(this.oldTiles)
+
+    this.picture.lastUpdate = {layer}
+  }
+}
+
 export
 class TransformLayerCommand implements UndoCommand {
   title = "Transform Layer"
@@ -307,36 +341,43 @@ class TransformLayerCommand implements UndoCommand {
 }
 
 export
-class ClearLayerCommand implements UndoCommand {
+class FillLayerCommand extends ReplaceLayerImageCommand {
+  title = "Fill Layer"
+
+  constructor(picture: Picture, path: IndexPath, public color: Color) {
+    super(picture, path)
+  }
+
+  createNewTiledTexture(original: TiledTexture) {
+    const tiledTexture = original.clone()
+    const {selection} = this.picture
+    tiledTexture.fill(this.color, this.picture.rect, {
+      clip: selection.hasSelection ? selection.texture : undefined
+    })
+    return tiledTexture
+  }
+}
+
+export
+class ClearLayerCommand extends ReplaceLayerImageCommand {
   title = "Clear Layer"
-  oldTiles: TiledTexture|undefined
 
-  constructor(public picture: Picture, public path: IndexPath) {
+  constructor(picture: Picture, path: IndexPath) {
+    super(picture, path)
   }
 
-  undo() {
-    const layer = this.picture.layerForPath(this.path)
-    if (!(layer && layer instanceof ImageLayer)) {
-      return
+  createNewTiledTexture(original: TiledTexture) {
+    const {selection} = this.picture
+    if (selection.hasSelection) {
+      const tiledTexture = original.clone()
+      tiledTexture.fill(new Color(1, 1, 1, 1), this.picture.rect, {
+        clip: selection.texture,
+        blendMode: "dst-out",
+      })
+      return tiledTexture
+    } else {
+      return new TiledTexture()
     }
-    if (!this.oldTiles) {
-      return
-    }
-    layer.tiledTexture = this.oldTiles
-    this.oldTiles = undefined
-
-    this.picture.lastUpdate = {layer}
-  }
-
-  redo() {
-    const layer = this.picture.layerForPath(this.path)
-    if (!(layer && layer instanceof ImageLayer)) {
-      return
-    }
-    this.oldTiles = layer.tiledTexture
-    layer.tiledTexture = new TiledTexture()
-
-    this.picture.lastUpdate = {layer}
   }
 }
 
