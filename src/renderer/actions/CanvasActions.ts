@@ -1,13 +1,21 @@
 import {PictureAction} from "./Action"
 import ActionIDs from "./ActionIDs"
 import {addAction} from "../state/ActionRegistry"
+import {dialogLauncher} from "../views/dialogs/DialogLauncher"
+import {FlipPictureCommand, Rotate90PictureCommand, Rotate180PictureCommand, ChangePictureResolutionCommand} from "../commands/PictureCommand"
 
 @addAction
 export class CanvasChangeResolutionAction extends PictureAction {
   id = ActionIDs.canvasChangeResolution
   title = "Change Canvas Resolution..."
-  run() {
-    this.pictureState && this.pictureState.changeResolution()
+  async run() {
+    if (!this.picture) {
+      return
+    }
+    const newDimension = await dialogLauncher.openResolutionChangeDialog(this.picture.dimension)
+    if (newDimension) {
+      this.picture.undoStack.push(new ChangePictureResolutionCommand(this.picture, newDimension))
+    }
   }
 }
 
@@ -16,7 +24,7 @@ export class CanvasRotateLeftAction extends PictureAction {
   id = ActionIDs.canvasRotateLeft
   title = "Rotate 90° Left"
   run() {
-    this.pictureState && this.pictureState.rotate90("left")
+    this.picture && this.picture.undoStack.push(new Rotate90PictureCommand(this.picture, "left"))
   }
 }
 
@@ -25,7 +33,7 @@ export class CanvasRotateRightAction extends PictureAction {
   id = ActionIDs.canvasRotateRight
   title = "Rotate 90° Right"
   run() {
-    this.pictureState && this.pictureState.rotate90("right")
+    this.picture && this.picture.undoStack.push(new Rotate90PictureCommand(this.picture, "right"))
   }
 }
 
@@ -34,7 +42,7 @@ export class CanvasRotate180Action extends PictureAction {
   id = ActionIDs.canvasRotate180
   title = "Rotate 180°"
   run() {
-    this.pictureState && this.pictureState.rotate180()
+    this.picture && this.picture.undoStack.push(new Rotate180PictureCommand(this.picture))
   }
 }
 
@@ -43,7 +51,7 @@ export class CanvasFlipHorizontallyAction extends PictureAction {
   id = ActionIDs.canvasFlipHorizontally
   title = "Flip Horizontally"
   run() {
-    this.pictureState && this.pictureState.flip("horizontal")
+    this.picture && this.picture.undoStack.push(new FlipPictureCommand(this.picture, "horizontal"))
   }
 }
 
@@ -52,6 +60,6 @@ export class CanvasFlipVerticallyAction extends PictureAction {
   id = ActionIDs.canvasFlipVertically
   title = "Flip Vertically"
   run() {
-    this.pictureState && this.pictureState.flip("vertical")
+    this.picture && this.picture.undoStack.push(new FlipPictureCommand(this.picture, "vertical"))
   }
 }
