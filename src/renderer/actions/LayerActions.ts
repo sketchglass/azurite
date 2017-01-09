@@ -1,8 +1,60 @@
 import {PictureAction} from "./Action"
 import ActionIDs from "./ActionIDs"
 import {addAction} from "../state/ActionRegistry"
-import {MergeLayerCommand} from "../commands/LayerCommand"
-import {GroupLayer} from "../models/Layer"
+import {MergeLayerCommand, AddLayerCommand, GroupLayerCommand, RemoveLayerCommand, ClearLayersCommand} from "../commands/LayerCommand"
+import {ImageLayer, GroupLayer} from "../models/Layer"
+
+@addAction
+export class AddLayerAction extends PictureAction {
+  id = ActionIDs.layerAdd
+  title = "Add Layer"
+
+  run() {
+    const {picture} = this
+    if (picture) {
+      picture.undoStack.redoAndPush(new AddLayerCommand(picture, picture.insertPath, new ImageLayer(picture, {name: "Layer"})))
+    }
+  }
+}
+
+@addAction
+export class AddGroupAction extends PictureAction {
+  id = ActionIDs.layerAddGroup
+  title = "Add Group"
+
+  run() {
+    const {picture} = this
+    if (picture) {
+      picture.undoStack.redoAndPush(new AddLayerCommand(picture, picture.insertPath, new GroupLayer(picture, {name: "Group"}, [])))
+    }
+  }
+}
+
+@addAction
+export class GroupLayerAction extends PictureAction {
+  id = ActionIDs.layerGroup
+  title = "Group Layers"
+
+  run() {
+    const {picture} = this
+    if (picture) {
+      picture.undoStack.redoAndPush(new GroupLayerCommand(picture, picture.selectedPaths))
+    }
+  }
+}
+
+@addAction
+export class RemoveLayerAction extends PictureAction {
+  id = ActionIDs.layerRemove
+  title = "Remove Layer"
+
+  run() {
+    const {picture} = this
+    if (picture) {
+      picture.undoStack.redoAndPush(new RemoveLayerCommand(picture, picture.selectedPaths))
+    }
+  }
+}
 
 @addAction
 export class MergeLayerAction extends PictureAction {
@@ -30,6 +82,19 @@ export class MergeLayerAction extends PictureAction {
         const paths = picture.selectedLayers.map(l => l.path)
         picture.undoStack.redoAndPush(new MergeLayerCommand(picture, paths))
       }
+    }
+  }
+}
+
+@addAction
+export class ClearLayerAction extends PictureAction {
+  id = ActionIDs.layerClear
+  title = "Clear Layer"
+
+  run() {
+    const {picture} = this
+    if (picture) {
+      picture.undoStack.redoAndPush(new ClearLayersCommand(picture, picture.selectedPaths))
     }
   }
 }

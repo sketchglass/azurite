@@ -89,6 +89,10 @@ class Picture {
     }
   }
 
+  get selectedPaths() {
+    return this.selectedLayers.map(l => l.path)
+  }
+
   dispose() {
     this.blender.dispose()
     for (const layer of this.layers) {
@@ -98,6 +102,10 @@ class Picture {
 
   layerForPath(path: IndexPath) {
     return this.rootLayer.descendantForPath(path)
+  }
+
+  get insertPath() {
+    return this.currentLayer ? this.currentLayer.path : new IndexPath([0])
   }
 
   forEachLayer(action: (layer: Layer) => void) {

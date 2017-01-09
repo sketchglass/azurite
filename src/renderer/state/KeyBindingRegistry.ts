@@ -54,7 +54,11 @@ keyBindingRegistry.add(
   [ActionIDs.selectionClear, new KeyInput(["CommandOrControl"], "d")],
   [ActionIDs.selectionInvert, new KeyInput(["Shift", "CommandOrControl"], "i")],
 
+  [ActionIDs.layerAdd, new KeyInput(["CommandOrControl", "Shift"], "n")],
+  [ActionIDs.layerGroup, new KeyInput(["CommandOrControl"], "g")],
+  [ActionIDs.layerRemove, new KeyInput(["CommandOrControl"], "Delete")],
   [ActionIDs.layerMerge, new KeyInput(["CommandOrControl"], "e")],
+  [ActionIDs.layerClear, new KeyInput([], "Delete")],
 
   [ActionIDs.viewReload, new KeyInput(["CommandOrControl"], "r")],
   [ActionIDs.viewToggleDevTools, process.platform == "darwin" ? new KeyInput(["Alt", "Command"], "i") : new KeyInput(["Control", "Shift"], "i")],

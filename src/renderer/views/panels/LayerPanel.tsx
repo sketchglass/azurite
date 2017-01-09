@@ -4,13 +4,14 @@ import React = require("react")
 import * as classNames from "classnames"
 import {Tree, TreeNode, NodeInfo} from "react-draggable-tree"
 import "react-draggable-tree/lib/index.css"
-import Layer, {ImageLayer, GroupLayer} from "../../models/Layer"
-import {MoveLayerCommand, CopyLayerCommand, GroupLayerCommand, AddLayerCommand, RemoveLayerCommand, ChangeLayerPropsCommand} from "../../commands/LayerCommand"
+import Layer, {GroupLayer} from "../../models/Layer"
+import {MoveLayerCommand, CopyLayerCommand, ChangeLayerPropsCommand} from "../../commands/LayerCommand"
 import ClickToEdit from "../components/ClickToEdit"
 import SVGIcon from "../components/SVGIcon"
 import LayerDetail from "../LayerDetail"
 import {appState} from "../../state/AppState"
 import IndexPath from "../../../lib/IndexPath"
+import {AddLayerAction, GroupLayerAction, RemoveLayerAction} from "../../actions/LayerActions"
 
 interface LayerNode extends TreeNode {
   layer: Layer
@@ -147,28 +148,14 @@ class LayerPanel extends React.Component<{}, {}> {
   }
 
   @action groupLayer() {
-    const picture = appState.currentPicture
-    if (picture) {
-      if (picture.selectedLayers.length > 0) {
-        const paths = picture.selectedLayers.map(l => l.path)
-        picture.undoStack.redoAndPush(new GroupLayerCommand(picture, paths))
-      }
-    }
+    new GroupLayerAction().run()
   }
 
   @action addLayer() {
-    const picture = appState.currentPicture
-    if (picture) {
-      const path = picture.currentLayer ? picture.currentLayer.path : new IndexPath([0])
-      picture.undoStack.redoAndPush(new AddLayerCommand(picture, path, new ImageLayer(picture, {name: "Layer"})))
-    }
+    new AddLayerAction().run()
   }
 
   @action removeLayer() {
-    const picture = appState.currentPicture
-    if (picture) {
-      const paths = picture.selectedLayers.map(l => l.path)
-      picture.undoStack.redoAndPush(new RemoveLayerCommand(picture, paths))
-    }
+    new RemoveLayerAction().run()
   }
 }

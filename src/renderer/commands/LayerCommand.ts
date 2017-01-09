@@ -1,7 +1,7 @@
 import {Transform} from "paintvec"
 import {IObservableArray} from "mobx"
 import {Rect} from "paintvec"
-import {UndoCommand} from "../models/UndoStack"
+import {UndoCommand, CompositeUndoCommand} from "../models/UndoStack"
 import Picture from "../models/Picture"
 import Layer, {LayerProps, GroupLayer, ImageLayer} from "../models/Layer"
 import TiledTexture from "../models/TiledTexture"
@@ -336,5 +336,46 @@ class TransformLayerCommand implements UndoCommand {
     layerTransform.dispose()
 
     this.picture.lastUpdate = {layer}
+  }
+}
+
+export
+class ClearLayerCommand implements UndoCommand {
+  title = "Clear Layer"
+  oldTiles: TiledTexture|undefined
+
+  constructor(public picture: Picture, public path: IndexPath) {
+  }
+
+  undo() {
+    const layer = this.picture.layerForPath(this.path)
+    if (!(layer && layer instanceof ImageLayer)) {
+      return
+    }
+    if (!this.oldTiles) {
+      return
+    }
+    layer.tiledTexture = this.oldTiles
+    this.oldTiles = undefined
+
+    this.picture.lastUpdate = {layer}
+  }
+
+  redo() {
+    const layer = this.picture.layerForPath(this.path)
+    if (!(layer && layer instanceof ImageLayer)) {
+      return
+    }
+    this.oldTiles = layer.tiledTexture
+    layer.tiledTexture = new TiledTexture()
+
+    this.picture.lastUpdate = {layer}
+  }
+}
+
+export
+class ClearLayersCommand extends CompositeUndoCommand {
+  constructor(public picture: Picture, public paths: IndexPath[]) {
+    super("Clear Layers", paths.map(path => new ClearLayerCommand(picture, path)))
   }
 }
