@@ -97,6 +97,10 @@ class MenuBar {
     const layerMenu: MenuDescription = {
       label: "Layer",
       submenu: [
+        {action: ActionIDs.layerAdd},
+        {action: ActionIDs.layerGroup},
+        {action: ActionIDs.layerRemove},
+        {type: "separator"},
         {action: ActionIDs.layerMerge},
       ],
     }

@@ -54,6 +54,9 @@ keyBindingRegistry.add(
   [ActionIDs.selectionClear, new KeyInput(["CommandOrControl"], "d")],
   [ActionIDs.selectionInvert, new KeyInput(["Shift", "CommandOrControl"], "i")],
 
+  [ActionIDs.layerAdd, new KeyInput(["CommandOrControl", "Shift"], "n")],
+  [ActionIDs.layerGroup, new KeyInput(["CommandOrControl"], "g")],
+  [ActionIDs.layerRemove, new KeyInput(["CommandOrControl"], "Backspace")],
   [ActionIDs.layerMerge, new KeyInput(["CommandOrControl"], "e")],
 
   [ActionIDs.viewReload, new KeyInput(["CommandOrControl"], "r")],

@@ -19,7 +19,11 @@ export default {
   selectionClear: "selection:clear",
   selectionInvert: "selection:invert",
 
+  layerAdd: "layer:add",
+  layerGroup: "layer:group",
+  layerRemove: "layer:remove",
   layerMerge: "layer:merge",
+  layerClear: "layer:clear",
 
   canvasChangeResolution: "canvas:changeResolution",
   canvasRotateLeft: "canvas:rotateLeft",
