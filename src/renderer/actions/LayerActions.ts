@@ -53,10 +53,6 @@ export class RemoveLayerAction extends PictureAction {
   id = ActionIDs.layerRemove
   title = "Remove Layer"
 
-  get enabled() {
-    return this.picture ? this.picture.selectedLayers.length > 0 : false
-  }
-
   run() {
     const {picture} = this
     if (picture) {
@@ -100,10 +96,6 @@ export class MergeLayerAction extends PictureAction {
 export class ClearLayerAction extends PictureAction {
   id = ActionIDs.layerClear
   title = "Clear Layer"
-
-  get enabled() {
-    return this.picture ? this.picture.selectedLayers.length > 0 : false
-  }
 
   run() {
     const {picture} = this
