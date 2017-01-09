@@ -1,6 +1,5 @@
 import * as assert from 'power-assert'
 import {Vec2} from "paintvec"
-import {Color} from "paintgl"
 import Picture from "../../renderer/models/Picture"
 import {GroupLayer, ImageLayer} from "../../renderer/models/Layer"
 import {
@@ -13,6 +12,7 @@ import {
   ChangeLayerPropsCommand,
 } from "../../renderer/commands/LayerCommand"
 import IndexPath from "../../lib/IndexPath"
+import TestPattern from "../util/TestPattern"
 
 interface LayerInfo {
   name: string
@@ -207,23 +207,17 @@ describe("Layer commands", () => {
       })
     })
     describe("when merging layers", () => {
+      let pattern: TestPattern
       beforeEach(() => {
         const paths = [new IndexPath([1, 0]), new IndexPath([1, 1, 0])]
         command = new MergeLayerCommand(picture, paths)
         const layer1 = picture.layerForPath(paths[0]) as ImageLayer
         const layer2 = picture.layerForPath(paths[1]) as ImageLayer
 
-        const canvas = document.createElement("canvas")
-        canvas.width = 100
-        canvas.height = 200
-        const context = canvas.getContext("2d")!
-        context.fillStyle = "red"
-        context.fillRect(0, 0, canvas.width, canvas.height)
-        context.fillStyle = "blue"
-        context.fillRect(10, 20, 30, 40)
+        pattern = new TestPattern()
 
-        layer1.tiledTexture.putImage(new Vec2(), canvas)
-        layer2.tiledTexture.putImage(new Vec2(500, 500), canvas)
+        layer1.tiledTexture.putImage(new Vec2(), pattern.canvas)
+        layer2.tiledTexture.putImage(new Vec2(500, 500), pattern.canvas)
       })
 
       describe("redo", () => {
@@ -241,10 +235,8 @@ describe("Layer commands", () => {
             {name: "8"}
           ])
           const merged = picture.layerForPath(new IndexPath([1, 0])) as ImageLayer
-          assert.deepEqual(merged.tiledTexture.colorAt(new Vec2(5, 5)), new Color(1, 0, 0, 1))
-          assert.deepEqual(merged.tiledTexture.colorAt(new Vec2(15, 30)), new Color(0, 0, 1, 1))
-          assert.deepEqual(merged.tiledTexture.colorAt(new Vec2(505, 505)), new Color(1, 0, 0, 1))
-          assert.deepEqual(merged.tiledTexture.colorAt(new Vec2(515, 530)), new Color(0, 0, 1, 1))
+          pattern.assert(merged.tiledTexture)
+          pattern.assert(merged.tiledTexture, new Vec2(500, 500))
         })
       })
 
