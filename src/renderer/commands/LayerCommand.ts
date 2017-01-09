@@ -1,5 +1,5 @@
-import {Transform} from "paintvec"
-import {Rect} from "paintvec"
+import {Transform, Rect} from "paintvec"
+import {Color} from "paintgl"
 import {UndoCommand, CompositeUndoCommand} from "../models/UndoStack"
 import Picture from "../models/Picture"
 import Layer, {LayerProps, GroupLayer, ImageLayer} from "../models/Layer"
@@ -301,6 +301,41 @@ class TransformLayerCommand implements UndoCommand {
     }
 
     layerTransform.dispose()
+
+    this.picture.lastUpdate = {layer}
+  }
+}
+
+export
+class FillLayerCommand implements UndoCommand {
+  title = "Fill Layer"
+  oldTiles: TiledTexture|undefined
+
+  constructor(public picture: Picture, public path: IndexPath, public color: Color) {
+  }
+
+  undo() {
+    const layer = this.picture.layerForPath(this.path)
+    if (!(layer && layer instanceof ImageLayer)) {
+      return
+    }
+    if (!this.oldTiles) {
+      return
+    }
+    layer.tiledTexture = this.oldTiles
+    this.oldTiles = undefined
+
+    this.picture.lastUpdate = {layer}
+  }
+
+  redo() {
+    const layer = this.picture.layerForPath(this.path)
+    if (!(layer && layer instanceof ImageLayer)) {
+      return
+    }
+    this.oldTiles = layer.tiledTexture
+    layer.tiledTexture = new TiledTexture()
+    layer.tiledTexture.fillRect(this.picture.rect, this.color)
 
     this.picture.lastUpdate = {layer}
   }

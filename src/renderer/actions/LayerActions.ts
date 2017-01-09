@@ -1,8 +1,16 @@
 import {PictureAction} from "./Action"
 import ActionIDs from "./ActionIDs"
 import {addAction} from "../state/ActionRegistry"
-import {MergeLayerCommand, AddLayerCommand, GroupLayerCommand, RemoveLayerCommand, ClearLayersCommand} from "../commands/LayerCommand"
+import {
+  MergeLayerCommand,
+  AddLayerCommand,
+  GroupLayerCommand,
+  RemoveLayerCommand,
+  ClearLayersCommand,
+  FillLayerCommand,
+} from "../commands/LayerCommand"
 import {ImageLayer, GroupLayer} from "../models/Layer"
+import {appState} from "../state/AppState"
 
 @addAction
 export class AddLayerAction extends PictureAction {
@@ -95,6 +103,19 @@ export class ClearLayerAction extends PictureAction {
     const {picture} = this
     if (picture) {
       picture.undoStack.push(new ClearLayersCommand(picture, picture.selectedPaths))
+    }
+  }
+}
+
+@addAction
+export class FillLayerAction extends PictureAction {
+  id = ActionIDs.layerFill
+  title = "Fill Layer"
+
+  run() {
+    const {picture} = this
+    if (picture && picture.currentLayer) {
+      picture.undoStack.push(new FillLayerCommand(picture, picture.currentLayer.path, appState.color.toRgb()))
     }
   }
 }

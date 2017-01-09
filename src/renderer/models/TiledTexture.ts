@@ -1,6 +1,6 @@
 import * as zlib from "zlib"
 import {Vec2, Rect, Transform} from "paintvec"
-import {Color, Texture, DrawTarget, TextureDrawTarget, BlendMode} from "paintgl"
+import {Color, Texture, DrawTarget, TextureDrawTarget, BlendMode, RectShape, ShapeModel, colorShader} from "paintgl"
 import {context} from "../GLContext"
 import {drawTexture, drawVisibilityToBinary} from "../GLUtil"
 import {float32ArrayTo16} from "../../lib/Float"
@@ -113,6 +113,18 @@ class TiledTexture {
       return tile.colorAt(pos.sub(tileKey.mulScalar(Tile.width)))
     } else {
       return new Color(0, 0, 0, 0)
+    }
+  }
+
+  fillRect(rect: Rect, color: Color) {
+    if (!fillRectShape.rect.equals(rect)) {
+      fillRectShape.rect = rect
+    }
+    fillRectModel.uniforms = {color}
+    for (const key of TiledTexture.keysForRect(rect)) {
+      tileDrawTarget.texture = this.get(key).texture
+      fillRectModel.transform = Transform.translate(key.mulScalar(-Tile.width)),
+      tileDrawTarget.draw(fillRectModel)
     }
   }
 
@@ -325,3 +337,9 @@ const binaryTexture = new Texture(context, {size: new Vec2(Tile.width / 32, Tile
 const binaryDrawTarget = new TextureDrawTarget(context, binaryTexture)
 
 const tileDrawTarget = new TextureDrawTarget(context)
+
+const fillRectShape = new RectShape(context)
+const fillRectModel = new ShapeModel(context, {
+  shape: fillRectShape,
+  shader: colorShader,
+})

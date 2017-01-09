@@ -25,6 +25,7 @@ export default {
   layerRemove: "layer:remove",
   layerMerge: "layer:merge",
   layerClear: "layer:clear",
+  layerFill: "layer:fill",
 
   canvasChangeResolution: "canvas:changeResolution",
   canvasRotateLeft: "canvas:rotateLeft",
