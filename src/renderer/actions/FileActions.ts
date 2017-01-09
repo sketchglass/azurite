@@ -4,6 +4,7 @@ import {addAction, actionRegistry} from "../state/ActionRegistry"
 import ImageFormat from "../formats/ImageFormat"
 import {formatRegistry} from "../state/FormatRegistry"
 import {appState} from "../state/AppState"
+import {PictureExport} from "../services/PictureExport"
 
 @addAction
 export class FileNewAction extends Action {
@@ -47,8 +48,12 @@ export class FileSaveAsAction extends PictureAction {
 export class FileImportAction extends PictureAction {
   id = ActionIDs.fileImport
   title = "Import..."
-  run() {
-    this.pictureState && this.pictureState.import()
+  async run() {
+    if (this.picture) {
+      const pictureExport = new PictureExport(this.picture)
+      await pictureExport.showImportDialog()
+      pictureExport.dispose()
+    }
   }
 }
 
@@ -59,8 +64,12 @@ export class FileExportAction extends PictureAction {
     super()
   }
 
-  run() {
-    this.pictureState && this.pictureState.export(this.format)
+  async run() {
+    if (this.picture) {
+      const pictureExport = new PictureExport(this.picture)
+      await pictureExport.showExportDialog(this.format)
+      pictureExport.dispose()
+    }
   }
 }
 

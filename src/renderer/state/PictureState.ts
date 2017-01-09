@@ -1,9 +1,7 @@
 import {remote} from "electron"
 const {dialog} = remote
 import Picture from "../models/Picture"
-import ImageFormat from "../formats/ImageFormat"
 import {PictureSave} from "../services/PictureSave"
-import {PictureExport} from "../services/PictureExport"
 import {dialogLauncher} from "../views/dialogs/DialogLauncher"
 import ThumbnailManager from "./ThumbnailManager"
 const Semaphore = require("promise-semaphore")
@@ -50,18 +48,6 @@ class PictureState {
     return this.saveSemaphore.add(async () => {
       return await new PictureSave(this.picture).saveAs()
     })
-  }
-
-  async import() {
-    const pictureExport = new PictureExport(this.picture)
-    await pictureExport.showImportDialog()
-    pictureExport.dispose()
-  }
-
-  async export(format: ImageFormat) {
-    const pictureExport = new PictureExport(this.picture)
-    await pictureExport.showExportDialog(format)
-    pictureExport.dispose()
   }
 
   dispose() {
