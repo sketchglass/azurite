@@ -89,6 +89,10 @@ class Picture {
     }
   }
 
+  get selectedPaths() {
+    return this.selectedLayers.map(l => l.path)
+  }
+
   dispose() {
     this.blender.dispose()
     for (const layer of this.layers) {

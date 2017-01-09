@@ -12,8 +12,7 @@ export class AddLayerAction extends PictureAction {
   run() {
     const {picture} = this
     if (picture) {
-      const path = picture.insertPath
-      picture.undoStack.redoAndPush(new AddLayerCommand(picture, path, new ImageLayer(picture, {name: "Layer"})))
+      picture.undoStack.redoAndPush(new AddLayerCommand(picture, picture.insertPath, new ImageLayer(picture, {name: "Layer"})))
     }
   }
 }
@@ -26,8 +25,7 @@ export class AddGroupAction extends PictureAction {
   run() {
     const {picture} = this
     if (picture) {
-      const path = picture.insertPath
-      picture.undoStack.redoAndPush(new AddLayerCommand(picture, path, new GroupLayer(picture, {name: "Group"}, [])))
+      picture.undoStack.redoAndPush(new AddLayerCommand(picture, picture.insertPath, new GroupLayer(picture, {name: "Group"}, [])))
     }
   }
 }
@@ -40,10 +38,7 @@ export class GroupLayerAction extends PictureAction {
   run() {
     const {picture} = this
     if (picture) {
-      if (picture.selectedLayers.length > 0) {
-        const paths = picture.selectedLayers.map(l => l.path)
-        picture.undoStack.redoAndPush(new GroupLayerCommand(picture, paths))
-      }
+      picture.undoStack.redoAndPush(new GroupLayerCommand(picture, picture.selectedPaths))
     }
   }
 }
@@ -56,8 +51,7 @@ export class RemoveLayerAction extends PictureAction {
   run() {
     const {picture} = this
     if (picture) {
-      const paths = picture.selectedLayers.map(l => l.path)
-      picture.undoStack.redoAndPush(new RemoveLayerCommand(picture, paths))
+      picture.undoStack.redoAndPush(new RemoveLayerCommand(picture, picture.selectedPaths))
     }
   }
 }
