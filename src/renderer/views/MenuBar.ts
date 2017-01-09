@@ -102,6 +102,8 @@ class MenuBar {
         {action: ActionIDs.layerRemove},
         {type: "separator"},
         {action: ActionIDs.layerMerge},
+        {type: "separator"},
+        {action: ActionIDs.layerClear},
       ],
     }
 

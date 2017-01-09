@@ -2,7 +2,7 @@ import IndexPath from "../../lib/IndexPath"
 import {PictureAction} from "./Action"
 import ActionIDs from "./ActionIDs"
 import {addAction} from "../state/ActionRegistry"
-import {MergeLayerCommand, AddLayerCommand, GroupLayerCommand, RemoveLayerCommand} from "../commands/LayerCommand"
+import {MergeLayerCommand, AddLayerCommand, GroupLayerCommand, RemoveLayerCommand, ClearLayersCommand} from "../commands/LayerCommand"
 import {ImageLayer, GroupLayer} from "../models/Layer"
 
 @addAction
@@ -79,6 +79,24 @@ export class MergeLayerAction extends PictureAction {
         const paths = picture.selectedLayers.map(l => l.path)
         picture.undoStack.redoAndPush(new MergeLayerCommand(picture, paths))
       }
+    }
+  }
+}
+
+@addAction
+export class ClearLayerAction extends PictureAction {
+  id = ActionIDs.layerClear
+  title = "Clear Layer"
+
+  get enabled() {
+    return this.picture ? this.picture.selectedLayers.length > 0 : false
+  }
+
+  run() {
+    const {picture} = this
+    if (picture) {
+      const paths = picture.selectedLayers.map(l => l.path)
+      picture.undoStack.redoAndPush(new ClearLayersCommand(picture, paths))
     }
   }
 }

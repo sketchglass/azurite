@@ -1,7 +1,7 @@
 import {Transform} from "paintvec"
 import {IObservableArray} from "mobx"
 import {Rect} from "paintvec"
-import {UndoCommand} from "../models/UndoStack"
+import {UndoCommand, CompositeUndoCommand} from "../models/UndoStack"
 import Picture from "../models/Picture"
 import Layer, {LayerProps, GroupLayer, ImageLayer} from "../models/Layer"
 import TiledTexture from "../models/TiledTexture"
@@ -357,6 +357,8 @@ class ClearLayerCommand implements UndoCommand {
     }
     layer.tiledTexture = this.oldTiles
     this.oldTiles = undefined
+
+    this.picture.lastUpdate = {layer}
   }
 
   redo() {
@@ -366,5 +368,14 @@ class ClearLayerCommand implements UndoCommand {
     }
     this.oldTiles = layer.tiledTexture
     layer.tiledTexture = new TiledTexture()
+
+    this.picture.lastUpdate = {layer}
+  }
+}
+
+export
+class ClearLayersCommand extends CompositeUndoCommand {
+  constructor(public picture: Picture, public paths: IndexPath[]) {
+    super("Clear Layers", paths.map(path => new ClearLayerCommand(picture, path)))
   }
 }
