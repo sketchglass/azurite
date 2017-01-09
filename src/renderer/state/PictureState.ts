@@ -5,8 +5,6 @@ import ImageFormat from "../formats/ImageFormat"
 import {PictureSave} from "../services/PictureSave"
 import {PictureExport} from "../services/PictureExport"
 import {dialogLauncher} from "../views/dialogs/DialogLauncher"
-import {FlipPictureCommand, Rotate90PictureCommand, Rotate180PictureCommand, ChangePictureResolutionCommand} from "../commands/PictureCommand"
-import {SelectAllCommand, ClearSelectionCommand, InvertSelectionCommand} from "../commands/SelectionCommand"
 import ThumbnailManager from "./ThumbnailManager"
 const Semaphore = require("promise-semaphore")
 
@@ -90,36 +88,5 @@ class PictureState {
     if (picture) {
       return new PictureState(picture)
     }
-  }
-
-  flip(orientation: "horizontal"|"vertical") {
-    this.picture.undoStack.push(new FlipPictureCommand(this.picture, orientation))
-  }
-
-  rotate90(direction: "left"|"right") {
-    this.picture.undoStack.push(new Rotate90PictureCommand(this.picture, direction))
-  }
-
-  rotate180() {
-    this.picture.undoStack.push(new Rotate180PictureCommand(this.picture))
-  }
-
-  async changeResolution() {
-    const newDimension = await dialogLauncher.openResolutionChangeDialog(this.picture.dimension)
-    if (newDimension) {
-      this.picture.undoStack.push(new ChangePictureResolutionCommand(this.picture, newDimension))
-    }
-  }
-
-  selectAll() {
-    this.picture.undoStack.push(new SelectAllCommand(this.picture))
-  }
-
-  clearSelection() {
-    this.picture.undoStack.push(new ClearSelectionCommand(this.picture))
-  }
-
-  invertSelection() {
-    this.picture.undoStack.push(new InvertSelectionCommand(this.picture))
   }
 }

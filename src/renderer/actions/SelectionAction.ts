@@ -3,6 +3,7 @@ import {PictureAction} from "./Action"
 import ActionIDs from "./ActionIDs"
 import {addAction} from "../state/ActionRegistry"
 import {currentFocus} from "../views/CurrentFocus"
+import {SelectAllCommand, ClearSelectionCommand, InvertSelectionCommand} from "../commands/SelectionCommand"
 
 @addAction
 export class SelectionSelectAllAction extends PictureAction {
@@ -14,8 +15,8 @@ export class SelectionSelectAllAction extends PictureAction {
   run() {
     if (currentFocus.isTextInput) {
       remote.getCurrentWebContents().selectAll()
-    } else if (this.pictureState) {
-      this.pictureState.selectAll()
+    } else if (this.picture) {
+      this.picture.undoStack.push(new SelectAllCommand(this.picture))
     }
   }
 }
@@ -25,7 +26,7 @@ export class SelectionClearAction extends PictureAction {
   id = ActionIDs.selectionClear
   title = "Clear Selection"
   run() {
-    this.pictureState && this.pictureState.clearSelection()
+    this.picture && this.picture.undoStack.push(new ClearSelectionCommand(this.picture))
   }
 }
 
@@ -34,6 +35,6 @@ export class SelectionInvertAction extends PictureAction {
   id = ActionIDs.selectionInvert
   title = "Invert Selection"
   run() {
-    this.pictureState && this.pictureState.invertSelection()
+    this.picture && this.picture.undoStack.push(new InvertSelectionCommand(this.picture))
   }
 }
