@@ -79,7 +79,7 @@ describe("Layer commands", () => {
 
     describe("redo", () => {
       it("moves layers", () => {
-        picture.undoStack.redoAndPush(command)
+        picture.undoStack.push(command)
         assertLayerStructure(picture.rootLayer, [
           {name: "1"},
           {name: "2", children: [
@@ -97,7 +97,7 @@ describe("Layer commands", () => {
 
     describe("undo", () => {
       it("restores structure", () => {
-        picture.undoStack.redoAndPush(command)
+        picture.undoStack.push(command)
         picture.undoStack.undo()
         assertLayerStructure(picture.rootLayer, originalStructure)
       })
@@ -116,7 +116,7 @@ describe("Layer commands", () => {
 
     describe("redo", () => {
       it("copies layers", () => {
-        picture.undoStack.redoAndPush(command)
+        picture.undoStack.push(command)
         assertLayerStructure(picture.rootLayer, [
           {name: "1"},
           {name: "2", children: [
@@ -136,7 +136,7 @@ describe("Layer commands", () => {
 
     describe("undo", () => {
       it("restores structure", () => {
-        picture.undoStack.redoAndPush(command)
+        picture.undoStack.push(command)
         picture.undoStack.undo()
         assertLayerStructure(picture.rootLayer, originalStructure)
       })
@@ -155,7 +155,7 @@ describe("Layer commands", () => {
 
     describe("redo", () => {
       it("groups layers", () => {
-        picture.undoStack.redoAndPush(command)
+        picture.undoStack.push(command)
         assertLayerStructure(picture.rootLayer, [
           {name: "1"},
           {name: "2", children: [
@@ -175,7 +175,7 @@ describe("Layer commands", () => {
 
     describe("undo", () => {
       it("restores structure", () => {
-        picture.undoStack.redoAndPush(command)
+        picture.undoStack.push(command)
         picture.undoStack.undo()
         assertLayerStructure(picture.rootLayer, originalStructure)
       })
@@ -192,7 +192,7 @@ describe("Layer commands", () => {
         layer1.opacity = 0.9
       })
       it("preserves properties of group", () => {
-        picture.undoStack.redoAndPush(command)
+        picture.undoStack.push(command)
         assertLayerStructure(picture.rootLayer, [
           {name: "1"},
           {name: "2", children: [
@@ -223,7 +223,7 @@ describe("Layer commands", () => {
 
       describe("redo", () => {
         it("merges layers", () => {
-          picture.undoStack.redoAndPush(command)
+          picture.undoStack.push(command)
           assertLayerStructure(picture.rootLayer, [
             {name: "1"},
             {name: "2", children: [
@@ -243,7 +243,7 @@ describe("Layer commands", () => {
 
       describe("undo", () => {
         it("restores structure", () => {
-          picture.undoStack.redoAndPush(command)
+          picture.undoStack.push(command)
           picture.undoStack.undo()
           assertLayerStructure(picture.rootLayer, originalStructure)
         })
@@ -263,7 +263,7 @@ describe("Layer commands", () => {
 
     describe("redo", () => {
       it("adds layer", () => {
-        picture.undoStack.redoAndPush(command)
+        picture.undoStack.push(command)
         assertLayerStructure(picture.rootLayer, [
           {name: "1"},
           {name: "2", children: [
@@ -282,7 +282,7 @@ describe("Layer commands", () => {
 
     describe("undo", () => {
       it("restores structure", () => {
-        picture.undoStack.redoAndPush(command)
+        picture.undoStack.push(command)
         picture.undoStack.undo()
         assertLayerStructure(picture.rootLayer, originalStructure)
       })
@@ -300,7 +300,7 @@ describe("Layer commands", () => {
 
     describe("redo", () => {
       it("removes layer", () => {
-        picture.undoStack.redoAndPush(command)
+        picture.undoStack.push(command)
         assertLayerStructure(picture.rootLayer, [
           {name: "1"},
           {name: "2", children: [
@@ -316,7 +316,7 @@ describe("Layer commands", () => {
 
     describe("undo", () => {
       it("restores structure", () => {
-        picture.undoStack.redoAndPush(command)
+        picture.undoStack.push(command)
         picture.undoStack.undo()
         assertLayerStructure(picture.rootLayer, originalStructure)
       })
@@ -342,7 +342,7 @@ describe("Layer commands", () => {
     })
     describe("redo", () => {
       it("changes layer props", () => {
-        picture.undoStack.redoAndPush(command)
+        picture.undoStack.push(command)
         const layer = picture.layerForPath(new IndexPath([1, 0]))!
         assert(layer.name == "Foobar")
         assert(layer.visible == false)
@@ -355,7 +355,7 @@ describe("Layer commands", () => {
 
     describe("undo", () => {
       it("restores layer", () => {
-        picture.undoStack.redoAndPush(command)
+        picture.undoStack.push(command)
         picture.undoStack.undo()
         const layer = picture.layerForPath(new IndexPath([1, 0]))!
         assert(layer.name == "3")
@@ -380,7 +380,7 @@ describe("Layer commands", () => {
     })
     describe("redo", () => {
       it("clears layer", () => {
-        picture.undoStack.redoAndPush(command)
+        picture.undoStack.push(command)
         const layer = picture.layerForPath(new IndexPath([1, 0])) as ImageLayer
         assert(layer.tiledTexture.tiles.size == 0)
       })
@@ -388,7 +388,7 @@ describe("Layer commands", () => {
 
     describe("undo", () => {
       it("restores layer", () => {
-        picture.undoStack.redoAndPush(command)
+        picture.undoStack.push(command)
         picture.undoStack.undo()
         const layer = picture.layerForPath(new IndexPath([1, 0])) as ImageLayer
         pattern.assert(layer.tiledTexture)

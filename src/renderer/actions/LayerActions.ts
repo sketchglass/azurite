@@ -12,7 +12,7 @@ export class AddLayerAction extends PictureAction {
   run() {
     const {picture} = this
     if (picture) {
-      picture.undoStack.redoAndPush(new AddLayerCommand(picture, picture.insertPath, new ImageLayer(picture, {name: "Layer"})))
+      picture.undoStack.push(new AddLayerCommand(picture, picture.insertPath, new ImageLayer(picture, {name: "Layer"})))
     }
   }
 }
@@ -25,7 +25,7 @@ export class AddGroupAction extends PictureAction {
   run() {
     const {picture} = this
     if (picture) {
-      picture.undoStack.redoAndPush(new AddLayerCommand(picture, picture.insertPath, new GroupLayer(picture, {name: "Group"}, [])))
+      picture.undoStack.push(new AddLayerCommand(picture, picture.insertPath, new GroupLayer(picture, {name: "Group"}, [])))
     }
   }
 }
@@ -38,7 +38,7 @@ export class GroupLayerAction extends PictureAction {
   run() {
     const {picture} = this
     if (picture) {
-      picture.undoStack.redoAndPush(new GroupLayerCommand(picture, picture.selectedPaths))
+      picture.undoStack.push(new GroupLayerCommand(picture, picture.selectedPaths))
     }
   }
 }
@@ -51,7 +51,7 @@ export class RemoveLayerAction extends PictureAction {
   run() {
     const {picture} = this
     if (picture) {
-      picture.undoStack.redoAndPush(new RemoveLayerCommand(picture, picture.selectedPaths))
+      picture.undoStack.push(new RemoveLayerCommand(picture, picture.selectedPaths))
     }
   }
 }
@@ -80,7 +80,7 @@ export class MergeLayerAction extends PictureAction {
     if (picture) {
       if (picture.selectedLayers.length > 0) {
         const paths = picture.selectedLayers.map(l => l.path)
-        picture.undoStack.redoAndPush(new MergeLayerCommand(picture, paths))
+        picture.undoStack.push(new MergeLayerCommand(picture, paths))
       }
     }
   }
@@ -94,7 +94,7 @@ export class ClearLayerAction extends PictureAction {
   run() {
     const {picture} = this
     if (picture) {
-      picture.undoStack.redoAndPush(new ClearLayersCommand(picture, picture.selectedPaths))
+      picture.undoStack.push(new ClearLayersCommand(picture, picture.selectedPaths))
     }
   }
 }

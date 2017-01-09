@@ -62,13 +62,10 @@ class UndoStack {
     }
   }
   @action push(command: UndoCommand) {
+    command.redo()
     this.commands.splice(this.doneCount)
     this.commands.push(command)
     this.doneCount += 1
-  }
-  @action redoAndPush(command: UndoCommand) {
-    command.redo()
-    this.push(command)
   }
 
   @action clear() {

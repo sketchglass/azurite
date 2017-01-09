@@ -37,7 +37,7 @@ class FloodFillTool extends Tool {
         const selection = this.picture.selection.clone()
         this.floodFill.floodFill(ev.picturePos.floor(), selection)
         const command = new SelectionChangeCommand(this.picture, selection)
-        this.picture.undoStack.redoAndPush(command)
+        this.picture.undoStack.push(command)
       }
     }
   }

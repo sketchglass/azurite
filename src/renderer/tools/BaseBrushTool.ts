@@ -258,7 +258,7 @@ abstract class BaseBrushTool extends Tool {
     const {picture} = layer
     const command = new ChangeLayerImageCommand(picture, layer.path, this.title, this.newTiledTexture)
     this.newTiledTexture = new TiledTexture()
-    picture.undoStack.redoAndPush(command)
+    picture.undoStack.push(command)
     picture.lastUpdate = {layer, rect}
   }
 
