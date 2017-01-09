@@ -94,8 +94,7 @@ export class ClearLayerAction extends PictureAction {
   run() {
     const {picture} = this
     if (picture) {
-      const paths = picture.selectedLayers.map(l => l.path)
-      picture.undoStack.redoAndPush(new ClearLayersCommand(picture, paths))
+      picture.undoStack.redoAndPush(new ClearLayersCommand(picture, picture.selectedPaths))
     }
   }
 }
