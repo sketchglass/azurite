@@ -6,7 +6,7 @@ import {
   AddLayerCommand,
   GroupLayerCommand,
   RemoveLayerCommand,
-  ClearLayersCommand,
+  ClearLayerCommand,
   FillLayerCommand,
 } from "../commands/LayerCommand"
 import {ImageLayer, GroupLayer} from "../models/Layer"
@@ -101,8 +101,8 @@ export class ClearLayerAction extends PictureAction {
 
   run() {
     const {picture} = this
-    if (picture) {
-      picture.undoStack.push(new ClearLayersCommand(picture, picture.selectedPaths))
+    if (picture && picture.currentLayer) {
+      picture.undoStack.push(new ClearLayerCommand(picture, picture.currentLayer.path))
     }
   }
 }
