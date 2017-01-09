@@ -117,11 +117,12 @@ class TiledTexture {
     }
   }
 
-  fill(color: Color, rect: Rect, clip?: Texture) {
+  fill(color: Color, rect: Rect, opts: {clip?: Texture, blendMode?: BlendMode} = {}) {
     if (!fillShape.rect.equals(rect)) {
       fillShape.rect = rect
     }
     let model: ShapeModel
+    const {clip} = opts
     if (clip) {
       model = fillModelClipped
       model.uniforms = {color, clip}
@@ -129,6 +130,7 @@ class TiledTexture {
       model = fillModel
       fillModel.uniforms = {color}
     }
+    model.blendMode = opts.blendMode || "src-over"
     for (const key of TiledTexture.keysForRect(rect)) {
       tileDrawTarget.texture = this.get(key).texture
       model.transform = Transform.translate(key.mulScalar(-Tile.width)),
