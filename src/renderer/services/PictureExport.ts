@@ -72,7 +72,7 @@ class PictureExport {
     }
 
     const compositeCommand = new CompositeUndoCommand("Import Images", commands)
-    this.picture.undoStack.redoAndPush(compositeCommand)
+    this.picture.undoStack.push(compositeCommand)
   }
 
   dispose() {

@@ -259,7 +259,7 @@ abstract class RectMoveTool extends Tool {
         this.lastTranslation, this.lastRect, this.lastAdditionalTransform,
         this.translation, this.rect, this.additionalTransform
       )
-      this.modalUndoStack.redoAndPush(command)
+      this.modalUndoStack.push(command)
     }
     this.dragType = DragType.None
   }

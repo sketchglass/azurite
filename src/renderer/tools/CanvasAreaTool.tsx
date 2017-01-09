@@ -110,7 +110,7 @@ class CanvasAreaTool extends RectMoveTool {
       const {topLeft, size} = this.areaRect
       const dimension = {width: size.width, height: size.height, dpi: this.dimensionSelectState.dpi}
       const command = new ChangeCanvasAreaCommand(this.picture, dimension, topLeft)
-      this.picture.undoStack.redoAndPush(command)
+      this.picture.undoStack.push(command)
     }
     this.cancelEditing()
   }

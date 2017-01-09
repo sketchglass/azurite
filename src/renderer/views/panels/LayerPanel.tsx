@@ -47,7 +47,7 @@ const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
 
   const rename = (name: string) => {
     if (layer.name != name) {
-      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path, "Rename Layer", {name}))
+      picture.undoStack.push(new ChangeLayerPropsCommand(picture, layer.path, "Rename Layer", {name}))
     }
   }
 
@@ -56,7 +56,7 @@ const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
   const onVisibleToggle = (e: React.FormEvent<HTMLInputElement>) => {
     const visible = (e.target as HTMLInputElement).checked
     if (layer.visible != visible) {
-      picture.undoStack.redoAndPush(new ChangeLayerPropsCommand(picture, layer.path, "Change Layer Visibility", {visible}))
+      picture.undoStack.push(new ChangeLayerPropsCommand(picture, layer.path, "Change Layer Visibility", {visible}))
     }
   }
   const onVisibleClick = (e: React.MouseEvent<HTMLInputElement>) => {
@@ -97,7 +97,7 @@ class LayerPanel extends React.Component<{}, {}> {
       const srcPaths = src.map(info => new IndexPath(info.path))
       const destPath = new IndexPath(dest.path).child(destIndex)
       const command = new MoveLayerCommand(picture, srcPaths, destPath)
-      picture.undoStack.redoAndPush(command)
+      picture.undoStack.push(command)
     }
   })
   onCopy = action((src: NodeInfo<LayerNode>[], dest: NodeInfo<LayerNode>, destIndex: number) => {
@@ -106,7 +106,7 @@ class LayerPanel extends React.Component<{}, {}> {
       const srcPaths = src.map(info => new IndexPath(info.path))
       const destPath = new IndexPath(dest.path).child(destIndex)
       const command = new CopyLayerCommand(picture, srcPaths, destPath)
-      picture.undoStack.redoAndPush(command)
+      picture.undoStack.push(command)
       const copiedLayers: Layer[] = []
       for (let i = 0; i < srcPaths.length; ++i) {
         const path = new IndexPath(dest.path).child(destIndex + i)

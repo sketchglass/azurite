@@ -93,33 +93,33 @@ class PictureState {
   }
 
   flip(orientation: "horizontal"|"vertical") {
-    this.picture.undoStack.redoAndPush(new FlipPictureCommand(this.picture, orientation))
+    this.picture.undoStack.push(new FlipPictureCommand(this.picture, orientation))
   }
 
   rotate90(direction: "left"|"right") {
-    this.picture.undoStack.redoAndPush(new Rotate90PictureCommand(this.picture, direction))
+    this.picture.undoStack.push(new Rotate90PictureCommand(this.picture, direction))
   }
 
   rotate180() {
-    this.picture.undoStack.redoAndPush(new Rotate180PictureCommand(this.picture))
+    this.picture.undoStack.push(new Rotate180PictureCommand(this.picture))
   }
 
   async changeResolution() {
     const newDimension = await dialogLauncher.openResolutionChangeDialog(this.picture.dimension)
     if (newDimension) {
-      this.picture.undoStack.redoAndPush(new ChangePictureResolutionCommand(this.picture, newDimension))
+      this.picture.undoStack.push(new ChangePictureResolutionCommand(this.picture, newDimension))
     }
   }
 
   selectAll() {
-    this.picture.undoStack.redoAndPush(new SelectAllCommand(this.picture))
+    this.picture.undoStack.push(new SelectAllCommand(this.picture))
   }
 
   clearSelection() {
-    this.picture.undoStack.redoAndPush(new ClearSelectionCommand(this.picture))
+    this.picture.undoStack.push(new ClearSelectionCommand(this.picture))
   }
 
   invertSelection() {
-    this.picture.undoStack.redoAndPush(new InvertSelectionCommand(this.picture))
+    this.picture.undoStack.push(new InvertSelectionCommand(this.picture))
   }
 }

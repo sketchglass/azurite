@@ -134,7 +134,7 @@ abstract class ShapeSelectTool extends Tool {
     }
     this.workingSelection.checkHasSelection()
     const command = new SelectionChangeCommand(this.picture, this.workingSelection)
-    this.picture.undoStack.redoAndPush(command)
+    this.picture.undoStack.push(command)
     this.workingSelection = undefined
 
     this.moving = false
