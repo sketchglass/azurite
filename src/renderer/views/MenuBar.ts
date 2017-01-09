@@ -98,6 +98,7 @@ class MenuBar {
       label: "Layer",
       submenu: [
         {action: ActionIDs.layerAdd},
+        {action: ActionIDs.layerAddGroup},
         {action: ActionIDs.layerGroup},
         {action: ActionIDs.layerRemove},
         {type: "separator"},

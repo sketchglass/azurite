@@ -20,6 +20,7 @@ export default {
   selectionInvert: "selection:invert",
 
   layerAdd: "layer:add",
+  layerAddGroup: "layer:addGroup",
   layerGroup: "layer:group",
   layerRemove: "layer:remove",
   layerMerge: "layer:merge",

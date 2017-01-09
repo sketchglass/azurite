@@ -20,6 +20,20 @@ export class AddLayerAction extends PictureAction {
 }
 
 @addAction
+export class AddGroupAction extends PictureAction {
+  id = ActionIDs.layerAddGroup
+  title = "Add Group"
+
+  run() {
+    const {picture} = this
+    if (picture) {
+      const path = picture.currentLayer ? picture.currentLayer.path : new IndexPath([0])
+      picture.undoStack.redoAndPush(new AddLayerCommand(picture, path, new GroupLayer(picture, {name: "Group"}, [])))
+    }
+  }
+}
+
+@addAction
 export class GroupLayerAction extends PictureAction {
   id = ActionIDs.layerGroup
   title = "Group Layer"
