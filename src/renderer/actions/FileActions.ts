@@ -77,8 +77,6 @@ for (const format of formatRegistry.imageFormats) {
   actionRegistry.add(new FileExportAction(format))
 }
 
-// TODO: implement export action
-
 @addAction
 export class FileCloseAction extends PictureAction {
   id = ActionIDs.fileClose
