@@ -108,6 +108,18 @@ class Picture {
     return this.currentLayer ? this.currentLayer.path : new IndexPath([0])
   }
 
+  spliceLayers(path: IndexPath, count: number, ...layers: Layer[]) {
+    const parentPath = path.parent
+    if (!parentPath) {
+      throw new Error("invalid path")
+    }
+    const parent = this.layerForPath(parentPath)
+    if (!(parent && parent instanceof GroupLayer)) {
+      throw new Error("invalid path")
+    }
+    return parent.children.splice(path.last, count, ...layers)
+  }
+
   forEachLayer(action: (layer: Layer) => void) {
     this.rootLayer.forEachDescendant(action)
   }
