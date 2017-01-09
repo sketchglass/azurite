@@ -1,5 +1,4 @@
 import {Transform} from "paintvec"
-import {IObservableArray} from "mobx"
 import {Rect} from "paintvec"
 import {UndoCommand, CompositeUndoCommand} from "../models/UndoStack"
 import Picture from "../models/Picture"
@@ -9,19 +8,6 @@ import LayerTransform from "../services/LayerTransform"
 import {SelectionChangeCommand} from "./SelectionCommand"
 import IndexPath from "../../lib/IndexPath"
 import {layerBlender} from "../services/LayerBlender"
-
-function getSiblingsAndIndex(picture: Picture, path: IndexPath): [IObservableArray<Layer>, number] {
-  const parentPath = path.parent
-  if (!parentPath) {
-    throw new Error("invalid path")
-  }
-  const parent = picture.layerForPath(parentPath)
-  if (!(parent && parent instanceof GroupLayer)) {
-    throw new Error("invalid path")
-  }
-  const index = path.last
-  return [parent.children, index]
-}
 
 export
 class MoveLayerCommand implements UndoCommand {
@@ -33,12 +19,10 @@ class MoveLayerCommand implements UndoCommand {
   }
 
   undo() {
-    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.dstPathAfter)
-    const srcs = dstSiblings.splice(dstIndex, this.srcPaths.length)
+    const srcs = this.picture.spliceLayers(this.dstPathAfter, this.srcPaths.length)
 
     for (const [i, srcPath] of this.srcPaths.entries()) {
-      const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
-      srcSiblings.splice(srcIndex, 0, srcs[i])
+      this.picture.spliceLayers(srcPath, 0, srcs[i])
     }
     this.picture.selectedLayers.replace(srcs)
   }
@@ -46,13 +30,11 @@ class MoveLayerCommand implements UndoCommand {
   redo() {
     const srcs: Layer[] = []
     for (const srcPath of [...this.srcPaths].reverse()) {
-      const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
-      const src = srcSiblings.splice(srcIndex, 1)[0]
+      const src = this.picture.spliceLayers(srcPath, 1)[0]
       srcs.unshift(src)
     }
 
-    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.dstPathAfter)
-    dstSiblings.splice(dstIndex, 0, ...srcs)
+    this.picture.spliceLayers(this.dstPathAfter, 0, ...srcs)
     this.picture.selectedLayers.replace(srcs)
   }
 }
@@ -65,20 +47,17 @@ class CopyLayerCommand implements UndoCommand {
   }
 
   undo() {
-    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.dstPath)
-    dstSiblings.splice(dstIndex, this.srcPaths.length)
+    this.picture.spliceLayers(this.dstPath, this.srcPaths.length)
   }
 
   redo() {
     const srcs: Layer[] = []
     for (const srcPath of [...this.srcPaths].reverse()) {
-      const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
-      const src = srcSiblings[srcIndex].clone()
+      const src = this.picture.layerForPath(srcPath)!.clone()
       srcs.unshift(src)
     }
 
-    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.dstPath)
-    dstSiblings.splice(dstIndex, 0, ...srcs)
+    this.picture.spliceLayers(this.dstPath, 0, ...srcs)
   }
 }
 
@@ -90,8 +69,7 @@ class GroupLayerCommand implements UndoCommand {
   }
 
   undo() {
-    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.srcPaths[0])
-    const group = dstSiblings.splice(dstIndex, 1)[0]
+    const group = this.picture.spliceLayers(this.srcPaths[0], 1)[0]
     if (!(group instanceof GroupLayer)) {
       return
     }
@@ -99,8 +77,7 @@ class GroupLayerCommand implements UndoCommand {
     const srcs = children.splice(0, children.length)
 
     for (const [i, srcPath] of this.srcPaths.entries()) {
-      const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
-      srcSiblings.splice(srcIndex, 0, srcs[i])
+      this.picture.spliceLayers(srcPath, 0, srcs[i])
     }
 
     group.dispose()
@@ -110,14 +87,12 @@ class GroupLayerCommand implements UndoCommand {
   redo() {
     const srcs: Layer[] = []
     for (const srcPath of [...this.srcPaths].reverse()) {
-      const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
-      const src = srcSiblings.splice(srcIndex, 1)[0]
+      const src = this.picture.spliceLayers(srcPath, 1)[0]
       srcs.unshift(src)
     }
     const group = new GroupLayer(this.picture, {name: "Group"}, srcs)
 
-    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.srcPaths[0])
-    dstSiblings.splice(dstIndex, 0, group)
+    this.picture.spliceLayers(this.srcPaths[0], 0, group)
     this.picture.selectedLayers.replace([group])
   }
 }
@@ -131,13 +106,11 @@ class MergeLayerCommand implements UndoCommand {
   }
 
   undo() {
-    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.srcPaths[0])
-    const merged = dstSiblings.splice(dstIndex, 1)[0]
+    const merged = this.picture.spliceLayers(this.srcPaths[0], 1)[0]
     merged.dispose()
 
     for (const [i, srcPath] of this.srcPaths.entries()) {
-      const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
-      srcSiblings.splice(srcIndex, 0, this.srcs[i])
+      this.picture.spliceLayers(srcPath, 0, this.srcs[i])
     }
 
     this.picture.selectedLayers.replace(this.srcs)
@@ -146,8 +119,7 @@ class MergeLayerCommand implements UndoCommand {
   redo() {
     const srcs: Layer[] = []
     for (const srcPath of [...this.srcPaths].reverse()) {
-      const [srcSiblings, srcIndex] = getSiblingsAndIndex(this.picture, srcPath)
-      const src = srcSiblings.splice(srcIndex, 1)[0]
+      const src = this.picture.spliceLayers(srcPath, 1)[0]
       srcs.unshift(src)
     }
     this.srcs = srcs
@@ -159,8 +131,7 @@ class MergeLayerCommand implements UndoCommand {
       merged = new ImageLayer(this.picture, {name: "Merged"}, layerBlender.blendToTiledTexture(srcs))
     }
 
-    const [dstSiblings, dstIndex] = getSiblingsAndIndex(this.picture, this.srcPaths[0])
-    dstSiblings.splice(dstIndex, 0, merged)
+    this.picture.spliceLayers(this.srcPaths[0], 0, merged)
     this.picture.selectedLayers.replace([merged])
   }
 }
@@ -173,16 +144,14 @@ class AddLayerCommand implements UndoCommand {
   }
 
   undo() {
-    const [siblings, index] = getSiblingsAndIndex(this.picture, this.path)
-    siblings.splice(index, 1)
+    this.picture.spliceLayers(this.path, 1)
     const nextLayer = this.picture.layerForPath(this.path)
     if (nextLayer) {
       this.picture.selectedLayers.replace([nextLayer])
     }
   }
   redo() {
-    const [siblings, index] = getSiblingsAndIndex(this.picture, this.path)
-    siblings.splice(index, 0, this.layer)
+    this.picture.spliceLayers(this.path, 0, this.layer)
     this.picture.selectedLayers.replace([this.layer])
   }
 }
@@ -196,16 +165,14 @@ class RemoveLayerCommand implements UndoCommand {
   }
   undo() {
     for (const [i, path] of this.paths.entries()) {
-      const [siblings, index] = getSiblingsAndIndex(this.picture, path)
-      siblings.splice(index, 0, this.removedLayers[i])
+      this.picture.spliceLayers(path, 0, this.removedLayers[i])
     }
     this.picture.selectedLayers.replace(this.removedLayers)
   }
   redo() {
     const removedLayers: Layer[] = []
     for (const path of [...this.paths].reverse()) {
-      const [siblings, index] = getSiblingsAndIndex(this.picture, path)
-      const removed = siblings.splice(index, 1)[0]
+      const removed = this.picture.spliceLayers(path, 1)[0]
       removedLayers.unshift(removed)
     }
     this.removedLayers = removedLayers
