@@ -5,6 +5,7 @@ import {context} from "../GLContext"
 import {drawTexture, drawVisibilityToBinary} from "../GLUtil"
 import {float32ArrayTo16} from "../../lib/Float"
 import {getBoundingRect} from "./util"
+const glsl = require("glslify")
 
 export
 class Tile {
@@ -116,15 +117,22 @@ class TiledTexture {
     }
   }
 
-  fillRect(rect: Rect, color: Color) {
-    if (!fillRectShape.rect.equals(rect)) {
-      fillRectShape.rect = rect
+  fill(color: Color, rect: Rect, clip?: Texture) {
+    if (!fillShape.rect.equals(rect)) {
+      fillShape.rect = rect
     }
-    fillRectModel.uniforms = {color}
+    let model: ShapeModel
+    if (clip) {
+      model = fillModelClipped
+      model.uniforms = {color, clip}
+    } else {
+      model = fillModel
+      fillModel.uniforms = {color}
+    }
     for (const key of TiledTexture.keysForRect(rect)) {
       tileDrawTarget.texture = this.get(key).texture
-      fillRectModel.transform = Transform.translate(key.mulScalar(-Tile.width)),
-      tileDrawTarget.draw(fillRectModel)
+      model.transform = Transform.translate(key.mulScalar(-Tile.width)),
+      tileDrawTarget.draw(model)
     }
   }
 
@@ -338,8 +346,22 @@ const binaryDrawTarget = new TextureDrawTarget(context, binaryTexture)
 
 const tileDrawTarget = new TextureDrawTarget(context)
 
-const fillRectShape = new RectShape(context)
-const fillRectModel = new ShapeModel(context, {
-  shape: fillRectShape,
+const fillShaderClipped = {
+  fragment: glsl`
+    uniform sampler2D clip;
+    uniform vec4 color;
+    void fragmentMain(vec2 pos, vec2 uv, out vec4 outColor) {
+      outColor = texture2D(clip, uv).a * color;
+    }
+  `
+}
+
+const fillShape = new RectShape(context)
+const fillModel = new ShapeModel(context, {
+  shape: fillShape,
   shader: colorShader,
+})
+const fillModelClipped = new ShapeModel(context, {
+  shape: fillShape,
+  shader: fillShaderClipped,
 })

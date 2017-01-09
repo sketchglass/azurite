@@ -335,7 +335,8 @@ class FillLayerCommand implements UndoCommand {
     }
     this.oldTiles = layer.tiledTexture
     layer.tiledTexture = new TiledTexture()
-    layer.tiledTexture.fillRect(this.picture.rect, this.color)
+    const {selection} = this.picture
+    layer.tiledTexture.fill(this.color, this.picture.rect, selection.hasSelection ? selection.texture : undefined)
 
     this.picture.lastUpdate = {layer}
   }
