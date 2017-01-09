@@ -35,7 +35,7 @@ export class AddGroupAction extends PictureAction {
 @addAction
 export class GroupLayerAction extends PictureAction {
   id = ActionIDs.layerGroup
-  title = "Group Layer"
+  title = "Group Layers"
 
   run() {
     const {picture} = this
