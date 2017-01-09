@@ -134,7 +134,7 @@ class FloodFill {
     this.drawTarget.texture = this.fillableRegionTexture
     this.findFillableRegionModel.uniforms = {
       referenceTexCoord,
-      image: this.picture.layerBlender.getBlendedTexture(),
+      image: this.picture.blender.getBlendedTexture(),
       tolerance: this.tolerance
     }
     this.drawTarget.draw(this.findFillableRegionModel)

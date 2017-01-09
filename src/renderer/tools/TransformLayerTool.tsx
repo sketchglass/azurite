@@ -111,7 +111,7 @@ class TransformLayerTool extends RectMoveTool {
     if (!this.picture) {
       return
     }
-    this.picture.layerBlender.dirtiness.addWhole()
+    this.picture.blender.dirtiness.addWhole()
     renderer.dirtiness.addWhole()
     renderer.update()
   }

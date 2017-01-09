@@ -19,6 +19,7 @@ import {config, ConfigValues} from "./Config"
 import * as IPCChannels from "../../common/IPCChannels"
 import "../formats/ImageFormats"
 import "../actions/FileActions"
+import "../actions/LayerActions"
 import "../actions/EditActions"
 import "../actions/SelectionAction"
 import "../actions/CanvasActions"
@@ -71,9 +72,9 @@ class AppState {
     reaction(() => [this.currentPictureState, this.currentTool], () => {
       for (const pictureState of this.pictureStates) {
         if (pictureState == this.currentPictureState) {
-          pictureState.picture.layerBlender.replaceTile = (layer, tileKey) => this.currentTool.previewLayerTile(layer, tileKey)
+          pictureState.picture.blender.replaceTile = (layer, tileKey) => this.currentTool.previewLayerTile(layer, tileKey)
         } else {
-          pictureState.picture.layerBlender.replaceTile = undefined
+          pictureState.picture.blender.replaceTile = undefined
         }
       }
     })
