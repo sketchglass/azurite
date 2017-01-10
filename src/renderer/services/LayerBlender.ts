@@ -171,7 +171,7 @@ class LayerBlender {
   }
 
   blend(layers: Layer[], tileKey: Vec2, tileScissor?: Rect) {
-    this.blendLayers(layers, tileKey, tileScissor, 0)
+    return this.blendLayers(layers, tileKey, tileScissor, 0)
   }
 
   blendToTiledTexture(layers: Layer[]) {

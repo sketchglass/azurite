@@ -45,8 +45,10 @@ class PictureBlender {
       const tileScissor = rect
         ? new Rect(rect.topLeft.sub(offset), rect.bottomRight.sub(offset)).intersection(Tile.rect)
         : undefined
-      layerBlender.blend(this.picture.layers, key, tileScissor)
-      drawTexture(this.drawTarget, layerBlender.blendedTile.texture, {transform: Transform.translate(offset), blendMode: "src-over"})
+      const rendered = layerBlender.blend(this.picture.layers, key, tileScissor)
+      if (rendered) {
+        drawTexture(this.drawTarget, layerBlender.blendedTile.texture, {transform: Transform.translate(offset), blendMode: "src-over"})
+      }
     }
     this.dirtiness.clear()
   }
