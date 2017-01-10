@@ -43,7 +43,7 @@ class PictureBlender {
     for (const key of tileKeys) {
       const offset = key.mulScalar(Tile.width)
       const tileScissor = rect && rect.translate(offset.neg()).intersection(Tile.rect)
-      const rendered = layerBlender.blend(this.picture.layers, key, tileScissor)
+      const rendered = layerBlender.blendTile(this.picture.layers, key, tileScissor)
       if (rendered) {
         drawTexture(this.drawTarget, layerBlender.blendedTile.texture, {transform: Transform.translate(offset), blendMode: "src-over"})
       }

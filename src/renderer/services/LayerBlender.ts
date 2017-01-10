@@ -170,7 +170,7 @@ class LayerBlender {
     return this.tileBlenders[0].currentTile
   }
 
-  blend(layers: Layer[], tileKey: Vec2, tileScissor?: Rect) {
+  blendTile(layers: Layer[], tileKey: Vec2, tileScissor?: Rect) {
     return this.blendLayers(layers, tileKey, tileScissor, 0)
   }
 
@@ -187,7 +187,7 @@ class LayerBlender {
     const keys = TiledTexture.unionKeys(...keyArrays)
     const tiledTexture = new TiledTexture()
     for (const key of keys) {
-      this.blend(layers, key)
+      this.blendTile(layers, key)
       tiledTexture.set(key, this.blendedTile.clone())
     }
     return tiledTexture
