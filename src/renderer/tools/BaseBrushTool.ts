@@ -256,10 +256,9 @@ abstract class BaseBrushTool extends Tool {
       return
     }
     const {picture} = layer
-    const command = new ChangeLayerImageCommand(picture, layer.path, this.title, this.newTiledTexture)
+    const command = new ChangeLayerImageCommand(picture, layer.path, this.title, this.newTiledTexture, rect)
     this.newTiledTexture = new TiledTexture()
     picture.undoStack.push(command)
-    picture.lastUpdate = {layer, rect}
   }
 
   private brushSize(waypoint: Waypoint) {
