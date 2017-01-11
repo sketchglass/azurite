@@ -122,7 +122,7 @@ class Renderer {
   })
 
   @observable size = new Vec2(100, 100)
-  readonly background = new Color(46 / 255, 48 / 255, 56 / 255, 1)
+  readonly background = new Color(31  / 255, 31 / 255, 31 / 255, 1)
 
   @observable selectionShowMode: SelectionShowMode = "normal"
 

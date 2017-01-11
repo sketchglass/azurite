@@ -3,11 +3,11 @@
   --default-font-family: Lato;
   /* colors */
   --default-color: #ECEEF4;
-  --default-background-color: #292B32;
+  --default-background-color: #141414;
   --default-border-color: #22232A;
   --selected-background-color: #1B1C21;
-  --darken-background-color: #22232A;
-  --lighten-background-color: #2E3037;
+  --darken-background-color: #0A0A0A;
+  --lighten-background-color: #1F1F1F;
   --ui-background-color: #454854;
   --ui-primary-background-color: #1472DF;
 
