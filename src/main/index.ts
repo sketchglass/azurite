@@ -55,6 +55,7 @@ async function openWindow() {
 
   if (process.platform == "darwin") {
     WindowUtilMac.initWindow(win.getNativeWindowHandle())
+    WindowUtilMac.setTitleColor(win.getNativeWindowHandle(), 236 / 255, 237 / 255, 244 / 255, 1)
   }
 
   win.loadURL(`${contentBase}/index.html`)
