@@ -2,35 +2,30 @@
   position: relative;
 };
 .RangeSlider_border {
-  border: 1px solid #cccccc;
-  border-radius: 2px;
+  background-color: var(--ui-background-color);
+  border-radius: 4px;
   cursor: pointer;
   overflow: hidden;
   width: 100%;
-  height: 20px;
+  height: 16px;
   box-sizing: border-box;
 }
 .RangeSlider_fill {
-  background-color: var(--range-slider-fill-background-color);
+  background-color: var(--ui-primary-background-color);
   width: calc(var(--slider-ratio) * 100%);
   height: 100%;
   &::after {
     content: "\200B";
   }
 }
-.RangeSlider_handle {
-  border-radius: 2px;
-  border: 1px solid #cccccc;
-  background-color: #ffffff;
-  box-sizing: border-box;
-  cursor: pointer;
+.RangeSlider_text {
   position: absolute;
-  width: 8px;
-  height: 20px;
+  right: 4px;
   top: 0px;
-  left: calc(var(--slider-ratio) * 100% - 4px);
-  z-index: 20;
-  &::after {
-    content: "\200B";
-  }
+  height: 16px;
+  line-height: 16px;
+  font-size: 11px;
+}
+.RangeSlider_handle {
+  position: absolute;
 }

@@ -4,7 +4,7 @@
   align-items: flex-end;
   z-index: 100;
   font-size: 13px;
-  background-color: var(--default-background-color);
+  background-color: var(--darken-background-color);
   transform: translateZ(0);
   &[hidden] {
     display: none;
@@ -18,9 +18,9 @@
   box-sizing: border-box;
   width: 160px;
   height: 32px;
-  border-right: 1px solid var(--default-border-color);
-  border-bottom: 1px solid var(--default-border-color);
   user-select: none;
+  background-color: var(--default-background-color);
+  margin-right: 4px;
   & * {
     cursor: default;
     position: absolute;
@@ -34,11 +34,9 @@
 }
 .PictureTab-current {
   background-color: var(--lighten-background-color);
-  border-bottom: 1px solid transparent;
 }
 .PictureTabFill {
   box-sizing: border-box;
   flex: 1;
   height: 32px;
-  border-bottom: 1px solid var(--default-border-color);
 }

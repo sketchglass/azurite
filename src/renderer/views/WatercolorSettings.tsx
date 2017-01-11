@@ -31,27 +31,27 @@ class WatercolorSettings extends React.Component<WatercolorSettingsProps, void> 
         <tbody>
           <tr>
             <td>Width</td>
-            <td><RangeSlider onChange={onWidthChange} min={0} max={100} value={tool.width} /></td><td>{tool.width}px</td>
+            <td><RangeSlider onChange={onWidthChange} min={0} max={100} value={tool.width} postfix="px" /></td>
           </tr>
           <tr>
             <td>Min Width</td>
-            <td><RangeSlider onChange={onMinWidthChange} min={0} max={100} value={Math.round(tool.minWidthRatio * 100)} /></td><td>{Math.round(tool.minWidthRatio * 100)}%</td>
+            <td><RangeSlider onChange={onMinWidthChange} min={0} max={100} value={Math.round(tool.minWidthRatio * 100)} postfix="%" /></td>
           </tr>
           <tr>
             <td>Softness</td>
-            <td><RangeSlider onChange={onSoftnessChange} min={0} max={100} value={Math.round(tool.softness * 100)} /></td><td>{Math.round(tool.softness * 100)}%</td>
+            <td><RangeSlider onChange={onSoftnessChange} min={0} max={100} value={Math.round(tool.softness * 100)} postfix="%" /></td>
           </tr>
           <tr>
             <td>Blending</td>
-            <td><RangeSlider onChange={onBlendingChange} min={0} max={100} value={Math.round(tool.blending * 100)} /></td><td>{Math.round(tool.blending * 100)}%</td>
+            <td><RangeSlider onChange={onBlendingChange} min={0} max={100} value={Math.round(tool.blending * 100)} postfix="%" /></td>
           </tr>
           <tr>
             <td>Thickness</td>
-            <td><RangeSlider onChange={onThicknessChange} min={0} max={100} value={Math.round(tool.thickness * 100)} /></td><td>{Math.round(tool.thickness * 100)}%</td>
+            <td><RangeSlider onChange={onThicknessChange} min={0} max={100} value={Math.round(tool.thickness * 100)} postfix="%" /></td>
           </tr>
           <tr>
             <td>Stabilizing</td>
-            <td><RangeSlider onChange={value => tool.stabilizingLevel = value} min={0} max={10} value={tool.stabilizingLevel} /></td><td>{tool.stabilizingLevel}</td>
+            <td><RangeSlider onChange={value => tool.stabilizingLevel = value} min={0} max={10} value={tool.stabilizingLevel} /></td>
           </tr>
         </tbody>
       </table>

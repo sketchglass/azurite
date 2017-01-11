@@ -2,10 +2,8 @@
   display: flex;
   flex-direction: column;
   box-sizing: border-box;
-  width: 48px;
+  width: 40px;
   height: 100%;
-  border-right: 1px solid var(--default-border-color);
-  padding: 8px 0;
   background-color: var(--default-background-color);
   &[hidden] {
     display: none;
@@ -20,9 +18,7 @@
   align-items: center;
   justify-content: center;
   padding: 1px; /* workaround for Retina */
-  margin: 0 4px;
-  border-radius: 4px;
 }
 .ToolSelection_button-selected {
-  background-color: var(--selected-background-color);
+  background-color: var(--ui-primary-background-color);
 }

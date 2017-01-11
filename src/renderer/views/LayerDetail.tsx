@@ -86,8 +86,7 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
         </div>
         <div>
           <label>Opacity</label>
-          <RangeSlider onChangeBegin={this.onOpaictyChangeBegin} onChange={this.onOpacityChange} onChangeEnd={this.onOpacityChangeEnd} min={0} max={100} value={Math.round(opacity * 100)} />
-          <span>{Math.round(opacity * 100)}%</span>
+          <RangeSlider onChangeBegin={this.onOpaictyChangeBegin} onChange={this.onOpacityChange} onChangeEnd={this.onOpacityChangeEnd} min={0} max={100} value={Math.round(opacity * 100)} postfix="%" />
         </div>
         <div>
           <label></label>

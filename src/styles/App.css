@@ -44,12 +44,6 @@ body {
     display: none;
   }
 }
-.Sidebar-left {
-  border-right: 1px solid var(--default-border-color);
-}
-.Sidebar-right {
-  border-left: 1px solid var(--default-border-color);
-}
 .ColorPicker {
   margin: 6px 12px;
   align-self: center;
@@ -77,12 +71,14 @@ body {
   & tr {
     display: flex;
     align-items: center;
+    margin: 4px 0;
   }
   & td {
     display: block;
     &:nth-child(1) {
       width: 64px;
       text-align: right;
+      margin: 0;
     }
     &:nth-child(2) {
       flex: 1;
