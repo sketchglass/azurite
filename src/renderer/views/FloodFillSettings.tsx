@@ -15,7 +15,7 @@ class FloodFillSettings extends React.Component<{tool: FloodFillTool}, void> {
         <tbody>
           <tr>
             <td>Tolerance</td>
-            <td><RangeSlider onChange={onToleranceChange} min={0} max={255} value={tool.tolerance} /></td><td>{tool.tolerance}</td>
+            <td><RangeSlider onChange={onToleranceChange} min={0} max={255} value={tool.tolerance} /></td>
           </tr>
         </tbody>
       </table>
