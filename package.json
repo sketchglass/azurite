@@ -19,6 +19,7 @@
     "test:dev": "cross-env NODE_ENV=test electron . --devserver",
     "pretest": "npm run build",
     "test": "cross-env NODE_ENV=test electron .",
+    "install": "",
     "postinstall": "electron-rebuild -e node_modules/electron -w receive-tablet-event",
     "package": "ts-node scripts/package.ts"
   },
