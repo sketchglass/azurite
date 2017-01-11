@@ -26,6 +26,9 @@
     &_fill {
       display: none;
     }
+    &_text {
+      display: none;
+    }
     &_handle {
       width: var(--handle-size);
       height: var(--handle-size);

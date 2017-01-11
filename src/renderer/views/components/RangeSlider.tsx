@@ -10,6 +10,7 @@ export interface RangeSliderProps {
   min: number
   max: number
   value: number
+  postfix?: string
   step?: number
   onChangeBegin?: (value: number) => void
   onChange: (value: number) => void
@@ -89,7 +90,7 @@ export default class RangeSlider extends React.Component<RangeSliderProps, void>
     })
   }
   render() {
-    const {value, min, max, backgroundComponentProps} = this.props
+    const {value, postfix, min, max, backgroundComponentProps} = this.props
     const BackgroundComponent = this.props.backgroundComponent
     const ratio = (value - min) / (max - min)
     const className = this.props.disabled ? "RangeSlider RangeSlider-disabled" : "RangeSlider" // TODO: change behavior
@@ -102,6 +103,7 @@ export default class RangeSlider extends React.Component<RangeSliderProps, void>
             <div className="RangeSlider_border" ref={s => { this.slider = s }}>
               { background }
             </div>
+            <div className="RangeSlider_text">{value}{postfix}</div>
             <div className="RangeSlider_handle" />
           </div>
         </CSSVariables>
