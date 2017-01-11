@@ -1,3 +1,5 @@
-.RangeSlider_canvas {
-  width: 100%;
+.RGBRangeSliders {
+  & .ColorSlider {
+    margin: 2px 0;
+  }
 }
