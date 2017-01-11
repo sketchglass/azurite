@@ -4,7 +4,6 @@
   box-sizing: border-box;
   width: 40px;
   height: 100%;
-  padding: 8px 0;
   background-color: var(--default-background-color);
   &[hidden] {
     display: none;
