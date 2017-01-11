@@ -3,7 +3,8 @@ type BrowserWindow = Electron.BrowserWindow
 const {app, BrowserWindow, ipcMain} = Electron
 import {TabletEventReceiver} from "receive-tablet-event"
 import * as IPCChannels from "../common/IPCChannels"
-const argv = require('minimist')(process.argv.slice(2));
+const argv = require('minimist')(process.argv.slice(2))
+const {WindowUtilMac} = require("nbind").init().lib
 
 let contentBase = argv.devserver ? "http://localhost:23000" : `file://${app.getAppPath()}/dist`
 
@@ -51,6 +52,10 @@ async function openWindow() {
     height: 768,
     show: false,
   })
+
+  if (process.platform == "darwin") {
+    WindowUtilMac.initWindow(win.getNativeWindowHandle())
+  }
 
   win.loadURL(`${contentBase}/index.html`)
   if (process.env.NODE_ENV === "development") {

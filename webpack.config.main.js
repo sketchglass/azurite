@@ -13,6 +13,7 @@ module.exports = {
   externals: {
     "receive-tablet-event": true,
     "electron-devtools-installer": true,
+    "nbind": true,
   },
   resolve: {
     extensions: ["", ".ts", ".js"],
