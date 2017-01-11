@@ -53,10 +53,16 @@ async function openWindow() {
     show: false,
   })
 
+  const resetTitleColor = () => {
+    if (process.platform == "darwin") {
+      WindowUtilMac.setTitleColor(win.getNativeWindowHandle(), 236 / 255, 237 / 255, 244 / 255, 1)
+    }
+  }
+
   if (process.platform == "darwin") {
     WindowUtilMac.initWindow(win.getNativeWindowHandle())
-    WindowUtilMac.setTitleColor(win.getNativeWindowHandle(), 236 / 255, 237 / 255, 244 / 255, 1)
   }
+  resetTitleColor()
 
   win.loadURL(`${contentBase}/index.html`)
   if (process.env.NODE_ENV === "development") {
@@ -101,6 +107,8 @@ async function openWindow() {
   win.on("ready-to-show", () => {
     win.show()
   })
+
+  win.on("leave-full-screen", resetTitleColor)
 }
 
 function openTestWindow() {
