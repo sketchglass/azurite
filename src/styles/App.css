@@ -71,13 +71,14 @@ body {
   & tr {
     display: flex;
     align-items: center;
+    margin: 4px 0;
   }
   & td {
     display: block;
-    margin: 4px 0;
     &:nth-child(1) {
       width: 64px;
       text-align: right;
+      margin: 0;
     }
     &:nth-child(2) {
       flex: 1;
