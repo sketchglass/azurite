@@ -116,7 +116,7 @@ abstract class BaseBrushTool extends Tool {
     }
     this.picture.blender.dirtiness.addRect(rect)
     renderer.addPictureDirtyRect(rect)
-    renderer.update()
+    renderer.renderNow()
   }
 
   previewLayerTile(layer: Layer, tileKey: Vec2) {
