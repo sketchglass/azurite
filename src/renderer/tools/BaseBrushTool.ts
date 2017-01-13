@@ -48,7 +48,7 @@ abstract class BaseBrushTool extends Tool {
   private editedRect: Rect|undefined
 
   private _cursorImage = document.createElement("canvas")
-  private _cursorImageSize = 0
+  @observable private _cursorImageSize = 0
   private cursorContext = this._cursorImage.getContext("2d")!
 
   get cursor() {
@@ -59,7 +59,7 @@ abstract class BaseBrushTool extends Tool {
       return this._cursorImage
     }
   }
-  get cursorImageSize() {
+  @computed get cursorImageSize() {
     return this._cursorImageSize
   }
 
@@ -116,7 +116,7 @@ abstract class BaseBrushTool extends Tool {
     }
     this.picture.blender.dirtiness.addRect(rect)
     renderer.addPictureDirtyRect(rect)
-    renderer.update()
+    renderer.renderNow()
   }
 
   previewLayerTile(layer: Layer, tileKey: Vec2) {

@@ -1,4 +1,4 @@
-import {observable, autorun, runInAction, reaction} from "mobx"
+import {observable, autorun, reaction} from "mobx"
 import {observer} from "mobx-react"
 import {Subscription} from "rxjs/Subscription"
 import React = require("react")
@@ -78,7 +78,6 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   @observable tool: Tool
   @observable picture: Picture|undefined
   currentTool: Tool|undefined
-  @observable cursorPosition = new Vec2()
   usingTablet = false
   tabletDownSubscription: Subscription
   tabletMoveSubscription: Subscription
@@ -125,7 +124,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     })
     this.tabletMoveSubscription = IPCChannels.tabletMove.listen().subscribe(ev => {
       const toolEv = this.toToolEvent(ev)
-      this.cursorPosition = toolEv.rendererPos
+      renderer.cursorPosition = toolEv.rendererPos
       this.onMove(toolEv)
     })
     this.tabletUpSubscription = IPCChannels.tabletUp.listen().subscribe(ev => {
@@ -149,21 +148,17 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   updateCursor() {
     const {cursor, cursorImage, cursorImageSize} = this.tool
-    const {cursorPosition} = this
-    runInAction(() => {
-      if (!this.element) {
-        return
-      }
-      renderer.cursorVisible = !!cursorImage
-      if (cursorImage) {
-        this.element.style.cursor = "none"
-        renderer.cursorTexture.setImage(cursorImage)
-        renderer.cursorPosition = cursorPosition.round()
-        renderer.cursorSize = new Vec2(cursorImageSize)
-      } else {
-        this.element.style.cursor = cursor
-      }
-    })
+    if (!this.element) {
+      return
+    }
+    renderer.cursorVisible = !!cursorImage
+    if (cursorImage) {
+      this.element.style.cursor = "none"
+      renderer.cursorTexture.setImage(cursorImage)
+      renderer.cursorSize = new Vec2(cursorImageSize)
+    } else {
+      this.element.style.cursor = cursor
+    }
   }
 
   onResize = () => {
@@ -225,7 +220,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
 
   onDocumentPointerMove = (ev: PointerEvent) => {
     if (!this.usingTablet) {
-      this.cursorPosition = this.offsetPos(ev).mulScalar(devicePixelRatio)
+      renderer.cursorPosition = this.offsetPos(ev).mulScalar(devicePixelRatio)
     }
   }
 
