@@ -39,23 +39,26 @@ class App extends React.Component<{}, {}> {
     const picture = appState.currentPicture
     return (
       <div className="App">
-        <ToolSelection hidden={!uiVisible} />
-        <aside className="Sidebar Sidebar-left" hidden={!uiVisible}>
-          <div className="PanelTitle">Color</div>
-          <ColorPanel />
-          <div className="PanelTitle">Tool</div>
-          <ToolSettingsPanel />
-        </aside>
-        <div className="CenterArea">
-          <PictureTabBar hidden={!uiVisible} />
-          <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
+        {process.platform == "darwin" ? <div className="TitleBarPaddingMac" /> : undefined}
+        <div className="WindowContent">
+          <ToolSelection hidden={!uiVisible} />
+          <aside className="Sidebar Sidebar-left" hidden={!uiVisible}>
+            <div className="PanelTitle">Color</div>
+            <ColorPanel />
+            <div className="PanelTitle">Tool</div>
+            <ToolSettingsPanel />
+          </aside>
+          <div className="CenterArea">
+            <PictureTabBar hidden={!uiVisible} />
+            <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
+          </div>
+          <aside className="Sidebar Sidebar-right" hidden={!uiVisible}>
+            <div className="PanelTitle">Navigator</div>
+            <NavigatorPanel />
+            <div className="PanelTitle">Layers</div>
+            <LayerPanel />
+          </aside>
         </div>
-        <aside className="Sidebar Sidebar-right" hidden={!uiVisible}>
-          <div className="PanelTitle">Navigator</div>
-          <NavigatorPanel />
-          <div className="PanelTitle">Layers</div>
-          <LayerPanel />
-        </aside>
       </div>
     )
   }

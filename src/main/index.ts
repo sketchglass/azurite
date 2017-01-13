@@ -3,7 +3,8 @@ type BrowserWindow = Electron.BrowserWindow
 const {app, BrowserWindow, ipcMain} = Electron
 import {TabletEventReceiver} from "receive-tablet-event"
 import * as IPCChannels from "../common/IPCChannels"
-const argv = require('minimist')(process.argv.slice(2));
+const argv = require('minimist')(process.argv.slice(2))
+const {WindowUtilMac} = require("nbind").init().lib
 
 let contentBase = argv.devserver ? "http://localhost:23000" : `file://${app.getAppPath()}/dist`
 
@@ -52,6 +53,17 @@ async function openWindow() {
     show: false,
   })
 
+  const resetTitleColor = () => {
+    if (process.platform == "darwin") {
+      WindowUtilMac.setTitleColor(win.getNativeWindowHandle(), 236 / 255, 237 / 255, 244 / 255, 1)
+    }
+  }
+
+  if (process.platform == "darwin") {
+    WindowUtilMac.initWindow(win.getNativeWindowHandle())
+  }
+  resetTitleColor()
+
   win.loadURL(`${contentBase}/index.html`)
   if (process.env.NODE_ENV === "development") {
     win.webContents.openDevTools()
@@ -95,6 +107,8 @@ async function openWindow() {
   win.on("ready-to-show", () => {
     win.show()
   })
+
+  win.on("leave-full-screen", resetTitleColor)
 }
 
 function openTestWindow() {
