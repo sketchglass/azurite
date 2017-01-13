@@ -153,9 +153,18 @@ class Renderer {
 
   @observable cursorVisible = false
   @observable cursorSize = new Vec2()
-  @observable cursorPosition = new Vec2()
 
-  @computed get cursorRect() {
+  // Do not use mobx for frequently-changed cursorPosition for performance
+  private _cursorPosition = new Vec2()
+  get cursorPosition() {
+    return this._cursorPosition
+  }
+  set cursorPosition(pos: Vec2) {
+    this._cursorPosition = pos
+    this.onCursorMove()
+  }
+
+  get cursorRect() {
     const pos = this.cursorPosition
     const size = this.cursorSize
     return new Rect(pos.sub(size.mulScalar(0.5)), pos.add(size.mulScalar(0.5)))
@@ -243,15 +252,19 @@ class Renderer {
         this.update()
       }
     }, SELECTION_DURATION)
-    reaction(() => [this.cursorRect, this.cursorVisible], () => {
-      if (this.cursorVisible) {
-        if (this.lastCursorRect) {
-          this.dirtiness.addRect(this.lastCursorRect)
-        }
-        this.dirtiness.addRect(this.cursorRect)
-      }
-      this.update()
+    reaction(() => [this.cursorSize, this.cursorVisible], () => {
+      this.onCursorMove()
     })
+  }
+
+  onCursorMove() {
+    if (this.cursorVisible) {
+      if (this.lastCursorRect) {
+        this.dirtiness.addRect(this.lastCursorRect)
+      }
+      this.dirtiness.addRect(this.cursorRect)
+    }
+    this.update()
   }
 
   addPictureDirtyRect(rect: Rect) {
