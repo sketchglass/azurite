@@ -10,6 +10,7 @@
 @import "./PictureTabBar.css";
 @import "./DrawArea.css";
 @import "./ToolSelection.css";
+@import "./WindowsMenuBar.css";
 
 /* Components */
 @import "./components/ClickToEdit.css";

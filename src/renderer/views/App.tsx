@@ -4,6 +4,7 @@ import {observer} from "mobx-react"
 import DrawArea from "./DrawArea"
 import {PictureTabBar} from "./PictureTabBar"
 import ToolSelection from "./ToolSelection"
+import WindowsMenuBar from "./WindowsMenuBar"
 
 import ColorPanel from "./panels/ColorPanel"
 import ToolSettingsPanel from "./panels/ToolSettingsPanel"
@@ -39,7 +40,7 @@ class App extends React.Component<{}, {}> {
     const picture = appState.currentPicture
     return (
       <div className="App">
-        {process.platform == "darwin" ? <div className="TitleBarPaddingMac" /> : undefined}
+        {process.platform == "darwin" ? <div className="TitleBarPaddingMac" /> : <WindowsMenuBar />}
         <div className="WindowContent">
           <ToolSelection hidden={!uiVisible} />
           <aside className="Sidebar Sidebar-left" hidden={!uiVisible}>

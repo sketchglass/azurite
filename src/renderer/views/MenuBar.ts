@@ -35,6 +35,7 @@ function menuDescriptionToElectron(description: MenuDescription): Electron.MenuI
   return options
 }
 
+export default
 class MenuBar {
   @computed get pictureState() {
     return appState.currentPictureState
@@ -198,4 +199,4 @@ class MenuBar {
   }
 }
 
-new MenuBar()
+export const menuBar = new MenuBar()

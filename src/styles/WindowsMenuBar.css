@@ -1,0 +1,13 @@
+.WindowsMenuBar {
+  height: 32px;
+  background-color: var(--default-background-color);
+  display: flex;
+
+  &_item {
+    line-height: 32px;
+    padding: 0 8px;
+    &:hover {
+      background-color: var(--lighten-background-color);
+    }
+  }
+}
