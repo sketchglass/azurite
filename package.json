@@ -66,6 +66,7 @@
     "postcss-loader": "^1.2.1",
     "postcss-url": "^5.1.2",
     "power-assert": "^1.4.2",
+    "resolve": "^1.2.0",
     "shelljs": "^0.7.5",
     "stack-source-map": "^1.0.6",
     "style-loader": "^0.13.1",
