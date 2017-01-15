@@ -6,36 +6,6 @@ import {context} from "../GLContext"
 import {drawTexture, drawVisibilityToBinary, drawBinaryToVisibility} from "../GLUtil"
 import nativelib = require("../../common/nativelib")
 
-class BinaryImage {
-  data: Int32Array
-  readonly stride = Math.ceil(this.width / 32)
-
-  constructor(public readonly width: number, public readonly height: number, data?: Int32Array) {
-    this.data = data || new Int32Array(this.stride * height)
-  }
-
-  get(x: number, y: number) {
-    const xcell = x >> 5
-    const xbit = x - (xcell << 5)
-    const cell = this.data[y * this.stride + xcell]
-    return (cell >> xbit) & 1
-  }
-
-  set(x: number, y: number, value: number) {
-    const xcell = x >> 5
-    const xbit = x - (xcell << 5)
-    if (value) {
-      this.data[y * this.stride + xcell] |= (1 << xbit)
-    } else {
-      this.data[y * this.stride + xcell] &= ~(1 << xbit)
-    }
-  }
-}
-
-export function floodFill(x: number, y: number, src: BinaryImage, dst: BinaryImage) {
-  nativelib.floodFill(x, y, src.width, src.height, src.data, dst.data)
-}
-
 const findFillableRegionShader = {
   vertex: `
     uniform vec2 referenceTexCoord;
@@ -110,10 +80,7 @@ class FloodFill {
     drawVisibilityToBinary(this.drawTarget, this.fillableRegionTexture)
     this.drawTarget.readPixels(new Rect(new Vec2(), new Vec2(stride, height)), new Uint8Array(src.buffer))
     const dst = new Int32Array(stride * height)
-    floodFill(x, y,
-      new BinaryImage(width, height, src),
-      new BinaryImage(width, height, dst)
-    )
+    nativelib.floodFill(x, y, width, height, src, dst)
     this.binaryTexture.setData(this.binaryTexture.size, new Uint8Array(dst.buffer))
 
     this.drawTarget.texture = this.filledTexture
