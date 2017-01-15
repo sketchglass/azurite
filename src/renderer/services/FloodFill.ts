@@ -4,6 +4,7 @@ import {Vec2, Rect} from "paintvec"
 import {Texture, RectShape, ShapeModel, TextureDrawTarget} from "paintgl"
 import {context} from "../GLContext"
 import {drawTexture, drawVisibilityToBinary, drawBinaryToVisibility} from "../GLUtil"
+import nativelib = require("../../common/nativelib")
 
 class BinaryImage {
   data: Int32Array
@@ -31,51 +32,8 @@ class BinaryImage {
   }
 }
 
-let floodFillStack: [number, number][] = []
-
-// Stack-based scanline flood fill from http://lodev.org/cgtutor/floodfill.html
 export function floodFill(x: number, y: number, src: BinaryImage, dst: BinaryImage) {
-  if (dst.get(x, y)) {
-    return
-  }
-  const w = src.width
-  const h = src.height
-  if (!(0 <= x && x < w && 0 <= y && y < h)) {
-    return
-  }
-  floodFillStack = []
-
-  let x1 = 0
-  let spanAbove = false
-  let spanBelow = false
-
-  floodFillStack.push([x, y])
-
-  while (floodFillStack.length > 0) {
-    const [x, y] = floodFillStack.pop()!
-    x1 = x;
-    while (x1 >= 0 && src.get(x1, y)) {
-      x1--;
-    }
-    x1++;
-    spanAbove = spanBelow = false;
-    while (x1 < w && src.get(x1, y)) {
-      dst.set(x1, y, 1)
-      if (!spanAbove && y > 0 && src.get(x1, y - 1) && !dst.get(x1, y - 1)) {
-        floodFillStack.push([x1, y - 1])
-        spanAbove = true;
-      } else if (spanAbove && y > 0 && !src.get(x1, y - 1)) {
-        spanAbove = false;
-      }
-      if (!spanBelow && y < h - 1 && src.get(x1, y + 1) && !dst.get(x1, y + 1)) {
-        floodFillStack.push([x1, y + 1])
-        spanBelow = true;
-      } else if (spanBelow && y < h - 1 && !src.get(x1, y + 1)) {
-        spanBelow = false;
-      }
-      x1++;
-    }
-  }
+  nativelib.floodFill(x, y, src.width, src.height, src.data, dst.data)
 }
 
 const findFillableRegionShader = {
