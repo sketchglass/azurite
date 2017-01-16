@@ -4,7 +4,8 @@ const {app, BrowserWindow, ipcMain} = Electron
 import {TabletEventReceiver} from "receive-tablet-event"
 import * as IPCChannels from "../common/IPCChannels"
 const argv = require('minimist')(process.argv.slice(2))
-const {WindowUtilMac} = require("nbind").init().lib
+import nativelib = require("../common/nativelib")
+const {WindowUtilMac} = nativelib
 
 let contentBase = argv.devserver ? "http://localhost:23000" : `file://${app.getAppPath()}/dist`
 

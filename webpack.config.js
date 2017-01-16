@@ -1,8 +1,10 @@
+const commonEntries = ["./src/renderer/requireManualResolve.ts"]
+
 module.exports = {
   entry: {
-    renderer: "./src/renderer/index.tsx",
-    dialogs: "./src/renderer/views/dialogs/DialogIndex.tsx",
-    test: "./src/test/index.js",
+    renderer: [...commonEntries, "./src/renderer/index.tsx"],
+    dialogs: [...commonEntries, "./src/renderer/views/dialogs/DialogIndex.tsx"],
+    test: [...commonEntries, "./src/test/index.js"],
   },
   output: {
     path: "./dist/assets",
@@ -16,6 +18,7 @@ module.exports = {
   },
   externals: {
     "glslify": "undefined", // glslify will be transformed with babel-plugin-glslify so don't have to be required
+    "nbind": "requireManualResolve('nbind')",
   },
   resolve: {
     extensions: ["", ".ts", ".tsx", ".js"],
