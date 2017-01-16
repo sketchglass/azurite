@@ -3,20 +3,26 @@ import {observer} from "mobx-react"
 import {appState} from "../state/AppState"
 import Picture from "../models/Picture"
 const classNames = require("classnames")
+import PointerEvents from "./components/PointerEvents"
 
-const PictureTab = observer((props: {picture: Picture, current: boolean, onClick: () => void, onClose: () => void}) => {
-  const onCloseClick = (e: React.MouseEvent<HTMLSpanElement>) => {
+class PictureTab extends React.Component<{picture: Picture, current: boolean, onClick: () => void, onClose: () => void}, {}> {
+  private onCloseClick = (e: React.MouseEvent<HTMLSpanElement>) => {
     e.stopPropagation()
-    props.onClose()
+    this.props.onClose()
   }
-
-  return (
-    <div className={classNames("PictureTab", {"PictureTab-current": props.current})} onClick={props.onClick}>
-      <span className="PictureTab_title">{props.picture.fileName}</span>
-      <span className="PictureTab_close" onClick={onCloseClick}>x</span>
-    </div>
-  )
-})
+  render() {
+    const {picture, current, onClick} = this.props
+    const {onCloseClick} = this
+    return (
+      <PointerEvents>
+        <div className={classNames("PictureTab", {"PictureTab-current": current})} onClick={onClick}>
+          <span className="PictureTab_title">{picture.fileName}</span>
+          <span className="PictureTab_close" onClick={onCloseClick}>x</span>
+        </div>
+      </PointerEvents>
+    )
+  }
+}
 
 export
 const PictureTabBar = observer((props: {hidden: boolean}) => {
