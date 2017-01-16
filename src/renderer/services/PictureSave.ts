@@ -57,18 +57,16 @@ class PictureSave {
     this.picture.edited = false
   }
 
-  static async open() {
-    const filePaths = await new Promise<string[]>((resolve, reject) => {
+  static async getOpenPath() {
+    const filePaths = await new Promise<string[]|undefined>((resolve, reject) => {
       dialog.showOpenDialog(remote.getCurrentWindow(), {
         title: "Open",
         filters: [fileFilter],
       }, resolve)
     })
-    if (filePaths.length == 0) {
-      return
+    if (filePaths && filePaths.length > 0) {
+      return filePaths[0]
     }
-    const filePath = filePaths[0]
-    return await this.openFromPath(filePath)
   }
 
   static async openFromPath(filePath: string) {
