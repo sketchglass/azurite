@@ -6,6 +6,5 @@ const resolve = require("resolve")
 // todo: fix Electron
 window["requireManualResolve"] = (request: string) => {
   const resolved = resolve.sync(request, {basedir: remote.app.getAppPath()})
-  console.log(resolved)
   return window["require"](resolved)
 }
