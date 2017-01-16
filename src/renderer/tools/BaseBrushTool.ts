@@ -122,14 +122,12 @@ abstract class BaseBrushTool extends Tool {
   previewLayerTile(layer: Layer, tileKey: Vec2) {
     if (this.targetLayer && layer == this.targetLayer) {
       if (this.newTiledTexture.has(tileKey)) {
-        return this.newTiledTexture.get(tileKey)
+        return {tile: this.newTiledTexture.get(tileKey)}
       } else if (this.targetLayer.tiledTexture.has(tileKey)) {
-        return this.targetLayer.tiledTexture.get(tileKey)
+        return {tile: this.targetLayer.tiledTexture.get(tileKey)}
       } else {
-        return undefined
+        return {tile: undefined}
       }
-    } else {
-      return false
     }
   }
 

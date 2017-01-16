@@ -64,7 +64,7 @@ abstract class Tool {
 
   renderSettings(): JSX.Element { return React.createElement("div") }
   renderOverlayCanvas?(context: CanvasRenderingContext2D): void
-  previewLayerTile(layer: Layer, tileKey: Vec2): Tile|undefined|false { return false }
+  previewLayerTile(layer: Layer, tileKey: Vec2): {tile: Tile|undefined}|undefined { return }
   previewSelection(): Selection|false { return false }
   get selectionShowMode(): SelectionShowMode { return "normal" }
 

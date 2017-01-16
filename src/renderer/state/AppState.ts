@@ -69,12 +69,12 @@ class AppState {
   @observable uiVisible = true
 
   constructor() {
-    reaction(() => [this.currentPictureState, this.currentTool], () => {
+    reaction(() => this.currentPictureState, () => {
       for (const pictureState of this.pictureStates) {
         if (pictureState == this.currentPictureState) {
-          pictureState.picture.blender.replaceTile = (layer, tileKey) => this.currentTool.previewLayerTile(layer, tileKey)
+          pictureState.picture.blender.tileHook = (layer, tileKey) => this.currentTool.previewLayerTile(layer, tileKey)
         } else {
-          pictureState.picture.blender.replaceTile = undefined
+          pictureState.picture.blender.tileHook = undefined
         }
       }
     })

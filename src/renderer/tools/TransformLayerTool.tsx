@@ -120,9 +120,7 @@ class TransformLayerTool extends RectMoveTool {
     if (this.modal && layer == this.currentImageLayer && this.layerTransform) {
       this.layerTransform.transform = this.transform
       this.layerTransform.transformToTile(transformedTile, tileKey)
-      return transformedTile
-    } else {
-      return false
+      return {tile: transformedTile}
     }
   }
 
