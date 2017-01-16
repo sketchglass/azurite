@@ -34,6 +34,7 @@ class PictureTab extends React.Component<PictureTabProps, {}> {
     this.element.setPointerCapture(e.pointerId)
     this.originalX = Math.round(e.clientX)
     this.dragged = true
+    this.props.onClick()
   })
   private onPointerMove = action((e: PointerEvent) => {
     if (!this.dragged) {
@@ -50,7 +51,7 @@ class PictureTab extends React.Component<PictureTabProps, {}> {
   })
 
   render() {
-    const {pictureState, current, onClick, shift} = this.props
+    const {pictureState, current, shift} = this.props
     const {dragged} = this
     const className = classNames("PictureTab", {
       "PictureTab-current": current,
@@ -60,7 +61,7 @@ class PictureTab extends React.Component<PictureTabProps, {}> {
     return (
       <CSSVariables offset={offset + "px"} width={TAB_WIDTH + "px"}>
         <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
-          <div className={className} onClick={onClick} ref={e => this.element = e}>
+          <div className={className} ref={e => this.element = e}>
             <span className="PictureTab_title">{pictureState.picture.fileName}</span>
             <span className="PictureTab_close" onClick={this.onCloseClick}>x</span>
           </div>
@@ -76,6 +77,9 @@ class PictureTabBar extends React.Component<{hidden: boolean}, {}> {
   @observable private moving = false
   @observable private movingIndex = 0
   @observable private movingIndexOffset = 0
+  private get movingIndexNew() {
+    return this.movingIndex + this.movingIndexOffset
+  }
 
   render() {
     const {pictureStates, currentPictureIndex} = appState
@@ -83,8 +87,9 @@ class PictureTabBar extends React.Component<{hidden: boolean}, {}> {
       <div className="PictureTabBar" hidden={this.props.hidden}>
         {
           pictureStates.map((p, i) => {
-            const shiftRight = this.moving && this.movingIndex + this.movingIndexOffset <= i && i < this.movingIndex
-            const shiftLeft = this.moving && this.movingIndex < i && i <= this.movingIndex + this.movingIndexOffset
+            const current = i == currentPictureIndex
+            const shiftRight = this.moving && this.movingIndexNew <= i && i < this.movingIndex
+            const shiftLeft = this.moving && this.movingIndex < i && i <= this.movingIndexNew
             const shift = shiftRight ? 1 : shiftLeft ? -1 : 0
             const onClick = () => appState.currentPictureIndex = i
             const onClose = () => appState.closePicture(i)
@@ -94,13 +99,18 @@ class PictureTabBar extends React.Component<{hidden: boolean}, {}> {
               this.movingIndexOffset = indexOffset
             })
             const onMoveEnd = action(() => {
-              this.moving = false
               if (this.movingIndexOffset != 0) {
+                const newIndex = Math.max(0, Math.min(this.movingIndexNew, appState.pictureStates.length - 1))
                 const [state] = appState.pictureStates.splice(this.movingIndex, 1)
-                appState.pictureStates.splice(this.movingIndex + this.movingIndexOffset, 0, state)
+                appState.pictureStates.splice(newIndex , 0, state)
+                if (current) {
+                  appState.currentPictureIndex = newIndex
+                }
               }
+              this.moving = false
+              this.movingIndex = 0
+              this.movingIndexOffset = 0
             })
-            const current = i == currentPictureIndex
             return <PictureTab key={p.picture.id} pictureState={p} shift={shift} current={current} onClose={onClose} onClick={onClick} onMove={onMove} onMoveEnd={onMoveEnd}/>
           })
         }

@@ -11,16 +11,17 @@
   }
 }
 .PictureTab {
+  --margin: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   box-sizing: border-box;
-  width: var(--width);
+  width: calc(var(--width) - var(--margin));
   height: 32px;
   user-select: none;
   background-color: var(--default-background-color);
-  margin-right: 4px;
+  margin-right: var(--margin);
   transform: translateX(var(--offset));
   & * {
     cursor: default;
