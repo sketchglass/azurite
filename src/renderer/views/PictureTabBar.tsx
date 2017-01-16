@@ -79,11 +79,15 @@ class PictureTab extends React.Component<{pictureState: PictureState, current: b
 
   render() {
     const {pictureState, current} = this.props
-    const {offset} = this
+    const {offset, dragged} = this
+    const className = classNames("PictureTab", {
+      "PictureTab-current": current,
+      "PictureTab-dragged": dragged,
+    })
     return (
       <CSSVariables offset={offset + "px"} width={TAB_WIDTH + "px"}>
         <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
-          <div className={classNames("PictureTab", {"PictureTab-current": current})} onClick={this.onClick} ref={e => this.element = e}>
+          <div className={className} onClick={this.onClick} ref={e => this.element = e}>
             <span className="PictureTab_title">{pictureState.picture.fileName}</span>
             <span className="PictureTab_close" onClick={this.onCloseClick}>x</span>
           </div>

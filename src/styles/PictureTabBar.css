@@ -27,14 +27,17 @@
     position: absolute;
     bottom: 8px;
   }
+  &-current {
+    background-color: var(--lighten-background-color);
+  }
+  &-dragged {
+    z-index: 10;
+  }
 }
 .PictureTab_title {
 }
 .PictureTab_close {
   right: 8px;
-}
-.PictureTab-current {
-  background-color: var(--lighten-background-color);
 }
 .PictureTabFill {
   box-sizing: border-box;
