@@ -21,6 +21,7 @@
   user-select: none;
   background-color: var(--default-background-color);
   margin-right: 4px;
+  transform: translateX(var(--offset));
   & * {
     cursor: default;
     position: absolute;
