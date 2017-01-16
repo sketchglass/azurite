@@ -6,34 +6,38 @@
   font-size: 13px;
   background-color: var(--darken-background-color);
   transform: translateZ(0);
+  overflow: hidden;
   &[hidden] {
     display: none;
   }
 }
 .PictureTab {
+  --margin: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   box-sizing: border-box;
-  width: 160px;
+  width: calc(var(--width) - var(--margin));
   height: 32px;
   user-select: none;
   background-color: var(--default-background-color);
-  margin-right: 4px;
+  margin-right: var(--margin);
+  transform: translateX(var(--offset));
   & * {
     cursor: default;
     position: absolute;
     bottom: 8px;
+  }
+  &-current {
+    background-color: var(--lighten-background-color);
+    z-index: 10;
   }
 }
 .PictureTab_title {
 }
 .PictureTab_close {
   right: 8px;
-}
-.PictureTab-current {
-  background-color: var(--lighten-background-color);
 }
 .PictureTabFill {
   box-sizing: border-box;
