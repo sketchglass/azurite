@@ -6,6 +6,7 @@
   font-size: 13px;
   background-color: var(--darken-background-color);
   transform: translateZ(0);
+  overflow: hidden;
   &[hidden] {
     display: none;
   }
