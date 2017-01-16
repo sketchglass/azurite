@@ -16,7 +16,7 @@
   justify-content: center;
   position: relative;
   box-sizing: border-box;
-  width: 160px;
+  width: var(--width);
   height: 32px;
   user-select: none;
   background-color: var(--default-background-color);
