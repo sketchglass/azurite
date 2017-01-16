@@ -1,3 +1,4 @@
+import * as path from "path"
 import {observable, computed, reaction} from "mobx"
 import {remote} from "electron"
 import Picture from "../models/Picture"
@@ -15,6 +16,7 @@ import CanvasAreaTool from "../tools/CanvasAreaTool"
 import FloodFillTool from "../tools/FloodFillTool"
 import {HSVColor} from "../../lib/Color"
 import {PictureState} from "./PictureState"
+import {PictureSave} from "../services/PictureSave"
 import {config, ConfigValues} from "./Config"
 import * as IPCChannels from "../../common/IPCChannels"
 import "../formats/ImageFormats"
@@ -131,10 +133,10 @@ class AppState {
       this.palette[i] = color ? new HSVColor(color.h, color.s, color.v) : undefined
     }
     for (const filePath of values.files) {
-      const pictureState = await PictureState.openFromPath(filePath)
+      const pictureState = new PictureState(await PictureSave.openFromPath(filePath))
       if (pictureState) {
-      this.addPictureState(pictureState)
-    }
+        this.addPictureState(pictureState)
+      }
       this.openPicture
     }
   }
@@ -190,9 +192,16 @@ class AppState {
   }
 
   async openPicture() {
-    const pictureState = await PictureState.open()
+    const filePath = await PictureSave.getOpenPath()
+    if (!filePath) {
+      return
+    }
+    const pictureState = this.pictureStates.find(s => path.resolve(s.picture.filePath) == path.resolve(filePath))
     if (pictureState) {
-      this.addPictureState(pictureState)
+      this.currentPictureIndex = this.pictureStates.indexOf(pictureState)
+    } else {
+      const picture = await PictureSave.openFromPath(filePath)
+      this.addPictureState(new PictureState(picture))
     }
   }
 
