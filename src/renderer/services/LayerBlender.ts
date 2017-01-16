@@ -159,12 +159,12 @@ class TileBlender {
 }
 
 export
-type ReplaceTile = (layer: Layer, tileKey: Vec2) => Tile|undefined|false
+type TileHook = (layer: Layer, tileKey: Vec2) => {tile: Tile|undefined}|undefined
 
 export
 class LayerBlender {
   private tileBlenders = [new TileBlender()]
-  replaceTile: ReplaceTile|undefined
+  tileHook: TileHook|undefined
 
   get blendedTile() {
     return this.tileBlenders[0].currentTile
@@ -212,10 +212,10 @@ class LayerBlender {
 
     const tileBlender = this.tileBlenders[depth]
 
-    if (this.replaceTile) {
-      const replace = this.replaceTile(layer, key)
-      if (replace != false) {
-        tile = replace
+    if (this.tileHook) {
+      const hooked = this.tileHook(layer, key)
+      if (hooked) {
+        tile = hooked.tile
       }
     }
 
