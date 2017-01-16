@@ -5,8 +5,9 @@
   "main": "dist/assets/main.js",
   "scripts": {
     "build:autogypi": "autogypi",
-    "build:node-gyp": "node-gyp rebuild --target=1.4.13 --arch=x64 --dist-url=https://atom.io/download/atom-shell",
-    "build:nativelib": "npm-run-all build:autogypi build:node-gyp",
+    "node-gyp:rebuild": "node-gyp rebuild --target=1.4.13 --arch=x64 --dist-url=https://atom.io/download/atom-shell",
+    "node-gyp:build": "node-gyp build --target=1.4.13 --arch=x64 --dist-url=https://atom.io/download/atom-shell",
+    "build:nativelib": "npm-run-all build:autogypi node-gyp:rebuild",
     "build:main": "webpack --config webpack.config.main.js",
     "build:renderer": "webpack",
     "build": "npm-run-all build:main build:renderer",
