@@ -1,5 +1,5 @@
 import * as React from "react"
-import {action} from "mobx"
+import {observable, action} from "mobx"
 import {observer} from "mobx-react"
 import {appState} from "../state/AppState"
 import {PictureState} from "../state/PictureState"
@@ -9,11 +9,12 @@ import CSSVariables from "./components/CSSVariables"
 
 const TAB_WIDTH = 160
 
+@observer
 class PictureTab extends React.Component<{pictureState: PictureState, current: boolean, onClose: () => void}, {}> {
   private element: HTMLElement
-  private dragged = false
+  @observable private dragged = false
   private originalX = 0
-  private offset = 0
+  @observable private offset = 0
 
   private onClick = () => {
     appState.currentPictureIndex = appState.pictureStates.indexOf(this.props.pictureState)
@@ -39,13 +40,11 @@ class PictureTab extends React.Component<{pictureState: PictureState, current: b
     } else if (offset < -TAB_WIDTH / 2) {
       this.moveBackward()
     }
-    this.forceUpdate()
   })
-  private onPointerUp = (e: PointerEvent) => {
+  private onPointerUp = action((e: PointerEvent) => {
     this.dragged = false
     this.offset = 0
-    this.forceUpdate()
-  }
+  })
 
   private moveForward() {
     const {pictureState} = this.props
