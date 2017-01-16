@@ -96,19 +96,22 @@ class PictureTab extends React.Component<{pictureState: PictureState, current: b
   }
 }
 
+@observer
 export
-const PictureTabBar = observer((props: {hidden: boolean}) => {
-  const {pictureStates, currentPictureIndex} = appState
-  return (
-    <div className="PictureTabBar" hidden={props.hidden}>
-      {
-        pictureStates.map((p, i) => {
-          const onClose = () => appState.closePicture(i)
-          const current = i == currentPictureIndex
-          return <PictureTab key={p.picture.id} pictureState={p} current={current} onClose={onClose}/>
-        })
-      }
-      <div className="PictureTabFill"></div>
-    </div>
-  )
-})
+class PictureTabBar extends React.Component<{hidden: boolean}, {}> {
+  render() {
+    const {pictureStates, currentPictureIndex} = appState
+    return (
+      <div className="PictureTabBar" hidden={this.props.hidden}>
+        {
+          pictureStates.map((p, i) => {
+            const onClose = () => appState.closePicture(i)
+            const current = i == currentPictureIndex
+            return <PictureTab key={p.picture.id} pictureState={p} current={current} onClose={onClose}/>
+          })
+        }
+        <div className="PictureTabFill"></div>
+      </div>
+    )
+  }
+}
