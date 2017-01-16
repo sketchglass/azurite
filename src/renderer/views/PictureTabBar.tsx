@@ -52,10 +52,8 @@ class PictureTab extends React.Component<PictureTabProps, {}> {
 
   render() {
     const {pictureState, current, shift} = this.props
-    const {dragged} = this
     const className = classNames("PictureTab", {
       "PictureTab-current": current,
-      "PictureTab-dragged": dragged,
     })
     const offset = this.offset + shift * TAB_WIDTH
     return (
