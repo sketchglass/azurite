@@ -16,7 +16,7 @@ body {
   display: flex;
   justify-content: center;
 }
-.App {
+.RootView {
   display: flex;
   flex-direction: column;
   width: 100vw;

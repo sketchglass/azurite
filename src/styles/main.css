@@ -5,7 +5,7 @@
 @import "./variables.css";
 
 /* App Styles */
-@import "./App.css";
+@import "./RootView.css";
 @import "./DimensionSelect.css";
 @import "./PictureTabBar.css";
 @import "./DrawArea.css";

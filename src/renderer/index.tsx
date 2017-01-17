@@ -1,7 +1,7 @@
 import React = require("react")
 import ReactDOM = require("react-dom")
 import {webFrame} from "electron"
-import App from "./views/App"
+import RootView from "./views/RootView"
 import {appState} from "./state/AppState"
 
 webFrame.setVisualZoomLevelLimits(1, 1)
@@ -10,7 +10,7 @@ webFrame.setLayoutZoomLevelLimits(1, 1)
 appState.bootstrap()
 
 window.addEventListener("DOMContentLoaded", () => {
-  ReactDOM.render(<App />, document.getElementById("app"))
+  ReactDOM.render(<RootView />, document.getElementById("app"))
 })
 
 if (module["hot"]) {

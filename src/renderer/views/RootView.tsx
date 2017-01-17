@@ -18,7 +18,7 @@ import "./MenuBar"
 import "../../styles/main.css"
 
 @observer export default
-class App extends React.Component<{}, {}> {
+class RootView extends React.Component<{}, {}> {
   constructor() {
     super()
 
@@ -38,7 +38,7 @@ class App extends React.Component<{}, {}> {
     const {currentTool, overrideTool, uiVisible} = appState
     const picture = appState.currentPicture
     return (
-      <div className="App">
+      <div className="RootView">
         {process.platform == "darwin" ? <div className="TitleBarPaddingMac" /> : undefined}
         <div className="WindowContent">
           <ToolSelection hidden={!uiVisible} />
