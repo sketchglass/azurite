@@ -7,6 +7,7 @@ import {Vec2} from "paintvec"
 import React = require("react")
 import {appState} from "../app/AppState"
 import {SelectionShowMode} from "../views/Renderer"
+import {toolManager} from "../app/ToolManager"
 
 export
 interface ToolPointerEvent {
@@ -37,7 +38,7 @@ abstract class Tool {
     }
   }
   @computed get active() {
-    return appState.currentTool == this
+    return toolManager.currentTool == this
   }
 
   abstract id: string
