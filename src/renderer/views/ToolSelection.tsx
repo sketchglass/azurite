@@ -6,7 +6,7 @@ import * as classNames from "classnames"
 
 import SVGIcon from "./components/SVGIcon"
 
-import {appState} from "../app/AppState"
+import {toolManager} from "../app/ToolManager"
 
 import Tool from "../tools/Tool"
 import ToolIDs from "../tools/ToolIDs"
@@ -39,7 +39,7 @@ export default
 class ToolSelection extends React.Component<{hidden: boolean}, {}> {
   render() {
     const {hidden} = this.props
-    const {tools, currentTool} = appState
+    const {tools, currentTool} = toolManager
     const nonBrushTools = tools.filter(tool => !(tool instanceof BaseBrushTool))
     const brushTools = tools.filter(tool => tool instanceof BaseBrushTool)
     return (
@@ -63,18 +63,18 @@ class ToolSelection extends React.Component<{hidden: boolean}, {}> {
     )
   }
   private onChange = action((tool: Tool) => {
-    appState.currentTool = tool
+    toolManager.currentTool = tool
   })
   private onContextMenu = action((selectedTool: Tool, e: React.MouseEvent<Element>) => {
     e.preventDefault()
     const removeTool = action(() => {
-      const index = appState.tools.indexOf(selectedTool)
-      appState.tools.splice(index, 1)
+      const index = toolManager.tools.indexOf(selectedTool)
+      toolManager.tools.splice(index, 1)
     })
     const appendTool = action((item: Tool) => {
       return () => {
-        const index = appState.tools.indexOf(selectedTool) + 1
-        appState.tools.splice(index, 0, item)
+        const index = toolManager.tools.indexOf(selectedTool) + 1
+        toolManager.tools.splice(index, 0, item)
       }
     })
     const menuTemplate = [

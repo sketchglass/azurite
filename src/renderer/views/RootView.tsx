@@ -12,6 +12,7 @@ import LayerPanel from "./panels/LayerPanel"
 
 import NavigationKeyBinding from "./NavigationKeyBinding"
 import {appState} from "../app/AppState"
+import {toolManager} from "../app/ToolManager"
 
 import "./KeyBindingHandler"
 import "./MenuBar"
@@ -24,18 +25,19 @@ class RootView extends React.Component<{}, {}> {
 
     new NavigationKeyBinding(klass => {
       if (klass) {
-        for (const tool of appState.tools) {
+        for (const tool of toolManager.tools) {
           if (tool instanceof klass) {
-            appState.overrideTool = tool
+            toolManager.overrideTool = tool
           }
         }
       } else {
-        appState.overrideTool = undefined
+        toolManager.overrideTool = undefined
       }
     })
   }
   render() {
-    const {currentTool, overrideTool, uiVisible} = appState
+    const {currentTool, overrideTool} = toolManager
+    const {uiVisible} = appState
     const picture = appState.currentPicture
     return (
       <div className="RootView">
