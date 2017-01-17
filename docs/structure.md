@@ -12,10 +12,10 @@
   * `renderer`: Codes that run in Electron renderer process
     * `actions`: Unit of code mainly trigerred by menu items, keyboard shortcuts and buttons
     * `app`: Codes that manages application
-    * `commands`: Undoable unit of code that run on models
-    * `formats`: Codes that add support for image formats
-    * `models`: Models such as Pictures or Layers
-    * `services`: Miscellaneous code that do something
+    * `commands`: Undoable unit of code that modifies models
+    * `formats`: Codes that add support for file formats
+    * `models`: Codes that represents data maniplated in Azurite, such as Pictures or Layers
+    * `services`: Miscellaneous sets of code that do something
     * `tools`: Tools that interact with user in viewport
     * `viewmodels`: Abstractions of complex views
     * `views`: View components
