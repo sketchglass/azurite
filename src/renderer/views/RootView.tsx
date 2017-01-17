@@ -11,7 +11,7 @@ import NavigatorPanel from "./panels/NavigatorPanel"
 import LayerPanel from "./panels/LayerPanel"
 
 import NavigationKeyBinding from "./NavigationKeyBinding"
-import {appState} from "../state/AppState"
+import {appState} from "../app/AppState"
 
 import "./KeyBindingHandler"
 import "./MenuBar"

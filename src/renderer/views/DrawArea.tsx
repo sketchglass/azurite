@@ -12,7 +12,7 @@ import * as IPCChannels from "../../common/IPCChannels"
 import PointerEvents from "./components/PointerEvents"
 import ScrollBar, {ScrollBarDirection} from "./components/ScrollBar"
 import FrameDebounced from "./components/FrameDebounced"
-import {appState} from "../state/AppState"
+import {appState} from "../app/AppState"
 
 @observer
 class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined}, {}> {

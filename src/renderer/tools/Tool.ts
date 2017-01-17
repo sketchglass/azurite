@@ -5,7 +5,7 @@ import {Tile} from "../models/TiledTexture"
 import {UndoStack} from "../models/UndoStack"
 import {Vec2} from "paintvec"
 import React = require("react")
-import {appState} from "../state/AppState"
+import {appState} from "../app/AppState"
 import {SelectionShowMode} from "../views/Renderer"
 
 export

@@ -9,7 +9,7 @@ import TiledTexture, {Tile} from "../models/TiledTexture"
 import WatercolorSettings from "../views/WatercolorSettings"
 import {ToolPointerEvent} from "./Tool"
 import React = require("react")
-import {appState} from "../state/AppState"
+import {appState} from "../app/AppState"
 import ToolIDs from "./ToolIDs"
 
 enum ShapeClipModes {

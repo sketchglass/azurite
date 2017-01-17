@@ -2,7 +2,7 @@ import React = require("react")
 import {observer} from "mobx-react"
 import {PictureDimension} from "../../models/Picture"
 import DimensionSelect from "../DimensionSelect"
-import DimensionSelectState from "../../state/DimensionSelectState"
+import DimensionSelectState from "../../app/DimensionSelectState"
 import DialogContainer from "./DialogContainer"
 
 interface NewPictureDialogProps {

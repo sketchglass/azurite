@@ -1,8 +1,8 @@
 import * as React from "react"
 import {observable, action} from "mobx"
 import {observer} from "mobx-react"
-import {appState} from "../state/AppState"
-import {PictureState} from "../state/PictureState"
+import {appState} from "../app/AppState"
+import {PictureState} from "../app/PictureState"
 const classNames = require("classnames")
 import PointerEvents from "./components/PointerEvents"
 import CSSVariables from "./components/CSSVariables"

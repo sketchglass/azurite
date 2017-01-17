@@ -6,7 +6,7 @@ import * as classNames from "classnames"
 
 import SVGIcon from "./components/SVGIcon"
 
-import {appState} from "../state/AppState"
+import {appState} from "../app/AppState"
 
 import Tool from "../tools/Tool"
 import ToolIDs from "../tools/ToolIDs"

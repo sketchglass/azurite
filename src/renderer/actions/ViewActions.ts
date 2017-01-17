@@ -1,8 +1,8 @@
 import {remote} from "electron"
 import Action, {PictureAction} from "./Action"
 import ActionIDs from "./ActionIDs"
-import {addAction} from "../state/ActionRegistry"
-import {appState} from "../state/AppState"
+import {addAction} from "../app/ActionRegistry"
+import {appState} from "../app/AppState"
 
 @addAction
 export class ViewReloadAction extends Action {

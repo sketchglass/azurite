@@ -1,5 +1,5 @@
-import {actionRegistry} from "../state/ActionRegistry"
-import {keyBindingRegistry} from "../state/KeyBindingRegistry"
+import {actionRegistry} from "../app/ActionRegistry"
+import {keyBindingRegistry} from "../app/KeyBindingRegistry"
 
 class KeyBindingHandler {
   constructor() {

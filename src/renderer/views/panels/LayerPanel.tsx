@@ -9,7 +9,7 @@ import {MoveLayerCommand, CopyLayerCommand, ChangeLayerPropsCommand} from "../..
 import ClickToEdit from "../components/ClickToEdit"
 import SVGIcon from "../components/SVGIcon"
 import LayerDetail from "../LayerDetail"
-import {appState} from "../../state/AppState"
+import {appState} from "../../app/AppState"
 import IndexPath from "../../../lib/IndexPath"
 import {AddLayerAction, GroupLayerAction, RemoveLayerAction} from "../../actions/LayerActions"
 

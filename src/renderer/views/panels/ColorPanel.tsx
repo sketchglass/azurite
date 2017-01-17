@@ -1,7 +1,7 @@
 import * as React from "react"
 import {action} from "mobx"
 import {observer} from "mobx-react"
-import {appState} from "../../state/AppState"
+import {appState} from "../../app/AppState"
 import {HSVColor} from "../../../lib/Color"
 import ColorPicker from "../components/ColorPicker"
 import RGBRangeSliders from "../components/RGBRangeSliders"

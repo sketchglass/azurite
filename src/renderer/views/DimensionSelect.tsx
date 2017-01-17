@@ -1,6 +1,6 @@
 import * as React from "react"
 import {observer} from "mobx-react"
-import DimensionSelectState, {DimensionUnit} from "../state/DimensionSelectState"
+import DimensionSelectState, {DimensionUnit} from "../app/DimensionSelectState"
 
 interface DimensionSelectProps {
   percent?: boolean

@@ -8,7 +8,7 @@ import BrushSettings from "../views/BrushSettings"
 import TiledTexture, {Tile} from "../models/TiledTexture"
 import {ToolPointerEvent} from "./Tool"
 import React = require("react")
-import {appState} from "../state/AppState"
+import {appState} from "../app/AppState"
 import ToolIDs from "./ToolIDs"
 
 const brushShader = {
