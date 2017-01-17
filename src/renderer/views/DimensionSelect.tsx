@@ -1,10 +1,10 @@
 import * as React from "react"
 import {observer} from "mobx-react"
-import DimensionSelectState, {DimensionUnit} from "../app/DimensionSelectState"
+import DimensionSelectViewModel, {DimensionUnit} from "../viewmodels/DimensionSelectViewModel"
 
 interface DimensionSelectProps {
   percent?: boolean
-  state: DimensionSelectState
+  viewModel: DimensionSelectViewModel
 }
 
 function toFixedNumber(x: number, digits: number) {
@@ -31,7 +31,7 @@ class DimensionSelect extends React.Component<DimensionSelectProps, {} > {
       widthRounded, heightRounded,
       widthCurrentUnit, heightCurrentUnit,
       dpi, unit, keepRatio, tooLarge, lastSelectedPreset, presets
-    } = this.props.state
+    } = this.props.viewModel
     const digits = this.digitsForUnit(unit)
     const step = Math.pow(10, -digits)
     const widthCurrentUnitRounded = toFixedNumber(widthCurrentUnit, digits)
@@ -95,31 +95,31 @@ class DimensionSelect extends React.Component<DimensionSelectProps, {} > {
   private onPresetSelect = (ev: React.FormEvent<HTMLSelectElement>) => {
     const i = parseInt((ev.target as HTMLSelectElement).value)
     if (i >= 0) {
-      this.props.state.setPreset(i)
+      this.props.viewModel.setPreset(i)
     }
   }
 
   private onUnitChange = (ev: React.FormEvent<HTMLSelectElement>) => {
     const unit = (ev.target as HTMLSelectElement).value as DimensionUnit
-    this.props.state.unit = unit
+    this.props.viewModel.unit = unit
   }
 
   private onWidthChange = (ev: React.FormEvent<HTMLInputElement>) => {
     const width = parseFloat((ev.target as HTMLInputElement).value)
-    this.props.state.changeSizeCurrentUnit(width, undefined)
+    this.props.viewModel.changeSizeCurrentUnit(width, undefined)
   }
 
   private onHeightChange = (ev: React.FormEvent<HTMLInputElement>) => {
     const height = parseFloat((ev.target as HTMLInputElement).value)
-    this.props.state.changeSizeCurrentUnit(undefined, height)
+    this.props.viewModel.changeSizeCurrentUnit(undefined, height)
   }
 
   private onDpiChange = (ev: React.FormEvent<HTMLInputElement>) => {
     const dpi = parseInt((ev.target as HTMLInputElement).value) || 72
-    this.props.state.changeDpi(dpi)
+    this.props.viewModel.changeDpi(dpi)
   }
 
   private onKeepRatioToggle = (ev: React.FormEvent<HTMLInputElement>) => {
-    this.props.state.keepRatio = (ev.target as HTMLInputElement).checked
+    this.props.viewModel.keepRatio = (ev.target as HTMLInputElement).checked
   }
 }

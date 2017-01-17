@@ -5,7 +5,7 @@ import {Vec2, Rect} from "paintvec"
 import RectMoveTool, {DragType} from "./RectMoveTool"
 import {ToolPointerEvent} from "./Tool"
 import {ChangeCanvasAreaCommand} from "../commands/PictureCommand"
-import DimensionSelectState from "../app/DimensionSelectState"
+import DimensionSelectViewModel from "../viewmodels/DimensionSelectViewModel"
 import DimensionSelect from "../views/DimensionSelect"
 import {renderer} from "../views/Renderer"
 import ToolIDs from "./ToolIDs"
@@ -18,7 +18,7 @@ const CanvasAreaToolSettings = observer((props: {tool: CanvasAreaTool}) => {
   const onCancel = () => tool.cancelEditing()
   return (
     <div className="CanvasAreaToolSettings" hidden={!tool.picture}>
-      <DimensionSelect state={tool.dimensionSelectState} percent={true} />
+      <DimensionSelect viewModel={tool.dimensionSelectViewModel} percent={true} />
       <div className="CanvasAreaToolSettings_buttons">
         <button className="Button" onClick={onCancel}>Cancel</button>
         <button className="Button Button-primary" onClick={onOK}>OK</button>
@@ -35,7 +35,7 @@ class CanvasAreaTool extends RectMoveTool {
   canRotate = false
   canDistort = false
 
-  readonly dimensionSelectState = new DimensionSelectState()
+  readonly dimensionSelectViewModel = new DimensionSelectViewModel()
 
   @computed get areaRect() {
     const topLeft = this.translation.add(this.normalizedRect.topLeft).round()
@@ -55,27 +55,27 @@ class CanvasAreaTool extends RectMoveTool {
       this.reset()
     })
     reaction(() => this.areaRect.size, action((size: Vec2) => {
-      if (!this.dimensionSelectState.size.round().equals(size)) {
-        this.dimensionSelectState.width = size.width
-        this.dimensionSelectState.height = size.height
-        this.dimensionSelectState.ratio = size.height / size.width
+      if (!this.dimensionSelectViewModel.size.round().equals(size)) {
+        this.dimensionSelectViewModel.width = size.width
+        this.dimensionSelectViewModel.height = size.height
+        this.dimensionSelectViewModel.ratio = size.height / size.width
       }
     }))
-    reaction(() => this.dimensionSelectState.size.round(), action((size: Vec2) => {
+    reaction(() => this.dimensionSelectViewModel.size.round(), action((size: Vec2) => {
       if (!this.areaRect.size.equals(size)) {
         this.rect = new Rect(this.rect.topLeft, this.rect.topLeft.add(size))
       }
     }))
-    reaction(() => this.dimensionSelectState.keepRatio, keepRatio => {
+    reaction(() => this.dimensionSelectViewModel.keepRatio, keepRatio => {
       this.alwaysKeepsRatio = keepRatio
     })
-    this.dimensionSelectState.keepRatio = this.alwaysKeepsRatio = true
+    this.dimensionSelectViewModel.keepRatio = this.alwaysKeepsRatio = true
   }
 
   reset() {
     if (this.picture) {
-      this.dimensionSelectState.reset(this.picture.dimension)
-      this.dimensionSelectState.unit = "percent"
+      this.dimensionSelectViewModel.reset(this.picture.dimension)
+      this.dimensionSelectViewModel.unit = "percent"
       this.resetRect(new Rect(new Vec2(), this.picture.size))
     }
   }
@@ -108,7 +108,7 @@ class CanvasAreaTool extends RectMoveTool {
   endEditing() {
     if (this.picture) {
       const {topLeft, size} = this.areaRect
-      const dimension = {width: size.width, height: size.height, dpi: this.dimensionSelectState.dpi}
+      const dimension = {width: size.width, height: size.height, dpi: this.dimensionSelectViewModel.dpi}
       const command = new ChangeCanvasAreaCommand(this.picture, dimension, topLeft)
       this.picture.undoStack.push(command)
     }

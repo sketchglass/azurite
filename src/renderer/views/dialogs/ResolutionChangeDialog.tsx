@@ -2,7 +2,7 @@ import React = require("react")
 import {observer} from "mobx-react"
 import {PictureDimension} from "../../models/Picture"
 import DimensionSelect from "../DimensionSelect"
-import DimensionSelectState from "../../app/DimensionSelectState"
+import DimensionSelectViewModel from "../../viewmodels/DimensionSelectViewModel"
 import DialogContainer from "./DialogContainer"
 
 interface ResolutionChangeDialogProps {
@@ -14,18 +14,18 @@ interface ResolutionChangeDialogProps {
 @observer
 export default
 class ResolutionChangeDialog extends React.Component<ResolutionChangeDialogProps, {}> {
-  private dimensionSelectState: DimensionSelectState
+  private dimensionSelectViewModel: DimensionSelectViewModel
 
   constructor(props: ResolutionChangeDialogProps) {
     super(props)
-    this.dimensionSelectState = new DimensionSelectState(props.init)
-    this.dimensionSelectState.unit = "percent"
+    this.dimensionSelectViewModel = new DimensionSelectViewModel(props.init)
+    this.dimensionSelectViewModel.unit = "percent"
   }
 
   render() {
     return (
-      <DialogContainer okText="Change" canOK={this.dimensionSelectState.isValid} onOK={this.onOK} onCancel={this.onCancel}>
-        <DimensionSelect state={this.dimensionSelectState} percent={true}/>
+      <DialogContainer okText="Change" canOK={this.dimensionSelectViewModel.isValid} onOK={this.onOK} onCancel={this.onCancel}>
+        <DimensionSelect viewModel={this.dimensionSelectViewModel} percent={true}/>
       </DialogContainer>
     )
   }
@@ -39,6 +39,6 @@ class ResolutionChangeDialog extends React.Component<ResolutionChangeDialogProps
   }
 
   private onOK = () => {
-    this.props.onDone(this.dimensionSelectState.dimension)
+    this.props.onDone(this.dimensionSelectViewModel.dimension)
   }
 }
