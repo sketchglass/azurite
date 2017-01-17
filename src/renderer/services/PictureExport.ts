@@ -9,7 +9,7 @@ import * as path from "path"
 import ImageFormat from "../formats/ImageFormat"
 import {UndoCommand, CompositeUndoCommand} from "../models/UndoStack"
 import {AddLayerCommand} from "../commands/LayerCommand"
-import {formatRegistry} from "../state/FormatRegistry"
+import {formatRegistry} from "../app/FormatRegistry"
 
 export
 type PictureExportFormat = "png"|"jpeg"|"bmp"

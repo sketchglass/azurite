@@ -1,7 +1,7 @@
 import {remote} from "electron"
 import {PictureAction} from "./Action"
 import ActionIDs from "./ActionIDs"
-import {addAction} from "../state/ActionRegistry"
+import {addAction} from "../app/ActionRegistry"
 import {currentFocus} from "../views/CurrentFocus"
 import {SelectAllCommand, ClearSelectionCommand, InvertSelectionCommand} from "../commands/SelectionCommand"
 

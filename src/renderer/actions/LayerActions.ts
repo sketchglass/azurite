@@ -1,6 +1,6 @@
 import {PictureAction} from "./Action"
 import ActionIDs from "./ActionIDs"
-import {addAction} from "../state/ActionRegistry"
+import {addAction} from "../app/ActionRegistry"
 import {
   MergeLayerCommand,
   AddLayerCommand,
@@ -10,7 +10,7 @@ import {
   FillLayerCommand,
 } from "../commands/LayerCommand"
 import {ImageLayer, GroupLayer} from "../models/Layer"
-import {appState} from "../state/AppState"
+import {appState} from "../app/AppState"
 
 @addAction
 export class AddLayerAction extends PictureAction {

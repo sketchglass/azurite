@@ -5,7 +5,7 @@ import Picture from "../../renderer/models/Picture"
 import {ImageLayer} from "../../renderer/models/Layer"
 import {PictureExport} from "../../renderer/services/PictureExport"
 import "../../renderer/formats/ImageFormats"
-import {formatRegistry} from "../../renderer/state/FormatRegistry"
+import {formatRegistry} from "../../renderer/app/FormatRegistry"
 import {remote} from "electron"
 import TestPattern from "../util/TestPattern"
 

@@ -5,7 +5,7 @@ import {Vec2} from "paintvec"
 import Layer, {ImageLayer} from "../models/Layer"
 import {Tile} from "../models/TiledTexture"
 import {ToolPointerEvent} from './Tool'
-import {appState} from "../state/AppState"
+import {appState} from "../app/AppState"
 import {TransformLayerCommand} from "../commands/LayerCommand"
 import RectMoveTool, {DragType} from "./RectMoveTool"
 import LayerTransform from "../services/LayerTransform"

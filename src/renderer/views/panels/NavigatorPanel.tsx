@@ -2,7 +2,7 @@ import {Transform, Vec2, Rect} from "paintvec"
 import {computed, reaction, action} from "mobx"
 import {observer} from "mobx-react"
 import React = require("react")
-import {appState} from "../../state/AppState"
+import {appState} from "../../app/AppState"
 import {renderer} from "../Renderer"
 import {frameDebounce} from "../../../lib/Debounce"
 import PointerEvents from "../components/PointerEvents"

@@ -16,7 +16,7 @@ interface DimensionPreset {
 }
 
 export default
-class DimensionSelectState {
+class DimensionSelectViewModel {
   readonly presets: DimensionPreset[] = [
     {
       name: "A4",

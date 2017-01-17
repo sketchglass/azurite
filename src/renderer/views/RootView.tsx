@@ -11,14 +11,14 @@ import NavigatorPanel from "./panels/NavigatorPanel"
 import LayerPanel from "./panels/LayerPanel"
 
 import NavigationKeyBinding from "./NavigationKeyBinding"
-import {appState} from "../state/AppState"
+import {appState} from "../app/AppState"
 
 import "./KeyBindingHandler"
 import "./MenuBar"
 import "../../styles/main.css"
 
 @observer export default
-class App extends React.Component<{}, {}> {
+class RootView extends React.Component<{}, {}> {
   constructor() {
     super()
 
@@ -38,7 +38,7 @@ class App extends React.Component<{}, {}> {
     const {currentTool, overrideTool, uiVisible} = appState
     const picture = appState.currentPicture
     return (
-      <div className="App">
+      <div className="RootView">
         {process.platform == "darwin" ? <div className="TitleBarPaddingMac" /> : undefined}
         <div className="WindowContent">
           <ToolSelection hidden={!uiVisible} />

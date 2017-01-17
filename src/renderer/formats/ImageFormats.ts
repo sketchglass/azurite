@@ -1,5 +1,5 @@
 import ImageFormat from "./ImageFormat"
-import {addImageFormat} from "../state/FormatRegistry"
+import {addImageFormat} from "../app/FormatRegistry"
 
 @addImageFormat
 export
