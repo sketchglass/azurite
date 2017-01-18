@@ -10,6 +10,7 @@ export class BrushEngineWatercolor extends BrushEngine {
 
   newPreset() {
     return new BrushPresetWatercolor({
+      title: "Watercolor",
       width: 10,
       opacity: 1,
       softness: 0.5,

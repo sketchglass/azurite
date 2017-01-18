@@ -10,6 +10,7 @@ export class BrushEnginePen extends BrushEngine {
 
   newPreset() {
     return new BrushPresetPen({
+      title: "Pen",
       width: 10,
       opacity: 1,
       softness: 0.5,

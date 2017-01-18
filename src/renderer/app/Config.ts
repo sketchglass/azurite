@@ -2,6 +2,8 @@ import * as fs from "fs"
 import * as path from "path"
 import {remote} from "electron"
 const deepAssign = require('deep-assign');
+import {defaultBrushPresets} from "../brush/DefaultBrushPresets"
+import {BrushPresetData} from "../brush/BrushPreset"
 
 interface RectData {
   x: number
@@ -30,6 +32,7 @@ interface ConfigValues {
   color: ColorData
   palette: (ColorData|undefined)[]
   files: string[]
+  brushPresets: BrushPresetData[]
   // TODO: preferences
 }
 
@@ -46,6 +49,7 @@ class Config {
     color: {h: 0, s: 0, v: 0},
     palette: [],
     files: [],
+    brushPresets: defaultBrushPresets(),
   }
   path = path.join(remote.app.getPath("userData"), "config.json")
 

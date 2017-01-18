@@ -1,6 +1,7 @@
 import {observable} from "mobx"
 
 export interface BrushPresetProps {
+  title: string
   width: number
   opacity: number
   softness: number
@@ -13,6 +14,7 @@ export interface BrushPresetData extends BrushPresetProps {
 }
 
 export abstract class BrushPreset implements BrushPresetProps {
+  @observable title = "Brush"
   // brush width (diameter)
   @observable width = 10
   // brush opacity
@@ -25,6 +27,7 @@ export abstract class BrushPreset implements BrushPresetProps {
   @observable stabilizingLevel = 2
 
   constructor(props: BrushPresetProps) {
+    this.title = props.title
     this.width = props.width
     this.opacity = props.opacity
     this.softness = props.softness

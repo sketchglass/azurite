@@ -23,10 +23,10 @@ export class BrushPresetWatercolor extends BrushPreset implements BrushPresetWat
   }
 
   toData(): BrushPresetWatercolorData {
-    const {width, opacity, softness, minWidthRatio, stabilizingLevel, blending, thickness} = this
+    const {title, width, opacity, softness, minWidthRatio, stabilizingLevel, blending, thickness} = this
     return {
       engine: "watercolor",
-      width, opacity, softness, minWidthRatio, stabilizingLevel, blending, thickness
+      title, width, opacity, softness, minWidthRatio, stabilizingLevel, blending, thickness
     }
   }
 }

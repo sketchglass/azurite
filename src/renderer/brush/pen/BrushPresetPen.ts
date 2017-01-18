@@ -20,10 +20,10 @@ export class BrushPresetPen extends BrushPreset implements BrushPresetPenProps {
   }
 
   toData(): BrushPresetPenData {
-    const {width, opacity, softness, minWidthRatio, stabilizingLevel, eraser} = this
+    const {title, width, opacity, softness, minWidthRatio, stabilizingLevel, eraser} = this
     return {
       engine: "pen",
-      width, opacity, softness, minWidthRatio, stabilizingLevel, eraser
+      title, width, opacity, softness, minWidthRatio, stabilizingLevel, eraser
     }
   }
 }

@@ -15,6 +15,7 @@ import "../actions/SelectionAction"
 import "../actions/CanvasActions"
 import "../actions/ViewActions"
 import {toolManager} from "./ToolManager"
+import {brushPresetManager} from "./BrushPresetManager"
 
 export
 class AppState {
@@ -112,6 +113,7 @@ class AppState {
         maximized: win.isMaximized(),
       },
       ...toolManager.saveConfig(),
+      ...brushPresetManager.saveConfig(),
       color: colorToData(this.color),
       palette: this.palette.map(color => {
         if (color) {
