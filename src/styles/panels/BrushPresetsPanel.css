@@ -4,7 +4,12 @@
   overflow-y: auto;
   & .ReactDraggableTree {
     min-height: 100%;
-    &_row-selected {
+  }
+  & .ReactDraggableTree_row-selected {
+    background: none;
+  }
+  &-brushToolActive {
+    & .ReactDraggableTree_row-selected {
       background-color: var(--ui-primary-background-color);
     }
   }

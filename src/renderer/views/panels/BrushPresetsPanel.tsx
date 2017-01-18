@@ -7,6 +7,7 @@ import {BrushPreset} from "../../brush/BrushPreset"
 import {brushPresetManager} from "../../app/BrushPresetManager"
 import {toolManager} from "../../app/ToolManager"
 import BrushTool from "../../tools/BrushTool"
+import * as classNames from "classnames"
 
 interface BrushPresetNode extends TreeNode {
   preset: BrushPreset
@@ -38,8 +39,10 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
       return {key: preset.internalKey, preset}
     })
     const root: TreeNode = {key: -1, children}
+    const brushToolActive = toolManager.currentTool instanceof BrushTool
+    const className = classNames("BrushPresetsPanel", {"BrushPresetsPanel-brushToolActive": brushToolActive})
     return (
-      <div className="BrushPresetsPanel">
+      <div className={className}>
         <BrushPresetTree
           root={root}
           selectedKeys={this.selectedKeys}
