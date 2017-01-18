@@ -1,4 +1,3 @@
-import {observable} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import {ShapeModel, TextureDrawTarget, Shape}  from "paintgl"
 import {Waypoint} from "../Waypoint"
@@ -7,6 +6,7 @@ import TiledTexture, {Tile} from "../../models/TiledTexture"
 import {appState} from "../../app/AppState"
 import {DabRenderer} from "../DabRenderer"
 import {ImageLayer} from "../../models/Layer"
+import {BrushPresetPen} from "./BrushPresetPen"
 
 const brushShader = {
   vertex: `
@@ -67,24 +67,24 @@ class DabRendererPen extends DabRenderer {
   private model: ShapeModel
   private drawTarget = new TextureDrawTarget(context)
   readonly title = "Brush"
-  @observable eraser = false
 
-  constructor() {
-    super()
+  constructor(public preset: BrushPresetPen) {
+    super(preset)
     this.shape = new Shape(context)
     this.shape.setVec2Attributes("aCenter", [])
     this.model = new ShapeModel(context, {shape: this.shape, shader: brushShader})
   }
 
   start(layer: ImageLayer) {
+    const {preset} = this
     this.model.uniforms = {
       uPictureSize: layer.picture.size,
-      uBrushSize: this.width,
+      uBrushSize: preset.width,
       uColor: appState.color.toRgb(),
-      uOpacity: this.opacity,
-      uMinWidthRatio: this.minWidthRatio,
+      uOpacity: preset.opacity,
+      uMinWidthRatio: preset.minWidthRatio,
       uSpacingRatio: 1,
-      uSoftness: this.softness,
+      uSoftness: preset.softness,
       uHasSelection: layer.picture.selection.hasSelection,
       uSelection: layer.picture.selection.texture,
     }
@@ -107,7 +107,7 @@ class DabRendererPen extends DabRenderer {
     const centers: Vec2[] = []
     const indices: number[] = []
 
-    const halfRectSize = new Vec2((this.width + 2) / 2)
+    const halfRectSize = new Vec2((this.preset.width + 2) / 2)
 
     for (let i = 0; i < waypoints.length; ++i) {
       const {pos, pressure} = waypoints[i]
@@ -127,7 +127,7 @@ class DabRendererPen extends DabRenderer {
     this.shape.setVec2Attributes("aCenter", centers)
     this.shape.indices = indices
 
-    this.model.blendMode = this.eraser ? "dst-out" : (layer.preserveOpacity ? "src-atop" : "src-over")
+    this.model.blendMode = this.preset.eraser ? "dst-out" : (layer.preserveOpacity ? "src-atop" : "src-over")
 
     for (const key of TiledTexture.keysForRect(rect)) {
       const tile = this.prepareTile(key)

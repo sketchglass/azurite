@@ -79,6 +79,7 @@ abstract class BaseBrushTool extends Tool {
       return
     }
     this.dragged = true
+    this.pipeline.dabRenderer.preset = this.preset
     this.pipeline.dabRenderer.start(layer)
     this.pipeline.nextWaypoints([new Waypoint(ev.picturePos, ev.pressure)])
   }

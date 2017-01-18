@@ -7,7 +7,7 @@ import {WaypointStabilizeFilter} from "./WaypointStabilizeFilter"
 export abstract class BrushEngine {
   abstract newDabRenderer(): DabRenderer
   abstract newPreset(): BrushPreset
-  abstract maybeLoadPreset(data: BrushPresetData): BrushPreset|undefined
+  abstract maybeNewPresetFromData(data: BrushPresetData): BrushPreset|undefined
 
   newPipeline() {
     return new BrushPipeline(

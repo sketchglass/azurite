@@ -5,7 +5,7 @@ import {DabRendererWatercolor} from "./DabRendererWatercolor"
 
 export class BrushEngineWatercolor extends BrushEngine {
   newDabRenderer() {
-    return new DabRendererWatercolor()
+    return new DabRendererWatercolor(this.newPreset())
   }
 
   newPreset() {
@@ -20,7 +20,7 @@ export class BrushEngineWatercolor extends BrushEngine {
     })
   }
 
-  maybeLoadPreset(data: BrushPresetData) {
+  maybeNewPresetFromData(data: BrushPresetData) {
     if (isPresetDataWatercolor(data)) {
       return new BrushPresetWatercolor(data)
     }

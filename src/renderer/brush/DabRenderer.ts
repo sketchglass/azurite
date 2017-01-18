@@ -1,26 +1,19 @@
 import {Rect, Vec2} from "paintvec"
-import {Waypoint} from "./Waypoint"
 import Layer, {ImageLayer} from "../models/Layer"
 import TiledTexture, {Tile} from "../models/TiledTexture"
-import {renderer} from "../views/Renderer"
 import {ChangeLayerImageCommand} from "../commands/LayerCommand"
+import {renderer} from "../views/Renderer"
+import {Waypoint} from "./Waypoint"
+import {BrushPreset} from "./BrushPreset"
 
 export abstract class DabRenderer {
-  layer: ImageLayer|undefined
-
   abstract title: string
-
-  // brush width (diameter)
-  width = 10
-  // brush opacity
-  opacity = 1
-  // distance used to soften edge, compared to brush radius
-  softness = 0.5
-  // width drawn in pressure 0, compared to brush width
-  minWidthRatio = 0.5
-
+  layer: ImageLayer|undefined
   private newTiledTexture = new TiledTexture()
   private editedRect: Rect|undefined
+
+  constructor(public preset: BrushPreset) {
+  }
 
   private addEditedRect(rect: Rect) {
     if (this.editedRect) {
@@ -41,7 +34,7 @@ export abstract class DabRenderer {
   }
 
   private rectForWaypoints(waypoints: Waypoint[]) {
-    const rectWidth = this.width + 2
+    const rectWidth = this.preset.width + 2
     const rectSize = new Vec2(rectWidth)
     const rects = waypoints.map(w => {
       const topLeft = new Vec2(w.pos.x - rectWidth * 0.5, w.pos.y - rectWidth * 0.5)

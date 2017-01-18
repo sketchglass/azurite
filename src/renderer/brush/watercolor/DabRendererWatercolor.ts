@@ -7,6 +7,7 @@ import {appState} from "../../app/AppState"
 import {DabRenderer} from "../DabRenderer"
 import {ImageLayer} from "../../models/Layer"
 import {Waypoint} from "../Waypoint"
+import {BrushPresetWatercolor} from "./BrushPresetWatercolor"
 
 enum ShapeClipModes {
   Shape, Clip
@@ -132,9 +133,6 @@ const watercolorShader = {
 
 export
 class DabRendererWatercolor extends DabRenderer {
-  blending = 0.5
-  thickness = 0.5
-
   readonly title = "Watercolor"
 
   private shape = new RectShape(context, {rect: new Rect()})
@@ -148,27 +146,32 @@ class DabRendererWatercolor extends DabRenderer {
 
   private sampleSize = 0
 
+  constructor(public preset: BrushPresetWatercolor) {
+    super(preset)
+  }
+
   start(layer: ImageLayer) {
     super.start(layer)
     const {preserveOpacity} = layer
+    const {preset} = this
 
-    this.sampleSize = Math.pow(2, Math.ceil(Math.log2(this.width + 2)))
+    this.sampleSize = Math.pow(2, Math.ceil(Math.log2(preset.width + 2)))
 
     this.model.uniforms = {
       uSampleSize: this.sampleSize,
-      uBlending: this.blending,
-      uThickness: this.thickness,
+      uBlending: preset.blending,
+      uThickness: preset.thickness,
       uColor: appState.color.toRgb(),
-      uOpacity: this.opacity,
+      uOpacity: preset.opacity,
       uPreserveOpacity: preserveOpacity,
     }
 
     this.shapeClipModel.uniforms = {
       uPictureSize: layer.picture.size,
       uSampleSize: this.sampleSize,
-      uBrushRadius: this.width * 0.5,
-      uSoftness: this.softness,
-      uMinWidthRatio: this.minWidthRatio,
+      uBrushRadius: preset.width * 0.5,
+      uSoftness: preset.softness,
+      uMinWidthRatio: preset.minWidthRatio,
       uPreserveOpacity: preserveOpacity,
       uHasSelection: layer.picture.selection.hasSelection,
       uSelection: layer.picture.selection.texture,

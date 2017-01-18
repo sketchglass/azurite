@@ -5,7 +5,7 @@ import {DabRendererPen} from "./DabRendererPen"
 
 export class BrushEnginePen extends BrushEngine {
   newDabRenderer() {
-    return new DabRendererPen()
+    return new DabRendererPen(this.newPreset())
   }
 
   newPreset() {
@@ -19,7 +19,7 @@ export class BrushEnginePen extends BrushEngine {
     })
   }
 
-  maybeLoadPreset(data: BrushPresetData) {
+  maybeNewPresetFromData(data: BrushPresetData) {
     if (isPresetDataPen(data)) {
       return new BrushPresetPen(data)
     }
