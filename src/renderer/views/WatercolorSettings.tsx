@@ -10,48 +10,48 @@ interface WatercolorSettingsProps {
 @observer export default
 class WatercolorSettings extends React.Component<WatercolorSettingsProps, void> {
   render() {
-    const {tool} = this.props
+    const {preset} = this.props.tool
     const onWidthChange = (value: number) => {
-      tool.width = value
+      preset.width = value
     }
     const onBlendingChange = (value: number) => {
-      tool.blending = value / 100
+      preset.blending = value / 100
     }
     const onThicknessChange = (value: number) => {
-      tool.thickness = value / 100
+      preset.thickness = value / 100
     }
     const onMinWidthChange = (value: number) => {
-      tool.minWidthRatio = value / 100
+      preset.minWidthRatio = value / 100
     }
     const onSoftnessChange = (value: number) => {
-      tool.softness = value / 100
+      preset.softness = value / 100
     }
     return (
       <table className="BrushSettings">
         <tbody>
           <tr>
             <td>Width</td>
-            <td><RangeSlider onChange={onWidthChange} min={0} max={100} value={tool.width} postfix="px" /></td>
+            <td><RangeSlider onChange={onWidthChange} min={0} max={100} value={preset.width} postfix="px" /></td>
           </tr>
           <tr>
             <td>Min Width</td>
-            <td><RangeSlider onChange={onMinWidthChange} min={0} max={100} value={Math.round(tool.minWidthRatio * 100)} postfix="%" /></td>
+            <td><RangeSlider onChange={onMinWidthChange} min={0} max={100} value={Math.round(preset.minWidthRatio * 100)} postfix="%" /></td>
           </tr>
           <tr>
             <td>Softness</td>
-            <td><RangeSlider onChange={onSoftnessChange} min={0} max={100} value={Math.round(tool.softness * 100)} postfix="%" /></td>
+            <td><RangeSlider onChange={onSoftnessChange} min={0} max={100} value={Math.round(preset.softness * 100)} postfix="%" /></td>
           </tr>
           <tr>
             <td>Blending</td>
-            <td><RangeSlider onChange={onBlendingChange} min={0} max={100} value={Math.round(tool.blending * 100)} postfix="%" /></td>
+            <td><RangeSlider onChange={onBlendingChange} min={0} max={100} value={Math.round(preset.blending * 100)} postfix="%" /></td>
           </tr>
           <tr>
             <td>Thickness</td>
-            <td><RangeSlider onChange={onThicknessChange} min={0} max={100} value={Math.round(tool.thickness * 100)} postfix="%" /></td>
+            <td><RangeSlider onChange={onThicknessChange} min={0} max={100} value={Math.round(preset.thickness * 100)} postfix="%" /></td>
           </tr>
           <tr>
             <td>Stabilizing</td>
-            <td><RangeSlider onChange={value => tool.stabilizingLevel = value} min={0} max={10} value={tool.stabilizingLevel} /></td>
+            <td><RangeSlider onChange={value => preset.stabilizingLevel = value} min={0} max={10} value={preset.stabilizingLevel} /></td>
           </tr>
         </tbody>
       </table>
