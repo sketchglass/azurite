@@ -1,14 +1,14 @@
 import {observer} from "mobx-react"
 import React = require("react")
-import BrushTool from "../tools/BrushTool"
+import PenTool from "../tools/PenTool"
 import RangeSlider from "./components/RangeSlider"
 
-interface BrushSettingsProps {
-  tool: BrushTool
+interface PenSettingsProps {
+  tool: PenTool
 }
 
 @observer export default
-class BrushSettings extends React.Component<BrushSettingsProps, void> {
+class PenSettings extends React.Component<PenSettingsProps, void> {
   render() {
     const {preset} = this.props.tool
     const onOpacityChange = (value: number) => {

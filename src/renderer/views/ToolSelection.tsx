@@ -11,7 +11,7 @@ import {toolManager} from "../app/ToolManager"
 import Tool from "../tools/Tool"
 import ToolIDs from "../tools/ToolIDs"
 import BaseBrushTool from "../tools/BaseBrushTool"
-import BrushTool from "../tools/BrushTool"
+import PenTool from "../tools/PenTool"
 import WatercolorTool from "../tools/WatercolorTool"
 
 const {Menu} = remote
@@ -19,7 +19,7 @@ const {Menu} = remote
 const toolToIcon = (tool: Tool) => {
   const map = {
     [ToolIDs.watercolor]: "paint-brush",
-    [ToolIDs.brush]: "pen",
+    [ToolIDs.pen]: "pen",
     [ToolIDs.pan]: "move",
     [ToolIDs.rotate]: "rotate",
     [ToolIDs.zoom]: "search",
@@ -78,11 +78,11 @@ class ToolSelection extends React.Component<{hidden: boolean}, {}> {
       }
     })
     const menuTemplate = [
-      {label: '追加', submenu: [
-        {label: "BrushTool", click: appendTool(new BrushTool())},
-        {label: "WatercolorTool", click: appendTool(new WatercolorTool())}
+      {label: 'Add', submenu: [
+        {label: "Pen", click: appendTool(new PenTool())},
+        {label: "Watercolor", click: appendTool(new WatercolorTool())}
       ]},
-      {label: '削除', click: removeTool}
+      {label: 'Remove', click: removeTool}
     ]
     const menu = Menu.buildFromTemplate(menuTemplate)
     menu.popup(remote.getCurrentWindow())
