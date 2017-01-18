@@ -16,6 +16,7 @@ class BrushPresetManager {
   }
 
   loadConfig(values: ConfigValues) {
+    this.presets.clear()
     for (const data of values.brushPresets) {
       for (const engine of brushEngineRegistry.engines) {
         const preset = engine.maybeNewPresetFromData(data)
