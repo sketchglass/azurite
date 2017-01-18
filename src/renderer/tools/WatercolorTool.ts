@@ -1,11 +1,11 @@
-import BaseBrushTool from "./BaseBrushTool";
+import BrushTool from "./BrushTool";
 import WatercolorSettings from "../views/WatercolorSettings"
 import React = require("react")
 import ToolIDs from "./ToolIDs"
 import {BrushEngineWatercolor} from "../brush/watercolor/BrushEngineWatercolor"
 
 export default
-class WatercolorTool extends BaseBrushTool {
+class WatercolorTool extends BrushTool {
   readonly id = ToolIDs.watercolor
   readonly title = "Watercolor"
   engine = new BrushEngineWatercolor()

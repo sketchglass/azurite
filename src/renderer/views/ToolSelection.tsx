@@ -10,7 +10,7 @@ import {toolManager} from "../app/ToolManager"
 
 import Tool from "../tools/Tool"
 import ToolIDs from "../tools/ToolIDs"
-import BaseBrushTool from "../tools/BaseBrushTool"
+import BrushTool from "../tools/BrushTool"
 import PenTool from "../tools/PenTool"
 import WatercolorTool from "../tools/WatercolorTool"
 
@@ -40,8 +40,8 @@ class ToolSelection extends React.Component<{hidden: boolean}, {}> {
   render() {
     const {hidden} = this.props
     const {tools, currentTool} = toolManager
-    const nonBrushTools = tools.filter(tool => !(tool instanceof BaseBrushTool))
-    const brushTools = tools.filter(tool => tool instanceof BaseBrushTool)
+    const nonBrushTools = tools.filter(tool => !(tool instanceof BrushTool))
+    const brushTools = tools.filter(tool => tool instanceof BrushTool)
     return (
       <div className="ToolSelection" hidden={hidden}>{
           nonBrushTools.map((tool, i) => {

@@ -1,11 +1,11 @@
-import BaseBrushTool from "./BaseBrushTool";
+import BrushTool from "./BrushTool";
 import PenSettings from "../views/PenSettings"
 import React = require("react")
 import ToolIDs from "./ToolIDs"
 import {BrushEnginePen} from "../brush/pen/BrushEnginePen"
 
 export default
-class BrushTool extends BaseBrushTool {
+class PenTool extends BrushTool {
   readonly id = ToolIDs.pen
   readonly title = "Pen"
   engine = new BrushEnginePen()

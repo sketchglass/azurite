@@ -6,7 +6,7 @@ import Layer, {ImageLayer} from "../models/Layer"
 import {BrushPipeline} from "../brush/BrushPipeline"
 import {BrushPreset} from "../brush/BrushPreset"
 
-abstract class BaseBrushTool extends Tool {
+abstract class BrushTool extends Tool {
   @observable dragged = false
 
   private _cursorImage = document.createElement("canvas")
@@ -98,4 +98,4 @@ abstract class BaseBrushTool extends Tool {
   }
 }
 
-export default BaseBrushTool
+export default BrushTool
