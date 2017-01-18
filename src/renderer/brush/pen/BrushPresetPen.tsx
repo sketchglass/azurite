@@ -22,11 +22,15 @@ export class BrushPresetPen extends BrushPreset implements BrushPresetPenProps {
     this.eraser = props.eraser
   }
 
+  toProps(): BrushPresetPenProps {
+    const {eraser} = this
+    return {...super.toProps(), eraser}
+  }
+
   toData(): BrushPresetPenData {
-    const {title, width, opacity, softness, minWidthRatio, stabilizingLevel, eraser} = this
     return {
       engine: "pen",
-      title, width, opacity, softness, minWidthRatio, stabilizingLevel, eraser
+      ...this.toProps(),
     }
   }
 

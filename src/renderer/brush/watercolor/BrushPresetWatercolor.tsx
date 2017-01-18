@@ -25,11 +25,15 @@ export class BrushPresetWatercolor extends BrushPreset implements BrushPresetWat
     this.thickness = props.thickness
   }
 
+  toProps(): BrushPresetWatercolorProps {
+    const {blending, thickness} = this
+    return {...super.toProps(), blending, thickness}
+  }
+
   toData(): BrushPresetWatercolorData {
-    const {title, width, opacity, softness, minWidthRatio, stabilizingLevel, blending, thickness} = this
     return {
       engine: "watercolor",
-      title, width, opacity, softness, minWidthRatio, stabilizingLevel, blending, thickness
+      ...this.toProps(),
     }
   }
   renderSettings() {
