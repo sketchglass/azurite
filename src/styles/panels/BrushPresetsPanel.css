@@ -1,6 +1,9 @@
 .BrushPresetsPanel {
   background-color: var(--darken-background-color);
+  flex: 1;
+  overflow-y: auto;
   & .ReactDraggableTree {
+    min-height: 100%;
     &_row-selected {
       background-color: var(--ui-primary-background-color);
     }
