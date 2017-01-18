@@ -3,8 +3,10 @@ import {action, observable} from "mobx"
 import {observer} from "mobx-react"
 import {Tree, TreeNode, NodeInfo} from "react-draggable-tree"
 import "react-draggable-tree/lib/index.css"
-import {brushPresetManager} from "../../app/BrushPresetManager"
 import {BrushPreset} from "../../brush/BrushPreset"
+import {brushPresetManager} from "../../app/BrushPresetManager"
+import {toolManager} from "../../app/ToolManager"
+import BrushTool from "../../tools/BrushTool"
 
 interface BrushPresetNode extends TreeNode {
   preset: BrushPreset
@@ -56,6 +58,10 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
     this.selectedKeys = selectedKeys
     if (selectedInfos.length > 0) {
       brushPresetManager.currentPresetIndex = selectedInfos[0].path[0]
+    }
+    const brushTool = toolManager.tools.find(t => t instanceof BrushTool)
+    if (brushTool) {
+      toolManager.currentTool = brushTool
     }
   })
   private onMove = action((src: NodeInfo<TreeNode>[], dest: NodeInfo<TreeNode>, destIndex: number) => {
