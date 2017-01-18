@@ -6,7 +6,7 @@
     min-height: 100%;
   }
   & .ReactDraggableTree_row-selected {
-    background: none;
+    background-color: var(--lighten-background-color);
   }
   &-brushToolActive {
     & .ReactDraggableTree_row-selected {
