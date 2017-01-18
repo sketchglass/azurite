@@ -24,7 +24,6 @@ class ToolManager {
 
   initTools() {
     this.tools.replace([
-      new BrushTool(),
       new PanTool(),
       new ZoomTool(),
       new RotateTool(),
@@ -35,6 +34,7 @@ class ToolManager {
       new PolygonSelectTool(),
       new FloodFillTool(),
       new CanvasAreaTool(),
+      new BrushTool(),
     ])
     this.currentTool = this.tools[0]
   }
