@@ -2,7 +2,9 @@ import {BrushEngine} from "../BrushEngine"
 import {BrushPresetData} from "../BrushPreset"
 import {BrushPresetWatercolor, isPresetDataWatercolor} from "./BrushPresetWatercolor"
 import {DabRendererWatercolor} from "./DabRendererWatercolor"
+import {addBrushEngine} from "../../app/BrushEngineRegistry"
 
+@addBrushEngine
 export class BrushEngineWatercolor extends BrushEngine {
   newDabRenderer() {
     return new DabRendererWatercolor(this.newPreset())
