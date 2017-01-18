@@ -46,7 +46,8 @@ export abstract class BrushPreset implements BrushPresetProps {
     return {title, width, opacity, softness, minWidthRatio, stabilizingLevel}
   }
 
-  abstract iconType: BrushIconType
+  abstract clone(): BrushPreset
   abstract toData(): BrushPresetData
   abstract renderSettings(): JSX.Element
+  abstract iconType: BrushIconType
 }
