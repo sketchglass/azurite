@@ -25,6 +25,7 @@
 @import "./panels/ColorPanel.css";
 @import "./panels/LayerPanel.css";
 @import "./panels/NavigatorPanel.css";
+@import "./panels/BrushPresetsPanel.css";
 
 /* Dialogs */
 @import "./dialogs/DialogContainer.css";
