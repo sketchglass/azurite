@@ -11,7 +11,7 @@ export class BrushEnginePen extends BrushEngine {
   }
 
   newPreset() {
-    return new BrushPresetPen({
+    return new BrushPresetPen(this, {
       title: "Pen",
       width: 10,
       opacity: 1,
@@ -24,7 +24,7 @@ export class BrushEnginePen extends BrushEngine {
 
   maybeNewPresetFromData(data: BrushPresetData) {
     if (isPresetDataPen(data)) {
-      return new BrushPresetPen(data)
+      return new BrushPresetPen(this, data)
     }
   }
 }

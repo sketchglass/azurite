@@ -1,5 +1,8 @@
+import * as React from "react"
 import {observable} from "mobx"
 import {BrushPreset, BrushPresetProps, BrushPresetData} from "../BrushPreset"
+import WatercolorSettings from "./WatercolorSettings"
+import {BrushEngineWatercolor} from "./BrushEngineWatercolor"
 
 export interface BrushPresetWatercolorProps extends BrushPresetProps {
   blending: number
@@ -16,8 +19,8 @@ export class BrushPresetWatercolor extends BrushPreset implements BrushPresetWat
   @observable blending = 0.5
   @observable thickness = 0.5
 
-  constructor(props: BrushPresetWatercolorProps) {
-    super(props)
+  constructor(public engine: BrushEngineWatercolor, props: BrushPresetWatercolorProps) {
+    super(engine, props)
     this.blending = props.blending
     this.thickness = props.thickness
   }
@@ -28,5 +31,8 @@ export class BrushPresetWatercolor extends BrushPreset implements BrushPresetWat
       engine: "watercolor",
       title, width, opacity, softness, minWidthRatio, stabilizingLevel, blending, thickness
     }
+  }
+  renderSettings() {
+    return <WatercolorSettings preset={this} />
   }
 }

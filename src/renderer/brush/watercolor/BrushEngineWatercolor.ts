@@ -11,7 +11,7 @@ export class BrushEngineWatercolor extends BrushEngine {
   }
 
   newPreset() {
-    return new BrushPresetWatercolor({
+    return new BrushPresetWatercolor(this, {
       title: "Watercolor",
       width: 10,
       opacity: 1,
@@ -25,7 +25,7 @@ export class BrushEngineWatercolor extends BrushEngine {
 
   maybeNewPresetFromData(data: BrushPresetData) {
     if (isPresetDataWatercolor(data)) {
-      return new BrushPresetWatercolor(data)
+      return new BrushPresetWatercolor(this, data)
     }
   }
 }

@@ -1,7 +1,6 @@
 import {observable} from "mobx"
 import Tool from "../tools/Tool"
-import PenTool from "../tools/PenTool"
-import WatercolorTool from "../tools/WatercolorTool"
+import BrushTool from "../tools/BrushTool"
 import PanTool from "../tools/PanTool"
 import {ZoomTool} from "../tools/ZoomTool"
 import RotateTool from "../tools/RotateTool"
@@ -25,8 +24,7 @@ class ToolManager {
 
   initTools() {
     this.tools.replace([
-      new PenTool(),
-      new WatercolorTool(),
+      new BrushTool(),
       new PanTool(),
       new ZoomTool(),
       new RotateTool(),

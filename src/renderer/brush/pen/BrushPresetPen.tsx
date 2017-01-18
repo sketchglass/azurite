@@ -1,5 +1,8 @@
+import * as React from "react"
 import {observable} from "mobx"
 import {BrushPreset, BrushPresetProps, BrushPresetData} from "../BrushPreset"
+import PenSettings from "./PenSettings"
+import {BrushEnginePen} from "./BrushEnginePen"
 
 export interface BrushPresetPenProps extends BrushPresetProps {
   eraser: boolean
@@ -14,8 +17,8 @@ export function isPresetDataPen(data: BrushPresetData): data is BrushPresetPenDa
 export class BrushPresetPen extends BrushPreset implements BrushPresetPenProps {
   @observable eraser = false
 
-  constructor(props: BrushPresetPenProps) {
-    super(props)
+  constructor(public engine: BrushEnginePen, props: BrushPresetPenProps) {
+    super(engine, props)
     this.eraser = props.eraser
   }
 
@@ -25,5 +28,9 @@ export class BrushPresetPen extends BrushPreset implements BrushPresetPenProps {
       engine: "pen",
       title, width, opacity, softness, minWidthRatio, stabilizingLevel, eraser
     }
+  }
+
+  renderSettings() {
+    return <PenSettings preset={this} />
   }
 }

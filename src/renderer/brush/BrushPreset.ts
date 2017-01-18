@@ -1,4 +1,5 @@
 import {observable} from "mobx"
+import {BrushEngine} from "./BrushEngine"
 
 export interface BrushPresetProps {
   title: string
@@ -29,7 +30,7 @@ export abstract class BrushPreset implements BrushPresetProps {
   // how many neighbor event positions used to stabilize stroke
   @observable stabilizingLevel = 2
 
-  constructor(props: BrushPresetProps) {
+  constructor(public engine: BrushEngine, props: BrushPresetProps) {
     this.title = props.title
     this.width = props.width
     this.opacity = props.opacity
@@ -39,4 +40,5 @@ export abstract class BrushPreset implements BrushPresetProps {
   }
 
   abstract toData(): BrushPresetData
+  abstract renderSettings(): JSX.Element
 }
