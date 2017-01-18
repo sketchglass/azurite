@@ -1,24 +1,21 @@
 import {observer} from "mobx-react"
 import React = require("react")
-import WatercolorTool from "../tools/WatercolorTool"
+import PenTool from "../tools/PenTool"
 import RangeSlider from "./components/RangeSlider"
 
-interface WatercolorSettingsProps {
-  tool: WatercolorTool
+interface PenSettingsProps {
+  tool: PenTool
 }
 
 @observer export default
-class WatercolorSettings extends React.Component<WatercolorSettingsProps, void> {
+class PenSettings extends React.Component<PenSettingsProps, void> {
   render() {
     const {preset} = this.props.tool
+    const onOpacityChange = (value: number) => {
+      preset.opacity = value / 100
+    }
     const onWidthChange = (value: number) => {
       preset.width = value
-    }
-    const onBlendingChange = (value: number) => {
-      preset.blending = value / 100
-    }
-    const onThicknessChange = (value: number) => {
-      preset.thickness = value / 100
     }
     const onMinWidthChange = (value: number) => {
       preset.minWidthRatio = value / 100
@@ -26,9 +23,16 @@ class WatercolorSettings extends React.Component<WatercolorSettingsProps, void> 
     const onSoftnessChange = (value: number) => {
       preset.softness = value / 100
     }
+    const onEraserModeChange = (ev: React.FormEvent<HTMLInputElement>) => {
+      preset.eraser = !preset.eraser
+    }
     return (
       <table className="BrushSettings">
         <tbody>
+          <tr>
+            <td>Opacity</td>
+            <td><RangeSlider onChange={onOpacityChange} min={0} max={100} value={Math.round(preset.opacity * 100)} postfix="%" /></td>
+          </tr>
           <tr>
             <td>Width</td>
             <td><RangeSlider onChange={onWidthChange} min={0} max={100} value={preset.width} postfix="px" /></td>
@@ -42,12 +46,8 @@ class WatercolorSettings extends React.Component<WatercolorSettingsProps, void> 
             <td><RangeSlider onChange={onSoftnessChange} min={0} max={100} value={Math.round(preset.softness * 100)} postfix="%" /></td>
           </tr>
           <tr>
-            <td>Blending</td>
-            <td><RangeSlider onChange={onBlendingChange} min={0} max={100} value={Math.round(preset.blending * 100)} postfix="%" /></td>
-          </tr>
-          <tr>
-            <td>Thickness</td>
-            <td><RangeSlider onChange={onThicknessChange} min={0} max={100} value={Math.round(preset.thickness * 100)} postfix="%" /></td>
+            <td>Eraser</td>
+            <td><label><input type="checkbox" onChange={onEraserModeChange} checked={preset.eraser} /> Eraser Mode</label></td>
           </tr>
           <tr>
             <td>Stabilizing</td>

@@ -10,6 +10,6 @@ export default {
   polygonSelect: "polygonSelect",
   floodFill: "floodFill",
   canvasArea: "canvasArea",
-  brush: "brush",
+  pen: "pen",
   watercolor: "watercolor",
 }
