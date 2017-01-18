@@ -11,7 +11,6 @@ import {BrushPresetPen} from "./BrushPresetPen"
 const brushShader = {
   vertex: `
     uniform float uBrushSize;
-    uniform float uSpacingRatio;
     uniform float uMinWidthRatio;
     uniform float uOpacity;
     uniform vec2 uPictureSize;
@@ -32,8 +31,7 @@ const brushShader = {
       vRadius = radius;
 
       // transparency = (overlap count) √ (final transparency)
-      float spacing = max(brushSize * uSpacingRatio, 1.0);
-      vOpacity = 1.0 - pow(1.0 - min(uOpacity, 0.998), spacing / brushSize);
+      vOpacity = 1.0 - pow(1.0 - min(uOpacity, 0.998), 1.0 / brushSize);
     }
   `,
   fragment: `
@@ -83,7 +81,6 @@ class DabRendererPen extends DabRenderer {
       uColor: appState.color.toRgb(),
       uOpacity: preset.opacity,
       uMinWidthRatio: preset.minWidthRatio,
-      uSpacingRatio: 1,
       uSoftness: preset.softness,
       uHasSelection: layer.picture.selection.hasSelection,
       uSelection: layer.picture.selection.texture,
