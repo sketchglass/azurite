@@ -1,8 +1,12 @@
-.BrushPresets {
+.BrushPresetsPanel {
   background-color: var(--darken-background-color);
+  & .ReactDraggableTree {
+    &_row-selected {
+      background-color: var(--ui-primary-background-color);
+    }
+  }
 }
 .BrushPresetItem {
   &-selected {
-    background-color: var(--ui-primary-background-color);
   }
 }

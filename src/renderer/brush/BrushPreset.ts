@@ -14,6 +14,9 @@ export interface BrushPresetData extends BrushPresetProps {
 }
 
 export abstract class BrushPreset implements BrushPresetProps {
+  static nextInternalKey = 0
+  readonly internalKey = BrushPreset.nextInternalKey++
+
   @observable title = "Brush"
   // brush width (diameter)
   @observable width = 10
