@@ -36,7 +36,6 @@
   "private": true,
   "devDependencies": {
     "@types/classnames": "0.0.32",
-    "@types/core-decorators": "^0.10.30",
     "@types/electron": "^1.4.30",
     "@types/electron-devtools-installer": "^2.0.2",
     "@types/mocha": "^2.2.35",
@@ -83,7 +82,6 @@
   },
   "dependencies": {
     "classnames": "^2.2.5",
-    "core-decorators": "^0.15.0",
     "decamelize": "^1.2.0",
     "deep-assign": "^2.0.0",
     "glslify": "^6.0.1",
