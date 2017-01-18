@@ -87,6 +87,7 @@ class AppState {
       win.maximize()
     }
     toolManager.loadConfig(values)
+    brushPresetManager.loadConfig(values)
     this.color = new HSVColor(values.color.h, values.color.s, values.color.v)
     for (const [i, color] of values.palette.entries()) {
       this.palette[i] = color ? new HSVColor(color.h, color.s, color.v) : undefined
