@@ -7,6 +7,7 @@ import {BrushPreset} from "../../brush/BrushPreset"
 import {brushPresetManager} from "../../app/BrushPresetManager"
 import {toolManager} from "../../app/ToolManager"
 import BrushTool from "../../tools/BrushTool"
+import SVGIcon from "../components/SVGIcon"
 import * as classNames from "classnames"
 
 interface BrushPresetNode extends TreeNode {
@@ -22,7 +23,8 @@ const BrushPresetItem = observer((props: {index: number}) => {
   })
   return (
     <div className="BrushPresetItem" onClick={onClick}>
-      {title}
+      <SVGIcon className={preset.iconType} />
+      <div className="BrushPresetItem_title">{title}</div>
     </div>
   )
 })

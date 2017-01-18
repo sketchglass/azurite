@@ -15,6 +15,9 @@
   }
 }
 .BrushPresetItem {
-  &-selected {
+  display: flex;
+  align-items: center;
+  & .SVGIcon {
+    margin-right: 8px;
   }
 }

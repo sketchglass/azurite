@@ -1,6 +1,8 @@
 import {observable} from "mobx"
 import {BrushEngine} from "./BrushEngine"
 
+export type BrushIconType = "paint-brush"|"pen"|"eraser"
+
 export interface BrushPresetProps {
   title: string
   width: number
@@ -39,6 +41,7 @@ export abstract class BrushPreset implements BrushPresetProps {
     this.stabilizingLevel = 2
   }
 
+  abstract iconType: BrushIconType
   abstract toData(): BrushPresetData
   abstract renderSettings(): JSX.Element
 }

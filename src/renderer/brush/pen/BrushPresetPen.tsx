@@ -1,6 +1,6 @@
 import * as React from "react"
 import {observable} from "mobx"
-import {BrushPreset, BrushPresetProps, BrushPresetData} from "../BrushPreset"
+import {BrushPreset, BrushPresetProps, BrushPresetData, BrushIconType} from "../BrushPreset"
 import PenSettings from "./PenSettings"
 import {BrushEnginePen} from "./BrushEnginePen"
 
@@ -32,5 +32,13 @@ export class BrushPresetPen extends BrushPreset implements BrushPresetPenProps {
 
   renderSettings() {
     return <PenSettings preset={this} />
+  }
+
+  get iconType(): BrushIconType {
+    if (this.eraser) {
+      return "eraser"
+    } else {
+      return "pen"
+    }
   }
 }

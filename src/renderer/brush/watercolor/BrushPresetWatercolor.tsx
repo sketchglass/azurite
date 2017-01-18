@@ -1,6 +1,6 @@
 import * as React from "react"
 import {observable} from "mobx"
-import {BrushPreset, BrushPresetProps, BrushPresetData} from "../BrushPreset"
+import {BrushPreset, BrushPresetProps, BrushPresetData, BrushIconType} from "../BrushPreset"
 import WatercolorSettings from "./WatercolorSettings"
 import {BrushEngineWatercolor} from "./BrushEngineWatercolor"
 
@@ -34,5 +34,9 @@ export class BrushPresetWatercolor extends BrushPreset implements BrushPresetWat
   }
   renderSettings() {
     return <WatercolorSettings preset={this} />
+  }
+
+  get iconType(): BrushIconType {
+    return "paint-brush"
   }
 }

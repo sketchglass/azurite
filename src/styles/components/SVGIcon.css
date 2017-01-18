@@ -11,6 +11,9 @@
   &.pen {
     mask: url("../../../bundles/icons/flaticon/svg/pen.svg");
   }
+  &.eraser {
+    mask: url("../../../bundles/icons/flaticon/svg/eraser.svg");
+  }
   &.rotate {
     mask: url("../../../bundles/icons/flaticon/svg/rotate.svg");
   }
