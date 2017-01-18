@@ -164,7 +164,7 @@ class AppState {
       return
     }
     const pictureState = this.pictureStates[index]
-    if (!pictureState.confirmClose()) {
+    if (!await pictureState.confirmClose()) {
       return
     }
     this.pictureStates.splice(index, 1)
