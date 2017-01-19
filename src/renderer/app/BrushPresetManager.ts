@@ -26,11 +26,13 @@ class BrushPresetManager {
         }
       }
     }
+    this.currentPresetIndex = values.currentBrushPreset
   }
 
   saveConfig() {
     return {
-      brushPresets: this.presets.map(p => p.toData())
+      brushPresets: this.presets.map(p => p.toData()),
+      currentBrushPreset: this.currentPresetIndex,
     }
   }
 }

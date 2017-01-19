@@ -33,6 +33,7 @@ interface ConfigValues {
   palette: (ColorData|undefined)[]
   files: string[]
   brushPresets: BrushPresetData[]
+  currentBrushPreset: number
   // TODO: preferences
 }
 
@@ -50,6 +51,7 @@ class Config {
     palette: [],
     files: [],
     brushPresets: defaultBrushPresets(),
+    currentBrushPreset: 0,
   }
   path = path.join(remote.app.getPath("userData"), "config.json")
 
