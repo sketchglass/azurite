@@ -2,11 +2,21 @@ import {observable, computed} from "mobx"
 import {BrushPreset} from "../brush/BrushPreset"
 import {ConfigValues} from "./Config"
 import {brushEngineRegistry} from "./BrushEngineRegistry"
+import {defaultBrushPresets} from "../brush/DefaultBrushPresets"
 
 export
 class BrushPresetManager {
   readonly presets = observable<BrushPreset>([])
   @observable currentPresetIndex = 0
+
+  constructor() {
+    for (const data of defaultBrushPresets()) {
+      const preset = brushEngineRegistry.createPreset(data)
+      if (preset) {
+        this.presets.push(preset)
+      }
+    }
+  }
 
   @computed get currentPreset() {
     const i = this.currentPresetIndex
