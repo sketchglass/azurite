@@ -1,6 +1,7 @@
 import * as React from "react"
 import {action, observable} from "mobx"
 import {observer} from "mobx-react"
+import * as classNames from "classnames"
 import {Tree, TreeNode, NodeInfo} from "react-draggable-tree"
 import "react-draggable-tree/lib/index.css"
 import {BrushPreset} from "../../brush/BrushPreset"
@@ -8,23 +9,26 @@ import {brushPresetManager} from "../../app/BrushPresetManager"
 import {toolManager} from "../../app/ToolManager"
 import BrushTool from "../../tools/BrushTool"
 import SVGIcon from "../components/SVGIcon"
-import * as classNames from "classnames"
+import ClickToEdit from "../components/ClickToEdit"
 
 interface BrushPresetNode extends TreeNode {
   preset: BrushPreset
 }
 
-const BrushPresetItem = observer((props: {index: number}) => {
-  const {index} = props
+const BrushPresetItem = observer((props: {index: number, selected: boolean}) => {
+  const {index, selected} = props
   const preset = brushPresetManager.presets[index]
   const {title} = preset
   const onClick = action(() => {
     brushPresetManager.currentPresetIndex = index
   })
+  const onTitleChange = action((title: string) => {
+    preset.title = title
+  })
   return (
     <div className="BrushPresetItem" onClick={onClick}>
       <SVGIcon className={preset.iconType} />
-      <div className="BrushPresetItem_title">{title}</div>
+      <ClickToEdit text={title} onChange={onTitleChange} editable={selected} />
     </div>
   )
 })
@@ -49,7 +53,7 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
           root={root}
           selectedKeys={this.selectedKeys}
           rowHeight={32}
-          rowContent={nodeInfo => <BrushPresetItem index={nodeInfo.path[0]} />}
+          rowContent={nodeInfo => <BrushPresetItem index={nodeInfo.path[0]} selected={nodeInfo.selected} />}
           onSelectedKeysChange={this.onSelectedKeysChange}
           onCollapsedChange={() => {}}
           onMove={this.onMove}
