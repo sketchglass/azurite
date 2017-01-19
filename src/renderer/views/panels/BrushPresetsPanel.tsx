@@ -52,7 +52,7 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
     const brushToolActive = toolManager.currentTool instanceof BrushTool
     const className = classNames("BrushPresetsPanel", {"BrushPresetsPanel-brushToolActive": brushToolActive})
     return (
-      <div className={className} onContextMenu={this.onContextMenu}>
+      <div className={className}>
         <BrushPresetTree
           root={root}
           selectedKeys={this.selectedKeys}
@@ -62,6 +62,7 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
           onCollapsedChange={() => {}}
           onMove={this.onMove}
           onCopy={this.onCopy}
+          onContextMenu={this.onContextMenu}
         />
       </div>
     )
@@ -95,31 +96,33 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
     }
     brushPresetManager.presets.splice(destIndex, 0, ...presets)
   })
-  private onContextMenu = action((event: React.MouseEvent<Element>) => {
-    event.preventDefault()
-    const index = Math.max(0, Math.min((event.nativeEvent as MouseEvent).offsetY / 32))
-    const addPresetItems: Electron.MenuItemOptions[] = defaultBrushPresets().map(data => {
-      return {
-        label: data.title,
-        click: action(() => {
-          const preset = brushEngineRegistry.createPreset(data)
-          if (preset) {
-            brushPresetManager.presets.splice(index, 0, preset)
-          }
-        }),
-      }
-    })
-    const removePresets = action(() => {
-      const selectedIndices = Array.from(this.selectedKeys).map(key => brushPresetManager.presets.findIndex(p => p.internalKey == key))
-      selectedIndices.sort()
-      for (let i = selectedIndices.length - 1; i >= 0; --i) {
-        brushPresetManager.presets.splice(selectedIndices[i], 1)
-      }
-    })
-    const menu = Menu.buildFromTemplate([
-      {label: "Add", submenu: addPresetItems},
-      {label: "Remove", click: removePresets}
-    ])
-    menu.popup(remote.getCurrentWindow(), event.clientX, event.clientY)
+  private onContextMenu = action((nodeInfo: NodeInfo<TreeNode>|undefined, event: React.MouseEvent<Element>) => {
+    const index = nodeInfo ? nodeInfo.path[0] : brushPresetManager.presets.length
+    // use timeout to workaround https://github.com/electron/electron/issues/1854
+    setTimeout(() => {
+      const addPresetItems: Electron.MenuItemOptions[] = defaultBrushPresets().map(data => {
+        return {
+          label: data.title,
+          click: action(() => {
+            const preset = brushEngineRegistry.createPreset(data)
+            if (preset) {
+              brushPresetManager.presets.splice(index, 0, preset)
+            }
+          }),
+        }
+      })
+      const removePresets = action(() => {
+        const selectedIndices = Array.from(this.selectedKeys).map(key => brushPresetManager.presets.findIndex(p => p.internalKey == key))
+        selectedIndices.sort()
+        for (let i = selectedIndices.length - 1; i >= 0; --i) {
+          brushPresetManager.presets.splice(selectedIndices[i], 1)
+        }
+      })
+      const menu = Menu.buildFromTemplate([
+        {label: "Add", submenu: addPresetItems},
+        {label: "Remove", click: removePresets}
+      ])
+      menu.popup(remote.getCurrentWindow(), event.clientX, event.clientY)
+    }, 50)
   })
 }
