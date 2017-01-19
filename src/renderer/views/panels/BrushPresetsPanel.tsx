@@ -4,9 +4,13 @@ import {observer} from "mobx-react"
 import * as classNames from "classnames"
 import {Tree, TreeNode, NodeInfo} from "react-draggable-tree"
 import "react-draggable-tree/lib/index.css"
+import {remote} from "electron"
+const {Menu} = remote
 import {BrushPreset} from "../../brush/BrushPreset"
 import {brushPresetManager} from "../../app/BrushPresetManager"
+import {brushEngineRegistry} from "../../app/BrushEngineRegistry"
 import {toolManager} from "../../app/ToolManager"
+import {defaultBrushPresets} from "../../brush/DefaultBrushPresets"
 import BrushTool from "../../tools/BrushTool"
 import SVGIcon from "../components/SVGIcon"
 import ClickToEdit from "../components/ClickToEdit"
@@ -48,7 +52,7 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
     const brushToolActive = toolManager.currentTool instanceof BrushTool
     const className = classNames("BrushPresetsPanel", {"BrushPresetsPanel-brushToolActive": brushToolActive})
     return (
-      <div className={className}>
+      <div className={className} onContextMenu={this.onContextMenu}>
         <BrushPresetTree
           root={root}
           selectedKeys={this.selectedKeys}
@@ -90,5 +94,32 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
       presets.unshift(preset)
     }
     brushPresetManager.presets.splice(destIndex, 0, ...presets)
+  })
+  private onContextMenu = action((event: React.MouseEvent<Element>) => {
+    event.preventDefault()
+    const index = Math.max(0, Math.min((event.nativeEvent as MouseEvent).offsetY / 32))
+    const addPresetItems: Electron.MenuItemOptions[] = defaultBrushPresets().map(data => {
+      return {
+        label: data.title,
+        click: action(() => {
+          const preset = brushEngineRegistry.createPreset(data)
+          if (preset) {
+            brushPresetManager.presets.splice(index, 0, preset)
+          }
+        }),
+      }
+    })
+    const removePresets = action(() => {
+      const selectedIndices = Array.from(this.selectedKeys).map(key => brushPresetManager.presets.findIndex(p => p.internalKey == key))
+      selectedIndices.sort()
+      for (let i = selectedIndices.length - 1; i >= 0; --i) {
+        brushPresetManager.presets.splice(selectedIndices[i], 1)
+      }
+    })
+    const menu = Menu.buildFromTemplate([
+      {label: "Add", submenu: addPresetItems},
+      {label: "Remove", click: removePresets}
+    ])
+    menu.popup(remote.getCurrentWindow(), event.clientX, event.clientY)
   })
 }
