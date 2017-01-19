@@ -69,10 +69,22 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
       toolManager.currentTool = brushTool
     }
   })
-  private onMove = action((src: NodeInfo<TreeNode>[], dest: NodeInfo<TreeNode>, destIndex: number) => {
-    // TODO
+  private onMove = action((src: NodeInfo<TreeNode>[], dest: NodeInfo<TreeNode>, destIndex: number, destIndexAfter: number) => {
+    const presets: BrushPreset[] = []
+    for (let i = src.length - 1; i >= 0; --i) {
+      const index = src[i].path[0]
+      const [preset] = brushPresetManager.presets.splice(index, 1)
+      presets.unshift(preset)
+    }
+    brushPresetManager.presets.splice(destIndexAfter, 0, ...presets)
   })
   private onCopy = action((src: NodeInfo<TreeNode>[], dest: NodeInfo<TreeNode>, destIndex: number) => {
-    // TODO
+    const presets: BrushPreset[] = []
+    for (let i = src.length - 1; i >= 0; --i) {
+      const index = src[i].path[0]
+      const preset = brushPresetManager.presets[index].clone()
+      presets.unshift(preset)
+    }
+    brushPresetManager.presets.splice(destIndex, 0, ...presets)
   })
 }
