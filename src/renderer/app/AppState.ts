@@ -14,7 +14,10 @@ import "../actions/EditActions"
 import "../actions/SelectionAction"
 import "../actions/CanvasActions"
 import "../actions/ViewActions"
+import "../brush/pen/BrushEnginePen"
+import "../brush/watercolor/BrushEngineWatercolor"
 import {toolManager} from "./ToolManager"
+import {brushPresetManager} from "./BrushPresetManager"
 
 export
 class AppState {
@@ -86,6 +89,7 @@ class AppState {
       win.maximize()
     }
     toolManager.loadConfig(values)
+    brushPresetManager.loadConfig(values)
     this.color = new HSVColor(values.color.h, values.color.s, values.color.v)
     for (const [i, color] of values.palette.entries()) {
       this.palette[i] = color ? new HSVColor(color.h, color.s, color.v) : undefined
@@ -112,6 +116,7 @@ class AppState {
         maximized: win.isMaximized(),
       },
       ...toolManager.saveConfig(),
+      ...brushPresetManager.saveConfig(),
       color: colorToData(this.color),
       palette: this.palette.map(color => {
         if (color) {

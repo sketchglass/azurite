@@ -2,14 +2,17 @@ import {BrushEngine} from "../BrushEngine"
 import {BrushPresetData} from "../BrushPreset"
 import {BrushPresetWatercolor, isPresetDataWatercolor} from "./BrushPresetWatercolor"
 import {DabRendererWatercolor} from "./DabRendererWatercolor"
+import {addBrushEngine} from "../../app/BrushEngineRegistry"
 
+@addBrushEngine
 export class BrushEngineWatercolor extends BrushEngine {
   newDabRenderer() {
     return new DabRendererWatercolor(this.newPreset())
   }
 
   newPreset() {
-    return new BrushPresetWatercolor({
+    return new BrushPresetWatercolor(this, {
+      title: "Watercolor",
       width: 10,
       opacity: 1,
       softness: 0.5,
@@ -22,7 +25,7 @@ export class BrushEngineWatercolor extends BrushEngine {
 
   maybeNewPresetFromData(data: BrushPresetData) {
     if (isPresetDataWatercolor(data)) {
-      return new BrushPresetWatercolor(data)
+      return new BrushPresetWatercolor(this, data)
     }
   }
 }

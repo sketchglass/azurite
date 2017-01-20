@@ -1,12 +1,17 @@
+import * as React from "react"
 import {observable, action, autorun, computed} from "mobx"
 import {Vec2} from "paintvec"
 import {Waypoint} from "../brush/Waypoint"
 import Tool, {ToolPointerEvent} from "./Tool"
 import Layer, {ImageLayer} from "../models/Layer"
-import {BrushPipeline} from "../brush/BrushPipeline"
-import {BrushPreset} from "../brush/BrushPreset"
+import {brushPresetManager} from "../app/BrushPresetManager"
+import BrushSettings from "../views/BrushSettings"
+import ToolIDs from "./ToolIDs"
 
-abstract class BrushTool extends Tool {
+export default
+class BrushTool extends Tool {
+  readonly id = ToolIDs.brush
+  readonly title = "Brush"
   @observable dragged = false
 
   private _cursorImage = document.createElement("canvas")
@@ -33,8 +38,14 @@ abstract class BrushTool extends Tool {
     }
   }
 
-  abstract preset: BrushPreset
-  abstract pipeline: BrushPipeline
+  @computed get preset() {
+    return brushPresetManager.currentPreset
+  }
+  @computed get pipeline() {
+    if (this.preset) {
+      return this.preset.engine.pipeline
+    }
+  }
 
   constructor() {
     super()
@@ -44,6 +55,9 @@ abstract class BrushTool extends Tool {
   }
 
   updateCursor() {
+    if (!this.preset) {
+      return
+    }
     const scale = this.picture ? this.picture.navigation.scale : 1
     const radius = this.preset.width / 2 * scale
     const dpr = window.devicePixelRatio
@@ -70,12 +84,17 @@ abstract class BrushTool extends Tool {
   }
 
   previewLayerTile(layer: Layer, tileKey: Vec2) {
-    return this.pipeline.dabRenderer.previewLayerTile(layer, tileKey)
+    if (this.pipeline) {
+      return this.pipeline.dabRenderer.previewLayerTile(layer, tileKey)
+    }
   }
 
   @action start(ev: ToolPointerEvent) {
     const layer = this.currentLayer
     if (!(layer && layer instanceof ImageLayer)) {
+      return
+    }
+    if (!this.pipeline || !this.preset) {
       return
     }
     this.dragged = true
@@ -85,17 +104,21 @@ abstract class BrushTool extends Tool {
   }
 
   @action move(ev: ToolPointerEvent) {
-    if (this.dragged) {
+    if (this.dragged && this.pipeline) {
       this.pipeline.nextWaypoints([new Waypoint(ev.picturePos, ev.pressure)])
     }
   }
 
   @action end() {
     if (this.dragged) {
-      this.pipeline.endWaypoint()
+      if (this.pipeline) {
+        this.pipeline.endWaypoint()
+      }
       this.dragged = false
     }
   }
-}
 
-export default BrushTool
+  renderSettings() {
+    return <BrushSettings />
+  }
+}

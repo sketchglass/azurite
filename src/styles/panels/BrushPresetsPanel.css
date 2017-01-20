@@ -1,0 +1,25 @@
+.BrushPresetsPanel {
+  background-color: var(--darken-background-color);
+  flex: 1;
+  overflow-y: auto;
+  & .ReactDraggableTree {
+    min-height: 100%;
+  }
+  & .ReactDraggableTree_row-selected {
+    background-color: var(--lighten-background-color);
+  }
+  &-brushToolActive {
+    & .ReactDraggableTree_row-selected {
+      background-color: var(--ui-primary-background-color);
+    }
+  }
+}
+.BrushPresetItem {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  & .ClickToEdit {
+    flex: 1;
+    margin: 0 8px;
+  }
+}

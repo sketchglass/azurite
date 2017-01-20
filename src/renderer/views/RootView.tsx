@@ -9,6 +9,7 @@ import ColorPanel from "./panels/ColorPanel"
 import ToolSettingsPanel from "./panels/ToolSettingsPanel"
 import NavigatorPanel from "./panels/NavigatorPanel"
 import LayerPanel from "./panels/LayerPanel"
+import BrushPresetsPanel from "./panels/BrushPresetsPanel"
 
 import NavigationKeyBinding from "./NavigationKeyBinding"
 import {appState} from "../app/AppState"
@@ -47,6 +48,8 @@ class RootView extends React.Component<{}, {}> {
           <aside className="Sidebar Sidebar-left" hidden={!uiVisible}>
             <div className="PanelTitle">Color</div>
             <ColorPanel />
+            <div className="PanelTitle">Brushes</div>
+            <BrushPresetsPanel />
             <div className="PanelTitle">Tool</div>
             <ToolSettingsPanel />
           </aside>

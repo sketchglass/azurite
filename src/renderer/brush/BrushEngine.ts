@@ -5,6 +5,8 @@ import {WaypointCurveFilter} from "./WaypointCurveFilter"
 import {WaypointStabilizeFilter} from "./WaypointStabilizeFilter"
 
 export abstract class BrushEngine {
+  pipeline = this.newPipeline()
+
   abstract newDabRenderer(): DabRenderer
   abstract newPreset(): BrushPreset
   abstract maybeNewPresetFromData(data: BrushPresetData): BrushPreset|undefined
