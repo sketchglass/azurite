@@ -25,19 +25,19 @@ function openDialogsWindow() {
   win.on("closed", () => {
     dialogsWindow = undefined
   })
-  ipcMain.on("dialogOpen", (ev: Electron.IpcMainEvent, name: string, param: any) => {
-    win.webContents.send("dialogOpen", name, param)
+  ipcMain.on(IPCChannels.dialogOpen, (ev: Electron.IpcMainEvent, name: string, param: any) => {
+    win.webContents.send(IPCChannels.dialogOpen, name, param)
   })
-  ipcMain.on("dialogDone", (ev: Electron.IpcMainEvent, result: any) => {
+  ipcMain.on(IPCChannels.dialogDone, (ev: Electron.IpcMainEvent, result: any) => {
     if (mainWindow) {
-      mainWindow.webContents.send("dialogDone", result)
+      mainWindow.webContents.send(IPCChannels.dialogDone, result)
     }
   })
   win.on("close", (e) => {
     e.preventDefault()
     win.hide()
     if (mainWindow) {
-      mainWindow.webContents.send("dialogDone", undefined)
+      mainWindow.webContents.send(IPCChannels.dialogDone, undefined)
     }
   })
 }

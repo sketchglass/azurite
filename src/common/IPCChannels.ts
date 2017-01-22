@@ -4,5 +4,7 @@ export default {
   tabletMove: "tabletMove",
   tabletUp: "tabletUp",
   quit: "quit",
-  windowResize: "windowResize"
+  windowResize: "windowResize",
+  dialogOpen: "dialogOpen",
+  dialogDone: "dialogDone",
 }
