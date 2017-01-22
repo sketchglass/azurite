@@ -1,12 +1,12 @@
 import * as path from "path"
 import {observable, computed, reaction} from "mobx"
-import {remote} from "electron"
+import {remote, ipcRenderer} from "electron"
 import Picture from "../models/Picture"
 import {HSVColor} from "../../lib/Color"
 import {PictureState} from "./PictureState"
 import {PictureSave} from "../services/PictureSave"
 import {config, ConfigValues} from "./Config"
-import * as IPCChannels from "../../common/IPCChannels"
+import IPCChannels from "../../common/IPCChannels"
 import "../formats/ImageFormats"
 import "../actions/FileActions"
 import "../actions/LayerActions"
@@ -215,9 +215,9 @@ class AppState {
 export const appState = new AppState()
 toolManager.initTools()
 
-IPCChannels.windowResize.listen().forEach(() => {
+ipcRenderer.on(IPCChannels.windowResize, () => {
   appState.saveConfig()
 })
-IPCChannels.quit.listen().forEach(() => {
+ipcRenderer.on(IPCChannels.quit, () => {
   appState.quit()
 })

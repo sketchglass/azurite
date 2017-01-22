@@ -1,5 +1,6 @@
 import {PictureDimension} from "../../models/Picture"
 import {ipcRenderer} from "electron"
+import IPCChannels from "../../../common/IPCChannels"
 
 export default
 class DialogLauncher {
@@ -18,10 +19,10 @@ class DialogLauncher {
       callback = (e: Electron.IpcRendererEvent, result: TResult|undefined) => {
         resolve(result)
       }
-      ipcRenderer.on("dialogDone", callback)
-      ipcRenderer.send("dialogOpen", name, param)
+      ipcRenderer.on(IPCChannels.dialogDone, callback)
+      ipcRenderer.send(IPCChannels.dialogOpen, name, param)
     })
-    ipcRenderer.removeListener("dialogDone", callback)
+    ipcRenderer.removeListener(IPCChannels.dialogDone, callback)
     return result
   }
 }

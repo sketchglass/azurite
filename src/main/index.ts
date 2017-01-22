@@ -2,7 +2,7 @@ import Electron = require("electron")
 type BrowserWindow = Electron.BrowserWindow
 const {app, BrowserWindow, ipcMain} = Electron
 import {TabletEventReceiver} from "receive-tablet-event"
-import * as IPCChannels from "../common/IPCChannels"
+import IPCChannels from "../common/IPCChannels"
 const argv = require('minimist')(process.argv.slice(2))
 import nativelib = require("../common/nativelib")
 const {WindowUtilMac} = nativelib
@@ -25,19 +25,19 @@ function openDialogsWindow() {
   win.on("closed", () => {
     dialogsWindow = undefined
   })
-  ipcMain.on("dialogOpen", (ev: Electron.IpcMainEvent, name: string, param: any) => {
-    win.webContents.send("dialogOpen", name, param)
+  ipcMain.on(IPCChannels.dialogOpen, (ev: Electron.IpcMainEvent, name: string, param: any) => {
+    win.webContents.send(IPCChannels.dialogOpen, name, param)
   })
-  ipcMain.on("dialogDone", (ev: Electron.IpcMainEvent, result: any) => {
+  ipcMain.on(IPCChannels.dialogDone, (ev: Electron.IpcMainEvent, result: any) => {
     if (mainWindow) {
-      mainWindow.webContents.send("dialogDone", result)
+      mainWindow.webContents.send(IPCChannels.dialogDone, result)
     }
   })
   win.on("close", (e) => {
     e.preventDefault()
     win.hide()
     if (mainWindow) {
-      mainWindow.webContents.send("dialogDone", undefined)
+      mainWindow.webContents.send(IPCChannels.dialogDone, undefined)
     }
   })
 }
@@ -72,29 +72,29 @@ async function openWindow() {
 
   const receiver = new TabletEventReceiver(win)
 
-  IPCChannels.setTabletCaptureArea.listen().forEach(captureArea => {
+  ipcMain.on(IPCChannels.setTabletCaptureArea, (e, captureArea) => {
     receiver.captureArea = captureArea;
   })
 
-  receiver.on("down", (ev) => {
-    IPCChannels.tabletDown.send(win.webContents, ev)
+  receiver.on("down", ev => {
+    win.webContents.send(IPCChannels.tabletDown, ev)
   })
-  receiver.on("move", (ev) => {
-    IPCChannels.tabletMove.send(win.webContents, ev)
+  receiver.on("move", ev => {
+    win.webContents.send(IPCChannels.tabletMove, ev)
   })
-  receiver.on("up", (ev) => {
-    IPCChannels.tabletUp.send(win.webContents, ev)
+  receiver.on("up", ev => {
+    win.webContents.send(IPCChannels.tabletUp, ev)
   })
 
   for (const ev of ["resize", "enter-full-screen", "leave-full-screen", "maximize", "unmaximize"]) {
     win.on(ev, () => {
-      IPCChannels.windowResize.send(win.webContents, undefined)
+      win.webContents.send(IPCChannels.windowResize)
     })
   }
 
   win.on("close", e => {
     e.preventDefault()
-    IPCChannels.quit.send(win.webContents, undefined)
+    win.webContents.send(IPCChannels.quit)
   })
 
   win.on("closed", () => {

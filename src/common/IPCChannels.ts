@@ -1,10 +1,10 @@
-import {IPCToRenderer, IPCToMain} from "../lib/IPC"
-import {TabletEvent} from "receive-tablet-event"
-
-export const setTabletCaptureArea = new IPCToMain<{left: number, top: number, width: number, height: number}>("setTabletCaptureArea")
-export const tabletDown = new IPCToRenderer<TabletEvent>("tabletDown")
-export const tabletMove = new IPCToRenderer<TabletEvent>("tabletMove")
-export const tabletUp = new IPCToRenderer<TabletEvent>("tabletUp")
-
-export const quit = new IPCToRenderer<void>("quit")
-export const windowResize = new IPCToRenderer<void>("windowResize")
+export default {
+  setTabletCaptureArea: "setTabletCaptureArea",
+  tabletDown: "tabletDown",
+  tabletMove: "tabletMove",
+  tabletUp: "tabletUp",
+  quit: "quit",
+  windowResize: "windowResize",
+  dialogOpen: "dialogOpen",
+  dialogDone: "dialogDone",
+}
