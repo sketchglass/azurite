@@ -1,6 +1,7 @@
 import {Vec2} from "paintvec"
 import {Waypoint} from "./Waypoint"
 import {WaypointFilter, WaypointConsumer} from "./BrushPipeline"
+import {brushPresetManager} from "../app/BrushPresetManager"
 
 function stabilizeWaypoint(waypoints: Waypoint[], level: number, index: number) {
   const nWaypoints = waypoints.length
@@ -22,7 +23,11 @@ function stabilizeWaypoint(waypoints: Waypoint[], level: number, index: number) 
 export class WaypointStabilizeFilter implements WaypointFilter {
   outlet: WaypointConsumer
   lastWaypoints: Waypoint[] = []
-  stabilizingLevel = 2
+
+  get stabilizingLevel() {
+    const {currentPreset} = brushPresetManager
+    return currentPreset ? currentPreset.stabilizingLevel : 2
+  }
 
   nextWaypoints(waypoints: Waypoint[]) {
     for (const wp of waypoints) {
