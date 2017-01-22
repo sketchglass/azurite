@@ -38,7 +38,7 @@ export abstract class BrushPreset implements BrushPresetProps {
     this.opacity = props.opacity
     this.softness = props.softness
     this.minWidthRatio = props.minWidthRatio
-    this.stabilizingLevel = 2
+    this.stabilizingLevel = props.stabilizingLevel
   }
 
   toProps(): BrushPresetProps {
