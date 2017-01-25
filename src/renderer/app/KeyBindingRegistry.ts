@@ -67,5 +67,5 @@ keyBindingRegistry.add(
   [ActionIDs.viewZoomIn, new KeyInput(["CommandOrControl"], "+")],
   [ActionIDs.viewZoomOut, new KeyInput(["CommandOrControl"], "-")],
   [ActionIDs.viewToggleUIPanels, new KeyInput([], "Tab")],
-  [ActionIDs.viewToggleFullscreen, process.platform == "darwn" ? new KeyInput(["Command"], "f") : new KeyInput([], "F11")],
+  [ActionIDs.viewToggleFullscreen, process.platform == "darwin" ? new KeyInput(["Command"], "f") : new KeyInput([], "F11")],
 )
