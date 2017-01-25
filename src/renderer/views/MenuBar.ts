@@ -168,6 +168,8 @@ class MenuBar {
         submenu: [
           {role: 'about'},
           {type: 'separator'},
+          {action: ActionIDs.appPreferences},
+          {type: 'separator'},
           {role: 'services', submenu: []},
           {type: 'separator'},
           {role: 'hide'},
