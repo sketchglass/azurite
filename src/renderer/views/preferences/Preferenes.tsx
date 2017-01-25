@@ -6,4 +6,11 @@ import PreferencesViewModel from "../../viewmodels/PreferencesViewModel"
 export default
 class Preferences extends React.Component<{}, {}> {
   viewModel = new PreferencesViewModel()
+
+  render() {
+    return (
+      <div>
+      </div>
+    )
+  }
 }
