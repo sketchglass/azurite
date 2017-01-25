@@ -45,9 +45,10 @@ function openDialogsWindow() {
 
 function openPreferencesWindow() {
   const win = preferencesWindow = new BrowserWindow({
-    width: 100,
-    height: 100,
+    width: 400,
+    height: 400,
     show: false,
+    title: "Preferences",
     parent: mainWindow,
   })
   win.loadURL(`${contentBase}/preferences.html`)
