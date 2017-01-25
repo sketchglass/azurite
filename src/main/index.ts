@@ -11,6 +11,7 @@ let contentBase = argv.devserver ? "http://localhost:23000" : `file://${app.getA
 
 let mainWindow: BrowserWindow|undefined
 let dialogsWindow: BrowserWindow|undefined
+let preferencesWindow: BrowserWindow|undefined
 let testWindow: BrowserWindow|undefined
 
 function openDialogsWindow() {
@@ -39,6 +40,23 @@ function openDialogsWindow() {
     if (mainWindow) {
       mainWindow.webContents.send(IPCChannels.dialogDone, undefined)
     }
+  })
+}
+
+function openPreferencesWindow() {
+  const win = preferencesWindow = new BrowserWindow({
+    width: 100,
+    height: 100,
+    show: false,
+    parent: mainWindow,
+  })
+  win.loadURL(`${contentBase}/preferences.html`)
+  win.on("closed", () => {
+    preferencesWindow = undefined
+  })
+  win.on("close", (e) => {
+    e.preventDefault()
+    win.hide()
   })
 }
 
@@ -103,6 +121,9 @@ async function openWindow() {
     if (dialogsWindow) {
       dialogsWindow.destroy()
     }
+    if (preferencesWindow) {
+      preferencesWindow.destroy()
+    }
   })
 
   win.on("ready-to-show", () => {
@@ -139,5 +160,6 @@ app.on("ready", async () => {
   } else {
     await openWindow()
     openDialogsWindow()
+    openPreferencesWindow()
   }
 })
