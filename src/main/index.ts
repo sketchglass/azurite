@@ -54,6 +54,14 @@ function openPreferencesWindow() {
   win.on("closed", () => {
     preferencesWindow = undefined
   })
+  ipcMain.on(IPCChannels.preferencesOpen, (ev: Electron.IpcMainEvent, data: any) => {
+    win.webContents.send(IPCChannels.preferencesOpen, data)
+  })
+  ipcMain.on(IPCChannels.preferencesChange, (ev: Electron.IpcMainEvent, data: any) => {
+    if (mainWindow) {
+      mainWindow.webContents.send(IPCChannels.preferencesChange, data)
+    }
+  })
   win.on("close", (e) => {
     e.preventDefault()
     win.hide()
