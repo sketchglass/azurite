@@ -60,8 +60,11 @@ export abstract class DabRenderer {
   }
 
   start(layer: ImageLayer) {
-    this.layer = layer
     this.clearCommitTimeout()
+    if (this.layer != layer) {
+      this.commit()
+      this.layer = layer
+    }
   }
 
   nextWaypoints(waypoints: Waypoint[]) {
