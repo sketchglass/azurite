@@ -7,6 +7,8 @@ import {Waypoint} from "./Waypoint"
 import {BrushPreset} from "./BrushPreset"
 import {appState} from "../app/AppState"
 
+declare var requestIdleCallback: any
+
 export abstract class DabRenderer {
   abstract title: string
   layer: ImageLayer|undefined
@@ -88,7 +90,12 @@ export abstract class DabRenderer {
   }
 
   private setCommitTimeout() {
-    this.commitTimeout = setTimeout(() => this.commit(), appState.undoGroupingInterval)
+    const onCommit = () => {
+      requestIdleCallback(() => {
+        this.commit()
+      })
+    }
+    this.commitTimeout = setTimeout(onCommit, appState.undoGroupingInterval)
   }
 
   private clearCommitTimeout() {
