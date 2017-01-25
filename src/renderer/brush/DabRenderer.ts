@@ -5,12 +5,17 @@ import {ChangeLayerImageCommand} from "../commands/LayerCommand"
 import {renderer} from "../views/Renderer"
 import {Waypoint} from "./Waypoint"
 import {BrushPreset} from "./BrushPreset"
+import {appState} from "../app/AppState"
+
+declare var requestIdleCallback: any
+declare var cancelIdleCallback: any
 
 export abstract class DabRenderer {
   abstract title: string
   layer: ImageLayer|undefined
   private newTiledTexture = new TiledTexture()
   private editedRect: Rect|undefined
+  private clearCommitTimeout: (() => void)|undefined
 
   constructor(public preset: BrushPreset) {
   }
@@ -56,7 +61,14 @@ export abstract class DabRenderer {
   }
 
   start(layer: ImageLayer) {
-    this.layer = layer
+    if (this.clearCommitTimeout) {
+      this.clearCommitTimeout()
+      this.clearCommitTimeout = undefined
+    }
+    if (this.layer != layer) {
+      this.commit()
+      this.layer = layer
+    }
   }
 
   nextWaypoints(waypoints: Waypoint[]) {
@@ -66,7 +78,7 @@ export abstract class DabRenderer {
     this.renderRect(rect)
   }
 
-  private pushUndoStack() {
+  private commit() {
     const rect = this.editedRect
     if (!rect) {
       return
@@ -77,15 +89,32 @@ export abstract class DabRenderer {
     if (!layer) {
       return
     }
+    this.layer = undefined
     const {picture} = layer
     const command = new ChangeLayerImageCommand(picture, layer.path, this.title, this.newTiledTexture, rect)
     this.newTiledTexture = new TiledTexture()
     picture.undoStack.push(command)
   }
 
+  private setCommitTimeout() {
+    let idleHandle: any
+    const onCommit = () => {
+      idleHandle = requestIdleCallback(() => {
+        this.commit()
+      })
+    }
+    const timeoutHandle = setTimeout(onCommit, appState.undoGroupingInterval)
+
+    this.clearCommitTimeout = () => {
+      clearTimeout(timeoutHandle)
+      if (idleHandle != undefined) {
+        cancelIdleCallback(idleHandle)
+      }
+    }
+  }
+
   endWaypoint() {
-    this.pushUndoStack()
-    this.layer = undefined
+    this.setCommitTimeout()
   }
 
   abstract renderWaypoints(waypoints: Waypoint[], rect: Rect): void
