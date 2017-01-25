@@ -7,4 +7,6 @@ export default {
   windowResize: "windowResize",
   dialogOpen: "dialogOpen",
   dialogDone: "dialogDone",
+  preferencesOpen: "preferencesOpen",
+  preferencesChange: "preferencesChange",
 }
