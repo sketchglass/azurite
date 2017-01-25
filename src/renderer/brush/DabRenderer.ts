@@ -5,12 +5,14 @@ import {ChangeLayerImageCommand} from "../commands/LayerCommand"
 import {renderer} from "../views/Renderer"
 import {Waypoint} from "./Waypoint"
 import {BrushPreset} from "./BrushPreset"
+import {appState} from "../app/AppState"
 
 export abstract class DabRenderer {
   abstract title: string
   layer: ImageLayer|undefined
   private newTiledTexture = new TiledTexture()
   private editedRect: Rect|undefined
+  private commitTimeout: number|undefined
 
   constructor(public preset: BrushPreset) {
   }
@@ -57,6 +59,7 @@ export abstract class DabRenderer {
 
   start(layer: ImageLayer) {
     this.layer = layer
+    this.clearCommitTimeout()
   }
 
   nextWaypoints(waypoints: Waypoint[]) {
@@ -66,7 +69,7 @@ export abstract class DabRenderer {
     this.renderRect(rect)
   }
 
-  private pushUndoStack() {
+  private commit() {
     const rect = this.editedRect
     if (!rect) {
       return
@@ -77,15 +80,26 @@ export abstract class DabRenderer {
     if (!layer) {
       return
     }
+    this.layer = undefined
     const {picture} = layer
     const command = new ChangeLayerImageCommand(picture, layer.path, this.title, this.newTiledTexture, rect)
     this.newTiledTexture = new TiledTexture()
     picture.undoStack.push(command)
   }
 
+  private setCommitTimeout() {
+    this.commitTimeout = setTimeout(() => this.commit(), appState.undoGroupingInterval)
+  }
+
+  private clearCommitTimeout() {
+    if (this.commitTimeout != undefined) {
+      clearTimeout(this.commitTimeout)
+      this.commitTimeout = undefined
+    }
+  }
+
   endWaypoint() {
-    this.pushUndoStack()
-    this.layer = undefined
+    this.setCommitTimeout()
   }
 
   abstract renderWaypoints(waypoints: Waypoint[], rect: Rect): void

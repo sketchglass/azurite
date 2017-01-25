@@ -39,7 +39,7 @@ class AppState {
   @observable paletteIndex: number = 0
   readonly palette = observable<HSVColor|undefined>(new Array(100).fill(undefined))
 
-  @observable undoGroupingInterval = 500
+  @observable undoGroupingInterval = 300
 
   @computed get modal() {
     return toolManager.currentTool.modal
