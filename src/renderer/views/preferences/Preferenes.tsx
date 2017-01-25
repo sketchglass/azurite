@@ -9,7 +9,7 @@ class Preferences extends React.Component<{}, {}> {
 
   render() {
     return (
-      <div>
+      <div className="Preferences">
       </div>
     )
   }
