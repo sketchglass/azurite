@@ -1,13 +1,19 @@
 .Preferences {
   width: 100vw;
   height: 100vh;
-  box-sizing: border-box;
-  padding: 16px;
   background-color: var(--default-background-color);
+}
+.PreferencesTitleBar {
+  height: 22px;
+  line-height: 22px;
+  width: 100%;
+  text-align: center;
+  -webkit-app-region: drag;
 }
 .PreferencesTabBar {
   display: flex;
-  margin-bottom: 16px;
+  padding: 16px;
+  padding-bottom: 0;
 }
 .PreferencesTab {
   height: 24px;
@@ -20,6 +26,8 @@
 }
 .PreferencesPane {
   width: 100%;
+  padding: 16px;
+  box-sizing: border-box;
 }
 .PreferencesRow {
   display: flex;

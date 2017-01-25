@@ -50,6 +50,7 @@ function openPreferencesWindow() {
     minWidth: 400,
     minHeight: 200,
     show: false,
+    titleBarStyle: "hidden",
     title: "Preferences",
     parent: mainWindow,
   })

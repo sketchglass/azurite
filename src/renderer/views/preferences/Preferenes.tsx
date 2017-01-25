@@ -18,6 +18,7 @@ class Preferences extends React.Component<{}, {}> {
 
     return (
       <div className="Preferences">
+        {process.platform == "darwin" ? <div className="PreferencesTitleBar">Preferences</div> : undefined}
         <div className="PreferencesTabBar">
           <div className="PreferencesTab PreferencesTab-selected">
             General
