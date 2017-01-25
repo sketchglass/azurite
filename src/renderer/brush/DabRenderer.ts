@@ -8,13 +8,14 @@ import {BrushPreset} from "./BrushPreset"
 import {appState} from "../app/AppState"
 
 declare var requestIdleCallback: any
+declare var cancelIdleCallback: any
 
 export abstract class DabRenderer {
   abstract title: string
   layer: ImageLayer|undefined
   private newTiledTexture = new TiledTexture()
   private editedRect: Rect|undefined
-  private commitTimeout: number|undefined
+  private clearCommitTimeout: (() => void)|undefined
 
   constructor(public preset: BrushPreset) {
   }
@@ -60,7 +61,10 @@ export abstract class DabRenderer {
   }
 
   start(layer: ImageLayer) {
-    this.clearCommitTimeout()
+    if (this.clearCommitTimeout) {
+      this.clearCommitTimeout()
+      this.clearCommitTimeout = undefined
+    }
     if (this.layer != layer) {
       this.commit()
       this.layer = layer
@@ -93,18 +97,19 @@ export abstract class DabRenderer {
   }
 
   private setCommitTimeout() {
+    let idleHandle: any
     const onCommit = () => {
-      requestIdleCallback(() => {
+      idleHandle = requestIdleCallback(() => {
         this.commit()
       })
     }
-    this.commitTimeout = setTimeout(onCommit, appState.undoGroupingInterval)
-  }
+    const timeoutHandle = setTimeout(onCommit, appState.undoGroupingInterval)
 
-  private clearCommitTimeout() {
-    if (this.commitTimeout != undefined) {
-      clearTimeout(this.commitTimeout)
-      this.commitTimeout = undefined
+    this.clearCommitTimeout = () => {
+      clearTimeout(timeoutHandle)
+      if (idleHandle != undefined) {
+        cancelIdleCallback(idleHandle)
+      }
     }
   }
 
