@@ -4,6 +4,7 @@ import {ipcRenderer, remote} from "electron"
 import Preferences from "./Preferenes"
 import IPCChannels from "../../../common/IPCChannels"
 import {PreferencesData} from "../../viewmodels/PreferencesViewModel"
+import "../../../styles/main.css"
 
 window.addEventListener("DOMContentLoaded", () => {
   const root = document.querySelector(".PreferencesRoot")!

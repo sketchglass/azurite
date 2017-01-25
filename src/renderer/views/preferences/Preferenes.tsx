@@ -20,7 +20,7 @@ class Preferences extends React.Component<{}, {}> {
       <div className="Preferences">
         <div className="PreferencesPane">
           <div>Undo Grouping Interval</div>
-          <input type="number" value={undoGroupingInterval} onChange={onUndoGroupingIntervalChange} />
+          <input className="TextInput" type="number" value={undoGroupingInterval} onChange={onUndoGroupingIntervalChange} />
           <div>milliseconds</div>
         </div>
       </div>

@@ -29,3 +29,6 @@
 
 /* Dialogs */
 @import "./dialogs/DialogContainer.css";
+
+/* Preferences */
+@import "./preferences/Preferences.css";
