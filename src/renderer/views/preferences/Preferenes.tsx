@@ -18,10 +18,19 @@ class Preferences extends React.Component<{}, {}> {
 
     return (
       <div className="Preferences">
+        <div className="PreferencesTabBar">
+          <div className="PreferencesTab PreferencesTab-selected">
+            General
+          </div>
+        </div>
         <div className="PreferencesPane">
-          <div>Undo Grouping Interval</div>
-          <input className="TextInput" type="number" value={undoGroupingInterval} onChange={onUndoGroupingIntervalChange} />
-          <div>milliseconds</div>
+          <div className="PreferencesRow">
+            <div>Undo Grouping Interval</div>
+            <div>
+              <input className="TextInput" type="number" value={undoGroupingInterval} onChange={onUndoGroupingIntervalChange} />
+              <div>milliseconds</div>
+            </div>
+          </div>
         </div>
       </div>
     )

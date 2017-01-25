@@ -46,7 +46,9 @@ function openDialogsWindow() {
 function openPreferencesWindow() {
   const win = preferencesWindow = new BrowserWindow({
     width: 400,
-    height: 400,
+    height: 200,
+    minWidth: 400,
+    minHeight: 200,
     show: false,
     title: "Preferences",
     parent: mainWindow,
