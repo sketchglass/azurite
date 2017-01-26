@@ -1,5 +1,6 @@
 import * as React from "react"
 import {observer} from "mobx-react"
+import FloatingWindowTitle from "../components/FloatingWindowTitle"
 import PreferencesViewModel from "../../viewmodels/PreferencesViewModel"
 
 @observer
@@ -18,7 +19,7 @@ class Preferences extends React.Component<{}, {}> {
 
     return (
       <div className="Preferences">
-        {process.platform == "darwin" ? <div className="PreferencesTitleBar">Preferences</div> : undefined}
+        <FloatingWindowTitle title="Preferences" />
         <div className="PreferencesTabBar">
           <div className="PreferencesTab PreferencesTab-selected">
             General

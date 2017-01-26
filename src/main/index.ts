@@ -53,8 +53,8 @@ function openPreferencesWindow() {
     show: false,
     titleBarStyle: "hidden",
     title: "Preferences",
+    frame: process.platform == "darwin",
   })
-  win.setMenu(null as any)
   win.loadURL(`${contentBase}/preferences.html`)
   win.on("closed", () => {
     preferencesWindow = undefined

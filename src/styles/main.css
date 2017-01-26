@@ -20,6 +20,7 @@
 @import "./components/RGBRangeSliders.css";
 @import "./components/ScrollBar.css";
 @import "./components/SVGIcon.css";
+@import "./components/FloatingWindowTitle.css";
 
 /* Panels */
 @import "./panels/ColorPanel.css";

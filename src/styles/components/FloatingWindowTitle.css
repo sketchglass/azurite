@@ -1,0 +1,15 @@
+.FloatingWindowTitle {
+  height: 22px;
+  line-height: 22px;
+  width: 100%;
+  text-align: center;
+  -webkit-app-region: drag;
+  &-darwin {
+    & .FloatingWindowTitle_close {
+      display: none;
+    }
+  }
+}
+
+.FloatingWindowTitle_close {
+}
