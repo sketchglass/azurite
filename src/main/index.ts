@@ -54,6 +54,7 @@ function openPreferencesWindow() {
     title: "Preferences",
     parent: mainWindow,
   })
+  win.setMenu(null as any)
   win.loadURL(`${contentBase}/preferences.html`)
   win.on("closed", () => {
     preferencesWindow = undefined
