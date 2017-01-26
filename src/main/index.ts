@@ -12,6 +12,7 @@ let contentBase = argv.devserver ? "http://localhost:23000" : `file://${app.getA
 let mainWindow: BrowserWindow|undefined
 let dialogsWindow: BrowserWindow|undefined
 let preferencesWindow: BrowserWindow|undefined
+let preferencesShown = false
 let testWindow: BrowserWindow|undefined
 
 function openDialogsWindow() {
@@ -52,7 +53,6 @@ function openPreferencesWindow() {
     show: false,
     titleBarStyle: "hidden",
     title: "Preferences",
-    parent: mainWindow,
   })
   win.setMenu(null as any)
   win.loadURL(`${contentBase}/preferences.html`)
@@ -61,8 +61,9 @@ function openPreferencesWindow() {
   })
   ipcMain.on(IPCChannels.preferencesOpen, (ev: Electron.IpcMainEvent, data: any) => {
     win.webContents.send(IPCChannels.preferencesOpen, data)
-    win.setParentWindow(mainWindow as any)
+    win.setAlwaysOnTop(true)
     win.show()
+    preferencesShown = true
   })
   ipcMain.on(IPCChannels.preferencesChange, (ev: Electron.IpcMainEvent, data: any) => {
     if (mainWindow) {
@@ -72,6 +73,7 @@ function openPreferencesWindow() {
   win.on("close", (e) => {
     e.preventDefault()
     win.hide()
+    preferencesShown = false
   })
 }
 
@@ -176,5 +178,15 @@ app.on("ready", async () => {
     await openWindow()
     openDialogsWindow()
     openPreferencesWindow()
+  }
+})
+app.on("browser-window-blur", () => {
+  if (preferencesShown && mainWindow && !mainWindow.isFocused() && preferencesWindow && !preferencesWindow.isFocused()) {
+    preferencesWindow.hide()
+  }
+})
+app.on("browser-window-focus", (ev, win) => {
+  if (preferencesShown &&  preferencesWindow && !preferencesWindow.isVisible()) {
+    preferencesWindow.show()
   }
 })
