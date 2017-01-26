@@ -1,6 +1,6 @@
 import * as React from "react"
 import * as ReactDOM from "react-dom"
-import {ipcRenderer, remote} from "electron"
+import {ipcRenderer} from "electron"
 import Preferences from "./Preferenes"
 import IPCChannels from "../../../common/IPCChannels"
 import {PreferencesData} from "../../viewmodels/PreferencesViewModel"
@@ -12,6 +12,5 @@ window.addEventListener("DOMContentLoaded", () => {
   ReactDOM.render(<Preferences ref={e => preferences = e} />, root)
   ipcRenderer.on(IPCChannels.preferencesOpen, (ev: Electron.IpcRendererEvent, data: PreferencesData) => {
     preferences.viewModel.setData(data)
-    remote.getCurrentWindow().show()
   })
 })

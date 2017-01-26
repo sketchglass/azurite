@@ -61,6 +61,8 @@ function openPreferencesWindow() {
   })
   ipcMain.on(IPCChannels.preferencesOpen, (ev: Electron.IpcMainEvent, data: any) => {
     win.webContents.send(IPCChannels.preferencesOpen, data)
+    win.setParentWindow(mainWindow as any)
+    win.show()
   })
   ipcMain.on(IPCChannels.preferencesChange, (ev: Electron.IpcMainEvent, data: any) => {
     if (mainWindow) {
