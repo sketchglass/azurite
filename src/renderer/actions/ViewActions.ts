@@ -20,7 +20,7 @@ export class ViewToggleDevToolsAction extends Action {
   title = "Toggle Developer Tools"
   enabled = true
   run() {
-    remote.getCurrentWebContents().toggleDevTools()
+    remote.BrowserWindow.getFocusedWindow().webContents.toggleDevTools()
   }
 }
 

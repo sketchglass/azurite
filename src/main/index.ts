@@ -11,6 +11,8 @@ let contentBase = argv.devserver ? "http://localhost:23000" : `file://${app.getA
 
 let mainWindow: BrowserWindow|undefined
 let dialogsWindow: BrowserWindow|undefined
+let preferencesWindow: BrowserWindow|undefined
+let preferencesShown = false
 let testWindow: BrowserWindow|undefined
 
 function openDialogsWindow() {
@@ -39,6 +41,39 @@ function openDialogsWindow() {
     if (mainWindow) {
       mainWindow.webContents.send(IPCChannels.dialogDone, undefined)
     }
+  })
+}
+
+function openPreferencesWindow() {
+  const win = preferencesWindow = new BrowserWindow({
+    width: 400,
+    height: 200,
+    minWidth: 400,
+    minHeight: 200,
+    show: false,
+    titleBarStyle: "hidden",
+    title: "Preferences",
+    frame: process.platform == "darwin",
+  })
+  win.loadURL(`${contentBase}/preferences.html`)
+  win.on("closed", () => {
+    preferencesWindow = undefined
+  })
+  ipcMain.on(IPCChannels.preferencesOpen, (ev: Electron.IpcMainEvent, data: any) => {
+    win.webContents.send(IPCChannels.preferencesOpen, data)
+    win.setAlwaysOnTop(true)
+    win.show()
+    preferencesShown = true
+  })
+  ipcMain.on(IPCChannels.preferencesChange, (ev: Electron.IpcMainEvent, data: any) => {
+    if (mainWindow) {
+      mainWindow.webContents.send(IPCChannels.preferencesChange, data)
+    }
+  })
+  win.on("close", (e) => {
+    e.preventDefault()
+    win.hide()
+    preferencesShown = false
   })
 }
 
@@ -103,6 +138,9 @@ async function openWindow() {
     if (dialogsWindow) {
       dialogsWindow.destroy()
     }
+    if (preferencesWindow) {
+      preferencesWindow.destroy()
+    }
   })
 
   win.on("ready-to-show", () => {
@@ -139,5 +177,16 @@ app.on("ready", async () => {
   } else {
     await openWindow()
     openDialogsWindow()
+    openPreferencesWindow()
+  }
+})
+app.on("browser-window-blur", () => {
+  if (preferencesShown && mainWindow && !mainWindow.isFocused() && preferencesWindow && !preferencesWindow.isFocused()) {
+    preferencesWindow.hide()
+  }
+})
+app.on("browser-window-focus", (ev, win) => {
+  if (preferencesShown &&  preferencesWindow && !preferencesWindow.isVisible()) {
+    preferencesWindow.show()
   }
 })

@@ -1,0 +1,38 @@
+.FloatingWindowTitle {
+  height: var(--height);
+  line-height: var(--height);
+  width: 100%;
+  text-align: center;
+  -webkit-app-region: drag;
+  &-darwin {
+    --height: 22px;
+    & .FloatingWindowTitle_close {
+      display: none;
+    }
+  }
+  &-win32 {
+    --height: 24px;
+  }
+}
+
+.FloatingWindowTitle_close {
+  width: 32px;
+  height: 24px;
+  position: absolute;
+  right: 0;
+  top: 0;
+  -webkit-app-region: no-drag;
+  &:before {
+    content: "";
+    position: absolute;
+    right: 8px;
+    top: 4px;
+    width: 16px;
+    height: 16px;
+    mask: url("../icons/window-close.svg");
+    background-color: white;
+  }
+  &:hover {
+    background-color: red;
+  }
+}

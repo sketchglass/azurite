@@ -1,5 +1,7 @@
 
 export default {
+  appPreferences: "app:preferences",
+
   fileNew: "file:new",
   fileOpen: "file:open",
   fileImport: "file:import",

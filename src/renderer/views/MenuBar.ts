@@ -84,6 +84,12 @@ class MenuBar {
         {action: ActionIDs.editDelete},
       ]
     }
+    if (process.platform == "win32") {
+      editMenu.submenu!.push(
+        {type: "separator"},
+        {action: ActionIDs.appPreferences},
+      )
+    }
 
     const selectionMenu: MenuDescription = {
       label: "Selection",
@@ -167,6 +173,8 @@ class MenuBar {
         label: name,
         submenu: [
           {role: 'about'},
+          {type: 'separator'},
+          {action: ActionIDs.appPreferences},
           {type: 'separator'},
           {role: 'services', submenu: []},
           {type: 'separator'},

@@ -4,6 +4,7 @@ module.exports = {
   entry: {
     renderer: [...commonEntries, "./src/renderer/index.tsx"],
     dialogs: [...commonEntries, "./src/renderer/views/dialogs/DialogIndex.tsx"],
+    preferences: [...commonEntries, "./src/renderer/views/preferences/PreferencesIndex.tsx"],
     test: [...commonEntries, "./src/test/index.js"],
   },
   output: {
