@@ -12,8 +12,8 @@ import KeyInput, {KeyInputData} from "../../lib/KeyInput"
 
 export
 interface ToolConfigData {
-  shortcut: KeyInputData|undefined
-  tempShortcut: KeyInputData|undefined
+  shortcut: KeyInputData|null
+  tempShortcut: KeyInputData|null
 }
 
 export
@@ -80,8 +80,8 @@ abstract class Tool {
   @observable tempShortcut: KeyInput|undefined
 
   getConfig(): ToolConfigData {
-    const shortcut = this.shortcut && this.shortcut.toData()
-    const tempShortcut = this.shortcut && this.shortcut.toData()
+    const shortcut = this.shortcut ? this.shortcut.toData() : null
+    const tempShortcut = this.shortcut ? this.shortcut.toData() : null
     return {shortcut, tempShortcut}
   }
   setConfig(config: ToolConfigData) {
