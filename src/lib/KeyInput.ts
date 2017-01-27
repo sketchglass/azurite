@@ -1,9 +1,25 @@
 
+export
 type KeyModifier = "Command"|"Control"|"CommandOrControl"|"Alt"|"Shift"
+
+export
+interface KeyInputData {
+  modifiers: KeyModifier[]
+  key: string
+}
 
 export default
 class KeyInput {
   constructor(public modifiers: KeyModifier[], public key: string) {
+  }
+
+  static fromData(data: KeyInputData) {
+    return new KeyInput(data.modifiers, data.key)
+  }
+
+  toData(): KeyInputData {
+    const {modifiers, key} = this
+    return {modifiers, key}
   }
 
   toElectronAccelerator() {

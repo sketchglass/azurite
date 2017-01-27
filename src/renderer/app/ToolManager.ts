@@ -43,7 +43,7 @@ class ToolManager {
     for (const toolId in values.tools) {
       const tool = this.tools.find(t => t.id == toolId)
       if (tool) {
-        tool.config = values.tools[toolId]
+        tool.setConfig(values.tools[toolId])
       }
     }
     const currentTool = this.tools.find(t => t.id == values.currentTool)
@@ -55,7 +55,7 @@ class ToolManager {
   saveConfig() {
     const tools = {}
     for (const tool of this.tools) {
-      tools[tool.id] = tool.config
+      tools[tool.id] = tool.getConfig()
     }
     return {
       tools,

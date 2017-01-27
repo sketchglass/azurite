@@ -8,7 +8,13 @@ import React = require("react")
 import {appState} from "../app/AppState"
 import {SelectionShowMode} from "../views/Renderer"
 import {toolManager} from "../app/ToolManager"
-import KeyInput from "../../lib/KeyInput"
+import KeyInput, {KeyInputData} from "../../lib/KeyInput"
+
+export
+interface ToolConfigData {
+  shortcut: KeyInputData|undefined
+  tempShortcut: KeyInputData|undefined
+}
 
 export
 interface ToolPointerEvent {
@@ -73,10 +79,14 @@ abstract class Tool {
   @observable shortcut: KeyInput|undefined
   @observable tempShortcut: KeyInput|undefined
 
-  get config(): Object {
-    return {}
+  getConfig(): ToolConfigData {
+    const shortcut = this.shortcut && this.shortcut.toData()
+    const tempShortcut = this.shortcut && this.shortcut.toData()
+    return {shortcut, tempShortcut}
   }
-  set config(config: Object) {
+  setConfig(config: ToolConfigData) {
+    this.shortcut = config.shortcut ? KeyInput.fromData(config.shortcut) : undefined
+    this.tempShortcut = config.tempShortcut ? KeyInput.fromData(config.tempShortcut) : undefined
   }
 }
 export default Tool
