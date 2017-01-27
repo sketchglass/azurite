@@ -79,12 +79,12 @@ abstract class Tool {
   @observable shortcut: KeyInput|undefined
   @observable tempShortcut: KeyInput|undefined
 
-  getConfig(): ToolConfigData {
+  saveConfig(): ToolConfigData {
     const shortcut = this.shortcut ? this.shortcut.toData() : null
     const tempShortcut = this.shortcut ? this.shortcut.toData() : null
     return {shortcut, tempShortcut}
   }
-  setConfig(config: ToolConfigData) {
+  loadConfig(config: ToolConfigData) {
     this.shortcut = config.shortcut ? KeyInput.fromData(config.shortcut) : undefined
     this.tempShortcut = config.tempShortcut ? KeyInput.fromData(config.tempShortcut) : undefined
   }
