@@ -1,4 +1,4 @@
-import {computed} from "mobx"
+import {computed, observable} from "mobx"
 import Layer from "../models/Layer"
 import Selection from "../models/Selection"
 import {Tile} from "../models/TiledTexture"
@@ -8,6 +8,7 @@ import React = require("react")
 import {appState} from "../app/AppState"
 import {SelectionShowMode} from "../views/Renderer"
 import {toolManager} from "../app/ToolManager"
+import KeyInput from "../../lib/KeyInput"
 
 export
 interface ToolPointerEvent {
@@ -68,6 +69,9 @@ abstract class Tool {
   previewLayerTile(layer: Layer, tileKey: Vec2): {tile: Tile|undefined}|undefined { return }
   previewSelection(): Selection|false { return false }
   get selectionShowMode(): SelectionShowMode { return "normal" }
+
+  @observable shortcut: KeyInput|undefined
+  @observable tempShortcut: KeyInput|undefined
 
   get config(): Object {
     return {}
