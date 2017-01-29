@@ -1,5 +1,5 @@
 import * as React from "react"
-import FloatingWindowTitle from "../components/FloatingWindowTitle"
+import DialogTitleBar from "../components/DialogTitleBar"
 
 interface DialogContainerProps {
   title: string
@@ -14,7 +14,7 @@ class DialogContainer extends React.Component<DialogContainerProps, {}> {
   render() {
     return (
       <div className="DialogContainer">
-        {process.platform == "win32" ? <FloatingWindowTitle title={this.props.title} /> : undefined}
+        {process.platform == "win32" ? <DialogTitleBar title={this.props.title} /> : undefined}
         <div className="DialogContainer_content">
           {this.props.children}
           <div className="DialogContainer_buttons">

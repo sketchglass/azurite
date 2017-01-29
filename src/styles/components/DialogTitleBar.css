@@ -1,4 +1,4 @@
-.FloatingWindowTitle {
+.DialogTitleBar {
   height: var(--height);
   line-height: var(--height);
   width: 100%;
@@ -7,7 +7,7 @@
   -webkit-app-region: drag;
   &-darwin {
     --height: 22px;
-    & .FloatingWindowTitle_close {
+    & .DialogTitleBar_close {
       display: none;
     }
   }
@@ -16,7 +16,7 @@
   }
 }
 
-.FloatingWindowTitle_close {
+.DialogTitleBar_close {
   width: 32px;
   height: 24px;
   position: absolute;
