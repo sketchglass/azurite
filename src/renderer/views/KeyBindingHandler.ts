@@ -8,6 +8,7 @@ class KeyBindingHandler {
   constructor() {
     document.addEventListener("keydown", e => this.onKeyDown(e))
     document.addEventListener("keyup", e => this.onKeyUp(e))
+    window.addEventListener("blur", e => this.onBlur())
   }
 
   onKeyDown(e: KeyboardEvent) {
@@ -41,6 +42,10 @@ class KeyBindingHandler {
         toolManager.overrideTool = undefined
       }
     }
+  }
+
+  onBlur() {
+    this.pressedKeys.clear()
   }
 }
 
