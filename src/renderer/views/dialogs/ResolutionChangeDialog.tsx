@@ -24,7 +24,7 @@ class ResolutionChangeDialog extends React.Component<ResolutionChangeDialogProps
 
   render() {
     return (
-      <DialogContainer okText="Change" canOK={this.dimensionSelectViewModel.isValid} onOK={this.onOK} onCancel={this.onCancel}>
+      <DialogContainer title="Change Canvas Resolution" okText="Change" canOK={this.dimensionSelectViewModel.isValid} onOK={this.onOK} onCancel={this.onCancel}>
         <DimensionSelect viewModel={this.dimensionSelectViewModel} percent={true}/>
       </DialogContainer>
     )

@@ -3,6 +3,7 @@
   line-height: var(--height);
   width: 100%;
   text-align: center;
+  position: relative;
   -webkit-app-region: drag;
   &-darwin {
     --height: 22px;

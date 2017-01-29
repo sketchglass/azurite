@@ -1,6 +1,8 @@
-import React = require("react")
+import * as React from "react"
+import FloatingWindowTitle from "../components/FloatingWindowTitle"
 
 interface DialogContainerProps {
+  title: string
   okText: string
   canOK: boolean
   onOK: () => void
@@ -12,10 +14,13 @@ class DialogContainer extends React.Component<DialogContainerProps, {}> {
   render() {
     return (
       <div className="DialogContainer">
-        {this.props.children}
-        <div className="DialogContainer_buttons">
-          <button className="Button" onClick={this.props.onCancel}>Cancel</button>
-          <button className="Button Button-primary" onClick={this.props.onOK} disabled={!this.props.canOK}>{this.props.okText}</button>
+        {process.platform == "win32" ? <FloatingWindowTitle title={this.props.title} /> : undefined}
+        <div className="DialogContainer_content">
+          {this.props.children}
+          <div className="DialogContainer_buttons">
+            <button className="Button" onClick={this.props.onCancel}>Cancel</button>
+            <button className="Button Button-primary" onClick={this.props.onOK} disabled={!this.props.canOK}>{this.props.okText}</button>
+          </div>
         </div>
       </div>
     )

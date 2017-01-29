@@ -22,6 +22,7 @@ function openDialogsWindow() {
     show: false,
     parent: mainWindow,
     modal: true,
+    frame: false,
   })
   win.loadURL(`${contentBase}/dialogs.html`)
   win.on("closed", () => {
