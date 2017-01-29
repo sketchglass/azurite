@@ -1,6 +1,7 @@
 import {Vec2} from "paintvec"
 import Tool, {ToolPointerEvent} from './Tool'
 import ToolIDs from "./ToolIDs"
+import KeyInput from "../../lib/KeyInput"
 
 const modScale = (scale: number) => {
   return (scale < 0.25) ? 0.25 : (scale > 32) ? 32 : scale
@@ -44,5 +45,12 @@ class ZoomTool extends Tool {
 
   end() {
     this.dragging = false
+  }
+
+  getDefaultConfig() {
+    return {
+      shortcut: null,
+      tempShortcut: new KeyInput(["MetaOrControl"], " ").toData()
+    }
   }
 }

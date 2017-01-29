@@ -88,5 +88,8 @@ abstract class Tool {
     this.shortcut = config.shortcut ? KeyInput.fromData(config.shortcut) : undefined
     this.tempShortcut = config.tempShortcut ? KeyInput.fromData(config.tempShortcut) : undefined
   }
+  getDefaultConfig(): ToolConfigData {
+    return {shortcut: null, tempShortcut: null}
+  }
 }
 export default Tool

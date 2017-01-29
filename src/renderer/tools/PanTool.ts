@@ -1,6 +1,7 @@
 import {Vec2} from "paintvec"
 import Tool, {ToolPointerEvent} from './Tool'
 import ToolIDs from "./ToolIDs"
+import KeyInput from "../../lib/KeyInput"
 
 export default
 class PanTool extends Tool {
@@ -31,5 +32,12 @@ class PanTool extends Tool {
   }
 
   end() {
+  }
+
+  getDefaultConfig() {
+    return {
+      shortcut: null,
+      tempShortcut: new KeyInput([], " ").toData()
+    }
   }
 }
