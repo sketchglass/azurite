@@ -1,7 +1,7 @@
 import * as React from "react"
 import * as ReactDOM from "react-dom"
 import {ipcRenderer} from "electron"
-import Preferences from "./Preferenes"
+import Preferences from "./Preferences"
 import IPCChannels from "../../../common/IPCChannels"
 import {PreferencesData} from "../../viewmodels/PreferencesViewModel"
 import "../../../styles/main.css"
