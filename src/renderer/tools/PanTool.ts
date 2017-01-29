@@ -12,6 +12,7 @@ class PanTool extends Tool {
   }
   originalPos = new Vec2(0)
   originalTranslation = new Vec2(0)
+  tempShortcut = new KeyInput([], " ")
 
   start(ev: ToolPointerEvent) {
     if (!this.picture) {
@@ -32,12 +33,5 @@ class PanTool extends Tool {
   }
 
   end() {
-  }
-
-  getDefaultConfig() {
-    return {
-      shortcut: null,
-      tempShortcut: new KeyInput([], " ").toData()
-    }
   }
 }

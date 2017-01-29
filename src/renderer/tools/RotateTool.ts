@@ -15,6 +15,8 @@ class RotateTool extends Tool {
   private originalAngle = 0
   private originalRotation = 0
 
+  tempShortcut = new KeyInput(["Shift"], " ")
+
   start(ev: ToolPointerEvent) {
     if (!this.picture) {
       return
@@ -49,12 +51,5 @@ class RotateTool extends Tool {
 
   end() {
     this.dragging = false
-  }
-
-  getDefaultConfig() {
-    return {
-      shortcut: null,
-      tempShortcut: new KeyInput(["Shift"], " ").toData()
-    }
   }
 }

@@ -17,6 +17,7 @@ class ZoomTool extends Tool {
   private originalScale = 1.0
   private dragging = false
   private startPos = new Vec2()
+  tempShortcut = new KeyInput(["MetaOrControl"], " ")
 
   start(ev: ToolPointerEvent) {
     if (!this.picture) {
@@ -45,12 +46,5 @@ class ZoomTool extends Tool {
 
   end() {
     this.dragging = false
-  }
-
-  getDefaultConfig() {
-    return {
-      shortcut: null,
-      tempShortcut: new KeyInput(["MetaOrControl"], " ").toData()
-    }
   }
 }

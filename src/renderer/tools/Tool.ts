@@ -81,15 +81,12 @@ abstract class Tool {
 
   saveConfig(): ToolConfigData {
     const shortcut = this.shortcut ? this.shortcut.toData() : null
-    const tempShortcut = this.shortcut ? this.shortcut.toData() : null
+    const tempShortcut = this.tempShortcut ? this.tempShortcut.toData() : null
     return {shortcut, tempShortcut}
   }
   loadConfig(config: ToolConfigData) {
     this.shortcut = config.shortcut ? KeyInput.fromData(config.shortcut) : undefined
     this.tempShortcut = config.tempShortcut ? KeyInput.fromData(config.tempShortcut) : undefined
-  }
-  getDefaultConfig(): ToolConfigData {
-    return {shortcut: null, tempShortcut: null}
   }
 }
 export default Tool
