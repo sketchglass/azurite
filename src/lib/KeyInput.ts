@@ -1,6 +1,7 @@
+const deepEqual = require("deep-equal")
 
 export
-type KeyModifier = "Command"|"Control"|"CommandOrControl"|"Alt"|"Shift"
+type KeyModifier = "Meta"|"Control"|"MetaOrControl"|"Alt"|"Shift"
 
 export
 interface KeyInputData {
@@ -30,21 +31,43 @@ class KeyInput {
     if (key == "+") {
       key = "Plus"
     }
-    return [...this.modifiers, key].join("+")
+    const modifiers = this.modifiers.map(m => {
+      switch (m) {
+        case "Meta":
+          return "Command"
+        case "MetaOrControl":
+          return "CommandOrControl"
+        default:
+          return m
+      }
+    })
+    return [...modifiers, key].join("+")
   }
 
   matchesEvent(e: KeyboardEvent) {
     if (e.key == this.key) {
       const {modifiers} = this
-      if (modifiers.includes("CommandOrControl")) {
+      if (modifiers.includes("MetaOrControl")) {
         return (e.ctrlKey || e.metaKey) &&
           e.altKey == modifiers.includes("Alt") && e.shiftKey == modifiers.includes("Shift")
       } else {
-        return e.ctrlKey == modifiers.includes("Control") && e.metaKey == modifiers.includes("Command") &&
+        return e.ctrlKey == modifiers.includes("Control") && e.metaKey == modifiers.includes("Meta") &&
           e.altKey == modifiers.includes("Alt") && e.shiftKey == modifiers.includes("Shift")
       }
     } else {
       return false
     }
+  }
+
+  matchesKeys(keys: Iterable<string>) {
+    for (const metaOrCtrl of ["Meta", "Control"]) {
+      const modifiers = this.modifiers.map(m => m == "MetaOrControl" ? metaOrCtrl : m)
+      const expected = [this.key, ...modifiers].sort()
+      const actual = [...keys].sort()
+      if (deepEqual(expected, actual)) {
+        return true
+      }
+    }
+    return false
   }
 }
