@@ -11,7 +11,6 @@ import NavigatorPanel from "./panels/NavigatorPanel"
 import LayerPanel from "./panels/LayerPanel"
 import BrushPresetsPanel from "./panels/BrushPresetsPanel"
 
-// import NavigationKeyBinding from "./NavigationKeyBinding"
 import {appState} from "../app/AppState"
 import {toolManager} from "../app/ToolManager"
 
