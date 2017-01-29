@@ -29,11 +29,9 @@ window.addEventListener("DOMContentLoaded", () => {
     let dialog: JSX.Element|undefined
     switch (name) {
       case "newPicture":
-        document.title = "New Picture"
         dialog = <NewPictureDialog onReadyShow={onReadyShow} onDone={onDone} />
         break
       case "resolutionChange":
-        document.title = "Change Canvas Resolution"
         dialog = <ResolutionChangeDialog init={param} onReadyShow={onReadyShow} onDone={onDone} />
         break
     }

@@ -17,7 +17,7 @@ class NewPictureDialog extends React.Component<NewPictureDialogProps, {}> {
 
   render() {
     return (
-      <DialogContainer okText="New" canOK={this.dimensionSelectViewModel.isValid} onOK={this.onOK} onCancel={this.onCancel}>
+      <DialogContainer title="New Picture" okText="New" canOK={this.dimensionSelectViewModel.isValid} onOK={this.onOK} onCancel={this.onCancel}>
         <DimensionSelect viewModel={this.dimensionSelectViewModel} />
       </DialogContainer>
     )
