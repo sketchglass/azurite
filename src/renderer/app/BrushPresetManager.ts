@@ -9,15 +9,6 @@ class BrushPresetManager {
   readonly presets = observable<BrushPreset>([])
   @observable currentPresetIndex = 0
 
-  constructor() {
-    for (const data of defaultBrushPresets()) {
-      const preset = brushEngineRegistry.createPreset(data)
-      if (preset) {
-        this.presets.push(preset)
-      }
-    }
-  }
-
   @computed get currentPreset() {
     const i = this.currentPresetIndex
     if (i < this.presets.length) {
@@ -26,8 +17,8 @@ class BrushPresetManager {
   }
 
   loadConfig(values: ConfigValues) {
-    this.presets.clear()
-    for (const data of values.brushPresets) {
+    const presetsData = values.brushPresets.length > 0 ? values.brushPresets : defaultBrushPresets()
+    for (const data of presetsData) {
       const preset = brushEngineRegistry.createPreset(data)
       if (preset) {
         this.presets.push(preset)
