@@ -21,21 +21,6 @@ import "../../styles/main.css"
 
 @observer export default
 class RootView extends React.Component<{}, {}> {
-  constructor() {
-    super()
-
-    // new NavigationKeyBinding(klass => {
-    //   if (klass) {
-    //     for (const tool of toolManager.tools) {
-    //       if (tool instanceof klass) {
-    //         toolManager.overrideTool = tool
-    //       }
-    //     }
-    //   } else {
-    //     toolManager.overrideTool = undefined
-    //   }
-    // })
-  }
   render() {
     const {currentTool, overrideTool} = toolManager
     const {uiVisible} = appState
