@@ -11,7 +11,6 @@ import NavigatorPanel from "./panels/NavigatorPanel"
 import LayerPanel from "./panels/LayerPanel"
 import BrushPresetsPanel from "./panels/BrushPresetsPanel"
 
-import NavigationKeyBinding from "./NavigationKeyBinding"
 import {appState} from "../app/AppState"
 import {toolManager} from "../app/ToolManager"
 
@@ -21,21 +20,6 @@ import "../../styles/main.css"
 
 @observer export default
 class RootView extends React.Component<{}, {}> {
-  constructor() {
-    super()
-
-    new NavigationKeyBinding(klass => {
-      if (klass) {
-        for (const tool of toolManager.tools) {
-          if (tool instanceof klass) {
-            toolManager.overrideTool = tool
-          }
-        }
-      } else {
-        toolManager.overrideTool = undefined
-      }
-    })
-  }
   render() {
     const {currentTool, overrideTool} = toolManager
     const {uiVisible} = appState

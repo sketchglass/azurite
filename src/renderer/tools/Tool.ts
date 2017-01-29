@@ -1,4 +1,4 @@
-import {computed} from "mobx"
+import {computed, observable} from "mobx"
 import Layer from "../models/Layer"
 import Selection from "../models/Selection"
 import {Tile} from "../models/TiledTexture"
@@ -8,6 +8,13 @@ import React = require("react")
 import {appState} from "../app/AppState"
 import {SelectionShowMode} from "../views/Renderer"
 import {toolManager} from "../app/ToolManager"
+import KeyInput, {KeyInputData} from "../../lib/KeyInput"
+
+export
+interface ToolConfigData {
+  shortcut: KeyInputData|null
+  tempShortcut: KeyInputData|null
+}
 
 export
 interface ToolPointerEvent {
@@ -69,10 +76,17 @@ abstract class Tool {
   previewSelection(): Selection|false { return false }
   get selectionShowMode(): SelectionShowMode { return "normal" }
 
-  get config(): Object {
-    return {}
+  @observable shortcut: KeyInput|undefined
+  @observable tempShortcut: KeyInput|undefined
+
+  saveConfig(): ToolConfigData {
+    const shortcut = this.shortcut ? this.shortcut.toData() : null
+    const tempShortcut = this.tempShortcut ? this.tempShortcut.toData() : null
+    return {shortcut, tempShortcut}
   }
-  set config(config: Object) {
+  loadConfig(config: ToolConfigData) {
+    this.shortcut = config.shortcut ? KeyInput.fromData(config.shortcut) : undefined
+    this.tempShortcut = config.tempShortcut ? KeyInput.fromData(config.tempShortcut) : undefined
   }
 }
 export default Tool
