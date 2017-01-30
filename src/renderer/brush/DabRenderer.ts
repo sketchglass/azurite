@@ -1,3 +1,4 @@
+import {reaction} from "mobx"
 import {Rect, Vec2} from "paintvec"
 import Layer, {ImageLayer} from "../models/Layer"
 import TiledTexture, {Tile} from "../models/TiledTexture"
@@ -16,8 +17,33 @@ export abstract class DabRenderer {
   private newTiledTexture = new TiledTexture()
   private editedRect: Rect|undefined
   private clearCommitTimeout: (() => void)|undefined
+  private disconnectPicture: (() => void)|undefined
 
   constructor(public preset: BrushPreset) {
+    setImmediate(() => {
+      reaction(() => appState.currentPicture, picture => {
+        if (this.disconnectPicture) {
+          this.disconnectPicture()
+        }
+        if (picture) {
+          const beforeUndoRedo = () => {
+            this.commit()
+          }
+          picture.undoStack.on("beforeUndo", beforeUndoRedo)
+          picture.undoStack.on("beforeRedo", beforeUndoRedo)
+          this.disconnectPicture = () => {
+            picture.undoStack.removeListener("beforeUndo", beforeUndoRedo)
+            picture.undoStack.removeListener("beforeRedo", beforeUndoRedo)
+          }
+        }
+      })
+    })
+  }
+
+  dispose() {
+    if (this.disconnectPicture) {
+      this.disconnectPicture()
+    }
   }
 
   private addEditedRect(rect: Rect) {

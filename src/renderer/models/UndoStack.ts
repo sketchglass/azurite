@@ -1,4 +1,5 @@
 import {observable, computed, action, IObservableArray} from "mobx"
+import {EventEmitter} from "events"
 
 export
 interface UndoCommand {
@@ -24,7 +25,7 @@ class CompositeUndoCommand implements UndoCommand {
 }
 
 export
-class UndoStack {
+class UndoStack extends EventEmitter {
   readonly commands: IObservableArray<UndoCommand> = observable([])
   @observable doneCount = 0
 
@@ -48,6 +49,7 @@ class UndoStack {
   }
 
   @action undo() {
+    this.emit("beforeUndo")
     const command = this.undoCommand
     if (command) {
       command.undo()
@@ -55,6 +57,7 @@ class UndoStack {
     }
   }
   @action redo() {
+    this.emit("beforeRedo")
     const command = this.redoCommand
     if (command) {
       command.redo()
