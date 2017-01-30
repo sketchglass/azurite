@@ -5,7 +5,8 @@ import {KeyInputData} from "../../../lib/KeyInput"
 
 interface ToolShortcutsDialogProps {
   onReadyShow: () => void
-  onDone: (keyInputs?: [KeyInputData, KeyInputData]) => void
+  onDone: (keyInputs?: [KeyInputData|undefined, KeyInputData|undefined]) => void
+  init: [KeyInputData|undefined, KeyInputData|undefined]
 }
 
 @observer
@@ -13,7 +14,7 @@ export default
 class ToolShortcutsDialog extends React.Component<ToolShortcutsDialogProps, {}> {
   render() {
     return (
-      <DialogContainer title="Tool Shortcuts" okText="New" canOK={true} onOK={this.onOK} onCancel={this.onCancel}>
+      <DialogContainer title="Tool Shortcuts" okText="OK" canOK={true} onOK={this.onOK} onCancel={this.onCancel}>
       </DialogContainer>
     )
   }
@@ -27,5 +28,6 @@ class ToolShortcutsDialog extends React.Component<ToolShortcutsDialogProps, {}> 
   }
 
   private onOK = () => {
+    this.props.onDone()
   }
 }
