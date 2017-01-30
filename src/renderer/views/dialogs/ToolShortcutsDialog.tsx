@@ -1,0 +1,31 @@
+import React = require("react")
+import {observer} from "mobx-react"
+import DialogContainer from "./DialogContainer"
+import {KeyInputData} from "../../../lib/KeyInput"
+
+interface ToolShortcutsDialogProps {
+  onReadyShow: () => void
+  onDone: (keyInputs?: [KeyInputData, KeyInputData]) => void
+}
+
+@observer
+export default
+class ToolShortcutsDialog extends React.Component<ToolShortcutsDialogProps, {}> {
+  render() {
+    return (
+      <DialogContainer title="Tool Shortcuts" okText="New" canOK={true} onOK={this.onOK} onCancel={this.onCancel}>
+      </DialogContainer>
+    )
+  }
+
+  componentDidMount() {
+    this.props.onReadyShow()
+  }
+
+  private onCancel = () => {
+    this.props.onDone()
+  }
+
+  private onOK = () => {
+  }
+}
