@@ -12,22 +12,26 @@ class KeyBindingHandler {
   }
 
   onKeyDown(e: KeyboardEvent) {
-    this.pressedKeys.add(e.key)
-
     const keyBindings = keyBindingRegistry.keyBindingsForKey(e.key)
     for (const binding of keyBindings) {
       if (binding.keyInput.matchesEvent(e)) {
         const action = actionRegistry.actions.get(binding.action)
         if (action) {
-          e.preventDefault()
           action.run()
+          e.preventDefault()
+          return
         }
       }
     }
     for (const tool of toolManager.tools) {
       if (tool.shortcut && tool.shortcut.matchesEvent(e)) {
         toolManager.currentTool = tool
+        e.preventDefault()
+        return
       }
+    }
+    this.pressedKeys.add(e.key)
+    for (const tool of toolManager.tools) {
       if (tool.tempShortcut && tool.tempShortcut.matchesKeys(this.pressedKeys)) {
         toolManager.overrideTool = tool
       }
