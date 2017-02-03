@@ -2,6 +2,7 @@
   width: 100px;
   height: 24px;
   background-color: var(--lighten-background-color);
+  border-radius: 4px;
   &:focus {
     background-color: var(--ui-primary-background-color);
   }
