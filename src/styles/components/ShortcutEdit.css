@@ -1,0 +1,8 @@
+.ShortcutEdit {
+  width: 100px;
+  height: 24px;
+  background-color: var(--lighten-background-color);
+  &:focus {
+    background-color: var(--ui-primary-background-color);
+  }
+}

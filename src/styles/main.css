@@ -21,6 +21,7 @@
 @import "./components/ScrollBar.css";
 @import "./components/SVGIcon.css";
 @import "./components/DialogTitleBar.css";
+@import "./components/ShortcutEdit.css";
 
 /* Panels */
 @import "./panels/ColorPanel.css";
