@@ -1,5 +1,23 @@
 const deepEqual = require("deep-equal")
 
+function electronKeyNames(key: string) {
+  switch (key) {
+    case "Meta":
+      return "Control"
+    case "MetaOrControl":
+      return "CommandOrControl"
+    case "+":
+      return "Plus"
+    case " ":
+      return "Space"
+    default:
+      if (key.match(/^[a-z]$/)) {
+        return key.toUpperCase()
+      }
+      return key
+  }
+}
+
 export
 type KeyModifier = "Meta"|"Control"|"MetaOrControl"|"Alt"|"Shift"
 
@@ -24,24 +42,7 @@ class KeyInput {
   }
 
   toElectronAccelerator() {
-    let key = this.key
-    if (key.length == 1) {
-      key = key.toUpperCase()
-    }
-    if (key == "+") {
-      key = "Plus"
-    }
-    const modifiers = this.modifiers.map(m => {
-      switch (m) {
-        case "Meta":
-          return "Command"
-        case "MetaOrControl":
-          return "CommandOrControl"
-        default:
-          return m
-      }
-    })
-    return [...modifiers, key].join("+")
+    return [...this.modifiers, this.key].map(electronKeyNames).join("+")
   }
 
   matchesEvent(e: KeyboardEvent) {
