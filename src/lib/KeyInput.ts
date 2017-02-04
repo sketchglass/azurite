@@ -9,14 +9,23 @@ function electronKeyNames(code: string) {
       return "CommandOrControl"
     case "Space":
       return "Space"
+    case "ArrowUp":
+      return "Up"
+    case "ArrowDown":
+      return "Down"
+    case "ArrowLeft":
+      return "Left"
+    case "ArrowRight":
+      return "Right"
   }
   const keymap = keyboardLayout.getCurrentKeymap()
   if (code in keymap) {
     const key = keymap[code].unmodified
-    if (key == "+") {
-      return "Plus"
-    } else {
-      return key
+    switch (key) {
+      case "+":
+        return "Plus"
+      default:
+        return key
     }
   }
   return code
