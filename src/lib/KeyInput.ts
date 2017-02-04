@@ -1,21 +1,25 @@
 const deepEqual = require("deep-equal")
+const keyboardLayout = require("keyboard-layout")
 
-function electronKeyNames(key: string) {
-  switch (key) {
+function electronKeyNames(code: string) {
+  switch (code) {
     case "Meta":
       return "Control"
     case "MetaOrControl":
       return "CommandOrControl"
-    case "+":
-      return "Plus"
-    case " ":
+    case "Space":
       return "Space"
-    default:
-      if (key.match(/^[a-z]$/)) {
-        return key.toUpperCase()
-      }
-      return key
   }
+  const keymap = keyboardLayout.getCurrentKeymap()
+  if (code in keymap) {
+    const key = keymap[code].unmodified
+    if (key == "+") {
+      return "Plus"
+    } else {
+      return key
+    }
+  }
+  return code
 }
 
 export
@@ -24,29 +28,30 @@ type KeyModifier = "Meta"|"Control"|"MetaOrControl"|"Alt"|"Shift"
 export
 interface KeyInputData {
   modifiers: KeyModifier[]
-  key: string
+  code: string
 }
 
+// TODO: make sure to work in non-US keyboards
 export default
 class KeyInput {
-  constructor(public modifiers: KeyModifier[], public key: string) {
+  constructor(public modifiers: KeyModifier[], public code: string) {
   }
 
   static fromData(data: KeyInputData) {
-    return new KeyInput(data.modifiers, data.key)
+    return new KeyInput(data.modifiers, data.code)
   }
 
   toData(): KeyInputData {
-    const {modifiers, key} = this
-    return {modifiers, key}
+    const {modifiers, code} = this
+    return {modifiers, code}
   }
 
   toElectronAccelerator() {
-    return [...this.modifiers, this.key].map(electronKeyNames).join("+")
+    return [...this.modifiers, this.code].map(electronKeyNames).join("+")
   }
 
   matchesEvent(e: KeyboardEvent) {
-    if (e.key == this.key) {
+    if (e.code == this.code) {
       const {modifiers} = this
       if (modifiers.includes("MetaOrControl")) {
         return (e.ctrlKey || e.metaKey) &&
@@ -60,11 +65,11 @@ class KeyInput {
     }
   }
 
-  matchesKeys(keys: Iterable<string>) {
+  matchesCodes(codes: Iterable<string>) {
     for (const metaOrCtrl of ["Meta", "Control"]) {
       const modifiers = this.modifiers.map(m => m == "MetaOrControl" ? metaOrCtrl : m)
-      const expected = [this.key, ...modifiers].sort()
-      const actual = [...keys].sort()
+      const expected = [this.code, ...modifiers].sort()
+      const actual = [...codes].sort()
       if (deepEqual(expected, actual)) {
         return true
       }

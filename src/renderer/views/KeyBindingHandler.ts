@@ -3,7 +3,7 @@ import {keyBindingRegistry} from "../app/KeyBindingRegistry"
 import {toolManager} from "../app/ToolManager"
 
 class KeyBindingHandler {
-  pressedKeys = new Set<string>()
+  pressedCodes = new Set<string>()
 
   constructor() {
     document.addEventListener("keydown", e => this.onKeyDown(e))
@@ -12,7 +12,7 @@ class KeyBindingHandler {
   }
 
   onKeyDown(e: KeyboardEvent) {
-    const keyBindings = keyBindingRegistry.keyBindingsForKey(e.key)
+    const keyBindings = keyBindingRegistry.keyBindingsForCode(e.key)
     for (const binding of keyBindings) {
       if (binding.keyInput.matchesEvent(e)) {
         const action = actionRegistry.actions.get(binding.action)
@@ -30,26 +30,26 @@ class KeyBindingHandler {
         return
       }
     }
-    this.pressedKeys.add(e.key)
+    this.pressedCodes.add(e.code)
     for (const tool of toolManager.tools) {
-      if (tool.tempShortcut && tool.tempShortcut.matchesKeys(this.pressedKeys)) {
+      if (tool.tempShortcut && tool.tempShortcut.matchesCodes(this.pressedCodes)) {
         toolManager.overrideTool = tool
       }
     }
   }
 
   onKeyUp(e: KeyboardEvent) {
-    this.pressedKeys.delete(e.key)
+    this.pressedCodes.delete(e.code)
     const {overrideTool} = toolManager
     if (overrideTool) {
-      if (!(overrideTool.tempShortcut && overrideTool.tempShortcut.matchesKeys(this.pressedKeys))) {
+      if (!(overrideTool.tempShortcut && overrideTool.tempShortcut.matchesCodes(this.pressedCodes))) {
         toolManager.overrideTool = undefined
       }
     }
   }
 
   onBlur() {
-    this.pressedKeys.clear()
+    this.pressedCodes.clear()
   }
 }
 

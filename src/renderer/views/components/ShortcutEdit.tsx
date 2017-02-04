@@ -23,15 +23,15 @@ class ShortcutEdit extends React.Component<ShortcutEditProps, {}> {
 
   private onKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     e.preventDefault()
-    const {key} = e
+    const {code} = e.nativeEvent as KeyboardEvent
     const modifiers = new Set<KeyModifier>()
-    if (!["Shift", "Alt", "Control", "Meta"].includes(key)) {
+    if (!["Shift", "Alt", "Control", "Meta"].includes(code)) {
       e.shiftKey && modifiers.add("Shift")
       e.altKey && modifiers.add("Alt")
       e.ctrlKey && modifiers.add("Control")
       e.metaKey && modifiers.add("Meta")
     }
-    const shortcut = new KeyInput([...modifiers], key)
+    const shortcut = new KeyInput([...modifiers], code)
     this.props.onChange(shortcut)
   }
 }
