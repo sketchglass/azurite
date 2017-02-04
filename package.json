@@ -86,6 +86,7 @@
     "deep-assign": "^2.0.0",
     "deep-equal": "^1.0.1",
     "glslify": "^6.0.1",
+    "keyboard-layout": "^2.0.10",
     "minimist": "^1.2.0",
     "mobx": "^3.0.2",
     "mobx-react": "^4.1.0",
