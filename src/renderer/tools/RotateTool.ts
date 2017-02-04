@@ -15,7 +15,7 @@ class RotateTool extends Tool {
   private originalAngle = 0
   private originalRotation = 0
 
-  tempShortcut = new KeyInput(["Shift"], " ")
+  tempShortcut = new KeyInput(["Shift"], "Space")
 
   start(ev: ToolPointerEvent) {
     if (!this.picture) {
