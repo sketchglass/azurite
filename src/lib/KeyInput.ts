@@ -4,7 +4,7 @@ const keyboardLayout = require("keyboard-layout")
 function electronKeyNames(code: string) {
   switch (code) {
     case "Meta":
-      return "Control"
+      return "Command"
     case "MetaOrControl":
       return "CommandOrControl"
     case "Space":
