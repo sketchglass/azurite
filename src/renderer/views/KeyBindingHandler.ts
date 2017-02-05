@@ -1,9 +1,11 @@
 import {actionRegistry} from "../app/ActionRegistry"
 import {keyBindingRegistry} from "../app/KeyBindingRegistry"
 import {toolManager} from "../app/ToolManager"
+import KeyInput from "../../lib/KeyInput"
+import KeyRecorder from "../../lib/KeyRecorder"
 
 class KeyBindingHandler {
-  pressedCodes = new Set<string>()
+  private keyRecorder = new KeyRecorder()
 
   constructor() {
     document.addEventListener("keydown", e => this.onKeyDown(e))
@@ -11,10 +13,10 @@ class KeyBindingHandler {
     window.addEventListener("blur", e => this.onBlur())
   }
 
-  onKeyDown(e: KeyboardEvent) {
+  private onKeyDown(e: KeyboardEvent) {
     const keyBindings = keyBindingRegistry.keyBindingsForCode(e.key)
     for (const binding of keyBindings) {
-      if (binding.keyInput.matchesEvent(e)) {
+      if (binding.keyInput.equals(KeyInput.fromEvent(e))) {
         const action = actionRegistry.actions.get(binding.action)
         if (action) {
           action.run()
@@ -24,32 +26,36 @@ class KeyBindingHandler {
       }
     }
     for (const tool of toolManager.tools) {
-      if (tool.toggleShortcut && tool.toggleShortcut.matchesEvent(e)) {
+      if (tool.toggleShortcut && tool.toggleShortcut.equals(KeyInput.fromEvent(e))) {
         toolManager.currentTool = tool
         e.preventDefault()
         return
       }
     }
-    this.pressedCodes.add(e.code)
-    for (const tool of toolManager.tools) {
-      if (tool.tempShortcut && tool.tempShortcut.matchesCodes(this.pressedCodes)) {
-        toolManager.overrideTool = tool
-      }
-    }
+    this.keyRecorder.keyDown(e)
+    this.updateOverrideTool()
   }
 
-  onKeyUp(e: KeyboardEvent) {
-    this.pressedCodes.delete(e.code)
-    const {overrideTool} = toolManager
-    if (overrideTool) {
-      if (!(overrideTool.tempShortcut && overrideTool.tempShortcut.matchesCodes(this.pressedCodes))) {
-        toolManager.overrideTool = undefined
-      }
-    }
+  private onKeyUp(e: KeyboardEvent) {
+    this.keyRecorder.keyUp(e)
+    this.updateOverrideTool()
   }
 
-  onBlur() {
-    this.pressedCodes.clear()
+  private onBlur() {
+    this.keyRecorder.clear()
+  }
+
+  private updateOverrideTool() {
+    const {keyInput} = this.keyRecorder
+    if (keyInput) {
+      for (const tool of toolManager.tools) {
+        if (tool.tempShortcut && tool.tempShortcut.equals(keyInput)) {
+          toolManager.overrideTool = tool
+          return
+        }
+      }
+    }
+    toolManager.overrideTool = undefined
   }
 }
 

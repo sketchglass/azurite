@@ -35,6 +35,9 @@ export
 type KeyModifier = "Meta"|"Control"|"MetaOrControl"|"Alt"|"Shift"
 
 export
+const allModifiers: KeyModifier[] = ["Meta", "Control", "MetaOrControl", "Alt", "Shift"]
+
+export
 interface KeyInputData {
   modifiers: KeyModifier[]
   code: string
@@ -50,6 +53,11 @@ class KeyInput {
     return new KeyInput(data.modifiers, data.code)
   }
 
+  static fromEvent(e: KeyboardEvent) {
+    const modifiers = allModifiers.filter(m => e.getModifierState(m))
+    return new KeyInput(modifiers, e.code)
+  }
+
   toData(): KeyInputData {
     const {modifiers, code} = this
     return {modifiers, code}
@@ -59,28 +67,13 @@ class KeyInput {
     return [...this.modifiers, this.code].map(electronKeyNames).join("+")
   }
 
-  matchesEvent(e: KeyboardEvent) {
-    if (e.code == this.code) {
-      const {modifiers} = this
-      if (modifiers.includes("MetaOrControl")) {
-        return (e.ctrlKey || e.metaKey) &&
-          e.altKey == modifiers.includes("Alt") && e.shiftKey == modifiers.includes("Shift")
-      } else {
-        return e.ctrlKey == modifiers.includes("Control") && e.metaKey == modifiers.includes("Meta") &&
-          e.altKey == modifiers.includes("Alt") && e.shiftKey == modifiers.includes("Shift")
-      }
-    } else {
-      return false
-    }
-  }
-
-  matchesCodes(codes: Iterable<string>) {
-    for (const metaOrCtrl of ["Meta", "Control"]) {
-      const modifiers = this.modifiers.map(m => m == "MetaOrControl" ? metaOrCtrl : m)
-      const expected = [this.code, ...modifiers].sort()
-      const actual = [...codes].sort()
-      if (deepEqual(expected, actual)) {
-        return true
+  equals(other: KeyInput) {
+    if (this.code == other.code) {
+      for (const metaOrCtrl of ["Meta", "Control"]) {
+        const normalizeModifiers = (modifiers: KeyModifier[]) => modifiers.map(m => m == "MetaOrControl" ? metaOrCtrl : m).sort()
+        if (deepEqual(normalizeModifiers(this.modifiers), normalizeModifiers(other.modifiers))) {
+          return true
+        }
       }
     }
     return false
