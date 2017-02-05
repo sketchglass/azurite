@@ -6,8 +6,8 @@ import KeyInput, {KeyInputData} from "../../../lib/KeyInput"
 import ShortcutEdit from "../components/ShortcutEdit"
 
 export interface ToolShortcutsDialogData {
-  shortcut: KeyInputData|undefined
-  tempShortcut: KeyInputData|undefined
+  toggle: KeyInputData|undefined
+  temp: KeyInputData|undefined
 }
 
 interface ToolShortcutsDialogProps {
@@ -19,14 +19,14 @@ interface ToolShortcutsDialogProps {
 @observer
 export default
 class ToolShortcutsDialog extends React.Component<ToolShortcutsDialogProps, {}> {
-  @observable private shortcut: KeyInput|undefined
-  @observable private tempShortcut: KeyInput|undefined
+  @observable private toggle: KeyInput|undefined
+  @observable private temp: KeyInput|undefined
 
   constructor(props: ToolShortcutsDialogProps) {
     super(props)
-    const {shortcut, tempShortcut} = this.props.init
-    this.shortcut = shortcut && KeyInput.fromData(shortcut)
-    this.tempShortcut = tempShortcut && KeyInput.fromData(tempShortcut)
+    const {toggle, temp} = this.props.init
+    this.toggle = toggle && KeyInput.fromData(toggle)
+    this.temp = temp && KeyInput.fromData(temp)
   }
 
   render() {
@@ -34,12 +34,12 @@ class ToolShortcutsDialog extends React.Component<ToolShortcutsDialogProps, {}> 
       <DialogContainer title="Tool Shortcuts" okText="OK" canOK={true} onOK={this.onOK} onCancel={this.onCancel}>
         <table>
           <tr>
-            <td>Shortcut</td>
-            <td><ShortcutEdit shortcut={this.shortcut} onChange={s => this.shortcut = s} /></td>
+            <td>Toggle</td>
+            <td><ShortcutEdit shortcut={this.toggle} onChange={s => this.toggle = s} /></td>
           </tr>
           <tr>
-            <td>Temp Shortcut</td>
-            <td><ShortcutEdit shortcut={this.tempShortcut} onChange={s => this.tempShortcut = s} /></td>
+            <td>Temporary</td>
+            <td><ShortcutEdit shortcut={this.temp} onChange={s => this.temp = s} /></td>
           </tr>
         </table>
       </DialogContainer>
@@ -56,8 +56,8 @@ class ToolShortcutsDialog extends React.Component<ToolShortcutsDialogProps, {}> 
 
   private onOK = () => {
     this.props.onDone({
-      shortcut: this.shortcut && this.shortcut.toData(),
-      tempShortcut: this.tempShortcut && this.tempShortcut.toData(),
+      toggle: this.toggle && this.toggle.toData(),
+      temp: this.temp && this.temp.toData(),
     })
   }
 }

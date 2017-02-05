@@ -24,7 +24,7 @@ class KeyBindingHandler {
       }
     }
     for (const tool of toolManager.tools) {
-      if (tool.shortcut && tool.shortcut.matchesEvent(e)) {
+      if (tool.toggleShortcut && tool.toggleShortcut.matchesEvent(e)) {
         toolManager.currentTool = tool
         e.preventDefault()
         return

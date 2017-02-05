@@ -61,13 +61,13 @@ class ToolSelection extends React.Component<{hidden: boolean}, {}> {
     setTimeout(() => {
       const selectShortcuts = async () => {
         const result = await dialogLauncher.openToolShortcutsDialog({
-          shortcut: tool.shortcut && tool.shortcut.toData(),
-          tempShortcut: tool.tempShortcut && tool.tempShortcut.toData(),
+          toggle: tool.toggleShortcut && tool.toggleShortcut.toData(),
+          temp: tool.tempShortcut && tool.tempShortcut.toData(),
         })
         if (result) {
-          const {shortcut, tempShortcut} = result
-          tool.shortcut = shortcut && KeyInput.fromData(shortcut)
-          tool.tempShortcut = tempShortcut && KeyInput.fromData(tempShortcut)
+          const {toggle, temp} = result
+          tool.toggleShortcut  = toggle && KeyInput.fromData(toggle)
+          tool.tempShortcut = temp && KeyInput.fromData(temp)
         }
       }
       const menu = Menu.buildFromTemplate([
