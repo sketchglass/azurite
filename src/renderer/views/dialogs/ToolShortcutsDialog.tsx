@@ -5,21 +5,26 @@ import DialogContainer from "./DialogContainer"
 import KeyInput, {KeyInputData} from "../../../lib/KeyInput"
 import ShortcutEdit from "../components/ShortcutEdit"
 
+export interface ToolShortcutsDialogData {
+  shortcut: KeyInputData|undefined
+  tempShortcut: KeyInputData|undefined
+}
+
 interface ToolShortcutsDialogProps {
   onReadyShow: () => void
-  onDone: (keyInputs?: [KeyInputData|undefined, KeyInputData|undefined]) => void
-  init: [KeyInputData|undefined, KeyInputData|undefined]
+  onDone: (data?: ToolShortcutsDialogData)=> void
+  init: ToolShortcutsDialogData
 }
 
 @observer
 export default
 class ToolShortcutsDialog extends React.Component<ToolShortcutsDialogProps, {}> {
-  @observable shortcut: KeyInput|undefined
-  @observable tempShortcut: KeyInput|undefined
+  @observable private shortcut: KeyInput|undefined
+  @observable private tempShortcut: KeyInput|undefined
 
   constructor(props: ToolShortcutsDialogProps) {
     super(props)
-    const [shortcut, tempShortcut] = this.props.init
+    const {shortcut, tempShortcut} = this.props.init
     this.shortcut = shortcut && KeyInput.fromData(shortcut)
     this.tempShortcut = tempShortcut && KeyInput.fromData(tempShortcut)
   }
@@ -50,6 +55,9 @@ class ToolShortcutsDialog extends React.Component<ToolShortcutsDialogProps, {}> 
   }
 
   private onOK = () => {
-    this.props.onDone()
+    this.props.onDone({
+      shortcut: this.shortcut && this.shortcut.toData(),
+      tempShortcut: this.tempShortcut && this.tempShortcut.toData(),
+    })
   }
 }

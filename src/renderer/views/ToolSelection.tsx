@@ -5,6 +5,8 @@ import * as classNames from "classnames"
 import {remote} from "electron"
 const {Menu} = remote
 
+import KeyInput from "../../lib/KeyInput"
+
 import SVGIcon from "./components/SVGIcon"
 
 import {toolManager} from "../app/ToolManager"
@@ -57,10 +59,16 @@ class ToolSelection extends React.Component<{hidden: boolean}, {}> {
     toolManager.currentTool = tool
     const {clientX, clientY} = e
     setTimeout(() => {
-      const selectShortcuts = () => {
-        dialogLauncher.openToolShortcutsDialog(
-          [tool.shortcut && tool.shortcut.toData(), tool.tempShortcut && tool.tempShortcut.toData()]
-        )
+      const selectShortcuts = async () => {
+        const result = await dialogLauncher.openToolShortcutsDialog({
+          shortcut: tool.shortcut && tool.shortcut.toData(),
+          tempShortcut: tool.tempShortcut && tool.tempShortcut.toData(),
+        })
+        if (result) {
+          const {shortcut, tempShortcut} = result
+          tool.shortcut = shortcut && KeyInput.fromData(shortcut)
+          tool.tempShortcut = tempShortcut && KeyInput.fromData(tempShortcut)
+        }
       }
       const menu = Menu.buildFromTemplate([
         {label: "Shortcuts...", click: selectShortcuts},
