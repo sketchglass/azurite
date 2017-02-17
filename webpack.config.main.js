@@ -1,7 +1,9 @@
+const path = require("path")
+
 module.exports = {
   entry: "./src/main/index.ts",
   output: {
-    path: "./dist/assets",
+    path: path.resolve(__dirname, "./dist/assets"),
     filename: 'main.js',
     libraryTarget: "commonjs",
   },
@@ -16,13 +18,13 @@ module.exports = {
     "nbind": true,
   },
   resolve: {
-    extensions: ["", ".ts", ".js"],
+    extensions: [".ts", ".js"],
   },
   module: {
     loaders: [
       {
         test: /\.ts$/,
-        loader: "ts-loader",
+        use: "ts-loader",
       },
     ],
   },
