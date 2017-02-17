@@ -19,6 +19,7 @@ export class BrushEnginePen extends BrushEngine {
       minWidthRatio: 0.5,
       stabilizingLevel: 2,
       eraser: false,
+      shortcut: undefined,
     })
   }
 

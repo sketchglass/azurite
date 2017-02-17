@@ -6,6 +6,7 @@ import {Tree, TreeNode, NodeInfo} from "react-draggable-tree"
 import "react-draggable-tree/lib/index.css"
 import {remote} from "electron"
 const {Menu} = remote
+import KeyInput from "../../../lib/KeyInput"
 import {BrushPreset} from "../../brush/BrushPreset"
 import {brushPresetManager} from "../../app/BrushPresetManager"
 import {brushEngineRegistry} from "../../app/BrushEngineRegistry"
@@ -14,6 +15,7 @@ import {defaultBrushPresets} from "../../brush/DefaultBrushPresets"
 import BrushTool from "../../tools/BrushTool"
 import SVGIcon from "../components/SVGIcon"
 import ClickToEdit from "../components/ClickToEdit"
+import {dialogLauncher} from "../dialogs/DialogLauncher"
 
 interface BrushPresetNode extends TreeNode {
   preset: BrushPreset
@@ -119,10 +121,29 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
           brushPresetManager.presets.splice(selectedIndices[i], 1)
         }
       })
-      const menu = Menu.buildFromTemplate([
+      const menuTemplate: Electron.MenuItemOptions[] = [
         {label: "Add", submenu: addPresetItems},
         {label: "Remove", click: removePresets}
-      ])
+      ]
+      if (nodeInfo) {
+        const preset = brushPresetManager.presets[nodeInfo.path[0]]
+        const editShortcut = action(async () => {
+          const result = await dialogLauncher.openToolShortcutsDialog({
+            noTemp: true,
+            toggle: preset.shortcut && preset.shortcut.toData(),
+            temp: undefined,
+          })
+          if (result) {
+            const {toggle} = result
+            preset.shortcut = toggle && KeyInput.fromData(toggle)
+          }
+        })
+        menuTemplate.push(
+          {type: "separator"},
+          {label: "Shortcut...", click: editShortcut},
+        )
+      }
+      const menu = Menu.buildFromTemplate(menuTemplate)
       menu.popup(remote.getCurrentWindow(), clientX, clientY)
     }, 50)
   })

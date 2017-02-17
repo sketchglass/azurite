@@ -20,6 +20,7 @@ export class BrushEngineWatercolor extends BrushEngine {
       stabilizingLevel: 2,
       blending: 0.5,
       thickness: 0.5,
+      shortcut: undefined,
     })
   }
 
