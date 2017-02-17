@@ -4,7 +4,31 @@
   line-height: 24px;
   background-color: var(--lighten-background-color);
   border-radius: 4px;
+  position: relative;
+  padding: 0 6px;
   &:focus {
     background-color: var(--ui-primary-background-color);
+  }
+  &:hover .ShortcutEdit_clear {
+    display: block;
+  }
+  &_clear {
+    display: none;
+    position: absolute;
+    right: 0px;
+    top: 0px;
+    width: 8px;
+    height: 8px;
+    padding: 8px;
+    &:before {
+      content: "";
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      width: 8px;
+      height: 8px;
+      mask: url("../../../bundles/icons/flaticon/svg/multiply.svg");
+      background-color: var(--default-color);
+    }
   }
 }

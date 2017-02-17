@@ -11,13 +11,14 @@ class ShortcutEdit extends React.Component<ShortcutEditProps, {}> {
   render() {
     const {shortcut} = this.props
     return (
-      <div className="ShortcutEdit" tabIndex={-1} onKeyDown={this.onKeyDown} onFocus={this.onFocus} >
+      <div className="ShortcutEdit" tabIndex={-1} onKeyDown={this.onKeyDown} >
         {shortcut ? shortcut.toElectronAccelerator() : ""}
+        <div className="ShortcutEdit_clear" onClick={this.onClear} />
       </div>
     )
   }
 
-  private onFocus = () => {
+  private onClear = () => {
     this.props.onChange(undefined)
   }
 
