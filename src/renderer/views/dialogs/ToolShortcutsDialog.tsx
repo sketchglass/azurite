@@ -6,6 +6,7 @@ import KeyInput, {KeyInputData} from "../../../lib/KeyInput"
 import ShortcutEdit from "../components/ShortcutEdit"
 
 export interface ToolShortcutsDialogData {
+  noTemp?: boolean
   toggle: KeyInputData|undefined
   temp: KeyInputData|undefined
 }
@@ -37,7 +38,7 @@ class ToolShortcutsDialog extends React.Component<ToolShortcutsDialogProps, {}> 
             <td>Toggle</td>
             <td><ShortcutEdit shortcut={this.toggle} onChange={s => this.toggle = s} /></td>
           </tr>
-          <tr>
+          <tr hidden={this.props.init.noTemp}>
             <td>Temporary</td>
             <td><ShortcutEdit shortcut={this.temp} onChange={s => this.temp = s} /></td>
           </tr>

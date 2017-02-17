@@ -1,8 +1,11 @@
+import {action} from "mobx"
 import {actionRegistry} from "../app/ActionRegistry"
 import {keyBindingRegistry} from "../app/KeyBindingRegistry"
 import {toolManager} from "../app/ToolManager"
+import {brushPresetManager} from "../app/BrushPresetManager"
 import KeyInput from "../../lib/KeyInput"
 import KeyRecorder from "../../lib/KeyRecorder"
+import BrushTool from "../tools/BrushTool"
 
 class KeyBindingHandler {
   private keyRecorder = new KeyRecorder()
@@ -13,10 +16,11 @@ class KeyBindingHandler {
     window.addEventListener("blur", e => this.onBlur())
   }
 
-  private onKeyDown(e: KeyboardEvent) {
+  @action private onKeyDown(e: KeyboardEvent) {
     const keyBindings = keyBindingRegistry.keyBindingsForCode(e.key)
+    const keyInput = KeyInput.fromEvent(e)
     for (const binding of keyBindings) {
-      if (binding.keyInput.equals(KeyInput.fromEvent(e))) {
+      if (binding.keyInput.equals(keyInput)) {
         const action = actionRegistry.actions.get(binding.action)
         if (action) {
           action.run()
@@ -26,8 +30,17 @@ class KeyBindingHandler {
       }
     }
     for (const tool of toolManager.tools) {
-      if (tool.toggleShortcut && tool.toggleShortcut.equals(KeyInput.fromEvent(e))) {
+      if (tool.toggleShortcut && tool.toggleShortcut.equals(keyInput)) {
         toolManager.currentTool = tool
+        e.preventDefault()
+        return
+      }
+    }
+    const brushTool = toolManager.tools.find(t => t instanceof BrushTool)
+    for (const [index, brush] of brushPresetManager.presets.entries()) {
+      if (brush.shortcut && brush.shortcut.equals(keyInput)) {
+        toolManager.currentTool = brushTool
+        brushPresetManager.currentPresetIndex = index
         e.preventDefault()
         return
       }
@@ -36,7 +49,7 @@ class KeyBindingHandler {
     this.updateOverrideTool()
   }
 
-  private onKeyUp(e: KeyboardEvent) {
+  @action private onKeyUp(e: KeyboardEvent) {
     this.keyRecorder.keyUp(e)
     this.updateOverrideTool()
   }

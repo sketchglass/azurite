@@ -13,6 +13,7 @@ export function defaultBrushPresets(): BrushPresetData[] {
       minWidthRatio: 0.5,
       stabilizingLevel: 2,
       eraser: false,
+      shortcut: {modifiers: [], code: "KeyB"},
     },
     {
       engine: "watercolor",
@@ -24,6 +25,7 @@ export function defaultBrushPresets(): BrushPresetData[] {
       stabilizingLevel: 2,
       blending: 0.5,
       thickness: 0.5,
+      shortcut: {modifiers: [], code: "KeyW"},
     },
     {
       engine: "pen",
@@ -34,6 +36,7 @@ export function defaultBrushPresets(): BrushPresetData[] {
       minWidthRatio: 0.5,
       stabilizingLevel: 2,
       eraser: true,
+      shortcut: {modifiers: [], code: "KeyE"},
     },
   ]
   return presets

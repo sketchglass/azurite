@@ -1,11 +1,12 @@
 import * as React from "react"
-import {action, observable} from "mobx"
+import {action, observable, reaction} from "mobx"
 import {observer} from "mobx-react"
 import * as classNames from "classnames"
 import {Tree, TreeNode, NodeInfo} from "react-draggable-tree"
 import "react-draggable-tree/lib/index.css"
 import {remote} from "electron"
 const {Menu} = remote
+import KeyInput from "../../../lib/KeyInput"
 import {BrushPreset} from "../../brush/BrushPreset"
 import {brushPresetManager} from "../../app/BrushPresetManager"
 import {brushEngineRegistry} from "../../app/BrushEngineRegistry"
@@ -14,6 +15,7 @@ import {defaultBrushPresets} from "../../brush/DefaultBrushPresets"
 import BrushTool from "../../tools/BrushTool"
 import SVGIcon from "../components/SVGIcon"
 import ClickToEdit from "../components/ClickToEdit"
+import {dialogLauncher} from "../dialogs/DialogLauncher"
 
 interface BrushPresetNode extends TreeNode {
   preset: BrushPreset
@@ -43,6 +45,16 @@ class BrushPresetTree extends Tree<TreeNode> {
 @observer
 export default class BrushPresetsPanel extends React.Component<{}, {}> {
   @observable selectedKeys = new Set<number>(brushPresetManager.currentPreset ? [brushPresetManager.currentPreset.internalKey] : [])
+
+  constructor() {
+    super()
+    // reselect when current changed
+    reaction(() => brushPresetManager.currentPreset, preset => {
+      if (preset && !this.selectedKeys.has(preset.internalKey)) {
+        this.selectedKeys = new Set<number>([preset.internalKey])
+      }
+    })
+  }
 
   render() {
     const children: BrushPresetNode[] = brushPresetManager.presets.map(preset => {
@@ -101,29 +113,52 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
     const {clientX, clientY} = event
     // use timeout to workaround https://github.com/electron/electron/issues/1854
     setTimeout(() => {
-      const addPresetItems: Electron.MenuItemOptions[] = defaultBrushPresets().map(data => {
-        return {
-          label: data.title,
-          click: action(() => {
-            const preset = brushEngineRegistry.createPreset(data)
-            if (preset) {
-              brushPresetManager.presets.splice(index, 0, preset)
-            }
-          }),
-        }
-      })
-      const removePresets = action(() => {
-        const selectedIndices = Array.from(this.selectedKeys).map(key => brushPresetManager.presets.findIndex(p => p.internalKey == key))
-        selectedIndices.sort()
-        for (let i = selectedIndices.length - 1; i >= 0; --i) {
-          brushPresetManager.presets.splice(selectedIndices[i], 1)
-        }
-      })
-      const menu = Menu.buildFromTemplate([
-        {label: "Add", submenu: addPresetItems},
-        {label: "Remove", click: removePresets}
-      ])
-      menu.popup(remote.getCurrentWindow(), clientX, clientY)
+      this.showContextMenu(index, clientX, clientY)
     }, 50)
   })
+
+  @action private showContextMenu(index: number, clientX: number, clientY: number) {
+    const addPresetItems: Electron.MenuItemOptions[] = defaultBrushPresets().map(data => {
+      return {
+        label: data.title,
+        click: action(() => {
+          const preset = brushEngineRegistry.createPreset(data)
+          if (preset) {
+            brushPresetManager.presets.splice(index, 0, preset)
+          }
+        }),
+      }
+    })
+    const removePresets = action(() => {
+      const selectedIndices = Array.from(this.selectedKeys).map(key => brushPresetManager.presets.findIndex(p => p.internalKey == key))
+      selectedIndices.sort()
+      for (let i = selectedIndices.length - 1; i >= 0; --i) {
+        brushPresetManager.presets.splice(selectedIndices[i], 1)
+      }
+    })
+    const menuTemplate: Electron.MenuItemOptions[] = [
+      {label: "Add", submenu: addPresetItems},
+      {label: "Remove", click: removePresets}
+    ]
+    if (index < brushPresetManager.presets.length) {
+      const preset = brushPresetManager.presets[index]
+      const editShortcut = action(async () => {
+        const result = await dialogLauncher.openToolShortcutsDialog({
+          noTemp: true,
+          toggle: preset.shortcut && preset.shortcut.toData(),
+          temp: undefined,
+        })
+        if (result) {
+          const {toggle} = result
+          preset.shortcut = toggle && KeyInput.fromData(toggle)
+        }
+      })
+      menuTemplate.push(
+        {type: "separator"},
+        {label: "Shortcut...", click: editShortcut},
+      )
+    }
+    const menu = Menu.buildFromTemplate(menuTemplate)
+    menu.popup(remote.getCurrentWindow(), clientX, clientY)
+  }
 }
