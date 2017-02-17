@@ -1,5 +1,6 @@
 import {observable} from "mobx"
 import {BrushEngine} from "./BrushEngine"
+import KeyInput, {KeyInputData} from "../../lib/KeyInput"
 
 export type BrushIconType = "paint-brush"|"pen"|"eraser"
 
@@ -10,6 +11,7 @@ export interface BrushPresetProps {
   softness: number
   minWidthRatio: number
   stabilizingLevel: number
+  shortcut: KeyInputData|undefined
 }
 
 export interface BrushPresetData extends BrushPresetProps {
@@ -32,6 +34,8 @@ export abstract class BrushPreset implements BrushPresetProps {
   // how many neighbor event positions used to stabilize stroke
   @observable stabilizingLevel = 2
 
+  @observable shortcut: KeyInput|undefined
+
   constructor(public engine: BrushEngine, props: BrushPresetProps) {
     this.title = props.title
     this.width = props.width
@@ -39,11 +43,12 @@ export abstract class BrushPreset implements BrushPresetProps {
     this.softness = props.softness
     this.minWidthRatio = props.minWidthRatio
     this.stabilizingLevel = props.stabilizingLevel
+    this.shortcut = props.shortcut && KeyInput.fromData(props.shortcut)
   }
 
   toProps(): BrushPresetProps {
-    const {title, width, opacity, softness, minWidthRatio, stabilizingLevel} = this
-    return {title, width, opacity, softness, minWidthRatio, stabilizingLevel}
+    const {title, width, opacity, softness, minWidthRatio, stabilizingLevel, shortcut} = this
+    return {title, width, opacity, softness, minWidthRatio, stabilizingLevel, shortcut: shortcut && shortcut.toData()}
   }
 
   abstract clone(): BrushPreset
