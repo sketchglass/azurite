@@ -1,5 +1,6 @@
 import * as React from "react"
-import KeyInput, {KeyModifier} from "../../../lib/KeyInput"
+import KeyInput from "../../../lib/KeyInput"
+import KeyRecorder from "../../../lib/KeyRecorder"
 
 interface ShortcutEditProps {
   shortcut: KeyInput|undefined
@@ -8,10 +9,12 @@ interface ShortcutEditProps {
 
 export default
 class ShortcutEdit extends React.Component<ShortcutEditProps, {}> {
+  private keyRecorder = new KeyRecorder()
+
   render() {
     const {shortcut} = this.props
     return (
-      <div className="ShortcutEdit" tabIndex={-1} onKeyDown={this.onKeyDown} >
+      <div className="ShortcutEdit" tabIndex={-1} onKeyDown={this.onKeyDown} onKeyUp={this.onKeyUp} >
         {shortcut ? shortcut.toElectronAccelerator() : ""}
         <div className="ShortcutEdit_clear" onClick={this.onClear} />
       </div>
@@ -20,19 +23,17 @@ class ShortcutEdit extends React.Component<ShortcutEditProps, {}> {
 
   private onClear = () => {
     this.props.onChange(undefined)
+    this.keyRecorder.clear()
   }
 
   private onKeyDown = (e: React.KeyboardEvent<HTMLElement>) => {
     e.preventDefault()
-    const {code} = e.nativeEvent as KeyboardEvent
-    const modifiers = new Set<KeyModifier>()
-    if (!["Shift", "Alt", "Control", "Meta"].includes(code)) {
-      e.shiftKey && modifiers.add("Shift")
-      e.altKey && modifiers.add("Alt")
-      e.ctrlKey && modifiers.add("Control")
-      e.metaKey && modifiers.add("Meta")
-    }
-    const shortcut = new KeyInput([...modifiers], code)
-    this.props.onChange(shortcut)
+    this.keyRecorder.keyDown(e.nativeEvent as KeyboardEvent)
+    this.props.onChange(this.keyRecorder.keyInput)
+  }
+
+  private onKeyUp = (e: React.KeyboardEvent<HTMLElement>) => {
+    e.preventDefault()
+    this.keyRecorder.keyUp(e.nativeEvent as KeyboardEvent)
   }
 }
