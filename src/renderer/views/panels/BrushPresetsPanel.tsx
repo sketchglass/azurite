@@ -1,5 +1,5 @@
 import * as React from "react"
-import {action, observable} from "mobx"
+import {action, observable, reaction} from "mobx"
 import {observer} from "mobx-react"
 import * as classNames from "classnames"
 import {Tree, TreeNode, NodeInfo} from "react-draggable-tree"
@@ -45,6 +45,16 @@ class BrushPresetTree extends Tree<TreeNode> {
 @observer
 export default class BrushPresetsPanel extends React.Component<{}, {}> {
   @observable selectedKeys = new Set<number>(brushPresetManager.currentPreset ? [brushPresetManager.currentPreset.internalKey] : [])
+
+  constructor() {
+    super()
+    // reselect when current changed
+    reaction(() => brushPresetManager.currentPreset, preset => {
+      if (preset && !this.selectedKeys.has(preset.internalKey)) {
+        this.selectedKeys = new Set<number>([preset.internalKey])
+      }
+    })
+  }
 
   render() {
     const children: BrushPresetNode[] = brushPresetManager.presets.map(preset => {
