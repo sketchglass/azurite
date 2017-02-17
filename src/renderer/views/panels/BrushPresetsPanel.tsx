@@ -103,48 +103,52 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
     const {clientX, clientY} = event
     // use timeout to workaround https://github.com/electron/electron/issues/1854
     setTimeout(() => {
-      const addPresetItems: Electron.MenuItemOptions[] = defaultBrushPresets().map(data => {
-        return {
-          label: data.title,
-          click: action(() => {
-            const preset = brushEngineRegistry.createPreset(data)
-            if (preset) {
-              brushPresetManager.presets.splice(index, 0, preset)
-            }
-          }),
-        }
-      })
-      const removePresets = action(() => {
-        const selectedIndices = Array.from(this.selectedKeys).map(key => brushPresetManager.presets.findIndex(p => p.internalKey == key))
-        selectedIndices.sort()
-        for (let i = selectedIndices.length - 1; i >= 0; --i) {
-          brushPresetManager.presets.splice(selectedIndices[i], 1)
-        }
-      })
-      const menuTemplate: Electron.MenuItemOptions[] = [
-        {label: "Add", submenu: addPresetItems},
-        {label: "Remove", click: removePresets}
-      ]
-      if (nodeInfo) {
-        const preset = brushPresetManager.presets[nodeInfo.path[0]]
-        const editShortcut = action(async () => {
-          const result = await dialogLauncher.openToolShortcutsDialog({
-            noTemp: true,
-            toggle: preset.shortcut && preset.shortcut.toData(),
-            temp: undefined,
-          })
-          if (result) {
-            const {toggle} = result
-            preset.shortcut = toggle && KeyInput.fromData(toggle)
-          }
-        })
-        menuTemplate.push(
-          {type: "separator"},
-          {label: "Shortcut...", click: editShortcut},
-        )
-      }
-      const menu = Menu.buildFromTemplate(menuTemplate)
-      menu.popup(remote.getCurrentWindow(), clientX, clientY)
+      this.showContextMenu(index, clientX, clientY)
     }, 50)
   })
+
+  @action private showContextMenu(index: number, clientX: number, clientY: number) {
+    const addPresetItems: Electron.MenuItemOptions[] = defaultBrushPresets().map(data => {
+      return {
+        label: data.title,
+        click: action(() => {
+          const preset = brushEngineRegistry.createPreset(data)
+          if (preset) {
+            brushPresetManager.presets.splice(index, 0, preset)
+          }
+        }),
+      }
+    })
+    const removePresets = action(() => {
+      const selectedIndices = Array.from(this.selectedKeys).map(key => brushPresetManager.presets.findIndex(p => p.internalKey == key))
+      selectedIndices.sort()
+      for (let i = selectedIndices.length - 1; i >= 0; --i) {
+        brushPresetManager.presets.splice(selectedIndices[i], 1)
+      }
+    })
+    const menuTemplate: Electron.MenuItemOptions[] = [
+      {label: "Add", submenu: addPresetItems},
+      {label: "Remove", click: removePresets}
+    ]
+    if (index < brushPresetManager.presets.length) {
+      const preset = brushPresetManager.presets[index]
+      const editShortcut = action(async () => {
+        const result = await dialogLauncher.openToolShortcutsDialog({
+          noTemp: true,
+          toggle: preset.shortcut && preset.shortcut.toData(),
+          temp: undefined,
+        })
+        if (result) {
+          const {toggle} = result
+          preset.shortcut = toggle && KeyInput.fromData(toggle)
+        }
+      })
+      menuTemplate.push(
+        {type: "separator"},
+        {label: "Shortcut...", click: editShortcut},
+      )
+    }
+    const menu = Menu.buildFromTemplate(menuTemplate)
+    menu.popup(remote.getCurrentWindow(), clientX, clientY)
+  }
 }
