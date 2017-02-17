@@ -12,7 +12,7 @@ export interface ToolShortcutsDialogData {
 
 interface ToolShortcutsDialogProps {
   onReadyShow: () => void
-  onDone: (data?: ToolShortcutsDialogData)=> void
+  onDone: (data?: ToolShortcutsDialogData) => void
   init: ToolShortcutsDialogData
 }
 
