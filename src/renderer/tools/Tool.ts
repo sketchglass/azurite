@@ -12,7 +12,7 @@ import KeyInput, {KeyInputData} from "../../lib/KeyInput"
 
 export
 interface ToolConfigData {
-  shortcut: KeyInputData|null
+  toggleShortcut: KeyInputData|null
   tempShortcut: KeyInputData|null
 }
 
@@ -76,16 +76,16 @@ abstract class Tool {
   previewSelection(): Selection|false { return false }
   get selectionShowMode(): SelectionShowMode { return "normal" }
 
-  @observable shortcut: KeyInput|undefined
+  @observable toggleShortcut: KeyInput|undefined
   @observable tempShortcut: KeyInput|undefined
 
   saveConfig(): ToolConfigData {
-    const shortcut = this.shortcut ? this.shortcut.toData() : null
+    const toggleShortcut = this.toggleShortcut ? this.toggleShortcut.toData() : null
     const tempShortcut = this.tempShortcut ? this.tempShortcut.toData() : null
-    return {shortcut, tempShortcut}
+    return {toggleShortcut, tempShortcut}
   }
   loadConfig(config: ToolConfigData) {
-    this.shortcut = config.shortcut ? KeyInput.fromData(config.shortcut) : undefined
+    this.toggleShortcut = config.toggleShortcut ? KeyInput.fromData(config.toggleShortcut) : undefined
     this.tempShortcut = config.tempShortcut ? KeyInput.fromData(config.tempShortcut) : undefined
   }
 }

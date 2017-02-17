@@ -1,6 +1,7 @@
 import {PictureDimension} from "../../models/Picture"
 import {ipcRenderer} from "electron"
 import IPCChannels from "../../../common/IPCChannels"
+import {ToolShortcutsDialogData} from "./ToolShortcutsDialog"
 
 export default
 class DialogLauncher {
@@ -11,6 +12,10 @@ class DialogLauncher {
 
   openResolutionChangeDialog(init: PictureDimension) {
     return this.open<PictureDimension, PictureDimension>("resolutionChange", init)
+  }
+
+  openToolShortcutsDialog(init: ToolShortcutsDialogData) {
+    return this.open<ToolShortcutsDialogData, ToolShortcutsDialogData>("toolShortcuts", init)
   }
 
   async open<TResult, TParam>(name: string, param: TParam): Promise<TResult|undefined> {

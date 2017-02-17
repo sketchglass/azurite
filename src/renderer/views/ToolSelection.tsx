@@ -2,6 +2,10 @@ import {action} from "mobx"
 import * as React from "react"
 import {observer} from "mobx-react"
 import * as classNames from "classnames"
+import {remote} from "electron"
+const {Menu} = remote
+
+import KeyInput from "../../lib/KeyInput"
 
 import SVGIcon from "./components/SVGIcon"
 
@@ -9,6 +13,8 @@ import {toolManager} from "../app/ToolManager"
 
 import Tool from "../tools/Tool"
 import ToolIDs from "../tools/ToolIDs"
+
+import {dialogLauncher} from "../views/dialogs/DialogLauncher"
 
 const toolToIcon = (tool: Tool) => {
   const map = {
@@ -39,7 +45,8 @@ class ToolSelection extends React.Component<{hidden: boolean}, {}> {
           const selected = tool === currentTool
           const className = classNames("ToolSelection_button", {"ToolSelection_button-selected": selected})
           const onClick = () => this.onChange(tool)
-          return <button key={i} onClick={onClick} className={className}>{toolToIcon(tool)}</button>
+          const onContextMenu = (e: React.MouseEvent<HTMLElement>) => this.onContextMenu(e, tool)
+          return <button key={i} onClick={onClick} onContextMenu={onContextMenu} className={className}>{toolToIcon(tool)}</button>
         })
       }
       </div>
@@ -47,5 +54,26 @@ class ToolSelection extends React.Component<{hidden: boolean}, {}> {
   }
   private onChange = action((tool: Tool) => {
     toolManager.currentTool = tool
+  })
+  private onContextMenu = action((e: React.MouseEvent<HTMLElement>, tool: Tool) => {
+    toolManager.currentTool = tool
+    const {clientX, clientY} = e
+    setTimeout(() => {
+      const selectShortcuts = async () => {
+        const result = await dialogLauncher.openToolShortcutsDialog({
+          toggle: tool.toggleShortcut && tool.toggleShortcut.toData(),
+          temp: tool.tempShortcut && tool.tempShortcut.toData(),
+        })
+        if (result) {
+          const {toggle, temp} = result
+          tool.toggleShortcut  = toggle && KeyInput.fromData(toggle)
+          tool.tempShortcut = temp && KeyInput.fromData(temp)
+        }
+      }
+      const menu = Menu.buildFromTemplate([
+        {label: "Shortcuts...", click: selectShortcuts},
+      ])
+      menu.popup(remote.getCurrentWindow(), clientX, clientY)
+    }, 50)
   })
 }

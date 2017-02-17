@@ -1,6 +1,9 @@
 machine:
   node:
     version: 6.1.0
+dependencies:
+  pre:
+    - sudo apt-get update; sudo apt-get install libx11-dev libxkbfile-dev
 test:
   override:
     - npm run lint

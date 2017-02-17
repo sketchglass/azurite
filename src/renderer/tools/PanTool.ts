@@ -12,7 +12,7 @@ class PanTool extends Tool {
   }
   originalPos = new Vec2(0)
   originalTranslation = new Vec2(0)
-  tempShortcut = new KeyInput([], " ")
+  tempShortcut = new KeyInput([], "Space")
 
   start(ev: ToolPointerEvent) {
     if (!this.picture) {

@@ -3,6 +3,7 @@ import * as ReactDOM from "react-dom"
 import {remote, ipcRenderer} from "electron"
 import NewPictureDialog from "./NewPictureDialog"
 import ResolutionChangeDialog from "./ResolutionChangeDialog"
+import ToolShortcutsDialog from "./ToolShortcutsDialog"
 import "../../../styles/main.css"
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -33,6 +34,9 @@ window.addEventListener("DOMContentLoaded", () => {
         break
       case "resolutionChange":
         dialog = <ResolutionChangeDialog init={param} onReadyShow={onReadyShow} onDone={onDone} />
+        break
+      case "toolShortcuts":
+        dialog = <ToolShortcutsDialog init={param} onReadyShow={onReadyShow} onDone={onDone} />
         break
     }
     if (dialog) {

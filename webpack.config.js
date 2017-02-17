@@ -20,6 +20,7 @@ module.exports = {
   externals: {
     "glslify": "undefined", // glslify will be transformed with babel-plugin-glslify so don't have to be required
     "nbind": "requireManualResolve('nbind')",
+    "keyboard-layout": "requireManualResolve('keyboard-layout')",
   },
   resolve: {
     extensions: ["", ".ts", ".tsx", ".js"],

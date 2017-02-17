@@ -9,7 +9,7 @@ interface KeyBinding {
 export default
 class KeyBindingRegistry {
   keyBindings = new Map<string, KeyBinding>()
-  keyToKeyBindings = new Map<string, KeyBinding[]>()
+  codeToKeyBindings = new Map<string, KeyBinding[]>()
 
   keyInputForAction(id: string) {
     const keyBinding = this.keyBindings.get(id)
@@ -18,18 +18,18 @@ class KeyBindingRegistry {
     }
   }
 
-  keyBindingsForKey(key: string) {
-    return this.keyToKeyBindings.get(key) || []
+  keyBindingsForCode(code: string) {
+    return this.codeToKeyBindings.get(code) || []
   }
 
   add(...keyBindings: [string, KeyInput][]) {
     for (const [action, keyInput] of keyBindings) {
       const keyBinding = {action, keyInput}
       this.keyBindings.set(action, keyBinding)
-      if (this.keyToKeyBindings.has(keyInput.key)) {
-        this.keyToKeyBindings.get(keyInput.key)!.push(keyBinding)
+      if (this.codeToKeyBindings.has(keyInput.code)) {
+        this.codeToKeyBindings.get(keyInput.code)!.push(keyBinding)
       } else {
-        this.keyToKeyBindings.set(keyInput.key, [keyBinding])
+        this.codeToKeyBindings.set(keyInput.code, [keyBinding])
       }
     }
   }
@@ -38,34 +38,34 @@ class KeyBindingRegistry {
 export const keyBindingRegistry = new KeyBindingRegistry()
 
 keyBindingRegistry.add(
-  [ActionIDs.fileNew, new KeyInput(["MetaOrControl"], "n")],
-  [ActionIDs.fileOpen, new KeyInput(["MetaOrControl"], "o")],
-  [ActionIDs.fileSave, new KeyInput(["MetaOrControl"], "s")],
-  [ActionIDs.fileSaveAs, new KeyInput(["MetaOrControl", "Shift"], "s")],
-  [ActionIDs.fileClose, new KeyInput(["MetaOrControl"], "w")],
+  [ActionIDs.fileNew, new KeyInput(["MetaOrControl"], "KeyN")],
+  [ActionIDs.fileOpen, new KeyInput(["MetaOrControl"], "KeyO")],
+  [ActionIDs.fileSave, new KeyInput(["MetaOrControl"], "KeyS")],
+  [ActionIDs.fileSaveAs, new KeyInput(["MetaOrControl", "Shift"], "KeyS")],
+  [ActionIDs.fileClose, new KeyInput(["MetaOrControl"], "KeyW")],
 
-  [ActionIDs.editUndo, new KeyInput(["MetaOrControl"], "z")],
-  [ActionIDs.editRedo, process.platform == "darwin" ? new KeyInput(["Shift", "Meta"], "z") : new KeyInput(["Control"], "y")],
-  [ActionIDs.editCut, new KeyInput(["MetaOrControl"], "x")],
-  [ActionIDs.editCopy, new KeyInput(["MetaOrControl"], "c")],
-  [ActionIDs.editPaste, new KeyInput(["MetaOrControl"], "v")],
+  [ActionIDs.editUndo, new KeyInput(["MetaOrControl"], "KeyZ")],
+  [ActionIDs.editRedo, process.platform == "darwin" ? new KeyInput(["Shift", "Meta"], "KeyZ") : new KeyInput(["Control"], "KeyY")],
+  [ActionIDs.editCut, new KeyInput(["MetaOrControl"], "KeyX")],
+  [ActionIDs.editCopy, new KeyInput(["MetaOrControl"], "KeyC")],
+  [ActionIDs.editPaste, new KeyInput(["MetaOrControl"], "KeyV")],
 
-  [ActionIDs.selectionSelectAll, new KeyInput(["MetaOrControl"], "a")],
-  [ActionIDs.selectionClear, new KeyInput(["MetaOrControl"], "d")],
-  [ActionIDs.selectionInvert, new KeyInput(["Shift", "MetaOrControl"], "i")],
+  [ActionIDs.selectionSelectAll, new KeyInput(["MetaOrControl"], "KeyA")],
+  [ActionIDs.selectionClear, new KeyInput(["MetaOrControl"], "KeyD")],
+  [ActionIDs.selectionInvert, new KeyInput(["Shift", "MetaOrControl"], "KeyI")],
 
-  [ActionIDs.layerAdd, new KeyInput(["MetaOrControl", "Shift"], "n")],
-  [ActionIDs.layerGroup, new KeyInput(["MetaOrControl"], "g")],
+  [ActionIDs.layerAdd, new KeyInput(["MetaOrControl", "Shift"], "KeyN")],
+  [ActionIDs.layerGroup, new KeyInput(["MetaOrControl"], "KeyG")],
   [ActionIDs.layerRemove, new KeyInput(["MetaOrControl"], "Delete")],
-  [ActionIDs.layerMerge, new KeyInput(["MetaOrControl"], "e")],
+  [ActionIDs.layerMerge, new KeyInput(["MetaOrControl"], "KeyE")],
   [ActionIDs.layerClear, new KeyInput([], "Delete")],
   [ActionIDs.layerFill, new KeyInput(["Alt"], "Delete")],
 
-  [ActionIDs.viewReload, new KeyInput(["MetaOrControl"], "r")],
-  [ActionIDs.viewToggleDevTools, process.platform == "darwin" ? new KeyInput(["Alt", "Meta"], "i") : new KeyInput(["Control", "Shift"], "i")],
-  [ActionIDs.viewActualSize, new KeyInput(["MetaOrControl"], "0")],
-  [ActionIDs.viewZoomIn, new KeyInput(["MetaOrControl"], "+")],
-  [ActionIDs.viewZoomOut, new KeyInput(["MetaOrControl"], "-")],
+  [ActionIDs.viewReload, new KeyInput(["MetaOrControl"], "KeyR")],
+  [ActionIDs.viewToggleDevTools, process.platform == "darwin" ? new KeyInput(["Alt", "Meta"], "KeyI") : new KeyInput(["Control", "Shift"], "KeyI")],
+  [ActionIDs.viewActualSize, new KeyInput(["MetaOrControl"], "Digit0")],
+  [ActionIDs.viewZoomIn, new KeyInput(["MetaOrControl"], "Equal")],
+  [ActionIDs.viewZoomOut, new KeyInput(["MetaOrControl"], "Minus")],
   [ActionIDs.viewToggleUIPanels, new KeyInput([], "Tab")],
-  [ActionIDs.viewToggleFullscreen, process.platform == "darwin" ? new KeyInput(["Meta"], "f") : new KeyInput([], "F11")],
+  [ActionIDs.viewToggleFullscreen, process.platform == "darwin" ? new KeyInput(["Meta"], "KeyF") : new KeyInput([], "F11")],
 )
