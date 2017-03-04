@@ -2,6 +2,7 @@ import {Vec2} from "paintvec"
 import Tool, {ToolPointerEvent} from './Tool'
 import {renderer} from "../views/Renderer"
 import ToolIDs from "./ToolIDs"
+import KeyInput from "../../lib/KeyInput"
 
 export default
 class RotateTool extends Tool {
@@ -13,6 +14,8 @@ class RotateTool extends Tool {
   private dragging = false
   private originalAngle = 0
   private originalRotation = 0
+
+  tempShortcut = new KeyInput(["Shift"], "Space")
 
   start(ev: ToolPointerEvent) {
     if (!this.picture) {

@@ -1,11 +1,15 @@
+const path = require("path")
+const commonEntries = ["./src/renderer/requireManualResolve.ts"]
+
 module.exports = {
   entry: {
-    renderer: "./src/renderer/index.tsx",
-    dialogs: "./src/renderer/views/dialogs/DialogIndex.tsx",
-    test: "./src/test/index.js",
+    renderer: [...commonEntries, "./src/renderer/index.tsx"],
+    dialogs: [...commonEntries, "./src/renderer/views/dialogs/DialogIndex.tsx"],
+    preferences: [...commonEntries, "./src/renderer/views/preferences/PreferencesIndex.tsx"],
+    test: [...commonEntries, "./src/test/index.js"],
   },
   output: {
-    path: "./dist/assets",
+    path: path.resolve(__dirname, "./dist/assets"),
     publicPath: "/assets/",
     filename: '[name].js',
   },
@@ -16,49 +20,67 @@ module.exports = {
   },
   externals: {
     "glslify": "undefined", // glslify will be transformed with babel-plugin-glslify so don't have to be required
+    "nbind": "requireManualResolve('nbind')",
+    "keyboard-layout": "requireManualResolve('keyboard-layout')",
   },
   resolve: {
-    extensions: ["", ".ts", ".tsx", ".js"],
+    extensions: [".ts", ".tsx", ".js"],
   },
   module: {
     loaders: [
       {
         test: /\.json$/,
-        loader: 'json-loader'
+        use: 'json-loader',
       },
       {
         test: /\.tsx?$/,
         exclude: /Test\.tsx?$/,
-        loader: "babel-loader?plugins[]=glslify!ts-loader",
+        use: [
+          "babel-loader?plugins[]=glslify",
+          "ts-loader",
+        ],
       },
       {
         test: /Test\.tsx?$/,
-        loader: "babel-loader?plugins[]=espower!ts-loader",
+        use: [
+          "babel-loader?plugins[]=espower",
+          "ts-loader",
+        ],
       },
       {
         test: /\.css$/,
-        loader: 'style-loader!css-loader?importLoaders=1!postcss-loader'
+        use: [
+          'style-loader',
+          'css-loader?importLoaders=1!',
+          {
+            loader: 'postcss-loader',
+            options: {
+              plugins: () => {
+                return [
+                  require('postcss-import'),
+                  require('postcss-url'),
+                  require('postcss-cssnext')({
+                    features: {
+                      customProperties: false,
+                    },
+                  }),
+                ];
+              }
+            }
+          },
+        ],
       },
       {
         test: /\.(jpg|png|woff|woff2|eot|ttf|svg)/,
-        loader: 'url-loader?limit=10000'
-      }
+        use: [
+          'url-loader?limit=10000',
+        ],
+      },
     ],
   },
   plugins: [
     require("webpack-fail-plugin"),
   ],
-  postcss: (webpack) => {
-    return [
-      require('postcss-import'),
-      require('postcss-url'),
-      require('postcss-cssnext')({
-        features: {
-          customProperties: false,
-        },
-      }),
-    ];
-  },
   devtool: "inline-source-map",
   devServer: {
     contentBase: './dist',

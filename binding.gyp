@@ -5,6 +5,7 @@
         "auto.gypi"
       ],
       "sources": [
+        "src/nativelib/FloodFill.cc",
       ],
       "conditions": [
         ['OS=="mac"', {

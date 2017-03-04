@@ -1,18 +1,18 @@
 import {observable, autorun, reaction} from "mobx"
 import {observer} from "mobx-react"
-import {Subscription} from "rxjs/Subscription"
-import React = require("react")
+import * as React from "react"
+import {ipcRenderer} from "electron"
 import Picture from "../models/Picture"
 import {Vec2, Rect} from "paintvec"
 import Tool, {ToolPointerEvent} from "../tools/Tool"
 import {TabletEvent} from "receive-tablet-event"
 import {canvas} from "../GLContext"
 import {renderer} from "./Renderer"
-import * as IPCChannels from "../../common/IPCChannels"
+import IPCChannels from "../../common/IPCChannels"
 import PointerEvents from "./components/PointerEvents"
 import ScrollBar, {ScrollBarDirection} from "./components/ScrollBar"
 import FrameDebounced from "./components/FrameDebounced"
-import {appState} from "../state/AppState"
+import {appState} from "../app/AppState"
 
 @observer
 class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined}, {}> {
@@ -79,9 +79,6 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   @observable picture: Picture|undefined
   currentTool: Tool|undefined
   usingTablet = false
-  tabletDownSubscription: Subscription
-  tabletMoveSubscription: Subscription
-  tabletUpSubscription: Subscription
   clientRect = new Rect()
 
   constructor(props: DrawAreaProps) {
@@ -118,32 +115,28 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     element.insertBefore(canvas, element.firstChild)
     this.updateCursor()
 
-    this.tabletDownSubscription = IPCChannels.tabletDown.listen().subscribe(ev => {
+    ipcRenderer.on(IPCChannels.tabletDown, (e: Electron.IpcRendererEvent, tabletEvent: TabletEvent) => {
       this.usingTablet = true
-      this.onDown(this.toToolEvent(ev))
+      this.onDown(this.toToolEvent(tabletEvent))
     })
-    this.tabletMoveSubscription = IPCChannels.tabletMove.listen().subscribe(ev => {
-      const toolEv = this.toToolEvent(ev)
+    ipcRenderer.on(IPCChannels.tabletDown, (e: Electron.IpcRendererEvent, tabletEvent: TabletEvent) => {
+      this.usingTablet = true
+      this.onDown(this.toToolEvent(tabletEvent))
+    })
+    ipcRenderer.on(IPCChannels.tabletMove, (e: Electron.IpcRendererEvent, tabletEvent: TabletEvent) => {
+      const toolEv = this.toToolEvent(tabletEvent)
       renderer.cursorPosition = toolEv.rendererPos
       this.onMove(toolEv)
     })
-    this.tabletUpSubscription = IPCChannels.tabletUp.listen().subscribe(ev => {
+    ipcRenderer.on(IPCChannels.tabletUp, (e: Electron.IpcRendererEvent, tabletEvent: TabletEvent) => {
       this.usingTablet = false
-      this.onUp(this.toToolEvent(ev))
+      this.onUp(this.toToolEvent(tabletEvent))
     })
 
     this.resizeRenderer(true)
     window.addEventListener("resize", this.onResize)
     document.addEventListener("pointermove", this.onDocumentPointerMove)
     reaction(() => appState.uiVisible, () => setImmediate(() => this.onResize()))
-  }
-
-  componentWillUnmount() {
-    this.tabletDownSubscription.unsubscribe()
-    this.tabletMoveSubscription.unsubscribe()
-    this.tabletUpSubscription.unsubscribe()
-    window.removeEventListener("resize", this.onResize)
-    document.removeEventListener("pointermove", this.onDocumentPointerMove)
   }
 
   updateCursor() {
@@ -190,7 +183,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     canvas.style.width = `${roundRect.width}px`
     canvas.style.height = `${roundRect.height}px`
 
-    IPCChannels.setTabletCaptureArea.send(roundRect)
+    ipcRenderer.send(IPCChannels.setTabletCaptureArea, roundRect)
   }
 
   render() {

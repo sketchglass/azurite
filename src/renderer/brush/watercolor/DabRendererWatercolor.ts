@@ -1,16 +1,13 @@
-import {observable} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import {ShapeModel, RectShape, Texture, TextureDrawTarget} from "paintgl"
-import Waypoint from "../models/Waypoint"
-import BaseBrushTool from "./BaseBrushTool"
-import {context} from "../GLContext"
-import {drawTexture} from "../GLUtil"
-import TiledTexture, {Tile} from "../models/TiledTexture"
-import WatercolorSettings from "../views/WatercolorSettings"
-import {ToolPointerEvent} from "./Tool"
-import React = require("react")
-import {appState} from "../state/AppState"
-import ToolIDs from "./ToolIDs"
+import {context} from "../../GLContext"
+import {drawTexture} from "../../GLUtil"
+import TiledTexture, {Tile} from "../../models/TiledTexture"
+import {appState} from "../../app/AppState"
+import {DabRenderer} from "../DabRenderer"
+import {ImageLayer} from "../../models/Layer"
+import {Waypoint} from "../Waypoint"
+import {BrushPresetWatercolor} from "./BrushPresetWatercolor"
 
 enum ShapeClipModes {
   Shape, Clip
@@ -134,53 +131,50 @@ const watercolorShader = {
   `
 }
 
-export default
-class WatercolorTool extends BaseBrushTool {
-  minWidthRatio = 1
-  @observable blending = 0.5
-  @observable thickness = 0.5
-
-  readonly id = ToolIDs.watercolor
+export
+class DabRendererWatercolor extends DabRenderer {
   readonly title = "Watercolor"
 
-  shape = new RectShape(context, {rect: new Rect()})
-  model = new ShapeModel(context, {shape: this.shape, blendMode: "src", shader: watercolorShader})
-  drawTarget = new TextureDrawTarget(context)
-  originalTexture = new Texture(context, {pixelType: "half-float"})
-  originalDrawTarget = new TextureDrawTarget(context, this.originalTexture)
-  shapeClipTexture = new Texture(context, {pixelType: "half-float", filter: "mipmap-nearest"})
-  shapeClipDrawTarget = new TextureDrawTarget(context, this.shapeClipTexture)
-  shapeClipModel = new ShapeModel(context, {shape: this.shape, blendMode: "src", shader: shapeClipShader})
+  private shape = new RectShape(context, {rect: new Rect()})
+  private model = new ShapeModel(context, {shape: this.shape, blendMode: "src", shader: watercolorShader})
+  private drawTarget = new TextureDrawTarget(context)
+  private originalTexture = new Texture(context, {pixelType: "half-float"})
+  private originalDrawTarget = new TextureDrawTarget(context, this.originalTexture)
+  private shapeClipTexture = new Texture(context, {pixelType: "half-float", filter: "mipmap-nearest"})
+  private shapeClipDrawTarget = new TextureDrawTarget(context, this.shapeClipTexture)
+  private shapeClipModel = new ShapeModel(context, {shape: this.shape, blendMode: "src", shader: shapeClipShader})
 
-  sampleSize = 0
+  private sampleSize = 0
 
-  start(ev: ToolPointerEvent) {
-    super.start(ev)
-    if (!this.targetLayer || !this.picture) {
-      return
-    }
-    const {preserveOpacity} = this.targetLayer
+  constructor(public preset: BrushPresetWatercolor) {
+    super(preset)
+  }
 
-    this.sampleSize = Math.pow(2, Math.ceil(Math.log2(this.width + 2)))
+  start(layer: ImageLayer) {
+    super.start(layer)
+    const {preserveOpacity} = layer
+    const {preset} = this
+
+    this.sampleSize = Math.pow(2, Math.ceil(Math.log2(preset.width + 2)))
 
     this.model.uniforms = {
       uSampleSize: this.sampleSize,
-      uBlending: this.blending,
-      uThickness: this.thickness,
+      uBlending: preset.blending,
+      uThickness: preset.thickness,
       uColor: appState.color.toRgb(),
-      uOpacity: this.opacity,
+      uOpacity: preset.opacity,
       uPreserveOpacity: preserveOpacity,
     }
 
     this.shapeClipModel.uniforms = {
-      uPictureSize: this.picture.size,
+      uPictureSize: layer.picture.size,
       uSampleSize: this.sampleSize,
-      uBrushRadius: this.width * 0.5,
-      uSoftness: this.softness,
-      uMinWidthRatio: this.minWidthRatio,
+      uBrushRadius: preset.width * 0.5,
+      uSoftness: preset.softness,
+      uMinWidthRatio: preset.minWidthRatio,
       uPreserveOpacity: preserveOpacity,
-      uHasSelection: this.picture.selection.hasSelection,
-      uSelection: this.picture.selection.texture,
+      uHasSelection: layer.picture.selection.hasSelection,
+      uSelection: layer.picture.selection.texture,
     }
 
     this.originalTexture.size = new Vec2(this.sampleSize)
@@ -233,9 +227,5 @@ class WatercolorTool extends BaseBrushTool {
         this.drawTarget.draw(this.model)
       }
     }
-  }
-
-  renderSettings() {
-    return React.createFactory(WatercolorSettings)({tool: this})
   }
 }

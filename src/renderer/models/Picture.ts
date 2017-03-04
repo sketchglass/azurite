@@ -30,6 +30,9 @@ interface PictureDimension {
 
 export default
 class Picture {
+  static nextID = 0
+  readonly id = Picture.nextID++
+
   @observable dimension: PictureDimension = {width: 0, height: 0, dpi: 72}
   @computed get size() {
     return new Vec2(this.dimension.width, this.dimension.height)

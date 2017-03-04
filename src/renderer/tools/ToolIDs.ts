@@ -11,5 +11,4 @@ export default {
   floodFill: "floodFill",
   canvasArea: "canvasArea",
   brush: "brush",
-  watercolor: "watercolor",
 }

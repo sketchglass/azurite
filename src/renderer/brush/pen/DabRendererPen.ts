@@ -1,20 +1,16 @@
-import {observable} from "mobx"
 import {Vec2, Rect, Transform} from "paintvec"
 import {ShapeModel, TextureDrawTarget, Shape}  from "paintgl"
-import Waypoint from "../models/Waypoint"
-import BaseBrushTool from "./BaseBrushTool";
-import {context} from "../GLContext"
-import BrushSettings from "../views/BrushSettings"
-import TiledTexture, {Tile} from "../models/TiledTexture"
-import {ToolPointerEvent} from "./Tool"
-import React = require("react")
-import {appState} from "../state/AppState"
-import ToolIDs from "./ToolIDs"
+import {Waypoint} from "../Waypoint"
+import {context} from "../../GLContext"
+import TiledTexture, {Tile} from "../../models/TiledTexture"
+import {appState} from "../../app/AppState"
+import {DabRenderer} from "../DabRenderer"
+import {ImageLayer} from "../../models/Layer"
+import {BrushPresetPen} from "./BrushPresetPen"
 
 const brushShader = {
   vertex: `
     uniform float uBrushSize;
-    uniform float uSpacingRatio;
     uniform float uMinWidthRatio;
     uniform float uOpacity;
     uniform vec2 uPictureSize;
@@ -35,8 +31,7 @@ const brushShader = {
       vRadius = radius;
 
       // transparency = (overlap count) √ (final transparency)
-      float spacing = max(brushSize * uSpacingRatio, 1.0);
-      vOpacity = 1.0 - pow(1.0 - min(uOpacity, 0.998), spacing / brushSize);
+      vOpacity = 1.0 - pow(1.0 - min(uOpacity, 0.998), 1.0 / brushSize);
     }
   `,
   fragment: `
@@ -64,42 +59,37 @@ const brushShader = {
   `
 }
 
-export default
-class BrushTool extends BaseBrushTool {
-  shape: Shape
-  model: ShapeModel
-  drawTarget = new TextureDrawTarget(context)
-  readonly id = ToolIDs.brush
+export
+class DabRendererPen extends DabRenderer {
+  private shape: Shape
+  private model: ShapeModel
+  private drawTarget = new TextureDrawTarget(context)
   readonly title = "Brush"
-  @observable eraser = false
 
-  constructor() {
-    super()
+  constructor(public preset: BrushPresetPen) {
+    super(preset)
     this.shape = new Shape(context)
     this.shape.setVec2Attributes("aCenter", [])
     this.model = new ShapeModel(context, {shape: this.shape, shader: brushShader})
   }
 
-  start(ev: ToolPointerEvent) {
-    if (!this.picture) {
-      return
-    }
+  start(layer: ImageLayer) {
+    const {preset} = this
     this.model.uniforms = {
-      uPictureSize: this.picture.size,
-      uBrushSize: this.width,
+      uPictureSize: layer.picture.size,
+      uBrushSize: preset.width,
       uColor: appState.color.toRgb(),
-      uOpacity: this.opacity,
-      uMinWidthRatio: this.minWidthRatio,
-      uSpacingRatio: this.spacingRatio,
-      uSoftness: this.softness,
-      uHasSelection: this.picture.selection.hasSelection,
-      uSelection: this.picture.selection.texture,
+      uOpacity: preset.opacity,
+      uMinWidthRatio: preset.minWidthRatio,
+      uSoftness: preset.softness,
+      uHasSelection: layer.picture.selection.hasSelection,
+      uSelection: layer.picture.selection.texture,
     }
-    return super.start(ev)
+    return super.start(layer)
   }
 
   renderWaypoints(waypoints: Waypoint[], rect: Rect) {
-    const layer = this.currentLayer
+    const {layer} = this
     if (!layer) {
       return
     }
@@ -114,7 +104,7 @@ class BrushTool extends BaseBrushTool {
     const centers: Vec2[] = []
     const indices: number[] = []
 
-    const halfRectSize = new Vec2((this.width + 2) / 2)
+    const halfRectSize = new Vec2((this.preset.width + 2) / 2)
 
     for (let i = 0; i < waypoints.length; ++i) {
       const {pos, pressure} = waypoints[i]
@@ -134,7 +124,7 @@ class BrushTool extends BaseBrushTool {
     this.shape.setVec2Attributes("aCenter", centers)
     this.shape.indices = indices
 
-    this.model.blendMode = this.eraser ? "dst-out" : (layer.preserveOpacity ? "src-atop" : "src-over")
+    this.model.blendMode = this.preset.eraser ? "dst-out" : (layer.preserveOpacity ? "src-atop" : "src-over")
 
     for (const key of TiledTexture.keysForRect(rect)) {
       const tile = this.prepareTile(key)
@@ -145,9 +135,5 @@ class BrushTool extends BaseBrushTool {
       this.model.transform = Transform.translate(key.mulScalar(-Tile.width))
       this.drawTarget.draw(this.model)
     }
-  }
-
-  renderSettings() {
-    return React.createFactory(BrushSettings)({tool: this})
   }
 }

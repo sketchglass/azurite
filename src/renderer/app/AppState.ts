@@ -1,29 +1,24 @@
+import * as path from "path"
 import {observable, computed, reaction} from "mobx"
-import {remote} from "electron"
+import {remote, ipcRenderer} from "electron"
 import Picture from "../models/Picture"
-import Tool from "../tools/Tool"
-import BrushTool from "../tools/BrushTool"
-import WatercolorTool from "../tools/WatercolorTool"
-import PanTool from "../tools/PanTool"
-import {ZoomTool} from "../tools/ZoomTool"
-import RotateTool from "../tools/RotateTool"
-import TransformLayerTool from "../tools/TransformLayerTool"
-import RectSelectTool from "../tools/RectSelectTool"
-import FreehandSelectTool from "../tools/FreehandSelectTool"
-import PolygonSelectTool from "../tools/PolygonSelectTool"
-import CanvasAreaTool from "../tools/CanvasAreaTool"
-import FloodFillTool from "../tools/FloodFillTool"
 import {HSVColor} from "../../lib/Color"
 import {PictureState} from "./PictureState"
+import {PictureSave} from "../services/PictureSave"
 import {config, ConfigValues} from "./Config"
-import * as IPCChannels from "../../common/IPCChannels"
+import IPCChannels from "../../common/IPCChannels"
 import "../formats/ImageFormats"
+import "../actions/AppActions"
 import "../actions/FileActions"
 import "../actions/LayerActions"
 import "../actions/EditActions"
 import "../actions/SelectionAction"
 import "../actions/CanvasActions"
 import "../actions/ViewActions"
+import "../brush/pen/BrushEnginePen"
+import "../brush/watercolor/BrushEngineWatercolor"
+import {toolManager} from "./ToolManager"
+import {brushPresetManager} from "./BrushPresetManager"
 
 export
 class AppState {
@@ -41,19 +36,17 @@ class AppState {
     return this.currentPictureState && this.currentPictureState.picture
   }
 
-  readonly tools = observable<Tool>([])
-  @observable currentTool: Tool
-  @observable overrideTool: Tool|undefined
-
   @observable color = new HSVColor(0, 0, 1)
   @observable paletteIndex: number = 0
   readonly palette = observable<HSVColor|undefined>(new Array(100).fill(undefined))
 
+  @observable undoGroupingInterval = 300
+
   @computed get modal() {
-    return this.currentTool.modal
+    return toolManager.currentTool.modal
   }
   @computed get modalUndoStack() {
-    return this.currentTool.modalUndoStack
+    return toolManager.currentTool.modalUndoStack
   }
 
   @computed get undoStack() {
@@ -69,33 +62,15 @@ class AppState {
   @observable uiVisible = true
 
   constructor() {
-    reaction(() => [this.currentPictureState, this.currentTool], () => {
+    reaction(() => this.currentPictureState, () => {
       for (const pictureState of this.pictureStates) {
         if (pictureState == this.currentPictureState) {
-          pictureState.picture.blender.replaceTile = (layer, tileKey) => this.currentTool.previewLayerTile(layer, tileKey)
+          pictureState.picture.blender.tileHook = (layer, tileKey) => toolManager.currentTool.previewLayerTile(layer, tileKey)
         } else {
-          pictureState.picture.blender.replaceTile = undefined
+          pictureState.picture.blender.tileHook = undefined
         }
       }
     })
-  }
-
-  initTools() {
-    this.tools.replace([
-      new BrushTool(),
-      new WatercolorTool(),
-      new PanTool(),
-      new ZoomTool(),
-      new RotateTool(),
-      new TransformLayerTool(),
-      new RectSelectTool("rect"),
-      new RectSelectTool("ellipse"),
-      new FreehandSelectTool(),
-      new PolygonSelectTool(),
-      new FloodFillTool(),
-      new CanvasAreaTool(),
-    ])
-    this.currentTool = this.tools[0]
   }
 
   toggleUIVisible() {
@@ -116,25 +91,17 @@ class AppState {
     if (values.window.maximized) {
       win.maximize()
     }
-    for (const toolId in values.tools) {
-      const tool = this.tools.find(t => t.id == toolId)
-      if (tool) {
-        tool.config = values.tools[toolId]
-      }
-    }
-    const currentTool = this.tools.find(t => t.id == values.currentTool)
-    if (currentTool) {
-      this.currentTool = currentTool
-    }
+    toolManager.loadConfig(values)
+    brushPresetManager.loadConfig(values)
     this.color = new HSVColor(values.color.h, values.color.s, values.color.v)
     for (const [i, color] of values.palette.entries()) {
       this.palette[i] = color ? new HSVColor(color.h, color.s, color.v) : undefined
     }
     for (const filePath of values.files) {
-      const pictureState = await PictureState.openFromPath(filePath)
+      const pictureState = new PictureState(await PictureSave.openFromPath(filePath))
       if (pictureState) {
-      this.addPictureState(pictureState)
-    }
+        this.addPictureState(pictureState)
+      }
       this.openPicture
     }
   }
@@ -151,8 +118,8 @@ class AppState {
         bounds: (win.isFullScreen() || win.isMaximized()) ? config.values.window.bounds : win.getBounds(),
         maximized: win.isMaximized(),
       },
-      tools: {},
-      currentTool: this.currentTool.id,
+      ...toolManager.saveConfig(),
+      ...brushPresetManager.saveConfig(),
       color: colorToData(this.color),
       palette: this.palette.map(color => {
         if (color) {
@@ -162,9 +129,6 @@ class AppState {
       files: this.pictureStates
         .map(state => state.picture.filePath)
         .filter(path => path)
-    }
-    for (const tool of this.tools) {
-      values.tools[tool.id] = tool.config
     }
     config.values = values
   }
@@ -190,9 +154,16 @@ class AppState {
   }
 
   async openPicture() {
-    const pictureState = await PictureState.open()
+    const filePath = await PictureSave.getOpenPath()
+    if (!filePath) {
+      return
+    }
+    const pictureState = this.pictureStates.find(s => path.resolve(s.picture.filePath) == path.resolve(filePath))
     if (pictureState) {
-      this.addPictureState(pictureState)
+      this.currentPictureIndex = this.pictureStates.indexOf(pictureState)
+    } else {
+      const picture = await PictureSave.openFromPath(filePath)
+      this.addPictureState(new PictureState(picture))
     }
   }
 
@@ -201,7 +172,7 @@ class AppState {
       return
     }
     const pictureState = this.pictureStates[index]
-    if (!pictureState.confirmClose()) {
+    if (!await pictureState.confirmClose()) {
       return
     }
     this.pictureStates.splice(index, 1)
@@ -245,11 +216,11 @@ class AppState {
 }
 
 export const appState = new AppState()
-appState.initTools()
+toolManager.initTools()
 
-IPCChannels.windowResize.listen().forEach(() => {
+ipcRenderer.on(IPCChannels.windowResize, () => {
   appState.saveConfig()
 })
-IPCChannels.quit.listen().forEach(() => {
+ipcRenderer.on(IPCChannels.quit, () => {
   appState.quit()
 })

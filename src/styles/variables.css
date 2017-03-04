@@ -1,6 +1,6 @@
 :root {
   /* fonts */
-  --default-font-family: Lato;
+  --default-font-family: BlinkMacSystemFont, "Segoe UI";
   /* colors */
   --default-color: #ECEEF4;
   --default-background-color: #141414;

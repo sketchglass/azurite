@@ -1,0 +1,40 @@
+.Preferences {
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--default-background-color);
+  border: 1px solid var(--lighten-background-color);
+  box-sizing: border-box;
+}
+.PreferencesTabBar {
+  display: flex;
+  padding: 16px;
+  padding-bottom: 0;
+}
+.PreferencesTab {
+  height: 24px;
+  line-height: 24px;
+  padding: 0 16px;
+  border-radius: 12px;
+  &-selected {
+    background-color: var(--ui-primary-background-color);
+  }
+}
+.PreferencesPane {
+  width: 100%;
+  padding: 16px;
+  box-sizing: border-box;
+}
+.PreferencesRow {
+  display: flex;
+  align-items: center;
+  & > *:nth-child(1) {
+    flex: 1;
+  }
+  & > *:nth-child(2) {
+    display: flex;
+    align-items: center;
+    & > * {
+      margin-left: 8px;
+    }
+  }
+}

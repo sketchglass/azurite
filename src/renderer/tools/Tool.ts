@@ -1,12 +1,20 @@
-import {computed} from "mobx"
+import {computed, observable} from "mobx"
 import Layer from "../models/Layer"
 import Selection from "../models/Selection"
 import {Tile} from "../models/TiledTexture"
 import {UndoStack} from "../models/UndoStack"
 import {Vec2} from "paintvec"
 import React = require("react")
-import {appState} from "../state/AppState"
+import {appState} from "../app/AppState"
 import {SelectionShowMode} from "../views/Renderer"
+import {toolManager} from "../app/ToolManager"
+import KeyInput, {KeyInputData} from "../../lib/KeyInput"
+
+export
+interface ToolConfigData {
+  toggleShortcut: KeyInputData|null
+  tempShortcut: KeyInputData|null
+}
 
 export
 interface ToolPointerEvent {
@@ -37,7 +45,7 @@ abstract class Tool {
     }
   }
   @computed get active() {
-    return appState.currentTool == this
+    return toolManager.currentTool == this
   }
 
   abstract id: string
@@ -64,14 +72,21 @@ abstract class Tool {
 
   renderSettings(): JSX.Element { return React.createElement("div") }
   renderOverlayCanvas?(context: CanvasRenderingContext2D): void
-  previewLayerTile(layer: Layer, tileKey: Vec2): Tile|undefined|false { return false }
+  previewLayerTile(layer: Layer, tileKey: Vec2): {tile: Tile|undefined}|undefined { return }
   previewSelection(): Selection|false { return false }
   get selectionShowMode(): SelectionShowMode { return "normal" }
 
-  get config(): Object {
-    return {}
+  @observable toggleShortcut: KeyInput|undefined
+  @observable tempShortcut: KeyInput|undefined
+
+  saveConfig(): ToolConfigData {
+    const toggleShortcut = this.toggleShortcut ? this.toggleShortcut.toData() : null
+    const tempShortcut = this.tempShortcut ? this.tempShortcut.toData() : null
+    return {toggleShortcut, tempShortcut}
   }
-  set config(config: Object) {
+  loadConfig(config: ToolConfigData) {
+    this.toggleShortcut = config.toggleShortcut ? KeyInput.fromData(config.toggleShortcut) : undefined
+    this.tempShortcut = config.tempShortcut ? KeyInput.fromData(config.tempShortcut) : undefined
   }
 }
 export default Tool

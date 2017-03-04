@@ -1,9 +1,9 @@
 import {remote} from "electron"
 import Action from "./Action"
 import ActionIDs from "./ActionIDs"
-import {addAction} from "../state/ActionRegistry"
+import {addAction} from "../app/ActionRegistry"
 import {currentFocus} from "../views/CurrentFocus"
-import {appState} from "../state/AppState"
+import {appState} from "../app/AppState"
 
 @addAction
 export class EditUndoAction extends Action {

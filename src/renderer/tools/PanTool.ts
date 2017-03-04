@@ -1,6 +1,7 @@
 import {Vec2} from "paintvec"
 import Tool, {ToolPointerEvent} from './Tool'
 import ToolIDs from "./ToolIDs"
+import KeyInput from "../../lib/KeyInput"
 
 export default
 class PanTool extends Tool {
@@ -11,6 +12,7 @@ class PanTool extends Tool {
   }
   originalPos = new Vec2(0)
   originalTranslation = new Vec2(0)
+  tempShortcut = new KeyInput([], "Space")
 
   start(ev: ToolPointerEvent) {
     if (!this.picture) {

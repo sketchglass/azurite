@@ -1,8 +1,7 @@
 import {Vec2} from "paintvec"
 import {catmullRom, centripetalCatmullRom} from "../../lib/Geometry"
 
-export default
-class Waypoint {
+export class Waypoint {
   constructor(public pos: Vec2, public pressure: number) {
   }
 

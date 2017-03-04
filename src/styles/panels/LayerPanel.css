@@ -37,6 +37,7 @@
 }
 .LayerPanel_layer .ClickToEdit {
   flex: 1;
+  margin-right: 4px;
 }
 .LayerPanel_layer img {
   margin-right: 12px;

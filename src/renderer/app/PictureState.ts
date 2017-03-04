@@ -61,18 +61,4 @@ class PictureState {
       return new PictureState(new Picture(dimension))
     }
   }
-
-  static async open() {
-    const picture = await PictureSave.open()
-    if (picture) {
-      return new PictureState(picture)
-    }
-  }
-
-  static async openFromPath(filePath: string) {
-    const picture = await PictureSave.openFromPath(filePath)
-    if (picture) {
-      return new PictureState(picture)
-    }
-  }
 }

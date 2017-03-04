@@ -6,7 +6,7 @@ import {context} from "../GLContext"
 import TiledTexture, {Tile} from "../models/TiledTexture"
 import {drawTexture} from "../GLUtil"
 import Dirtiness from "../../lib/Dirtiness"
-import {layerBlender, ReplaceTile} from "./LayerBlender"
+import {layerBlender, TileHook} from "./LayerBlender"
 
 export default
 class PictureBlender {
@@ -19,12 +19,7 @@ class PictureBlender {
 
   dirtiness = new Dirtiness()
 
-  get replaceTile() {
-    return layerBlender.replaceTile
-  }
-  set replaceTile(f: ReplaceTile|undefined) {
-    layerBlender.replaceTile = f
-  }
+  tileHook: TileHook|undefined
 
   constructor(public picture: Picture) {
     this.dirtiness.addWhole()
@@ -37,6 +32,7 @@ class PictureBlender {
     if (!this.dirtiness.dirty) {
       return
     }
+    layerBlender.tileHook = this.tileHook
     const rect = this.drawTarget.scissor = this.dirtiness.rect
     this.drawTarget.clear(new Color(1, 1, 1, 1))
     const tileKeys = TiledTexture.keysForRect(rect || new Rect(new Vec2(0), this.picture.size))

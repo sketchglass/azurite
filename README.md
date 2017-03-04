@@ -19,6 +19,13 @@ npm install
 npm run watch
 ```
 
+### Build native code
+
+```
+npm run build:nativelib # rebuild entirely
+npm run node-gyp:build # build changed files only
+```
+
 ## Run App
 
 ```

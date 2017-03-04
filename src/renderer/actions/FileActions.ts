@@ -1,9 +1,9 @@
 import Action, {PictureAction} from "./Action"
 import ActionIDs from "./ActionIDs"
-import {addAction, actionRegistry} from "../state/ActionRegistry"
+import {addAction, actionRegistry} from "../app/ActionRegistry"
 import ImageFormat from "../formats/ImageFormat"
-import {formatRegistry} from "../state/FormatRegistry"
-import {appState} from "../state/AppState"
+import {formatRegistry} from "../app/FormatRegistry"
+import {appState} from "../app/AppState"
 import {PictureExport} from "../services/PictureExport"
 
 @addAction

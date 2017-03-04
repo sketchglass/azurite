@@ -1,7 +1,7 @@
 import {observer} from "mobx-react"
-import {appState} from "../../state/AppState"
+import {toolManager} from "../../app/ToolManager"
 
 export default observer(() => {
-  const {currentTool} = appState
+  const {currentTool} = toolManager
   return currentTool.renderSettings()
 })

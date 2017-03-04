@@ -1,4 +1,4 @@
-import {appState} from "../state/AppState"
+import {appState} from "../app/AppState"
 
 export
 abstract class Action {

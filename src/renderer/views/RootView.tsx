@@ -10,42 +10,31 @@ import ColorPanel from "./panels/ColorPanel"
 import ToolSettingsPanel from "./panels/ToolSettingsPanel"
 import NavigatorPanel from "./panels/NavigatorPanel"
 import LayerPanel from "./panels/LayerPanel"
+import BrushPresetsPanel from "./panels/BrushPresetsPanel"
 
-import NavigationKeyBinding from "./NavigationKeyBinding"
-import {appState} from "../state/AppState"
+import {appState} from "../app/AppState"
+import {toolManager} from "../app/ToolManager"
 
 import "./KeyBindingHandler"
 import "./MenuBar"
 import "../../styles/main.css"
 
 @observer export default
-class App extends React.Component<{}, {}> {
-  constructor() {
-    super()
-
-    new NavigationKeyBinding(klass => {
-      if (klass) {
-        for (const tool of appState.tools) {
-          if (tool instanceof klass) {
-            appState.overrideTool = tool
-          }
-        }
-      } else {
-        appState.overrideTool = undefined
-      }
-    })
-  }
+class RootView extends React.Component<{}, {}> {
   render() {
-    const {currentTool, overrideTool, uiVisible} = appState
+    const {currentTool, overrideTool} = toolManager
+    const {uiVisible} = appState
     const picture = appState.currentPicture
     return (
-      <div className="App">
+      <div className="RootView">
         {process.platform == "darwin" ? <div className="TitleBarPaddingMac" /> : <WindowsMenuBar />}
         <div className="WindowContent">
           <ToolSelection hidden={!uiVisible} />
           <aside className="Sidebar Sidebar-left" hidden={!uiVisible}>
             <div className="PanelTitle">Color</div>
             <ColorPanel />
+            <div className="PanelTitle">Brushes</div>
+            <BrushPresetsPanel />
             <div className="PanelTitle">Tool</div>
             <ToolSettingsPanel />
           </aside>
