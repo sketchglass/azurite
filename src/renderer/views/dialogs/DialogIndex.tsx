@@ -10,7 +10,7 @@ window.addEventListener("DOMContentLoaded", () => {
   const root = document.querySelector(".DialogRoot")!
 
   const onReadyShow = () => {
-    const {width, height} = root.firstElementChild.getBoundingClientRect()
+    const {width, height} = root.firstElementChild!.getBoundingClientRect()
     const win = remote.getCurrentWindow()
     win.setMenu(null as any)
     win.setContentSize(Math.round(width), Math.round(height))
