@@ -227,8 +227,8 @@ abstract class RectMoveTool extends Tool {
       const hToW = this.lastRect.width / this.lastRect.height
 
       const {width, height} = this.lastRect
-      const newWidth = width + diffWidth
-      const newHeight = height + diffHeight
+      const newWidth = width + (diffWidth || 0)
+      const newHeight = height + (diffHeight || 0)
       if (diffHeight == undefined || newWidth / width < newHeight / height) {
         diffHeight = newWidth * wToH - height
       } else {
