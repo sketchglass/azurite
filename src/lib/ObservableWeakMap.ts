@@ -5,7 +5,7 @@ class ObservableWeakMapContainer<T> {
 }
 
 export default
-class ObservableWeakMap<K, V> {
+class ObservableWeakMap<K extends object, V> {
   weakMap = new WeakMap<K, ObservableWeakMapContainer<V>>()
 
   has(key: K) {
