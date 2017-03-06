@@ -14,6 +14,8 @@ export interface BrushPresetProps {
   shortcut: KeyInputData|undefined
 }
 
+export type BrushType = "normal"|"eraser"
+
 export interface BrushPresetData extends BrushPresetProps {
   engine: string
 }
@@ -23,6 +25,8 @@ export abstract class BrushPreset implements BrushPresetProps {
   readonly internalKey = BrushPreset.nextInternalKey++
 
   @observable title = "Brush"
+  // brush type
+  @observable type: BrushType = "normal"
   // brush width (diameter)
   @observable width = 10
   // brush opacity
@@ -33,6 +37,8 @@ export abstract class BrushPreset implements BrushPresetProps {
   @observable minWidthRatio = 0.5
   // how many neighbor event positions used to stabilize stroke
   @observable stabilizingLevel = 2
+  // how much color is blended in each dab
+  @observable blending = 0.5
 
   @observable shortcut: KeyInput|undefined
 
