@@ -1,26 +1,22 @@
 import {observable} from "mobx"
-import {BrushEngine} from "./BrushEngine"
 import KeyInput, {KeyInputData} from "../../lib/KeyInput"
 
 export type BrushIconType = "paint-brush"|"pen"|"eraser"
+export type BrushType = "normal"|"eraser"
 
-export interface BrushPresetProps {
+export interface BrushPresetData {
   title: string
+  type: BrushType
   width: number
   opacity: number
+  blending: number
   softness: number
   minWidthRatio: number
   stabilizingLevel: number
   shortcut: KeyInputData|undefined
 }
 
-export type BrushType = "normal"|"eraser"
-
-export interface BrushPresetData extends BrushPresetProps {
-  engine: string
-}
-
-export abstract class BrushPreset implements BrushPresetProps {
+export class BrushPreset implements BrushPresetData {
   static nextInternalKey = 0
   readonly internalKey = BrushPreset.nextInternalKey++
 
@@ -31,34 +27,46 @@ export abstract class BrushPreset implements BrushPresetProps {
   @observable width = 10
   // brush opacity
   @observable opacity = 1
+  // how much color is blended in each dab
+  @observable blending = 0.5
   // distance used to soften edge, compared to brush radius
   @observable softness = 0.5
   // width drawn in pressure 0, compared to brush width
   @observable minWidthRatio = 0.5
   // how many neighbor event positions used to stabilize stroke
   @observable stabilizingLevel = 2
-  // how much color is blended in each dab
-  @observable blending = 0.5
 
   @observable shortcut: KeyInput|undefined
 
-  constructor(public engine: BrushEngine, props: BrushPresetProps) {
+  constructor(props: BrushPresetData) {
     this.title = props.title
+    this.type = props.type
     this.width = props.width
     this.opacity = props.opacity
+    this.blending = props.blending
     this.softness = props.softness
     this.minWidthRatio = props.minWidthRatio
     this.stabilizingLevel = props.stabilizingLevel
     this.shortcut = props.shortcut && KeyInput.fromData(props.shortcut)
   }
 
-  toProps(): BrushPresetProps {
-    const {title, width, opacity, softness, minWidthRatio, stabilizingLevel, shortcut} = this
-    return {title, width, opacity, softness, minWidthRatio, stabilizingLevel, shortcut: shortcut && shortcut.toData()}
+  toData(): BrushPresetData {
+    const {title, type, width, opacity, blending, softness, minWidthRatio, stabilizingLevel, shortcut} = this
+    return {title, type, width, opacity, blending, softness, minWidthRatio, stabilizingLevel, shortcut: shortcut && shortcut.toData()}
   }
 
-  abstract clone(): BrushPreset
-  abstract toData(): BrushPresetData
-  abstract renderSettings(): JSX.Element
-  abstract iconType: BrushIconType
+  clone() {
+    return new BrushPreset(this.toData())
+  }
+
+  get iconType(): BrushIconType {
+    if (this.type == "eraser") {
+      return "eraser"
+    }
+    if (this.blending == 0) {
+      return "pen"
+    } else {
+      return "paint-brush"
+    }
+  }
 }

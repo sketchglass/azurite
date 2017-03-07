@@ -9,7 +9,6 @@ const {Menu} = remote
 import KeyInput from "../../../lib/KeyInput"
 import {BrushPreset} from "../../brush/BrushPreset"
 import {brushPresetManager} from "../../app/BrushPresetManager"
-import {brushEngineRegistry} from "../../app/BrushEngineRegistry"
 import {toolManager} from "../../app/ToolManager"
 import {defaultBrushPresets} from "../../brush/DefaultBrushPresets"
 import BrushTool from "../../tools/BrushTool"
@@ -115,7 +114,7 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
       return {
         label: data.title,
         click: action(() => {
-          const preset = brushEngineRegistry.createPreset(data)
+          const preset = new BrushPreset(data)
           if (preset) {
             brushPresetManager.presets.splice(index, 0, preset)
           }

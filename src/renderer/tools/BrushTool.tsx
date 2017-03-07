@@ -6,6 +6,7 @@ import Tool, {ToolPointerEvent} from "./Tool"
 import Layer, {ImageLayer} from "../models/Layer"
 import {brushPresetManager} from "../app/BrushPresetManager"
 import BrushSettings from "../views/BrushSettings"
+import {BrushEngine} from "../brush/BrushEngine"
 import ToolIDs from "./ToolIDs"
 
 export default
@@ -41,11 +42,7 @@ class BrushTool extends Tool {
   @computed get preset() {
     return brushPresetManager.currentPreset
   }
-  @computed get pipeline() {
-    if (this.preset) {
-      return this.preset.engine.pipeline
-    }
-  }
+  engine = new BrushEngine()
 
   constructor() {
     super()
@@ -84,9 +81,7 @@ class BrushTool extends Tool {
   }
 
   previewLayerTile(layer: Layer, tileKey: Vec2) {
-    if (this.pipeline) {
-      return this.pipeline.dabRenderer.previewLayerTile(layer, tileKey)
-    }
+    return this.engine.dabRenderer.previewLayerTile(layer, tileKey)
   }
 
   @action start(ev: ToolPointerEvent) {
@@ -94,26 +89,25 @@ class BrushTool extends Tool {
     if (!(layer && layer instanceof ImageLayer)) {
       return
     }
-    if (!this.pipeline || !this.preset) {
+    if (!this.preset) {
       return
     }
+    this.engine.preset = this.preset
     this.dragged = true
-    this.pipeline.dabRenderer.preset = this.preset
-    this.pipeline.dabRenderer.start(layer)
-    this.pipeline.nextWaypoints([new Waypoint(ev.picturePos, ev.pressure)])
+    this.engine.dabRenderer.preset = this.preset
+    this.engine.dabRenderer.start(layer)
+    this.engine.pipeline.nextWaypoints([new Waypoint(ev.picturePos, ev.pressure)])
   }
 
   @action move(ev: ToolPointerEvent) {
-    if (this.dragged && this.pipeline) {
-      this.pipeline.nextWaypoints([new Waypoint(ev.picturePos, ev.pressure)])
+    if (this.dragged) {
+      this.engine.pipeline.nextWaypoints([new Waypoint(ev.picturePos, ev.pressure)])
     }
   }
 
   @action end() {
     if (this.dragged) {
-      if (this.pipeline) {
-        this.pipeline.endWaypoint()
-      }
+      this.engine.pipeline.endWaypoint()
       this.dragged = false
     }
   }
