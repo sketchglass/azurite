@@ -57,23 +57,24 @@ class ToolSelection extends React.Component<{hidden: boolean}, {}> {
   })
   private onContextMenu = action((e: React.MouseEvent<HTMLElement>, tool: Tool) => {
     toolManager.currentTool = tool
-    const {clientX, clientY} = e
-    setTimeout(() => {
-      const selectShortcuts = async () => {
-        const result = await dialogLauncher.openToolShortcutsDialog({
-          toggle: tool.toggleShortcut && tool.toggleShortcut.toData(),
-          temp: tool.tempShortcut && tool.tempShortcut.toData(),
-        })
-        if (result) {
-          const {toggle, temp} = result
-          tool.toggleShortcut  = toggle && KeyInput.fromData(toggle)
-          tool.tempShortcut = temp && KeyInput.fromData(temp)
-        }
+    const selectShortcuts = async () => {
+      const result = await dialogLauncher.openToolShortcutsDialog({
+        toggle: tool.toggleShortcut && tool.toggleShortcut.toData(),
+        temp: tool.tempShortcut && tool.tempShortcut.toData(),
+      })
+      if (result) {
+        const {toggle, temp} = result
+        tool.toggleShortcut  = toggle && KeyInput.fromData(toggle)
+        tool.tempShortcut = temp && KeyInput.fromData(temp)
       }
-      const menu = Menu.buildFromTemplate([
-        {label: "Shortcuts...", click: selectShortcuts},
-      ])
-      menu.popup(remote.getCurrentWindow(), clientX, clientY)
-    }, 50)
+    }
+    const menu = Menu.buildFromTemplate([
+      {label: "Shortcuts...", click: selectShortcuts},
+    ])
+    menu.popup(remote.getCurrentWindow(), {
+      x: e.clientX,
+      y: e.clientY,
+      async: true
+    })
   })
 }
