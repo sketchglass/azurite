@@ -110,14 +110,7 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
   })
   private onContextMenu = action((nodeInfo: NodeInfo<TreeNode>|undefined, event: React.MouseEvent<Element>) => {
     const index = nodeInfo ? nodeInfo.path[0] : brushPresetManager.presets.length
-    const {clientX, clientY} = event
-    // use timeout to workaround https://github.com/electron/electron/issues/1854
-    setTimeout(() => {
-      this.showContextMenu(index, clientX, clientY)
-    }, 50)
-  })
 
-  @action private showContextMenu(index: number, clientX: number, clientY: number) {
     const addPresetItems: Electron.MenuItemOptions[] = defaultBrushPresets().map(data => {
       return {
         label: data.title,
@@ -159,6 +152,10 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
       )
     }
     const menu = Menu.buildFromTemplate(menuTemplate)
-    menu.popup(remote.getCurrentWindow(), clientX, clientY)
-  }
+    menu.popup(remote.getCurrentWindow(), {
+      x: event.clientX,
+      y: event.clientY,
+      async: true
+    })
+  })
 }
