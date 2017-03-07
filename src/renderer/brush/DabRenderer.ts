@@ -8,9 +8,6 @@ import {Waypoint} from "./Waypoint"
 import {BrushPreset} from "./BrushPreset"
 import {appState} from "../app/AppState"
 
-declare var requestIdleCallback: any
-declare var cancelIdleCallback: any
-
 export abstract class DabRenderer {
   abstract title: string
   layer: ImageLayer|undefined
