@@ -3,6 +3,13 @@ import {observer} from "mobx-react"
 import {brushPresetManager} from "../app/BrushPresetManager"
 import RangeSlider from "./components/RangeSlider"
 
+function PercentSlider(props: {value: number, onChange: (value: number) => void}) {
+  const onPercentChange = (value: number) => {
+    props.onChange(value / 100)
+  }
+  return <RangeSlider onChange={onPercentChange} min={0} max={100} value={Math.round(props.value * 100)} postfix="%" />
+}
+
 @observer
 export default
 class BrushSettings extends React.Component<{}, {}> {
@@ -11,46 +18,35 @@ class BrushSettings extends React.Component<{}, {}> {
     if (!preset) {
       return <table className="BrushSettings" />
     }
-    const onOpacityChange = (value: number) => {
-      preset.opacity = value / 100
-    }
-    const onWidthChange = (value: number) => {
-      preset.width = value
-    }
-    const onMinWidthChange = (value: number) => {
-      preset.minWidthRatio = value / 100
-    }
-    const onSoftnessChange = (value: number) => {
-      preset.softness = value / 100
-    }
     const onEraserModeChange = (ev: React.FormEvent<HTMLInputElement>) => {
       preset.type = ev.currentTarget.checked ? "eraser" : "normal"
-    }
-    const onBlendingChange = (value: number) => {
-      preset.blending = value / 100
     }
     return (
       <table className="BrushSettings">
         <tbody>
           <tr>
             <td>Opacity</td>
-            <td><RangeSlider onChange={onOpacityChange} min={0} max={100} value={Math.round(preset.opacity * 100)} postfix="%" /></td>
+            <td><PercentSlider value={preset.opacity} onChange={x => preset.opacity = x} /></td>
+          </tr>
+          <tr>
+            <td>Min Opacity</td>
+            <td><PercentSlider value={preset.minOpacityRatio} onChange={x => preset.minOpacityRatio = x} /></td>
           </tr>
           <tr>
             <td>Blending</td>
-            <td><RangeSlider onChange={onBlendingChange} min={0} max={100} value={Math.round(preset.blending * 100)} postfix="%" /></td>
+            <td><PercentSlider value={preset.blending} onChange={x => preset.blending = x} /></td>
           </tr>
           <tr>
             <td>Width</td>
-            <td><RangeSlider onChange={onWidthChange} min={0} max={100} value={preset.width} postfix="px" /></td>
+            <td><RangeSlider min={0} max={100} value={preset.width} postfix="px" onChange={x => preset.width = x} /></td>
           </tr>
           <tr>
             <td>Min Width</td>
-            <td><RangeSlider onChange={onMinWidthChange} min={0} max={100} value={Math.round(preset.minWidthRatio * 100)} postfix="%" /></td>
+            <td><PercentSlider value={preset.minWidthRatio} onChange={x => preset.minWidthRatio = x} /></td>
           </tr>
           <tr>
             <td>Softness</td>
-            <td><RangeSlider onChange={onSoftnessChange} min={0} max={100} value={Math.round(preset.softness * 100)} postfix="%" /></td>
+            <td><PercentSlider value={preset.softness} onChange={x => preset.softness = x} /></td>
           </tr>
           <tr>
             <td>Eraser</td>
