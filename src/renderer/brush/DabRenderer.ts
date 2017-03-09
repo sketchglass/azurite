@@ -16,6 +16,7 @@ const brushShader = {
     uniform float uBrushSize;
     uniform float uMinWidthRatio;
     uniform float uOpacity;
+    uniform float uMinOpacityRatio;
     uniform vec2 uPictureSize;
 
     attribute vec2 aCenter;
@@ -28,13 +29,15 @@ const brushShader = {
     void vertexMain(vec2 pos, vec2 uv) {
       vSelectionUV = pos / uPictureSize;
       vOffset = pos - aCenter;
+      float pressure = uv.x;
 
-      float brushSize = uBrushSize * (uMinWidthRatio + (1.0 - uMinWidthRatio) * uv.x);
+      float brushSize = uBrushSize * mix(uMinWidthRatio, 1.0, pressure);
       float radius = brushSize * 0.5;
       vRadius = radius;
 
+      float opacity = uOpacity * mix(uMinOpacityRatio, 1.0, pressure);
       // transparency = (overlap count) √ (final transparency)
-      vOpacity = 1.0 - pow(1.0 - min(uOpacity, 0.998), 1.0 / brushSize);
+      vOpacity = 1.0 - pow(1.0 - min(opacity, 0.998), 1.0 / brushSize);
     }
   `,
   fragment: `
@@ -318,6 +321,7 @@ export class DabRenderer {
         uColor: appState.color.toRgb(),
         uOpacity: preset.opacity,
         uMinWidthRatio: preset.minWidthRatio,
+        uMinOpacityRatio: preset.minOpacityRatio,
         uSoftness: preset.softness,
         uHasSelection: layer.picture.selection.hasSelection,
         uSelection: layer.picture.selection.texture,
