@@ -33,6 +33,8 @@ export class BrushPreset implements BrushPresetData {
   @observable softness = 0.5
   // width drawn in pressure 0, compared to brush width
   @observable minWidthRatio = 0.5
+  // opacity in pressure 0, compared to max opacity
+  @observable minOpacityRatio = 0.5
   // how many neighbor event positions used to stabilize stroke
   @observable stabilizingLevel = 2
 
