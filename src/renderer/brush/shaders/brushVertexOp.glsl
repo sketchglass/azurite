@@ -3,7 +3,7 @@ float correctOpacity(float opacity, float invWidth) {
    return 1.0 - pow(1.0 - min(opacity, 0.998), invWidth);
 }
 
-void brushVertex(
+void brushVertexOp(
   vec2 pos,
   float pressure,
   vec2 center,
@@ -29,5 +29,5 @@ void brushVertex(
   selectionUV = pos / pictureSize;
 }
 
-#pragma glslify: export(brushVertex)
+#pragma glslify: export(brushVertexOp)
 

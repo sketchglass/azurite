@@ -14,7 +14,7 @@ const glsl = require("glslify")
 
 const brushShader = {
   vertex: glsl`
-    #pragma glslify: brushVertex = require('./shaders/brushVertex')
+    #pragma glslify: brushVertexOp = require('./shaders/brushVertexOp')
     uniform float uMaxWidth;
     uniform float uMinWidthRatio;
     uniform float uMaxOpacity;
@@ -30,7 +30,7 @@ const brushShader = {
 
     void vertexMain(vec2 pos, vec2 uv) {
       float blending; // unused
-      brushVertex(
+      brushVertexOp(
         pos,
         uv.x,
         aCenter,
@@ -70,7 +70,7 @@ const brushShader = {
 }
 
 const shapeClipVertexShader = glsl`
-  #pragma glslify: brushVertex = require('./shaders/brushVertex')
+  #pragma glslify: brushVertexOp = require('./shaders/brushVertexOp')
   uniform vec2 uCenter;
   uniform float uSampleSize;
   uniform float uPressure;
@@ -84,7 +84,7 @@ const shapeClipVertexShader = glsl`
   void vertexMain(vec2 pos, vec2 uv) {
     vec2 picturePos = pos - uSampleSize * 0.5 + floor(uCenter);
     float opacity, blending; // unused
-    brushVertex(
+    brushVertexOp(
       picturePos,
       uPressure,
       uCenter,
@@ -155,7 +155,7 @@ const clipShader = {
 
 const watercolorShader = {
   vertex: glsl`
-    #pragma glslify: brushVertex = require('./shaders/brushVertex')
+    #pragma glslify: brushVertexOp = require('./shaders/brushVertexOp')
 
     uniform float uSampleSize;
     uniform float uPressure;
@@ -184,7 +184,7 @@ const watercolorShader = {
       vMixColor = calcMixColor();
       float radius; // unused
       vec2 offset, selectionUV; // unused
-      brushVertex(
+      brushVertexOp(
         vec2(0.0),
         uPressure,
         vec2(0.0),
