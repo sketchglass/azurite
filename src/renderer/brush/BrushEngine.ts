@@ -13,6 +13,7 @@ export class BrushEngine {
     blending: 0.5,
     softness: 0.5,
     minWidthRatio: 0.5,
+    minOpacityRatio: 0.5,
     stabilizingLevel: 2,
     shortcut: undefined
   })

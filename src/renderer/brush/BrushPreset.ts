@@ -12,6 +12,7 @@ export interface BrushPresetData {
   blending: number
   softness: number
   minWidthRatio: number
+  minOpacityRatio: number
   stabilizingLevel: number
   shortcut: KeyInputData|undefined
 }
@@ -48,13 +49,14 @@ export class BrushPreset implements BrushPresetData {
     this.blending = props.blending
     this.softness = props.softness
     this.minWidthRatio = props.minWidthRatio
+    this.minOpacityRatio = props.minOpacityRatio
     this.stabilizingLevel = props.stabilizingLevel
     this.shortcut = props.shortcut && KeyInput.fromData(props.shortcut)
   }
 
   toData(): BrushPresetData {
-    const {title, type, width, opacity, blending, softness, minWidthRatio, stabilizingLevel, shortcut} = this
-    return {title, type, width, opacity, blending, softness, minWidthRatio, stabilizingLevel, shortcut: shortcut && shortcut.toData()}
+    const {title, type, width, opacity, blending, softness, minWidthRatio, minOpacityRatio, stabilizingLevel, shortcut} = this
+    return {title, type, width, opacity, blending, softness, minWidthRatio, minOpacityRatio, stabilizingLevel, shortcut: shortcut && shortcut.toData()}
   }
 
   clone() {
