@@ -15,8 +15,6 @@ import "../actions/EditActions"
 import "../actions/SelectionAction"
 import "../actions/CanvasActions"
 import "../actions/ViewActions"
-import "../brush/pen/BrushEnginePen"
-import "../brush/watercolor/BrushEngineWatercolor"
 import {toolManager} from "./ToolManager"
 import {brushPresetManager} from "./BrushPresetManager"
 

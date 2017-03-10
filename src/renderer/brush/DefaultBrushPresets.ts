@@ -1,43 +1,42 @@
 import {BrushPresetData} from "./BrushPreset"
-import {BrushPresetPenData} from "./pen/BrushPresetPen"
-import {BrushPresetWatercolorData} from "./watercolor/BrushPresetWatercolor"
 
 export function defaultBrushPresets(): BrushPresetData[] {
-  const presets: (BrushPresetPenData|BrushPresetWatercolorData)[] = [
+  return [
     {
-      engine: "pen",
       title: "Pen",
+      type: "normal",
       width: 10,
       opacity: 1,
+      blending: 0,
       softness: 0.5,
       minWidthRatio: 0.5,
+      minOpacityRatio: 1,
       stabilizingLevel: 2,
-      eraser: false,
       shortcut: {modifiers: [], code: "KeyB"},
     },
     {
-      engine: "watercolor",
       title: "Watercolor",
+      type: "normal",
       width: 10,
       opacity: 1,
+      blending: 0.5,
       softness: 0.5,
       minWidthRatio: 1,
+      minOpacityRatio: 0,
       stabilizingLevel: 2,
-      blending: 0.5,
-      thickness: 0.5,
       shortcut: {modifiers: [], code: "KeyW"},
     },
     {
-      engine: "pen",
       title: "Eraser",
+      type: "eraser",
       width: 10,
       opacity: 1,
+      blending: 0.5,
       softness: 0.5,
       minWidthRatio: 0.5,
+      minOpacityRatio: 1,
       stabilizingLevel: 2,
-      eraser: true,
       shortcut: {modifiers: [], code: "KeyE"},
     },
   ]
-  return presets
 }
