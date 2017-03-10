@@ -1,5 +1,5 @@
 import {BrushPreset} from "./BrushPreset"
-import {DabRenderer} from "./DabRenderer"
+import {BrushRenderer} from "./BrushRenderer"
 import {BrushPipeline} from "./BrushPipeline"
 import {WaypointCurveFilter} from "./WaypointCurveFilter"
 import {WaypointStabilizeFilter} from "./WaypointStabilizeFilter"
@@ -17,16 +17,16 @@ export class BrushEngine {
     stabilizingLevel: 2,
     shortcut: undefined
   })
-  dabRenderer = new DabRenderer(this._preset)
+  renderer = new BrushRenderer(this._preset)
   pipeline = new BrushPipeline(
     [new WaypointStabilizeFilter(), new WaypointCurveFilter()],
-    this.dabRenderer
+    this.renderer
   )
   get preset() {
     return this._preset
   }
   set preset(preset: BrushPreset) {
     this._preset = preset
-    this.dabRenderer.preset = preset
+    this.renderer.preset = preset
   }
 }

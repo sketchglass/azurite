@@ -1,5 +1,4 @@
 import {Waypoint} from "./Waypoint"
-import {DabRenderer} from "./DabRenderer"
 
 export interface WaypointConsumer {
   nextWaypoints(waypoints: Waypoint[]): void
@@ -11,11 +10,11 @@ export interface WaypointFilter extends WaypointConsumer {
 }
 
 export class BrushPipeline implements WaypointConsumer {
-  constructor(public waypointFilters: WaypointFilter[], public dabRenderer: DabRenderer) {
+  constructor(public waypointFilters: WaypointFilter[], public renderer: WaypointConsumer) {
     for (let i = 0; i < waypointFilters.length - 1; ++i) {
       waypointFilters[i].outlet = waypointFilters[i + 1]
     }
-    waypointFilters[waypointFilters.length - 1].outlet = dabRenderer
+    waypointFilters[waypointFilters.length - 1].outlet = renderer
   }
 
   nextWaypoints(waypoints: Waypoint[]) {

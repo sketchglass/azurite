@@ -81,7 +81,7 @@ class BrushTool extends Tool {
   }
 
   previewLayerTile(layer: Layer, tileKey: Vec2) {
-    return this.engine.dabRenderer.previewLayerTile(layer, tileKey)
+    return this.engine.renderer.previewLayerTile(layer, tileKey)
   }
 
   @action start(ev: ToolPointerEvent) {
@@ -94,8 +94,8 @@ class BrushTool extends Tool {
     }
     this.engine.preset = this.preset
     this.dragged = true
-    this.engine.dabRenderer.preset = this.preset
-    this.engine.dabRenderer.start(layer)
+    this.engine.renderer.preset = this.preset
+    this.engine.renderer.start(layer)
     this.engine.pipeline.nextWaypoints([new Waypoint(ev.picturePos, ev.pressure)])
   }
 

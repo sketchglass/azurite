@@ -234,7 +234,7 @@ const watercolorShader = {
   `
 }
 
-export class DabRenderer {
+export class BrushRenderer {
   layer: ImageLayer|undefined
   private newTiledTexture = new TiledTexture()
   private editedRect: Rect|undefined
