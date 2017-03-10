@@ -48,7 +48,9 @@ const brushShader = {
       );
     }
   `,
-  fragment: `
+  fragment: glsl`
+    #pragma glslify: brushShape = require('./shaders/brushShape')
+
     uniform float uBrushSize;
     uniform float uSoftness;
     uniform vec4 uColor;
@@ -61,60 +63,53 @@ const brushShader = {
     varying vec2 vSelectionUV;
 
     void fragmentMain(vec2 pos, vec2 uv, out vec4 outColor) {
-      float r = length(vOffset);
-      float opacity = smoothstep(vRadius, vRadius - max(1.0, vRadius * uSoftness), r);
-      vec4 color = uColor * opacity * vOpacity;
-      if (uHasSelection) {
-        outColor = color * texture2D(uSelection, vSelectionUV).a;
-      } else {
-        outColor = color;
-      }
+      float shape = brushShape(vOffset, vRadius, uSoftness, uHasSelection, uSelection, vSelectionUV);
+      outColor = shape * vOpacity * uColor;
     }
   `
 }
 
-enum ShapeClipModes {
-  Shape, Clip
-}
+const shapeClipVertexShader = glsl`
+  #pragma glslify: brushVertex = require('./shaders/brushVertex')
+  uniform vec2 uCenter;
+  uniform float uSampleSize;
+  uniform float uPressure;
+  uniform float uMaxWidth;
+  uniform float uMinWidthRatio;
+  uniform vec2 uPictureSize;
+  varying vec2 vOffset;
+  varying float vRadius;
+  varying vec2 vSelectionUV;
 
-const shapeClipShader = {
-  vertex: glsl`
-    #pragma glslify: brushVertex = require('./shaders/brushVertex')
-    uniform vec2 uCenter;
-    uniform float uSampleSize;
-    uniform float uPressure;
-    uniform float uMaxWidth;
-    uniform float uMinWidthRatio;
-    uniform vec2 uPictureSize;
-    varying vec2 vOffset;
-    varying float vRadius;
-    varying vec2 vSelectionUV;
+  void vertexMain(vec2 pos, vec2 uv) {
+    vec2 picturePos = pos - uSampleSize * 0.5 + floor(uCenter);
+    float opacity, blending; // unused
+    brushVertex(
+      picturePos,
+      uPressure,
+      uCenter,
+      uMaxWidth,
+      uMinWidthRatio,
+      0.0,
+      0.0,
+      0.0,
+      uPictureSize,
+      vOffset,
+      vRadius,
+      opacity,
+      blending,
+      vSelectionUV
+    );
+  }
+`
 
-    void vertexMain(vec2 pos, vec2 uv) {
-      vec2 picturePos = pos - uSampleSize * 0.5 + floor(uCenter);
-      float opacity, blending; // unused
-      brushVertex(
-        picturePos,
-        uPressure,
-        uCenter,
-        uMaxWidth,
-        uMinWidthRatio,
-        0.0,
-        0.0,
-        0.0,
-        uPictureSize,
-        vOffset,
-        vRadius,
-        opacity,
-        blending,
-        vSelectionUV
-      );
-    }
-  `,
-  fragment: `
+const shapeShader = {
+  vertex: shapeClipVertexShader,
+  fragment: glsl`
+    #pragma glslify: brushShape = require('./shaders/brushShape')
+
     uniform float uSoftness;
     uniform sampler2D uOriginalTexture;
-    uniform float uMode;
     uniform bool uPreserveOpacity;
     uniform bool uHasSelection;
     uniform sampler2D uSelection;
@@ -123,30 +118,37 @@ const shapeClipShader = {
     varying float vRadius;
     varying vec2 vSelectionUV;
 
-    vec4 fetchOriginal(vec2 uv) {
-      return texture2D(uOriginalTexture, uv);
+    void fragmentMain(vec2 pos, vec2 uv, out vec4 color) {
+      float r = length(vOffset);
+      vec4 original = texture2D(uOriginalTexture, uv);
+      float shape = brushShape(vOffset, vRadius, uSoftness, uHasSelection, uSelection, vSelectionUV);
+      if (uPreserveOpacity) {
+        shape *= original.a;
+      }
+      color = vec4(shape);
     }
+  `
+}
 
-    float calcOpacity(float r) {
-      return smoothstep(vRadius, vRadius - max(1.0, vRadius * uSoftness), r);
-    }
+const clipShader = {
+  vertex: shapeClipVertexShader,
+  fragment: glsl`
+    #pragma glslify: brushShape = require('./shaders/brushShape')
+
+    uniform float uSoftness;
+    uniform sampler2D uOriginalTexture;
+    uniform bool uHasSelection;
+    uniform sampler2D uSelection;
+
+    varying vec2 vOffset;
+    varying float vRadius;
+    varying vec2 vSelectionUV;
 
     void fragmentMain(vec2 pos, vec2 uv, out vec4 color) {
       float r = length(vOffset);
-      float opacity = calcOpacity(r);
-      vec4 original = fetchOriginal(uv);
-      if (uMode == ${ShapeClipModes.Shape}.0) {
-        float clip = 1.0;
-        if (uPreserveOpacity) {
-          clip *= original.a;
-        }
-        if (uHasSelection) {
-          clip *= texture2D(uSelection, vSelectionUV).a;
-        }
-        color = vec4(opacity * clip);
-      } else {
-        color = original * opacity;
-      }
+      vec4 original = texture2D(uOriginalTexture, uv);
+      float shape = brushShape(vOffset, vRadius, uSoftness, uHasSelection, uSelection, vSelectionUV);
+      color = original * shape;
     }
   `
 }
@@ -248,7 +250,8 @@ export class DabRenderer {
   private originalDrawTarget = new TextureDrawTarget(context, this.originalTexture)
   private shapeClipTexture = new Texture(context, {pixelType: "half-float", filter: "mipmap-nearest"})
   private shapeClipDrawTarget = new TextureDrawTarget(context, this.shapeClipTexture)
-  private shapeClipModel = new ShapeModel(context, {shape: this.dabShape, blendMode: "src", shader: shapeClipShader})
+  private shapeModel = new ShapeModel(context, {shape: this.dabShape, blendMode: "src", shader: shapeShader})
+  private clipModel = new ShapeModel(context, {shape: this.dabShape, blendMode: "src", shader: clipShader})
 
   private sampleSize = 0
 
@@ -353,8 +356,9 @@ export class DabRenderer {
     }
 
     if (this.blendingEnabled) {
-      this.mixModel.uniforms = uniforms
-      this.shapeClipModel.uniforms = uniforms
+      this.mixModel.uniforms = this.shapeModel.uniforms = this.clipModel.uniforms = uniforms
+      this.shapeModel.transform = new Transform()
+      this.clipModel.transform = Transform.translate(new Vec2(this.sampleSize, 0))
       this.originalTexture.size = new Vec2(this.sampleSize)
       this.shapeClipTexture.size = new Vec2(this.sampleSize * 2, this.sampleSize)
       this.dabShape.rect = new Rect(new Vec2(), new Vec2(this.sampleSize))
@@ -417,8 +421,10 @@ export class DabRenderer {
     if (this.blendingEnabled) {
       for (let i = 0; i < waypoints.length; ++i) {
         const waypoint = waypoints[i]
-        this.shapeClipModel.uniforms["uCenter"] = waypoint.pos
-        this.shapeClipModel.uniforms["uPressure"] = waypoint.pressure
+        this.shapeModel.uniforms["uCenter"] = waypoint.pos
+        this.shapeModel.uniforms["uPressure"] = waypoint.pressure
+        this.clipModel.uniforms["uCenter"] = waypoint.pos
+        this.clipModel.uniforms["uPressure"] = waypoint.pressure
         this.mixModel.uniforms["uPressure"] = waypoint.pressure
 
         const topLeft = waypoint.pos.floor().sub(new Vec2(this.sampleSize / 2))
@@ -432,17 +438,10 @@ export class DabRenderer {
           drawTexture(this.originalDrawTarget, tile.texture, {blendMode: "src", transform: Transform.translate(offset)})
         }
 
-        this.shapeClipModel.uniforms["uOriginalTexture"] = this.originalTexture
-
-        // draw brush shape in left of sample texture
-        this.shapeClipModel.uniforms["uMode"] = ShapeClipModes.Shape
-        this.shapeClipModel.transform = new Transform()
-        this.shapeClipDrawTarget.draw(this.shapeClipModel)
-
-        // draw original colors clipped by brush shape in right of sample texture
-        this.shapeClipModel.uniforms["uMode"] = ShapeClipModes.Clip
-        this.shapeClipModel.transform = Transform.translate(new Vec2(this.sampleSize, 0))
-        this.shapeClipDrawTarget.draw(this.shapeClipModel)
+        this.shapeModel.uniforms["uOriginalTexture"] = this.originalTexture
+        this.clipModel.uniforms["uOriginalTexture"] = this.originalTexture
+        this.shapeClipDrawTarget.draw(this.shapeModel)
+        this.shapeClipDrawTarget.draw(this.clipModel)
 
         this.shapeClipTexture.generateMipmap()
 
