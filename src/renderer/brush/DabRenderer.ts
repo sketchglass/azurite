@@ -10,12 +10,14 @@ import {renderer} from "../views/Renderer"
 import {Waypoint} from "./Waypoint"
 import {BrushPreset} from "./BrushPreset"
 import {appState} from "../app/AppState"
+const glsl = require("glslify")
 
 const brushShader = {
-  vertex: `
-    uniform float uBrushSize;
+  vertex: glsl`
+    #pragma glslify: brushVertex = require('./shaders/brushVertex')
+    uniform float uMaxWidth;
     uniform float uMinWidthRatio;
-    uniform float uOpacity;
+    uniform float uMaxOpacity;
     uniform float uMinOpacityRatio;
     uniform vec2 uPictureSize;
 
@@ -27,17 +29,23 @@ const brushShader = {
     varying vec2 vSelectionUV;
 
     void vertexMain(vec2 pos, vec2 uv) {
-      vSelectionUV = pos / uPictureSize;
-      vOffset = pos - aCenter;
-      float pressure = uv.x;
-
-      float brushSize = uBrushSize * mix(uMinWidthRatio, 1.0, pressure);
-      float radius = brushSize * 0.5;
-      vRadius = radius;
-
-      float opacity = uOpacity * mix(uMinOpacityRatio, 1.0, pressure);
-      // transparency = (overlap count) √ (final transparency)
-      vOpacity = 1.0 - pow(1.0 - min(opacity, 0.998), 1.0 / brushSize);
+      float blending; // unused
+      brushVertex(
+        pos,
+        uv.x,
+        aCenter,
+        uMaxWidth,
+        uMinWidthRatio,
+        uMaxOpacity,
+        uMinOpacityRatio,
+        0.0,
+        uPictureSize,
+        vOffset,
+        vRadius,
+        vOpacity,
+        blending,
+        vSelectionUV
+      );
     }
   `,
   fragment: `
@@ -70,25 +78,40 @@ enum ShapeClipModes {
 }
 
 const shapeClipShader = {
-  vertex: `
-    uniform vec2 uBrushPos;
+  vertex: glsl`
+    #pragma glslify: brushVertex = require('./shaders/brushVertex')
+    uniform vec2 uCenter;
     uniform float uSampleSize;
     uniform float uPressure;
+    uniform float uMaxWidth;
     uniform float uMinWidthRatio;
-    uniform float uBrushRadius;
     uniform vec2 uPictureSize;
     varying vec2 vOffset;
     varying float vRadius;
     varying vec2 vSelectionUV;
 
     void vertexMain(vec2 pos, vec2 uv) {
-      vRadius = uBrushRadius * (uMinWidthRatio + (1.0 - uMinWidthRatio) * uPressure);
-      vOffset = pos - uSampleSize * 0.5;
-      vSelectionUV = (vOffset + floor(uBrushPos)) / uPictureSize;
+      vec2 picturePos = pos - uSampleSize * 0.5 + floor(uCenter);
+      float opacity, blending; // unused
+      brushVertex(
+        picturePos,
+        uPressure,
+        uCenter,
+        uMaxWidth,
+        uMinWidthRatio,
+        0.0,
+        0.0,
+        0.0,
+        uPictureSize,
+        vOffset,
+        vRadius,
+        opacity,
+        blending,
+        vSelectionUV
+      );
     }
   `,
   fragment: `
-    uniform vec2 uBrushPos;
     uniform float uSoftness;
     uniform sampler2D uOriginalTexture;
     uniform float uMode;
@@ -109,7 +132,7 @@ const shapeClipShader = {
     }
 
     void fragmentMain(vec2 pos, vec2 uv, out vec4 color) {
-      float r = distance(fract(uBrushPos), vOffset);
+      float r = length(vOffset);
       float opacity = calcOpacity(r);
       vec4 original = fetchOriginal(uv);
       if (uMode == ${ShapeClipModes.Shape}.0) {
@@ -129,13 +152,21 @@ const shapeClipShader = {
 }
 
 const watercolorShader = {
-  vertex: `
+  vertex: glsl`
+    #pragma glslify: brushVertex = require('./shaders/brushVertex')
+
     uniform float uSampleSize;
-    uniform mediump float uPressure;
-    uniform mediump float uOpacity;
+    uniform float uPressure;
+    uniform float uMaxWidth;
+    uniform float uMinWidthRatio;
+    uniform float uMaxOpacity;
+    uniform float uMinOpacityRatio;
+    uniform float uMaxBlending;
     uniform sampler2D uShapeClipTexture;
 
     varying vec4 vMixColor;
+    varying float vOpacity;
+    varying float vBlending;
 
     vec4 calcMixColor() {
       float topLod = log2(uSampleSize);
@@ -149,13 +180,27 @@ const watercolorShader = {
 
     void vertexMain(vec2 pos, vec2 uv) {
       vMixColor = calcMixColor();
+      float radius; // unused
+      vec2 offset, selectionUV; // unused
+      brushVertex(
+        vec2(0.0),
+        uPressure,
+        vec2(0.0),
+        uMaxWidth,
+        uMinWidthRatio,
+        uMaxOpacity,
+        uMinOpacityRatio,
+        uMaxBlending,
+        vec2(0.0),
+        offset,
+        radius,
+        vOpacity,
+        vBlending,
+        selectionUV
+      );
     }
   `,
   fragment: `
-    precision mediump float;
-
-    uniform float uBlending;
-    uniform float uOpacity;
     uniform float uPressure;
     uniform vec4 uColor;
     uniform bool uPreserveOpacity;
@@ -164,12 +209,14 @@ const watercolorShader = {
     uniform sampler2D uShapeClipTexture;
 
     varying vec4 vMixColor;
+    varying float vBlending;
+    varying float vOpacity;
 
     void fragmentMain(vec2 pos, vec2 uv, out vec4 outColor) {
-      float mask = texture2D(uShapeClipTexture, uv * vec2(0.5, 1.0)).a * uPressure;
+      float mask = texture2D(uShapeClipTexture, uv * vec2(0.5, 1.0)).a;
       vec4 orig = texture2D(uOriginalTexture, uv);
 
-      float mixRate = mask * uBlending;
+      float mixRate = mask * vBlending;
 
       vec4 mixColor = vMixColor;
       if (uPreserveOpacity) {
@@ -178,7 +225,7 @@ const watercolorShader = {
       // mix color
       vec4 color = mix(orig, mixColor, mixRate);
       // add color
-      vec4 addColor = uColor * (mask * uOpacity);
+      vec4 addColor = uColor * (mask * vOpacity);
 
       outColor = addColor + color * (1.0 - addColor.a);
     }
@@ -289,43 +336,30 @@ export class DabRenderer {
       this.layer = layer
     }
     const {preset} = this
+    this.sampleSize = Math.pow(2, Math.ceil(Math.log2(preset.width + 2)))
+    const uniforms = {
+      uSampleSize: this.sampleSize,
+      uPictureSize: layer.picture.size,
+      uColor: appState.color.toRgb(),
+      uMaxWidth: preset.width,
+      uMinWidthRatio: preset.minWidthRatio,
+      uMaxOpacity: preset.opacity,
+      uMinOpacityRatio: preset.minOpacityRatio,
+      uMaxBlending: preset.blending,
+      uPreserveOpacity: layer.preserveOpacity,
+      uSoftness: preset.softness,
+      uHasSelection: layer.picture.selection.hasSelection,
+      uSelection: layer.picture.selection.texture,
+    }
+
     if (this.blendingEnabled) {
-      this.sampleSize = Math.pow(2, Math.ceil(Math.log2(preset.width + 2)))
-
-      this.mixModel.uniforms = {
-        uSampleSize: this.sampleSize,
-        uBlending: preset.blending,
-        uColor: appState.color.toRgb(),
-        uOpacity: preset.opacity,
-        uPreserveOpacity: layer.preserveOpacity,
-      }
-
-      this.shapeClipModel.uniforms = {
-        uPictureSize: layer.picture.size,
-        uSampleSize: this.sampleSize,
-        uBrushRadius: preset.width * 0.5,
-        uSoftness: preset.softness,
-        uMinWidthRatio: preset.minWidthRatio,
-        uPreserveOpacity: layer.preserveOpacity,
-        uHasSelection: layer.picture.selection.hasSelection,
-        uSelection: layer.picture.selection.texture,
-      }
-
+      this.mixModel.uniforms = uniforms
+      this.shapeClipModel.uniforms = uniforms
       this.originalTexture.size = new Vec2(this.sampleSize)
       this.shapeClipTexture.size = new Vec2(this.sampleSize * 2, this.sampleSize)
       this.dabShape.rect = new Rect(new Vec2(), new Vec2(this.sampleSize))
     } else {
-      this.brushModel.uniforms = {
-        uPictureSize: layer.picture.size,
-        uBrushSize: preset.width,
-        uColor: appState.color.toRgb(),
-        uOpacity: preset.opacity,
-        uMinWidthRatio: preset.minWidthRatio,
-        uMinOpacityRatio: preset.minOpacityRatio,
-        uSoftness: preset.softness,
-        uHasSelection: layer.picture.selection.hasSelection,
-        uSelection: layer.picture.selection.texture,
-      }
+      this.brushModel.uniforms = uniforms
     }
   }
 
@@ -383,7 +417,7 @@ export class DabRenderer {
     if (this.blendingEnabled) {
       for (let i = 0; i < waypoints.length; ++i) {
         const waypoint = waypoints[i]
-        this.shapeClipModel.uniforms["uBrushPos"] = waypoint.pos
+        this.shapeClipModel.uniforms["uCenter"] = waypoint.pos
         this.shapeClipModel.uniforms["uPressure"] = waypoint.pressure
         this.mixModel.uniforms["uPressure"] = waypoint.pressure
 
