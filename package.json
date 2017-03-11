@@ -46,6 +46,7 @@
     "@types/react-dom": "^0.14.23",
     "@types/webpack-env": "^1.13.0",
     "autogypi": "^0.2.2",
+    "awesome-typescript-loader": "^3.1.2",
     "babel-core": "^6.23.1",
     "babel-loader": "^6.4.0",
     "babel-plugin-espower": "^2.3.2",
