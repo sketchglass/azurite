@@ -1,4 +1,5 @@
 const path = require("path")
+const webpack = require("webpack")
 const commonEntries = ["./src/renderer/requireManualResolve.ts"]
 
 module.exports = {
@@ -79,6 +80,7 @@ module.exports = {
     ],
   },
   plugins: [
+    new webpack.NamedModulesPlugin(),
     require("webpack-fail-plugin"),
   ],
   devtool: "inline-source-map",
