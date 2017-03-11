@@ -1,9 +1,10 @@
 const path = require("path")
+const webpack = require("webpack")
 const commonEntries = ["./src/renderer/requireManualResolve.ts"]
 
 module.exports = {
   entry: {
-    renderer: [...commonEntries, "./src/renderer/index.tsx"],
+    renderer: [...commonEntries, "./src/renderer/index.ts"],
     dialogs: [...commonEntries, "./src/renderer/views/dialogs/DialogIndex.tsx"],
     preferences: [...commonEntries, "./src/renderer/views/preferences/PreferencesIndex.tsx"],
     test: [...commonEntries, "./src/test/index.js"],
@@ -79,6 +80,7 @@ module.exports = {
     ],
   },
   plugins: [
+    new webpack.NamedModulesPlugin(),
     require("webpack-fail-plugin"),
   ],
   devtool: "inline-source-map",
