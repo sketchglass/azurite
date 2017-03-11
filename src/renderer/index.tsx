@@ -9,13 +9,20 @@ webFrame.setLayoutZoomLevelLimits(1, 1)
 
 appState.bootstrap()
 
-window.addEventListener("DOMContentLoaded", () => {
+function render() {
   ReactDOM.render(<RootView />, document.getElementById("app"))
+}
+
+window.addEventListener("DOMContentLoaded", () => {
+  render()
 })
 
-if (module["hot"]) {
-  module["hot"].accept()
-  module["hot"].dispose(() => {
+if (module.hot) {
+  module.hot.accept("./views/RootView", () => {
+    render()
+  })
+  module.hot.accept()
+  module.hot.dispose(() => {
     appState.reload()
   })
 }

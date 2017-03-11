@@ -15,7 +15,8 @@
         ],
         "types": [
             "electron",
-            "mocha"
+            "mocha",
+            "webpack-env"
         ]
     },
     "exclude": [
