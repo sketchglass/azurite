@@ -43,7 +43,8 @@ module.exports = {
             useBabel: true,
             babelOptions: {
               plugins: ["glslify"]
-            }
+            },
+            useCache: true
           }
         }
       },
@@ -55,7 +56,8 @@ module.exports = {
             useBabel: true,
             babelOptions: {
               plugins: ["espower"]
-            }
+            },
+            useCache: true
           }
         }
       },

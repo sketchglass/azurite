@@ -42,3 +42,4 @@ auto-top.gypi
 
 /build
 /dist/assets
+.awcache
