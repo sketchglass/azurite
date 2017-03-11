@@ -1,5 +1,6 @@
 const path = require("path")
 const webpack = require("webpack")
+const {CheckerPlugin} = require('awesome-typescript-loader')
 const commonEntries = ["./src/renderer/requireManualResolve.ts"]
 
 module.exports = {
@@ -36,17 +37,29 @@ module.exports = {
       {
         test: /\.tsx?$/,
         exclude: /Test\.tsx?$/,
-        use: [
-          "babel-loader?plugins[]=glslify",
-          "ts-loader",
-        ],
+        use: {
+          loader: 'awesome-typescript-loader',
+          options: {
+            useBabel: true,
+            babelOptions: {
+              plugins: ["glslify"]
+            },
+            useCache: true
+          }
+        }
       },
       {
         test: /Test\.tsx?$/,
-        use: [
-          "babel-loader?plugins[]=espower",
-          "ts-loader",
-        ],
+        use: {
+          loader: 'awesome-typescript-loader',
+          options: {
+            useBabel: true,
+            babelOptions: {
+              plugins: ["espower"]
+            },
+            useCache: true
+          }
+        }
       },
       {
         test: /\.css$/,
@@ -83,7 +96,7 @@ module.exports = {
     new webpack.NamedModulesPlugin(),
     require("webpack-fail-plugin"),
   ],
-  devtool: "inline-source-map",
+  devtool: "eval-cheap-module-source-map",
   devServer: {
     contentBase: './dist',
     port: 23000,
