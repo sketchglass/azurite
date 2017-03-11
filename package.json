@@ -73,7 +73,6 @@
     "shelljs": "^0.7.7",
     "stack-source-map": "^1.0.6",
     "style-loader": "^0.13.2",
-    "ts-loader": "^2.0.1",
     "ts-node": "^2.1.0",
     "tslint": "^4.5.1",
     "typescript": "^2.2.1",
