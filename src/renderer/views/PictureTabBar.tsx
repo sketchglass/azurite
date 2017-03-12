@@ -6,6 +6,7 @@ import {PictureState} from "../app/PictureState"
 const classNames = require("classnames")
 import PointerEvents from "./components/PointerEvents"
 import CSSVariables from "./components/CSSVariables"
+import "./PictureTabBar.css"
 
 const TAB_WIDTH = 160
 
