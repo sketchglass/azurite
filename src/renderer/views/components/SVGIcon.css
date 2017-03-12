@@ -1,0 +1,66 @@
+.SVGIcon {
+  background: var(--default-color);
+  width: 24px;
+  height: 24px;
+  &.move {
+    mask: url("../../../../bundles/icons/flaticon/svg/move.svg");
+  }
+  &.paint-brush {
+    mask: url("../../../../bundles/icons/flaticon/svg/paint-brush.svg");
+  }
+  &.pen {
+    mask: url("../../../../bundles/icons/flaticon/svg/pen.svg");
+  }
+  &.eraser {
+    mask: url("../../../../bundles/icons/flaticon/svg/eraser.svg");
+  }
+  &.rotate {
+    mask: url("../../../../bundles/icons/flaticon/svg/rotate.svg");
+  }
+  &.search {
+    mask: url("../../../../bundles/icons/flaticon/svg/search.svg");
+  }
+  &.transform {
+    mask: url("../../../../bundles/icons/flaticon/svg/transform.svg");
+  }
+  &.add {
+    mask: url("../../../../bundles/icons/flaticon/svg/add.svg");
+  }
+  &.folder {
+    mask: url("../../../../bundles/icons/flaticon/svg/folder-2.svg");
+  }
+  &.subtract {
+    mask: url("../../../../bundles/icons/flaticon/svg/subtract.svg");
+  }
+  &.zoom-in {
+    mask: url("../../../../bundles/icons/flaticon/svg/zoom-in.svg");
+  }
+  &.zoom-out {
+    mask: url("../../../../bundles/icons/flaticon/svg/zoom-out.svg");
+  }
+  &.rotate-left {
+    mask: url("../../../../bundles/icons/flaticon/svg/circuit-9.svg");
+  }
+  &.rotate-right {
+    mask: url("../../../../bundles/icons/flaticon/svg/circuit-9.svg");
+    transform: scaleX(-1);
+  }
+  &.rect-select {
+    mask: url("../../../../bundles/icons/flaticon/svg/square-21.svg");
+  }
+  &.ellipse-select {
+    mask: url("../../../../bundles/icons/flaticon/svg/circle.svg");
+  }
+  &.freehand-select {
+    mask: url("../icons/freehand-select.svg");
+  }
+  &.polygon-select {
+    mask: url("../icons/polygon-select.svg");
+  }
+  &.crop {
+    mask: url("../../../../bundles/icons/flaticon/svg/crop.svg");
+  }
+  &.magic-wand {
+    mask: url("../../../../bundles/icons/flaticon/svg/magic-wand.svg");
+  }
+}
