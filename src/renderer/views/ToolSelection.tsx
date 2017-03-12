@@ -16,6 +16,8 @@ import ToolIDs from "../tools/ToolIDs"
 
 import {dialogLauncher} from "../views/dialogs/DialogLauncher"
 
+import "./ToolSelection.css"
+
 const toolToIcon = (tool: Tool) => {
   const map = {
     [ToolIDs.brush]: "paint-brush",

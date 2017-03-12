@@ -1,6 +1,7 @@
 import * as React from "react"
 import KeyInput from "../../../lib/KeyInput"
 import KeyRecorder from "../../../lib/KeyRecorder"
+import "./ShortcutEdit.css"
 
 interface ShortcutEditProps {
   shortcut: KeyInput|undefined

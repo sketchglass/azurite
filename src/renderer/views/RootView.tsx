@@ -16,7 +16,8 @@ import {toolManager} from "../app/ToolManager"
 
 import "./KeyBindingHandler"
 import "./MenuBar"
-import "../../styles/main.css"
+import "./common.css"
+import "./RootView.css"
 
 @observer export default
 class RootView extends React.Component<{}, {}> {

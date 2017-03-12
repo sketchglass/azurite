@@ -6,6 +6,7 @@ import {HSVColor} from "../../../lib/Color"
 import ColorPicker from "../components/ColorPicker"
 import RGBRangeSliders from "../components/RGBRangeSliders"
 import Palette from "../components/Palette"
+import "./ColorPanel.css"
 
 @observer
 export default

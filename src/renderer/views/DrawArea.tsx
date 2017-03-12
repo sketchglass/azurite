@@ -13,6 +13,7 @@ import PointerEvents from "./components/PointerEvents"
 import ScrollBar, {ScrollBarDirection} from "./components/ScrollBar"
 import FrameDebounced from "./components/FrameDebounced"
 import {appState} from "../app/AppState"
+import "./DrawArea.css"
 
 @observer
 class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined}, {}> {

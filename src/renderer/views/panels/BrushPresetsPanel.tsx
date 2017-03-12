@@ -15,6 +15,7 @@ import BrushTool from "../../tools/BrushTool"
 import SVGIcon from "../components/SVGIcon"
 import ClickToEdit from "../components/ClickToEdit"
 import {dialogLauncher} from "../dialogs/DialogLauncher"
+import "./BrushPresetsPanel.css"
 
 interface BrushPresetNode extends TreeNode {
   preset: BrushPreset

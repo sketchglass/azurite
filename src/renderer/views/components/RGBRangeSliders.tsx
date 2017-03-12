@@ -2,6 +2,7 @@ import React = require("react")
 import { Color } from "paintgl"
 import { HSVColor } from "../../../lib/Color"
 import ColorSlider from "./ColorSlider"
+import "./RGBRangeSliders.css"
 
 interface RGBRangeSlidersProps {
   color: HSVColor

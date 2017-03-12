@@ -1,5 +1,6 @@
 import * as React from "react"
 import {remote} from "electron"
+import "./DialogTitleBar.css"
 
 export default
 function DialogTitleBar(props: {title: string}) {
