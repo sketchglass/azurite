@@ -10,5 +10,6 @@ declare namespace Electron {
       async?: boolean
       positioningItem?: number
     }): void
+    closePopup(browserWindow?: BrowserWindow): void
   }
 }
