@@ -27,7 +27,7 @@
       top: 8px;
       width: 8px;
       height: 8px;
-      mask: url("../../../bundles/icons/flaticon/svg/multiply.svg");
+      mask: url("../../../../bundles/icons/flaticon/svg/multiply.svg");
       background-color: var(--default-color);
     }
   }

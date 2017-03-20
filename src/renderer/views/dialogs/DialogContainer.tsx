@@ -1,5 +1,6 @@
 import * as React from "react"
 import DialogTitleBar from "../components/DialogTitleBar"
+import "./DialogContainer.css"
 
 interface DialogContainerProps {
   title: string

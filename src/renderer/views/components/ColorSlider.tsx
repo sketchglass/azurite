@@ -3,6 +3,7 @@ import {Color} from "paintgl"
 import {toHexColor} from "../../../lib/Color"
 import CSSVariables from "./CSSVariables"
 import PointerEvents from "./PointerEvents"
+import "./ColorSlider.css"
 
 interface ColorSliderProps {
   color: Color

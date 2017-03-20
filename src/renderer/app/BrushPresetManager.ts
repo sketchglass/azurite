@@ -1,7 +1,6 @@
 import {observable, computed} from "mobx"
 import {BrushPreset} from "../brush/BrushPreset"
 import {ConfigValues} from "./Config"
-import {brushEngineRegistry} from "./BrushEngineRegistry"
 import {defaultBrushPresets} from "../brush/DefaultBrushPresets"
 
 export
@@ -18,12 +17,7 @@ class BrushPresetManager {
 
   loadConfig(values: ConfigValues) {
     const presetsData = values.brushPresets.length > 0 ? values.brushPresets : defaultBrushPresets()
-    for (const data of presetsData) {
-      const preset = brushEngineRegistry.createPreset(data)
-      if (preset) {
-        this.presets.push(preset)
-      }
-    }
+    this.presets.replace(presetsData.map(data => new BrushPreset(data)))
     this.currentPresetIndex = values.currentBrushPreset
   }
 

@@ -1,9 +1,11 @@
 const path = require("path")
+const webpack = require("webpack")
+const {CheckerPlugin} = require('awesome-typescript-loader')
 const commonEntries = ["./src/renderer/requireManualResolve.ts"]
 
 module.exports = {
   entry: {
-    renderer: [...commonEntries, "./src/renderer/index.tsx"],
+    renderer: [...commonEntries, "./src/renderer/index.ts"],
     dialogs: [...commonEntries, "./src/renderer/views/dialogs/DialogIndex.tsx"],
     preferences: [...commonEntries, "./src/renderer/views/preferences/PreferencesIndex.tsx"],
     test: [...commonEntries, "./src/test/index.js"],
@@ -35,17 +37,29 @@ module.exports = {
       {
         test: /\.tsx?$/,
         exclude: /Test\.tsx?$/,
-        use: [
-          "babel-loader?plugins[]=glslify",
-          "ts-loader",
-        ],
+        use: {
+          loader: 'awesome-typescript-loader',
+          options: {
+            useBabel: true,
+            babelOptions: {
+              plugins: ["glslify"]
+            },
+            useCache: true
+          }
+        }
       },
       {
         test: /Test\.tsx?$/,
-        use: [
-          "babel-loader?plugins[]=espower",
-          "ts-loader",
-        ],
+        use: {
+          loader: 'awesome-typescript-loader',
+          options: {
+            useBabel: true,
+            babelOptions: {
+              plugins: ["espower"]
+            },
+            useCache: true
+          }
+        }
       },
       {
         test: /\.css$/,
@@ -79,9 +93,10 @@ module.exports = {
     ],
   },
   plugins: [
+    new webpack.NamedModulesPlugin(),
     require("webpack-fail-plugin"),
   ],
-  devtool: "inline-source-map",
+  devtool: "eval-cheap-module-source-map",
   devServer: {
     contentBase: './dist',
     port: 23000,

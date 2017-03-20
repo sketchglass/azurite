@@ -1,0 +1,2 @@
+import "./initState"
+import "./initView"

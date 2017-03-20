@@ -12,6 +12,7 @@ import LayerDetail from "../LayerDetail"
 import {appState} from "../../app/AppState"
 import IndexPath from "../../../lib/IndexPath"
 import {AddLayerAction, GroupLayerAction, RemoveLayerAction} from "../../actions/LayerActions"
+import "./LayerPanel.css"
 
 interface LayerNode extends TreeNode {
   layer: Layer

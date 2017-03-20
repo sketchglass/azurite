@@ -1,4 +1,5 @@
 import React = require("react")
+import "./ClickToEdit.css"
 
 interface ClickToEditProps {
   text: string

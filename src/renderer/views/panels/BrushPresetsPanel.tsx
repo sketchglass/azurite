@@ -9,13 +9,13 @@ const {Menu} = remote
 import KeyInput from "../../../lib/KeyInput"
 import {BrushPreset} from "../../brush/BrushPreset"
 import {brushPresetManager} from "../../app/BrushPresetManager"
-import {brushEngineRegistry} from "../../app/BrushEngineRegistry"
 import {toolManager} from "../../app/ToolManager"
 import {defaultBrushPresets} from "../../brush/DefaultBrushPresets"
 import BrushTool from "../../tools/BrushTool"
 import SVGIcon from "../components/SVGIcon"
 import ClickToEdit from "../components/ClickToEdit"
 import {dialogLauncher} from "../dialogs/DialogLauncher"
+import "./BrushPresetsPanel.css"
 
 interface BrushPresetNode extends TreeNode {
   preset: BrushPreset
@@ -110,19 +110,12 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
   })
   private onContextMenu = action((nodeInfo: NodeInfo<TreeNode>|undefined, event: React.MouseEvent<Element>) => {
     const index = nodeInfo ? nodeInfo.path[0] : brushPresetManager.presets.length
-    const {clientX, clientY} = event
-    // use timeout to workaround https://github.com/electron/electron/issues/1854
-    setTimeout(() => {
-      this.showContextMenu(index, clientX, clientY)
-    }, 50)
-  })
 
-  @action private showContextMenu(index: number, clientX: number, clientY: number) {
     const addPresetItems: Electron.MenuItemOptions[] = defaultBrushPresets().map(data => {
       return {
         label: data.title,
         click: action(() => {
-          const preset = brushEngineRegistry.createPreset(data)
+          const preset = new BrushPreset(data)
           if (preset) {
             brushPresetManager.presets.splice(index, 0, preset)
           }
@@ -159,6 +152,10 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
       )
     }
     const menu = Menu.buildFromTemplate(menuTemplate)
-    menu.popup(remote.getCurrentWindow(), clientX, clientY)
-  }
+    menu.popup(remote.getCurrentWindow(), {
+      x: event.clientX,
+      y: event.clientY,
+      async: true
+    })
+  })
 }

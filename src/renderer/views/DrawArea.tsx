@@ -13,6 +13,7 @@ import PointerEvents from "./components/PointerEvents"
 import ScrollBar, {ScrollBarDirection} from "./components/ScrollBar"
 import FrameDebounced from "./components/FrameDebounced"
 import {appState} from "../app/AppState"
+import "./DrawArea.css"
 
 @observer
 class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined}, {}> {
@@ -80,15 +81,12 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
   currentTool: Tool|undefined
   usingTablet = false
   clientRect = new Rect()
+  disposers: (() => void)[] = []
 
   constructor(props: DrawAreaProps) {
     super(props)
     this.picture = renderer.picture = props.picture
     this.setTool(props.tool)
-    autorun(() => this.updateCursor())
-    reaction(() => this.tool.selectionShowMode, mode => {
-      renderer.selectionShowMode = mode
-    })
   }
 
   setTool(tool: Tool) {
@@ -115,28 +113,30 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     element.insertBefore(canvas, element.firstChild)
     this.updateCursor()
 
-    ipcRenderer.on(IPCChannels.tabletDown, (e: Electron.IpcRendererEvent, tabletEvent: TabletEvent) => {
-      this.usingTablet = true
-      this.onDown(this.toToolEvent(tabletEvent))
-    })
-    ipcRenderer.on(IPCChannels.tabletDown, (e: Electron.IpcRendererEvent, tabletEvent: TabletEvent) => {
-      this.usingTablet = true
-      this.onDown(this.toToolEvent(tabletEvent))
-    })
-    ipcRenderer.on(IPCChannels.tabletMove, (e: Electron.IpcRendererEvent, tabletEvent: TabletEvent) => {
-      const toolEv = this.toToolEvent(tabletEvent)
-      renderer.cursorPosition = toolEv.rendererPos
-      this.onMove(toolEv)
-    })
-    ipcRenderer.on(IPCChannels.tabletUp, (e: Electron.IpcRendererEvent, tabletEvent: TabletEvent) => {
-      this.usingTablet = false
-      this.onUp(this.toToolEvent(tabletEvent))
-    })
+    ipcRenderer.on(IPCChannels.tabletDown, this.onIPCTabletDown)
+    ipcRenderer.on(IPCChannels.tabletMove, this.onIPCTabletMove)
+    ipcRenderer.on(IPCChannels.tabletUp, this.onIPCTabletUp)
 
     this.resizeRenderer(true)
     window.addEventListener("resize", this.onResize)
     document.addEventListener("pointermove", this.onDocumentPointerMove)
-    reaction(() => appState.uiVisible, () => setImmediate(() => this.onResize()))
+
+    this.disposers = [
+      () => ipcRenderer.removeListener(IPCChannels.tabletDown, this.onIPCTabletDown),
+      () => ipcRenderer.removeListener(IPCChannels.tabletMove, this.onIPCTabletMove),
+      () => ipcRenderer.removeListener(IPCChannels.tabletUp, this.onIPCTabletUp),
+      () => window.removeEventListener("resize", this.onResize),
+      () => document.removeEventListener("pointermove", this.onDocumentPointerMove),
+      reaction(() => appState.uiVisible, () => setImmediate(() => this.onResize())),
+      autorun(() => this.updateCursor()),
+      reaction(() => this.tool.selectionShowMode, mode => {
+        renderer.selectionShowMode = mode
+      }),
+    ]
+  }
+
+  componentWillUnmount() {
+    this.disposers.forEach(d => d())
   }
 
   updateCursor() {
@@ -217,6 +217,19 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     }
   }
 
+  onIPCTabletDown = (e: Electron.IpcRendererEvent, tabletEvent: TabletEvent) => {
+    this.usingTablet = true
+    this.onDown(this.toToolEvent(tabletEvent))
+  }
+  onIPCTabletMove = (e: Electron.IpcRendererEvent, tabletEvent: TabletEvent) => {
+    const toolEv = this.toToolEvent(tabletEvent)
+    renderer.cursorPosition = toolEv.rendererPos
+    this.onMove(toolEv)
+  }
+  onIPCTabletUp = (e: Electron.IpcRendererEvent, tabletEvent: TabletEvent) => {
+    this.usingTablet = false
+    this.onUp(this.toToolEvent(tabletEvent))
+  }
   onPointerDown = (ev: PointerEvent) => {
     if (!this.usingTablet) {
       this.onDown(this.toToolEvent(ev))

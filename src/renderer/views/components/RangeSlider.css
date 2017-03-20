@@ -1,6 +1,6 @@
 .RangeSlider {
   position: relative;
-};
+}
 .RangeSlider_border {
   background-color: var(--ui-background-color);
   border-radius: 4px;

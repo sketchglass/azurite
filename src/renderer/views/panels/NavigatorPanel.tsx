@@ -8,6 +8,7 @@ import {frameDebounce} from "../../../lib/Debounce"
 import PointerEvents from "../components/PointerEvents"
 import SVGIcon from "../components/SVGIcon"
 import RangeSlider from "../components/RangeSlider"
+import "./NavigatorPanel.css"
 
 class NavigatorMinimap extends React.Component<{}, {} > {
   private minimap: HTMLCanvasElement

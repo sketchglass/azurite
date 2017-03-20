@@ -1,6 +1,7 @@
 import React = require("react")
 import PointerEvents from "./PointerEvents"
 import CSSVariables from "./CSSVariables"
+import "./RangeSlider.css"
 
 export interface BackgroundProps {
   width: number

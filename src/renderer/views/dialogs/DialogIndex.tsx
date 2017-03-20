@@ -4,7 +4,7 @@ import {remote, ipcRenderer} from "electron"
 import NewPictureDialog from "./NewPictureDialog"
 import ResolutionChangeDialog from "./ResolutionChangeDialog"
 import ToolShortcutsDialog from "./ToolShortcutsDialog"
-import "../../../styles/main.css"
+import "../common.css"
 
 window.addEventListener("DOMContentLoaded", () => {
   const root = document.querySelector(".DialogRoot")!

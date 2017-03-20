@@ -1,6 +1,7 @@
 import * as React from "react"
 import {observer} from "mobx-react"
 import DimensionSelectViewModel, {DimensionUnit} from "../viewmodels/DimensionSelectViewModel"
+import "./DimensionSelect.css"
 
 interface DimensionSelectProps {
   percent?: boolean

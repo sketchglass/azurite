@@ -2,6 +2,7 @@ import * as React from "react"
 import {observer} from "mobx-react"
 import DialogTitleBar from "../components/DialogTitleBar"
 import PreferencesViewModel from "../../viewmodels/PreferencesViewModel"
+import "./Preferences.css"
 
 @observer
 export default
