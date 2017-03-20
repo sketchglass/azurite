@@ -17,7 +17,11 @@ class WindowsMenuBar extends React.Component<{}, {}> {
           const onClick = (e: React.MouseEvent<HTMLElement>) => {
             const element = e.target as HTMLElement
             const rect = element.getBoundingClientRect()
-            menu.popup(remote.getCurrentWindow(), rect.left, rect.bottom)
+            menu.popup(remote.getCurrentWindow(), {
+              x: Math.round(rect.left),
+              y: Math.round(rect.bottom),
+              async: true
+            })
           }
           return <div className="WindowsMenuBar_item" onClick={onClick}>{template.label}</div>
         })
