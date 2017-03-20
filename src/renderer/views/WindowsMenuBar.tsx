@@ -2,6 +2,7 @@ import * as React from "react"
 import {observer} from "mobx-react"
 import {remote} from "electron"
 import {menuBar} from "./MenuBar"
+import "./WindowsMenuBar.css"
 const {Menu} = remote
 
 @observer
