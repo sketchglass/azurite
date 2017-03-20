@@ -88,6 +88,7 @@ async function openWindow() {
     width: 1200,
     height: 768,
     show: false,
+    frame: process.platform == "darwin",
   })
 
   const resetTitleColor = () => {

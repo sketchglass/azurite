@@ -2,10 +2,12 @@
   height: 32px;
   background-color: var(--default-background-color);
   display: flex;
+  -webkit-app-region: drag;
 
   &_item {
     line-height: 32px;
     padding: 0 8px;
+    -webkit-app-region: no-drag;
     &:hover {
       background-color: var(--lighten-background-color);
     }
