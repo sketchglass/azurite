@@ -79,7 +79,7 @@ function openPreferencesWindow() {
 }
 
 async function openWindow() {
-  if (process.env.NODE_ENV === "development") {
+  if (argv.development) {
     const {default: installExtension, REACT_DEVELOPER_TOOLS} = require("electron-devtools-installer");
     await installExtension(REACT_DEVELOPER_TOOLS)
   }
@@ -102,7 +102,7 @@ async function openWindow() {
   resetTitleColor()
 
   win.loadURL(`${contentBase}/index.html`)
-  if (process.env.NODE_ENV === "development") {
+  if (argv.development) {
     win.webContents.openDevTools()
   }
 
@@ -173,7 +173,7 @@ function openTestWindow() {
 app.commandLine.appendSwitch("enable-experimental-web-platform-features")
 
 app.on("ready", async () => {
-  if (process.env.NODE_ENV == "test") {
+  if (argv.test) {
     openTestWindow()
   } else {
     await openWindow()
