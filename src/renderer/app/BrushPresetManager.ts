@@ -17,6 +17,7 @@ class BrushPresetManager {
 
   loadConfig(values: ConfigValues) {
     const presetsData = values.brushPresets.length > 0 ? values.brushPresets : defaultBrushPresets()
+    this.presets.clear()
     for (const data of presetsData) {
       const preset = new BrushPreset(data)
       if (preset) {
