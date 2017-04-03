@@ -1,13 +1,14 @@
 import {remote} from "electron"
-import * as msgpack from "msgpack-lite"
 import * as fs from "fs"
 import Picture from "../models/Picture"
+import PictureFormatAzurite from "../formats/PictureFormatAzurite"
 
 const {dialog} = remote
 
+const pictureFormat = new PictureFormatAzurite()
 const fileFilter = {
-  name: "Azurite Picture",
-  extensions: ["azurite"]
+  name: pictureFormat.title,
+  extensions: pictureFormat.extensions,
 }
 
 export
@@ -44,7 +45,7 @@ class PictureSave {
   }
 
   async saveToPath(filePath: string) {
-    const fileData = msgpack.encode(this.picture.toData())
+    const fileData = await pictureFormat.export(this.picture)
     await new Promise((resolve, reject) => {
       fs.writeFile(filePath, fileData, (err) => {
         if (err) {
@@ -79,7 +80,7 @@ class PictureSave {
         }
       })
     })
-    const picture = Picture.fromData(msgpack.decode(fileData))
+    const picture = await pictureFormat.import(fileData)
     picture.filePath = filePath
     return picture
   }
