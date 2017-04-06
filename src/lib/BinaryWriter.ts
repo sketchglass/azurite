@@ -4,9 +4,6 @@ export default
 class BinaryWriter {
   constructor(public writable: Writable) {
   }
-  arrayBuffer(buf: ArrayBuffer) {
-    this.writable.write(Buffer.from(buf))
-  }
   string(string: string, encoding: string) {
     const buf = Buffer.from(string, encoding)
     this.writable.write(buf)
