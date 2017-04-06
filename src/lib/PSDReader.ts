@@ -45,4 +45,16 @@ class PSDReader {
     this.depth = reader.uint16BE()
     this.colorMode = reader.uint16BE()
   }
+
+  readColorModeData() {
+    const {reader} = this
+    const len = reader.uint32BE()
+    reader.skip(len) // TODO
+  }
+
+  readImageResouces() {
+    const {reader} = this
+    const len = reader.uint32BE()
+    reader.skip(len) // TODO
+  }
 }
