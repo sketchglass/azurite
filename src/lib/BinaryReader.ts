@@ -5,6 +5,9 @@ export default
 class BinaryReader {
   constructor(public readable: Readable) {
   }
+  skip(size: number) {
+    this.readable.read(size)
+  }
   ascii(count: number) {
     const buf = this.readable.read(count) as Buffer
     return buf.toString('ascii')
