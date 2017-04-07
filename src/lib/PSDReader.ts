@@ -1,4 +1,4 @@
-import {PSDColorMode, PSDLayerInfo, PSDChannelInfo, PSDBlendModeKey, PSDSectionType} from "./PSDTypes"
+import {PSDColorMode, PSDLayerRecord, PSDChannelInfo, PSDBlendModeKey, PSDSectionType, PSDCompression} from "./PSDTypes"
 import {Rect, Vec2} from "paintvec"
 import * as iconv from "iconv-lite"
 
@@ -50,6 +50,29 @@ class PSDBinaryReader {
   }
 }
 
+function decodePackBits(src: Buffer, dstSize: number) {
+  const dst = Buffer.alloc(dstSize)
+  let i = 0
+  let j = 0
+  while (i < src.length) {
+    const count = src.readInt8(i)
+    ++i
+    if (count >= 0) {
+      const len = count + 1
+      dst.set(src.slice(i, len), j)
+      i += len
+      j += len
+    } else {
+      const c = src[i]
+      const len = -count + 1
+      dst.fill(c, j, j + len)
+      ++i
+      j += len
+    }
+  }
+  return dst
+}
+
 // https://www.adobe.com/devnet-apps/photoshop/fileformatashtml/
 export default
 class PSDReader {
@@ -60,7 +83,7 @@ class PSDReader {
   depth: number
   colorMode: PSDColorMode
   numberOfLayers: number
-  layerInfos: PSDLayerInfo[] = []
+  layerRecords: PSDLayerRecord[] = []
 
   constructor(public data: Buffer) {
   }
@@ -107,7 +130,7 @@ class PSDReader {
     reader.uint32() // length
     this.numberOfLayers = reader.uint16()
     this.readLayerRecords()
-    this.readChannelImageData()
+    this.readChannelImageDatas()
   }
 
   readLayerRecords() {
@@ -116,7 +139,7 @@ class PSDReader {
     }
   }
 
-  readLayerRecord(): PSDLayerInfo {
+  readLayerRecord(): PSDLayerRecord {
     const {reader} = this
     const top = reader.uint32()
     const left = reader.uint32()
@@ -143,7 +166,7 @@ class PSDReader {
     const visible = (flags & (1 << 1)) !== 0
     reader.skip(1) // filler
     const extraDataFieldLength = reader.uint32()
-    reader.buffer(extraDataFieldLength) // TODO
+    reader.skip(extraDataFieldLength) // TODO
 
     return {
       name: '', // TODO
@@ -159,6 +182,37 @@ class PSDReader {
     }
   }
 
-  readChannelImageData() {
+  readLayerMaskData() {
+    const {reader} = this
+    const len = reader.uint32()
+    reader.skip(len)
+  }
+
+  readLayerBlendingRangesData() {
+    const {reader} = this
+    const len = reader.uint32()
+    reader.skip(len)
+  }
+
+  readChannelImageDatas() {
+    for (const record of this.layerRecords) {
+      for (const channelInfo of record.channelInfos) {
+        const data = this.readChannelImageData(channelInfo.dataLength, record.rect)
+        record.channelDatas.push(data)
+      }
+    }
+  }
+
+  readChannelImageData(length: number, rect: Rect) {
+    const {reader} = this
+    const compression = reader.uint16() as PSDCompression
+    const data = reader.buffer(length)
+    if (compression === PSDCompression.Raw) {
+      return data
+    } else if (compression === PSDCompression.RLE) {
+      return decodePackBits(data, rect.width * rect.height)
+    } else {
+      throw new Error("Zip-encoded channel data is not supported")
+    }
   }
 }

@@ -54,7 +54,7 @@ interface PSDChannelInfo {
 }
 
 export
-interface PSDLayerInfo {
+interface PSDLayerRecord {
   name: string
   opacity: number // 0...255
   clipping: boolean
@@ -65,4 +65,12 @@ interface PSDLayerInfo {
   sectionType: PSDSectionType
   channelInfos: PSDChannelInfo[]
   channelDatas: Buffer[]
+}
+
+export
+enum PSDCompression {
+  Raw = 0,
+  RLE = 1,
+  ZipWithoutPrediction = 2,
+  ZipWithPrediction = 3,
 }
