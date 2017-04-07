@@ -8,6 +8,9 @@ class BinaryReader {
   skip(size: number) {
     this.readable.read(size)
   }
+  buffer(size: number) {
+    return this.readable.read(size) as Buffer
+  }
   ascii(count: number) {
     const buf = this.readable.read(count) as Buffer
     return buf.toString('ascii')
