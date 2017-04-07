@@ -38,6 +38,18 @@ class PSDBinaryReader {
     const buf = this.buffer(count * 2)
     return iconv.decode(buf, 'utf16-be')
   }
+  pascalString(alignment: number) {
+    const count = this.uint8()
+    const totalCount = count + 1
+    const alignedCount = Math.ceil(totalCount / alignment) * alignment
+    const str = this.ascii(count)
+    this.skip(alignedCount - totalCount)
+    return str
+  }
+  unicodePascalString() {
+    const count = this.uint32()
+    return this.utf16(count)
+  }
   pushOffset() {
     this.savedOffsets.push(this.offset)
   }
@@ -166,19 +178,25 @@ class PSDReader {
     const visible = (flags & (1 << 1)) !== 0
     reader.skip(1) // filler
     const extraDataFieldLength = reader.uint32()
-    reader.skip(extraDataFieldLength) // TODO
+    reader.pushOffset()
+    this.readLayerMaskData()
+    this.readLayerBlendingRangesData()
+    const name = reader.pascalString(4)
+    const {sectionType, unicodeName} = this.readAdditionalLayerInfo()
+    reader.popOffset()
+    reader.skip(extraDataFieldLength)
 
     return {
-      name: '', // TODO
+      name: unicodeName != undefined ? unicodeName : name,
       opacity,
       clipping,
       transparencyProtected,
       visible,
       rect,
       blendMode,
-      sectionType: PSDSectionType.Layer, // TODO
+      sectionType,
       channelInfos,
-      channelDatas: [], // TODO
+      channelDatas: [],
     }
   }
 
@@ -192,6 +210,30 @@ class PSDReader {
     const {reader} = this
     const len = reader.uint32()
     reader.skip(len)
+  }
+
+  readAdditionalLayerInfo() {
+    const {reader} = this
+    let sectionType = PSDSectionType.Layer
+    let unicodeName: string|undefined
+    while (true) {
+      const signature = reader.ascii(4)
+      if (signature != '8BIM' || signature != '8B64') {
+        break
+      }
+      const key = reader.ascii(4)
+      const len = reader.uint32()
+      reader.pushOffset()
+      if (key == 'lsct') {
+        // section type
+        sectionType = reader.uint32() as PSDSectionType
+      } else if (key == 'luni') {
+        unicodeName = reader.unicodePascalString()
+      }
+      reader.popOffset()
+      reader.skip(len)
+    }
+    return {sectionType, unicodeName}
   }
 
   readChannelImageDatas() {
