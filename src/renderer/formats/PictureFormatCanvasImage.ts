@@ -1,7 +1,7 @@
 import {Vec2} from "paintvec"
 
 import PictureFormat from "./PictureFormat"
-import {encodeImage, decodeToImage} from "../../lib/ImageFile"
+import {encodeCanvas, decodeToCanvas} from "../../lib/CanvasEncodeDecode"
 import {addPictureFormat} from "../app/FormatRegistry"
 import Picture from "../models/Picture"
 import TextureToCanvas from "../models/TextureToCanvas"
@@ -15,7 +15,7 @@ function canvasToLayer(canvas: HTMLCanvasElement, name: string, picture: Picture
 
 abstract class PictureFormatCanvasImage extends PictureFormat {
   async importPicture(buffer: Buffer, name: string) {
-    const canvas = await decodeToImage(buffer, this.mimeType)
+    const canvas = await decodeToCanvas(buffer, this.mimeType)
     const picture = new Picture({
       width: canvas.width,
       height: canvas.height,
@@ -28,7 +28,7 @@ abstract class PictureFormatCanvasImage extends PictureFormat {
   }
 
   async importLayer(buffer: Buffer, name: string, picture: Picture) {
-    const canvas = await decodeToImage(buffer, this.mimeType)
+    const canvas = await decodeToCanvas(buffer, this.mimeType)
     return canvasToLayer(canvas, name, picture)
   }
 
@@ -36,7 +36,7 @@ abstract class PictureFormatCanvasImage extends PictureFormat {
     const textureToCanvas = new TextureToCanvas(picture.size)
     textureToCanvas.loadTexture(picture.blender.getBlendedTexture(), new Vec2(0))
     textureToCanvas.updateCanvas()
-    return await encodeImage(textureToCanvas.canvas, this.mimeType)
+    return await encodeCanvas(textureToCanvas.canvas, this.mimeType)
   }
 }
 export default PictureFormatCanvasImage
