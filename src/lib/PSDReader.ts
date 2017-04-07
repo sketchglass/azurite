@@ -100,6 +100,13 @@ class PSDReader {
   constructor(public data: Buffer) {
   }
 
+  read() {
+    this.readFileHeader()
+    this.readColorModeData()
+    this.readImageResouces()
+    this.readLayerAndMasInformation()
+  }
+
   readFileHeader() {
     const {reader} = this
     const signature = reader.ascii(4)
