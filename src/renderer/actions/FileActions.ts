@@ -1,7 +1,7 @@
 import Action, {PictureAction} from "./Action"
 import ActionIDs from "./ActionIDs"
 import {addAction, actionRegistry} from "../app/ActionRegistry"
-import ImageFormat from "../formats/ImageFormat"
+import PictureFormat from "../formats/PictureFormat"
 import {formatRegistry} from "../app/FormatRegistry"
 import {appState} from "../app/AppState"
 import {PictureExport} from "../services/PictureExport"
@@ -60,7 +60,7 @@ export class FileImportAction extends PictureAction {
 export class FileExportAction extends PictureAction {
   id = `${ActionIDs.fileExport}:${this.format.mimeType}`
   title = `Export ${this.format.title}...`
-  constructor(public format: ImageFormat) {
+  constructor(public format: PictureFormat) {
     super()
   }
 
@@ -73,7 +73,7 @@ export class FileExportAction extends PictureAction {
   }
 }
 
-for (const format of formatRegistry.imageFormats) {
+for (const format of formatRegistry.pictureFormats) {
   actionRegistry.add(new FileExportAction(format))
 }
 

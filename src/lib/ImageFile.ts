@@ -1,5 +1,5 @@
 async function blobToBuffer(blob: Blob) {
-  return new Promise((resolve, reject) => {
+  return new Promise<Buffer>((resolve, reject) => {
     const reader = new FileReader()
     reader.addEventListener("loadend", (ev) => {
       if (ev["error"]) {

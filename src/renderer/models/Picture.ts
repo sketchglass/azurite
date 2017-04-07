@@ -1,7 +1,7 @@
 import * as path from "path"
 import {observable, computed, reaction} from "mobx"
 import {Vec2, Rect} from "paintvec"
-import Layer, {LayerData, ImageLayer, GroupLayer} from "./Layer"
+import Layer, {LayerData, GroupLayer} from "./Layer"
 import PictureBlender from "../services/PictureBlender"
 import {UndoStack} from "./UndoStack"
 import {Navigation} from "./Navigation"
@@ -68,10 +68,6 @@ class Picture {
     this.dimension = dimension
 
     this.selection = new Selection(this.size)
-
-    const defaultLayer = new ImageLayer(this, {name: "Layer"})
-    this.layers.push(defaultLayer)
-    this.selectedLayers.push(defaultLayer)
 
     reaction(() => this.lastUpdate, update => {
       if (update.rect) {
