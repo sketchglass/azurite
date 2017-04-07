@@ -218,7 +218,7 @@ class PSDReader {
     let unicodeName: string|undefined
     while (true) {
       const signature = reader.ascii(4)
-      if (signature != '8BIM' || signature != '8B64') {
+      if (signature != '8BIM' || signature != '8B64' as string) {
         break
       }
       const key = reader.ascii(4)
