@@ -1,12 +1,12 @@
-import * as React from "react"
-import {observable, action} from "mobx"
-import {observer} from "mobx-react"
-import {appState} from "../app/AppState"
-import {PictureState} from "../app/PictureState"
-const classNames = require("classnames")
-import PointerEvents from "./components/PointerEvents"
-import CSSVariables from "./components/CSSVariables"
-import "./PictureTabBar.css"
+import * as React from 'react'
+import {observable, action} from 'mobx'
+import {observer} from 'mobx-react'
+import {appState} from '../app/AppState'
+import {PictureState} from '../app/PictureState'
+const classNames = require('classnames')
+import PointerEvents from './components/PointerEvents'
+import CSSVariables from './components/CSSVariables'
+import './PictureTabBar.css'
 
 const TAB_WIDTH = 160
 
@@ -53,12 +53,12 @@ class PictureTab extends React.Component<PictureTabProps, {}> {
 
   render() {
     const {pictureState, current, shift} = this.props
-    const className = classNames("PictureTab", {
-      "PictureTab-current": current,
+    const className = classNames('PictureTab', {
+      'PictureTab-current': current,
     })
     const offset = this.offset + shift * TAB_WIDTH
     return (
-      <CSSVariables offset={offset + "px"} width={TAB_WIDTH + "px"}>
+      <CSSVariables offset={offset + 'px'} width={TAB_WIDTH + 'px'}>
         <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
           <div className={className} ref={e => this.element = e}>
             <span className="PictureTab_title">{pictureState.picture.fileName}</span>
@@ -86,7 +86,7 @@ class PictureTabBar extends React.Component<{hidden: boolean}, {}> {
       <div className="PictureTabBar" hidden={this.props.hidden}>
         {
           pictureStates.map((p, i) => {
-            const current = i == currentPictureIndex
+            const current = i === currentPictureIndex
             const shiftRight = this.moving && this.movingIndexNew <= i && i < this.movingIndex
             const shiftLeft = this.moving && this.movingIndex < i && i <= this.movingIndexNew
             const shift = shiftRight ? 1 : shiftLeft ? -1 : 0
@@ -98,7 +98,7 @@ class PictureTabBar extends React.Component<{hidden: boolean}, {}> {
               this.movingIndexOffset = indexOffset
             })
             const onMoveEnd = action(() => {
-              if (this.movingIndexOffset != 0) {
+              if (this.movingIndexOffset !== 0) {
                 const newIndex = Math.max(0, Math.min(this.movingIndexNew, appState.pictureStates.length - 1))
                 const [state] = appState.pictureStates.splice(this.movingIndex, 1)
                 appState.pictureStates.splice(newIndex , 0, state)

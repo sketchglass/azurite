@@ -1,18 +1,18 @@
-import {action} from "mobx"
-import {observer} from "mobx-react"
-import React = require("react")
-import * as classNames from "classnames"
-import {Tree, TreeNode, NodeInfo} from "react-draggable-tree"
-import "react-draggable-tree/lib/index.css"
-import Layer, {GroupLayer} from "../../models/Layer"
-import {MoveLayerCommand, CopyLayerCommand, ChangeLayerPropsCommand} from "../../commands/LayerCommand"
-import ClickToEdit from "../components/ClickToEdit"
-import SVGIcon from "../components/SVGIcon"
-import LayerDetail from "../LayerDetail"
-import {appState} from "../../app/AppState"
-import IndexPath from "../../../lib/IndexPath"
-import {AddLayerAction, GroupLayerAction, RemoveLayerAction} from "../../actions/LayerActions"
-import "./LayerPanel.css"
+import {action} from 'mobx'
+import {observer} from 'mobx-react'
+import React = require('react')
+import * as classNames from 'classnames'
+import {Tree, TreeNode, NodeInfo} from 'react-draggable-tree'
+import 'react-draggable-tree/lib/index.css'
+import Layer, {GroupLayer} from '../../models/Layer'
+import {MoveLayerCommand, CopyLayerCommand, ChangeLayerPropsCommand} from '../../commands/LayerCommand'
+import ClickToEdit from '../components/ClickToEdit'
+import SVGIcon from '../components/SVGIcon'
+import LayerDetail from '../LayerDetail'
+import {appState} from '../../app/AppState'
+import IndexPath from '../../../lib/IndexPath'
+import {AddLayerAction, GroupLayerAction, RemoveLayerAction} from '../../actions/LayerActions'
+import './LayerPanel.css'
 
 interface LayerNode extends TreeNode {
   layer: Layer
@@ -47,8 +47,8 @@ const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
   const {picture} = layer
 
   const rename = (name: string) => {
-    if (layer.name != name) {
-      picture.undoStack.push(new ChangeLayerPropsCommand(picture, layer.path, "Rename Layer", {name}))
+    if (layer.name !== name) {
+      picture.undoStack.push(new ChangeLayerPropsCommand(picture, layer.path, 'Rename Layer', {name}))
     }
   }
 
@@ -56,14 +56,14 @@ const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
 
   const onVisibleToggle = (e: React.FormEvent<HTMLInputElement>) => {
     const visible = (e.target as HTMLInputElement).checked
-    if (layer.visible != visible) {
-      picture.undoStack.push(new ChangeLayerPropsCommand(picture, layer.path, "Change Layer Visibility", {visible}))
+    if (layer.visible !== visible) {
+      picture.undoStack.push(new ChangeLayerPropsCommand(picture, layer.path, 'Change Layer Visibility', {visible}))
     }
   }
   const onVisibleClick = (e: React.MouseEvent<HTMLInputElement>) => {
     e.stopPropagation()
   }
-  const className = classNames("LayerPanel_layer", {"LayerPanel_layer-clipped": layer.clippingGroup})
+  const className = classNames('LayerPanel_layer', {'LayerPanel_layer-clipped': layer.clippingGroup})
 
   return (
     <div className={className}>

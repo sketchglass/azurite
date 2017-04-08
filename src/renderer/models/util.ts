@@ -1,4 +1,4 @@
-import {Vec2, Rect} from "paintvec"
+import {Vec2, Rect} from 'paintvec'
 
 export function getBoundingRect(data: Int32Array, size: Vec2) {
   const {width, height} = size
@@ -30,7 +30,7 @@ export function getBoundingRect(data: Int32Array, size: Vec2) {
       right = x
     }
     mask <<= 1
-    if (mask == 0) {
+    if (mask === 0) {
       ++i
       mask = 1
     }

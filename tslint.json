@@ -20,15 +20,15 @@
             "check-whitespace"
         ],
         "quotemark": [
-            false,
-            "double"
+            true,
+            "single"
         ],
         "semicolon": [
-            false,
-            "always"
+            true,
+            "never"
         ],
         "triple-equals": [
-            false,
+            true,
             "allow-null-check",
             "allow-undefined-check"
         ],

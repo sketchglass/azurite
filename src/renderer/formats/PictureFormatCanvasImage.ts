@@ -1,11 +1,11 @@
-import {Vec2} from "paintvec"
+import {Vec2} from 'paintvec'
 
-import PictureFormat from "./PictureFormat"
-import {encodeCanvas, decodeToCanvas} from "../../lib/CanvasEncodeDecode"
-import {addPictureFormat} from "../app/FormatRegistry"
-import Picture from "../models/Picture"
-import TextureToCanvas from "../models/TextureToCanvas"
-import {ImageLayer} from "../models/Layer"
+import PictureFormat from './PictureFormat'
+import {encodeCanvas, decodeToCanvas} from '../../lib/CanvasEncodeDecode'
+import {addPictureFormat} from '../app/FormatRegistry'
+import Picture from '../models/Picture'
+import TextureToCanvas from '../models/TextureToCanvas'
+import {ImageLayer} from '../models/Layer'
 
 function canvasToLayer(canvas: HTMLCanvasElement, name: string, picture: Picture) {
   const layer = new ImageLayer(picture, {name})
@@ -44,23 +44,23 @@ export default PictureFormatCanvasImage
 @addPictureFormat
 export
 class PictureFormatJPEG extends PictureFormatCanvasImage {
-  title = "JPEG"
-  extensions = ["jpg", "jpeg"]
-  mimeType = "image/jpeg"
+  title = 'JPEG'
+  extensions = ['jpg', 'jpeg']
+  mimeType = 'image/jpeg'
 }
 
 @addPictureFormat
 export
 class PictureFormatPNG extends PictureFormatCanvasImage {
-  title = "PNG"
-  extensions = ["png"]
-  mimeType = "image/png"
+  title = 'PNG'
+  extensions = ['png']
+  mimeType = 'image/png'
 }
 
 @addPictureFormat
 export
 class PictureFormatBMP extends PictureFormatCanvasImage {
-  title = "BMP"
-  extensions = ["bmp"]
-  mimeType = "image/bmp"
+  title = 'BMP'
+  extensions = ['bmp']
+  mimeType = 'image/bmp'
 }

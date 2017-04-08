@@ -1,4 +1,4 @@
-import {Waypoint} from "./Waypoint"
+import {Waypoint} from './Waypoint'
 
 export interface WaypointConsumer {
   nextWaypoints(waypoints: Waypoint[]): void

@@ -1,4 +1,4 @@
-import {Vec2} from "paintvec"
+import {Vec2} from 'paintvec'
 
 export
 class CubicPolynomial {
@@ -30,10 +30,10 @@ export function catmullRom(x0: number, x1: number, x2: number, x3: number) {
 
 // Return polynomial for non-uniform catmull rom interpolation
 export function nonUniformCatmullRom(x0: number, x1: number, x2: number, x3: number, dt0: number, dt1: number, dt2: number) {
-  let t1 = (x1 - x0) / dt0 - (x2 - x0) / (dt0 + dt1) + (x2 - x1) / dt1;
-  let t2 = (x2 - x1) / dt1 - (x3 - x1) / (dt1 + dt2) + (x3 - x2) / dt2;
-  t1 *= dt1;
-  t2 *= dt1;
+  let t1 = (x1 - x0) / dt0 - (x2 - x0) / (dt0 + dt1) + (x2 - x1) / dt1
+  let t2 = (x2 - x1) / dt1 - (x3 - x1) / (dt1 + dt2) + (x3 - x2) / dt2
+  t1 *= dt1
+  t2 *= dt1
   return CubicPolynomial.fromSlopes(x1, x2, t1, t2)
 }
 
@@ -44,9 +44,9 @@ export function centripetalCatmullRom(p0: Vec2, p1: Vec2, p2: Vec2, p3: Vec2): [
   let dt1 = Math.pow(p2.sub(p1).squaredLength(), 0.25)
   let dt2 = Math.pow(p3.sub(p2).squaredLength(), 0.25)
 
-  if (dt1 < 1e-4) dt1 = 1.0;
-  if (dt0 < 1e-4) dt0 = dt1;
-  if (dt2 < 1e-4) dt2 = dt1;
+  if (dt1 < 1e-4) dt1 = 1.0
+  if (dt0 < 1e-4) dt0 = dt1
+  if (dt2 < 1e-4) dt2 = dt1
 
   return [
     nonUniformCatmullRom(p0.x, p1.x, p2.x, p3.x, dt0, dt1, dt2),

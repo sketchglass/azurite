@@ -1,16 +1,16 @@
-import Picture from "../models/Picture"
-import TextureToCanvas from "../models/TextureToCanvas"
-import {remote} from "electron"
+import Picture from '../models/Picture'
+import TextureToCanvas from '../models/TextureToCanvas'
+import {remote} from 'electron'
 const {dialog} = remote
-import * as fs from "fs"
-import * as path from "path"
-import PictureFormat from "../formats/PictureFormat"
-import {UndoCommand, CompositeUndoCommand} from "../models/UndoStack"
-import {AddLayerCommand} from "../commands/LayerCommand"
-import {formatRegistry} from "../app/FormatRegistry"
+import * as fs from 'fs'
+import * as path from 'path'
+import PictureFormat from '../formats/PictureFormat'
+import {UndoCommand, CompositeUndoCommand} from '../models/UndoStack'
+import {AddLayerCommand} from '../commands/LayerCommand'
+import {formatRegistry} from '../app/FormatRegistry'
 
 export
-type PictureExportFormat = "png"|"jpeg"|"bmp"
+type PictureExportFormat = 'png'|'jpeg'|'bmp'
 
 export
 class PictureExport {
@@ -23,7 +23,7 @@ class PictureExport {
     const filter = {name: format.title, extensions: format.extensions}
     const fileName = await new Promise<string|undefined>((resolve, reject) => {
       dialog.showSaveDialog(remote.getCurrentWindow(), {
-        title: "Export...",
+        title: 'Export...',
         filters: [filter]
       }, resolve)
     })
@@ -36,8 +36,8 @@ class PictureExport {
     const extensions = formatRegistry.pictureExtensions()
     const fileNames = await new Promise<string[]>((resolve, reject) => {
       dialog.showOpenDialog(remote.getCurrentWindow(), {
-        title: "Import...",
-        filters: [{name: "Image", extensions}]
+        title: 'Import...',
+        filters: [{name: 'Image', extensions}]
       }, resolve)
     })
     await this.import(fileNames)
@@ -49,7 +49,7 @@ class PictureExport {
   }
 
   async import(fileNames: string[]) {
-    if (fileNames.length == 0) {
+    if (fileNames.length === 0) {
       return
     }
     const indexPath = this.picture.insertPath
@@ -66,7 +66,7 @@ class PictureExport {
       }
     }
 
-    const compositeCommand = new CompositeUndoCommand("Import Images", commands)
+    const compositeCommand = new CompositeUndoCommand('Import Images', commands)
     this.picture.undoStack.push(compositeCommand)
   }
 

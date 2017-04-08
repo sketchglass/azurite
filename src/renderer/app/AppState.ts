@@ -1,22 +1,22 @@
-import * as path from "path"
-import {observable, computed, reaction} from "mobx"
-import {remote, ipcRenderer} from "electron"
-import Picture from "../models/Picture"
-import {HSVColor} from "../../lib/Color"
-import {PictureState} from "./PictureState"
-import {PictureSave} from "../services/PictureSave"
-import {config, ConfigValues} from "./Config"
-import IPCChannels from "../../common/IPCChannels"
-import "../formats/PictureFormatCanvasImage"
-import "../actions/AppActions"
-import "../actions/FileActions"
-import "../actions/LayerActions"
-import "../actions/EditActions"
-import "../actions/SelectionAction"
-import "../actions/CanvasActions"
-import "../actions/ViewActions"
-import {toolManager} from "./ToolManager"
-import {brushPresetManager} from "./BrushPresetManager"
+import * as path from 'path'
+import {observable, computed, reaction} from 'mobx'
+import {remote, ipcRenderer} from 'electron'
+import Picture from '../models/Picture'
+import {HSVColor} from '../../lib/Color'
+import {PictureState} from './PictureState'
+import {PictureSave} from '../services/PictureSave'
+import {config, ConfigValues} from './Config'
+import IPCChannels from '../../common/IPCChannels'
+import '../formats/PictureFormatCanvasImage'
+import '../actions/AppActions'
+import '../actions/FileActions'
+import '../actions/LayerActions'
+import '../actions/EditActions'
+import '../actions/SelectionAction'
+import '../actions/CanvasActions'
+import '../actions/ViewActions'
+import {toolManager} from './ToolManager'
+import {brushPresetManager} from './BrushPresetManager'
 
 export
 class AppState {
@@ -62,7 +62,7 @@ class AppState {
   constructor() {
     reaction(() => this.currentPictureState, () => {
       for (const pictureState of this.pictureStates) {
-        if (pictureState == this.currentPictureState) {
+        if (pictureState === this.currentPictureState) {
           pictureState.picture.blender.tileHook = (layer, tileKey) => toolManager.currentTool.previewLayerTile(layer, tileKey)
         } else {
           pictureState.picture.blender.tileHook = undefined
@@ -138,7 +138,7 @@ class AppState {
 
   stateForPicture(picture: Picture) {
     for (const state of this.pictureStates) {
-      if (state.picture == picture) {
+      if (state.picture === picture) {
         return state
       }
     }
@@ -156,7 +156,7 @@ class AppState {
     if (!filePath) {
       return
     }
-    const pictureState = this.pictureStates.find(s => path.resolve(s.picture.filePath) == path.resolve(filePath))
+    const pictureState = this.pictureStates.find(s => path.resolve(s.picture.filePath) === path.resolve(filePath))
     if (pictureState) {
       this.currentPictureIndex = this.pictureStates.indexOf(pictureState)
     } else {

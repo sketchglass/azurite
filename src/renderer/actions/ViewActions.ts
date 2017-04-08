@@ -1,13 +1,13 @@
-import {remote} from "electron"
-import Action, {PictureAction} from "./Action"
-import ActionIDs from "./ActionIDs"
-import {addAction} from "../app/ActionRegistry"
-import {appState} from "../app/AppState"
+import {remote} from 'electron'
+import Action, {PictureAction} from './Action'
+import ActionIDs from './ActionIDs'
+import {addAction} from '../app/ActionRegistry'
+import {appState} from '../app/AppState'
 
 @addAction
 export class ViewReloadAction extends Action {
   id = ActionIDs.viewReload
-  title = "Reload"
+  title = 'Reload'
   enabled = true
   run() {
     appState.reload()
@@ -17,7 +17,7 @@ export class ViewReloadAction extends Action {
 @addAction
 export class ViewToggleDevToolsAction extends Action {
   id = ActionIDs.viewToggleDevTools
-  title = "Toggle Developer Tools"
+  title = 'Toggle Developer Tools'
   enabled = true
   run() {
     remote.BrowserWindow.getFocusedWindow().webContents.toggleDevTools()
@@ -27,7 +27,7 @@ export class ViewToggleDevToolsAction extends Action {
 @addAction
 export class ViewActualSizeAction extends PictureAction {
   id = ActionIDs.viewActualSize
-  title = "Actual Size"
+  title = 'Actual Size'
   run() {
     this.picture && this.picture.navigation.resetScale()
   }
@@ -36,7 +36,7 @@ export class ViewActualSizeAction extends PictureAction {
 @addAction
 export class ViewZoomInAction extends PictureAction {
   id = ActionIDs.viewZoomIn
-  title = "Zoom In"
+  title = 'Zoom In'
   run() {
     this.picture && this.picture.navigation.zoomIn()
   }
@@ -45,7 +45,7 @@ export class ViewZoomInAction extends PictureAction {
 @addAction
 export class ViewZoomOutAction extends PictureAction {
   id = ActionIDs.viewZoomOut
-  title = "Zoom Out"
+  title = 'Zoom Out'
   run() {
     this.picture && this.picture.navigation.zoomOut()
   }
@@ -54,7 +54,7 @@ export class ViewZoomOutAction extends PictureAction {
 @addAction
 export class ViewToggleUIPanelsAction extends Action {
   id = ActionIDs.viewToggleUIPanels
-  get title() { return appState.uiVisible ? "Hide UI Panels" : "Show UI Panels" }
+  get title() { return appState.uiVisible ? 'Hide UI Panels' : 'Show UI Panels' }
   enabled = true
   run() {
     appState.toggleUIVisible()
@@ -64,7 +64,7 @@ export class ViewToggleUIPanelsAction extends Action {
 @addAction
 export class ViewToggleFullscreenAction extends Action {
   id = ActionIDs.viewToggleFullscreen
-  title = "Toggle Fullscreen"
+  title = 'Toggle Fullscreen'
   enabled = true
   run() {
     appState.toggleUIVisible()

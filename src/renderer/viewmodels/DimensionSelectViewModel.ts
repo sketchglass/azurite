@@ -1,10 +1,10 @@
-import {observable, computed, action, observe} from "mobx"
-import {Vec2} from "paintvec"
-import {PictureDimension} from "../models/Picture"
-import {MAX_PICTURE_SIZE} from "../../common/constants"
+import {observable, computed, action, observe} from 'mobx'
+import {Vec2} from 'paintvec'
+import {PictureDimension} from '../models/Picture'
+import {MAX_PICTURE_SIZE} from '../../common/constants'
 
 export
-type DimensionUnit = "px" | "mm" | "inch" | "percent"
+type DimensionUnit = 'px' | 'mm' | 'inch' | 'percent'
 
 export
 interface DimensionPreset {
@@ -19,29 +19,29 @@ export default
 class DimensionSelectViewModel {
   readonly presets: DimensionPreset[] = [
     {
-      name: "A4",
-      unit: "mm",
+      name: 'A4',
+      unit: 'mm',
       width: 210,
       height: 297,
       dpi: 300,
     },
     {
-      name: "A5",
-      unit: "mm",
+      name: 'A5',
+      unit: 'mm',
       width: 148,
       height: 210,
       dpi: 300,
     },
     {
-      name: "A6",
-      unit: "mm",
+      name: 'A6',
+      unit: 'mm',
       width: 105,
       height: 148,
       dpi: 300,
     },
     {
-      name: "1200 x 800",
-      unit: "px",
+      name: '1200 x 800',
+      unit: 'px',
       width: 1200,
       height: 800,
       dpi: 144,
@@ -53,7 +53,7 @@ class DimensionSelectViewModel {
   @observable width = 100
   @observable height = 100
   @observable dpi = 72
-  @observable unit: DimensionUnit = "px"
+  @observable unit: DimensionUnit = 'px'
   @observable ratio = 1
   @observable keepRatio = true
   @observable lastSelectedPreset = -1
@@ -70,17 +70,17 @@ class DimensionSelectViewModel {
   }
 
   @computed get widthCurrentUnit() {
-    return this.fromPx(this.width, this.unit, "width")
+    return this.fromPx(this.width, this.unit, 'width')
   }
   @computed get heightCurrentUnit() {
-    return this.fromPx(this.height, this.unit, "height")
+    return this.fromPx(this.height, this.unit, 'height')
   }
 
   constructor(init?: PictureDimension) {
-    observe(this, "width", () => {
+    observe(this, 'width', () => {
       this.lastSelectedPreset = -1
     }, true)
-    observe(this, "height", () => {
+    observe(this, 'height', () => {
       this.lastSelectedPreset = -1
     }, true)
 
@@ -127,37 +127,37 @@ class DimensionSelectViewModel {
     return 0 < widthRounded && 0 < heightRounded && !this.tooLarge
   }
 
-  private toPx(value: number, unit: DimensionUnit, type: "width"|"height") {
+  private toPx(value: number, unit: DimensionUnit, type: 'width'|'height') {
     const {dpi} = this
     switch (unit) {
-      case "px":
+      case 'px':
         return value
-      case "mm":
+      case 'mm':
         return value / 25.4 * dpi
-      case "inch":
+      case 'inch':
         return value * dpi
-      case "percent":
-        return type == "width" ? value / 100 * this.percentBaseWidth : value / 100 * this.percentBaseHeight
+      case 'percent':
+        return type === 'width' ? value / 100 * this.percentBaseWidth : value / 100 * this.percentBaseHeight
     }
   }
 
-  private fromPx(px: number, unit: DimensionUnit, type: "width"|"height") {
+  private fromPx(px: number, unit: DimensionUnit, type: 'width'|'height') {
     const {dpi} = this
     switch (unit) {
-      case "px":
+      case 'px':
         return px
-      case "mm":
+      case 'mm':
         return px / dpi * 25.4
-      case "inch":
+      case 'inch':
         return px / dpi
-      case "percent":
-        return type == "width" ? px / this.percentBaseWidth * 100 : px / this.percentBaseHeight * 100
+      case 'percent':
+        return type === 'width' ? px / this.percentBaseWidth * 100 : px / this.percentBaseHeight * 100
     }
   }
 
   @action changeSizeCurrentUnit(width: number|undefined, height: number|undefined) {
-    let w = width != undefined ? this.toPx(width, this.unit, "width") : undefined
-    let h = height != undefined ? this.toPx(height, this.unit, "height") : undefined
+    let w = width != undefined ? this.toPx(width, this.unit, 'width') : undefined
+    let h = height != undefined ? this.toPx(height, this.unit, 'height') : undefined
     if (w == undefined && h != undefined && this.keepRatio) {
       w = h / this.ratio
     }

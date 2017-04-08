@@ -1,7 +1,7 @@
-import {Vec2} from "paintvec"
+import {Vec2} from 'paintvec'
 import Tool, {ToolPointerEvent} from './Tool'
-import ToolIDs from "./ToolIDs"
-import KeyInput from "../../lib/KeyInput"
+import ToolIDs from './ToolIDs'
+import KeyInput from '../../lib/KeyInput'
 
 const modScale = (scale: number) => {
   return (scale < 0.25) ? 0.25 : (scale > 32) ? 32 : scale
@@ -10,20 +10,20 @@ const modScale = (scale: number) => {
 export
 class ZoomTool extends Tool {
   readonly id = ToolIDs.zoom
-  readonly title = "Zoom"
+  readonly title = 'Zoom'
   get cursor() {
-    return "zoom-in"
+    return 'zoom-in'
   }
   private originalScale = 1.0
   private dragging = false
   private startPos = new Vec2()
-  tempShortcut = new KeyInput(["MetaOrControl"], "Space")
+  tempShortcut = new KeyInput(['MetaOrControl'], 'Space')
 
   start(ev: ToolPointerEvent) {
     if (!this.picture) {
       return
     }
-    if (ev.button == 2) {
+    if (ev.button === 2) {
       this.picture.navigation.resetScale()
       return
     }

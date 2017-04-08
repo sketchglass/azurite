@@ -1,6 +1,6 @@
-import {UndoCommand} from "../models/UndoStack"
-import Picture from "../models/Picture"
-import Selection from "../models/Selection"
+import {UndoCommand} from '../models/UndoStack'
+import Picture from '../models/Picture'
+import Selection from '../models/Selection'
 
 abstract class SelectionCommand implements UndoCommand {
   abstract title: string
@@ -25,7 +25,7 @@ abstract class SelectionCommand implements UndoCommand {
 
 export
 class SelectionChangeCommand extends SelectionCommand {
-  title = "Change Selection"
+  title = 'Change Selection'
 
   constructor(public picture: Picture, public selection: Selection) {
     super(picture)
@@ -38,7 +38,7 @@ class SelectionChangeCommand extends SelectionCommand {
 
 export
 class SelectAllCommand extends SelectionCommand {
-  title = "Select All"
+  title = 'Select All'
 
   newSelection() {
     const selection = new Selection(this.picture.size)
@@ -50,7 +50,7 @@ class SelectAllCommand extends SelectionCommand {
 
 export
 class ClearSelectionCommand extends SelectionCommand {
-  title = "Clear Selection"
+  title = 'Clear Selection'
 
   newSelection() {
     return new Selection(this.picture.size)
@@ -59,7 +59,7 @@ class ClearSelectionCommand extends SelectionCommand {
 
 export
 class InvertSelectionCommand extends SelectionCommand {
-  title = "Invert Selection"
+  title = 'Invert Selection'
 
   newSelection() {
     return this.picture.selection.invert()

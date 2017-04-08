@@ -1,8 +1,8 @@
-import * as React from "react"
-import CSSVariables from "./CSSVariables"
-import PointerEvents from "./PointerEvents"
-import * as classNames from "classnames"
-import "./ScrollBar.css"
+import * as React from 'react'
+import CSSVariables from './CSSVariables'
+import PointerEvents from './PointerEvents'
+import * as classNames from 'classnames'
+import './ScrollBar.css'
 
 export
 enum ScrollBarDirection {
@@ -36,7 +36,7 @@ class ScrollBar extends React.Component<ScrollBarProps, {}> {
     if (this.moving) {
       const {contentMax, contentMin, direction, onChange} = this.props
       const rect = this.element.getBoundingClientRect()
-      if (direction == ScrollBarDirection.Horizontal) {
+      if (direction === ScrollBarDirection.Horizontal) {
         const offset = e.clientX - this.origX
         onChange(offset / rect.width * (contentMax - contentMin))
       } else {
@@ -54,7 +54,7 @@ class ScrollBar extends React.Component<ScrollBarProps, {}> {
     const current = (visibleMax + visibleMin) / 2
     const rect = this.element.getBoundingClientRect()
     let newValue: number
-    if (direction == ScrollBarDirection.Horizontal) {
+    if (direction === ScrollBarDirection.Horizontal) {
       newValue = (e.clientX - rect.left) / rect.width * (contentMax - contentMin) + contentMin
     } else {
       newValue = (e.clientY - rect.top) / rect.height * (contentMax - contentMin) + contentMin
@@ -75,9 +75,9 @@ class ScrollBar extends React.Component<ScrollBarProps, {}> {
     const length = contentMax - contentMin
     const handleStart = (visibleMin - contentMin) / length
     const handleEnd = (visibleMax - contentMin) / length
-    const className = classNames("ScrollBar", {
-      "ScrollBar-vertical": direction == ScrollBarDirection.Vertical,
-      "ScrollBar-horizontal": direction == ScrollBarDirection.Horizontal,
+    const className = classNames('ScrollBar', {
+      'ScrollBar-vertical': direction === ScrollBarDirection.Vertical,
+      'ScrollBar-horizontal': direction === ScrollBarDirection.Horizontal,
     })
     return (
       <CSSVariables handleStart={handleStart} handleEnd={handleEnd}>

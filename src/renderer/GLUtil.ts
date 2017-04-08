@@ -1,7 +1,7 @@
-import {Vec2, Rect, Transform} from "paintvec"
-import {ShapeModel, Texture, RectShape, QuadShape, textureShader, DrawTarget, TextureDrawTarget, BlendMode} from "paintgl"
-import {context} from "./GLContext"
-const glsl = require("glslify")
+import {Vec2, Rect, Transform} from 'paintvec'
+import {ShapeModel, Texture, RectShape, QuadShape, textureShader, DrawTarget, TextureDrawTarget, BlendMode} from 'paintgl'
+import {context} from './GLContext'
+const glsl = require('glslify')
 
 const bicubicTextureShader = {
   fragment: glsl`
@@ -14,7 +14,7 @@ const bicubicTextureShader = {
   `
 }
 
-const drawTextureShape = new RectShape(context, {usage: "stream"})
+const drawTextureShape = new RectShape(context, {usage: 'stream'})
 const drawTextureModel = new ShapeModel(context, {
   shape: drawTextureShape,
   shader: textureShader,
@@ -30,7 +30,7 @@ interface DrawTextureParams {
   srcRect?: Rect
   transform?: Transform
   blendMode?: BlendMode
-  nonAffine?: "inverse-bilinear" // TODO: "perspective"
+  nonAffine?: 'inverse-bilinear' // TODO: "perspective"
   bicubic?: boolean
 }
 
@@ -44,8 +44,8 @@ function drawTexture(dst: DrawTarget, src: Texture, params: DrawTextureParams) {
   const transform = params.transform || new Transform()
   const {bicubic} = params
 
-  if (bicubic && src.filter !== "bilinear" && src.filter !== "mipmap-bilinear") {
-    console.warn("src texture filter must be bilinear")
+  if (bicubic && src.filter !== 'bilinear' && src.filter !== 'mipmap-bilinear') {
+    console.warn('src texture filter must be bilinear')
   }
 
   if (!transform.isAffine()) {
@@ -67,12 +67,12 @@ function drawTexture(dst: DrawTarget, src: Texture, params: DrawTextureParams) {
   }
   if (bicubic && !isTransformIntTranslation(transform)) {
     drawTextureBicubicModel.transform = transform
-    drawTextureBicubicModel.blendMode = params.blendMode || "src-over"
+    drawTextureBicubicModel.blendMode = params.blendMode || 'src-over'
     drawTextureBicubicModel.uniforms = {texture: src, texSize: src.size}
     dst.draw(drawTextureBicubicModel)
   } else {
     drawTextureModel.transform = transform
-    drawTextureModel.blendMode = params.blendMode || "src-over"
+    drawTextureModel.blendMode = params.blendMode || 'src-over'
     drawTextureModel.uniforms = {texture: src}
     dst.draw(drawTextureModel)
   }
@@ -117,7 +117,7 @@ const inverseBilinearTextureShader = {
   `
 }
 
-const inverseBilinearShape = new QuadShape(context, {usage: "stream"})
+const inverseBilinearShape = new QuadShape(context, {usage: 'stream'})
 const inverseBilinearModel = new ShapeModel(context, {
   shape: inverseBilinearShape,
   shader: inverseBilinearTextureShader,
@@ -159,7 +159,7 @@ function normalizeQuad(quad: Quad): [Quad, Transform] {
 export function duplicateTexture(texture: Texture) {
   const result = new Texture(context, {size: texture.size, pixelType: texture.pixelType, pixelFormat: texture.pixelFormat})
   const drawTarget = new TextureDrawTarget(context, result)
-  drawTexture(drawTarget, texture, {blendMode: "src"})
+  drawTexture(drawTarget, texture, {blendMode: 'src'})
   drawTarget.dispose()
   return result
 }
@@ -194,7 +194,7 @@ const visibilityToBinaryShape = new RectShape(context)
 const visibilityToBinaryModel = new ShapeModel(context, {
   shape: visibilityToBinaryShape,
   shader: visiblityToBinaryShader,
-  blendMode: "src",
+  blendMode: 'src',
 })
 
 export function drawVisibilityToBinary(drawTarget: DrawTarget, src: Texture) {
@@ -250,7 +250,7 @@ const binaryToVisibilityShape = new RectShape(context)
 const binaryToVisibilityModel = new ShapeModel(context, {
   shape: binaryToVisibilityShape,
   shader: binaryToVisibilityShader,
-  blendMode: "src",
+  blendMode: 'src',
 })
 
 export function drawBinaryToVisibility(drawTarget: DrawTarget, src: Texture) {

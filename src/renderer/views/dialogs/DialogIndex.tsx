@@ -1,13 +1,13 @@
-import * as React from "react"
-import * as ReactDOM from "react-dom"
-import {remote, ipcRenderer} from "electron"
-import NewPictureDialog from "./NewPictureDialog"
-import ResolutionChangeDialog from "./ResolutionChangeDialog"
-import ToolShortcutsDialog from "./ToolShortcutsDialog"
-import "../common.css"
+import * as React from 'react'
+import * as ReactDOM from 'react-dom'
+import {remote, ipcRenderer} from 'electron'
+import NewPictureDialog from './NewPictureDialog'
+import ResolutionChangeDialog from './ResolutionChangeDialog'
+import ToolShortcutsDialog from './ToolShortcutsDialog'
+import '../common.css'
 
-window.addEventListener("DOMContentLoaded", () => {
-  const root = document.querySelector(".DialogRoot")!
+window.addEventListener('DOMContentLoaded', () => {
+  const root = document.querySelector('.DialogRoot')!
 
   const onReadyShow = () => {
     const {width, height} = root.firstElementChild!.getBoundingClientRect()
@@ -22,20 +22,20 @@ window.addEventListener("DOMContentLoaded", () => {
   }
   const onDone = (result: any) => {
     remote.getCurrentWindow().hide()
-    ipcRenderer.send("dialogDone", result)
+    ipcRenderer.send('dialogDone', result)
   }
 
-  ipcRenderer.on("dialogOpen", (ev: Electron.IpcRendererEvent, name: string, param: any) => {
+  ipcRenderer.on('dialogOpen', (ev: Electron.IpcRendererEvent, name: string, param: any) => {
     ReactDOM.unmountComponentAtNode(root)
     let dialog: JSX.Element|undefined
     switch (name) {
-      case "newPicture":
+      case 'newPicture':
         dialog = <NewPictureDialog onReadyShow={onReadyShow} onDone={onDone} />
         break
-      case "resolutionChange":
+      case 'resolutionChange':
         dialog = <ResolutionChangeDialog init={param} onReadyShow={onReadyShow} onDone={onDone} />
         break
-      case "toolShortcuts":
+      case 'toolShortcuts':
         dialog = <ToolShortcutsDialog init={param} onReadyShow={onReadyShow} onDone={onDone} />
         break
     }

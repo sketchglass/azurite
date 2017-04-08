@@ -1,5 +1,5 @@
-import {observable, computed} from "mobx"
-import {isTextInput} from "./util"
+import {observable, computed} from 'mobx'
+import {isTextInput} from './util'
 
 export default
 class CurrentFocus {
@@ -10,8 +10,8 @@ class CurrentFocus {
   }
 
   constructor() {
-    window.addEventListener("focus", () => this.onFocusChange(), true)
-    window.addEventListener("blur", () => this.onFocusChange(), true)
+    window.addEventListener('focus', () => this.onFocusChange(), true)
+    window.addEventListener('blur', () => this.onFocusChange(), true)
   }
 
   private onFocusChange() {

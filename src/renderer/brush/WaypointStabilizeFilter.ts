@@ -1,7 +1,7 @@
-import {Vec2} from "paintvec"
-import {Waypoint} from "./Waypoint"
-import {WaypointFilter, WaypointConsumer} from "./BrushPipeline"
-import {brushPresetManager} from "../app/BrushPresetManager"
+import {Vec2} from 'paintvec'
+import {Waypoint} from './Waypoint'
+import {WaypointFilter, WaypointConsumer} from './BrushPipeline'
+import {brushPresetManager} from '../app/BrushPresetManager'
 
 function stabilizeWaypoint(waypoints: Waypoint[], level: number, index: number) {
   const nWaypoints = waypoints.length
@@ -40,7 +40,7 @@ export class WaypointStabilizeFilter implements WaypointFilter {
     waypoints.push(waypoint)
     const level = this.stabilizingLevel
     const sumCount = level * 2 + 1
-    if (sumCount == waypoints.length) {
+    if (sumCount === waypoints.length) {
       for (let i = 0; i < level; ++i) {
         this.outlet.nextWaypoints([stabilizeWaypoint(waypoints, level, i)])
       }

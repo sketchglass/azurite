@@ -1,6 +1,6 @@
-import * as React from "react"
-import DialogTitleBar from "../components/DialogTitleBar"
-import "./DialogContainer.css"
+import * as React from 'react'
+import DialogTitleBar from '../components/DialogTitleBar'
+import './DialogContainer.css'
 
 interface DialogContainerProps {
   title: string
@@ -15,7 +15,7 @@ class DialogContainer extends React.Component<DialogContainerProps, {}> {
   render() {
     return (
       <div className="DialogContainer">
-        {process.platform == "win32" ? <DialogTitleBar title={this.props.title} /> : undefined}
+        {process.platform === 'win32' ? <DialogTitleBar title={this.props.title} /> : undefined}
         <div className="DialogContainer_content">
           {this.props.children}
           <div className="DialogContainer_buttons">
@@ -28,17 +28,17 @@ class DialogContainer extends React.Component<DialogContainerProps, {}> {
   }
 
   componentDidMount() {
-    document.addEventListener("keyup", this.onKeyUp)
+    document.addEventListener('keyup', this.onKeyUp)
   }
   componentWillUnmount() {
-    document.removeEventListener("keyup", this.onKeyUp)
+    document.removeEventListener('keyup', this.onKeyUp)
   }
 
   onKeyUp = (e: KeyboardEvent) => {
-    if (e.key == "Enter") {
+    if (e.key === 'Enter') {
       this.props.onOK()
     }
-    if (e.key == "Escape") {
+    if (e.key === 'Escape') {
       this.props.onCancel()
     }
   }

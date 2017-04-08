@@ -1,5 +1,5 @@
-import {Vec2} from "paintvec"
-import {catmullRom, centripetalCatmullRom} from "../../lib/Geometry"
+import {Vec2} from 'paintvec'
+import {catmullRom, centripetalCatmullRom} from '../../lib/Geometry'
 
 export class Waypoint {
   constructor(public pos: Vec2, public pressure: number) {
@@ -35,7 +35,7 @@ export class Waypoint {
   static subdivide(start: Waypoint, end: Waypoint, getNextSpacing: (waypoint: Waypoint) => number, offset: number) {
     const diff = end.pos.sub(start.pos)
     const len = diff.length()
-    if (len == 0) {
+    if (len === 0) {
       return {
         waypoints: [],
         nextOffset: 0

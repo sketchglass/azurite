@@ -1,7 +1,7 @@
-import React = require("react")
-import PointerEvents from "./PointerEvents"
-import CSSVariables from "./CSSVariables"
-import "./RangeSlider.css"
+import React = require('react')
+import PointerEvents from './PointerEvents'
+import CSSVariables from './CSSVariables'
+import './RangeSlider.css'
 
 export interface BackgroundProps {
   width: number
@@ -94,7 +94,7 @@ export default class RangeSlider extends React.Component<RangeSliderProps, void>
     const {value, postfix, min, max, backgroundComponentProps} = this.props
     const BackgroundComponent = this.props.backgroundComponent
     const ratio = (value - min) / (max - min)
-    const className = this.props.disabled ? "RangeSlider RangeSlider-disabled" : "RangeSlider" // TODO: change behavior
+    const className = this.props.disabled ? 'RangeSlider RangeSlider-disabled' : 'RangeSlider' // TODO: change behavior
     const background = BackgroundComponent ?
       <BackgroundComponent width={this.backgroundWidth} height={this.backgroundHeight} {...backgroundComponentProps} /> : <div className="RangeSlider_fill" />
     return (

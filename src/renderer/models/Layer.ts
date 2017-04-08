@@ -1,10 +1,10 @@
-import {observable, reaction, action, IArrayChange, IArraySplice} from "mobx"
-import Picture from "./Picture"
-import TiledTexture, {TiledTextureData} from "./TiledTexture"
-import IndexPath from "../../lib/IndexPath"
+import {observable, reaction, action, IArrayChange, IArraySplice} from 'mobx'
+import Picture from './Picture'
+import TiledTexture, {TiledTextureData} from './TiledTexture'
+import IndexPath from '../../lib/IndexPath'
 
 export
-type LayerBlendMode = "normal" | "plus" | "multiply" // TODO: add more
+type LayerBlendMode = 'normal' | 'plus' | 'multiply' // TODO: add more
 
 export
 interface LayerProps {
@@ -29,9 +29,9 @@ abstract class Layer implements LayerProps {
   parent: GroupLayer|undefined
 
   constructor(public picture: Picture, props: Partial<LayerProps>) {
-    this.name = props.name || "Layer"
+    this.name = props.name || 'Layer'
     this.visible = props.visible != undefined ? props.visible : true
-    this.blendMode = props.blendMode || "normal"
+    this.blendMode = props.blendMode || 'normal'
     this.opacity = props.opacity != undefined ? props.opacity : 1
     this.preserveOpacity = props.preserveOpacity != undefined ? props.preserveOpacity : false
     this.clippingGroup = props.clippingGroup != undefined ? props.clippingGroup : false
@@ -54,7 +54,7 @@ abstract class Layer implements LayerProps {
     if (this.parent) {
       const index = this.parent.children.indexOf(this)
       if (index < 0) {
-        throw new Error("cannot find in children list")
+        throw new Error('cannot find in children list')
       }
       return this.parent.path.child(index)
     } else {
@@ -64,9 +64,9 @@ abstract class Layer implements LayerProps {
 
   static fromData(picture: Picture, data: ImageLayerData|GroupLayerData): Layer {
     switch (data.type) {
-      case "image":
+      case 'image':
         return ImageLayer.fromData(picture, data)
-      case "group":
+      case 'group':
         return GroupLayer.fromData(picture, data)
     }
   }
@@ -75,7 +75,7 @@ abstract class Layer implements LayerProps {
 export default Layer
 
 interface ImageLayerData extends LayerProps {
-  type: "image"
+  type: 'image'
   image: TiledTextureData
 }
 
@@ -96,7 +96,7 @@ class ImageLayer extends Layer {
 
   toData(): ImageLayerData {
     const image = this.tiledTexture.toData()
-    return {type: "image", ...this.props, image}
+    return {type: 'image', ...this.props, image}
   }
 
   static fromData(picture: Picture, data: ImageLayerData) {
@@ -106,7 +106,7 @@ class ImageLayer extends Layer {
 }
 
 interface GroupLayerData extends LayerProps {
-  type: "group"
+  type: 'group'
   children: LayerData[]
 }
 
@@ -148,7 +148,7 @@ class GroupLayer extends Layer {
     const index = path.at(0)
     if (0 <= index && index < children.length) {
       const child = this.children[index]
-      if (path.length == 1) {
+      if (path.length === 1) {
         return child
       } else if (child instanceof GroupLayer) {
         return child.descendantForPath(path.slice(1))
@@ -164,12 +164,12 @@ class GroupLayer extends Layer {
       child.parent = undefined
       const selected = this.picture.selectedLayers
       for (let i = selected.length - 1; i >= 0; --i) {
-        if (selected[i] == child) {
+        if (selected[i] === child) {
           selected.splice(i, 1)
         }
       }
     }
-    if (change.type == "splice") {
+    if (change.type === 'splice') {
       change.added.forEach(onAdded)
       change.removed.forEach(onRemoved)
     } else {
@@ -181,7 +181,7 @@ class GroupLayer extends Layer {
 
   toData(): GroupLayerData {
     const children = this.children.map(c => c.toData())
-    return {type: "group", ...this.props, children}
+    return {type: 'group', ...this.props, children}
   }
 
   static fromData(picture: Picture, data: GroupLayerData) {

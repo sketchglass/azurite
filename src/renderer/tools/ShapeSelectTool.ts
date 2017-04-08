@@ -1,12 +1,12 @@
-import {Vec2, Transform} from "paintvec"
-import {Texture, Color} from "paintgl"
-import Selection from "../models/Selection"
-import {context} from "../GLContext"
-import {drawTexture} from "../GLUtil"
+import {Vec2, Transform} from 'paintvec'
+import {Texture, Color} from 'paintgl'
+import Selection from '../models/Selection'
+import {context} from '../GLContext'
+import {drawTexture} from '../GLUtil'
 import Tool, {ToolPointerEvent} from './Tool'
-import {frameDebounce} from "../../lib/Debounce"
-import {SelectionChangeCommand} from "../commands/SelectionCommand"
-import {renderer} from "../views/Renderer"
+import {frameDebounce} from '../../lib/Debounce'
+import {SelectionChangeCommand} from '../commands/SelectionCommand'
+import {renderer} from '../views/Renderer'
 
 abstract class ShapeSelectTool extends Tool {
   commitDrawOnEnd = true
@@ -17,8 +17,8 @@ abstract class ShapeSelectTool extends Tool {
   startPicturePos = new Vec2()
   currentPicturePos = new Vec2()
 
-  private canvas = document.createElement("canvas")
-  private context = this.canvas.getContext("2d")!
+  private canvas = document.createElement('canvas')
+  private context = this.canvas.getContext('2d')!
   private canvasTexture = new Texture(context, {})
   private workingSelection: Selection|undefined
 
@@ -82,7 +82,7 @@ abstract class ShapeSelectTool extends Tool {
     const selection = this.workingSelection
     const offset = this.currentPicturePos.sub(this.startPicturePos)
     selection.drawTarget.clear(new Color(0, 0, 0, 0))
-    drawTexture(selection.drawTarget, this.picture.selection.texture, {blendMode: "src", transform: Transform.translate(offset)})
+    drawTexture(selection.drawTarget, this.picture.selection.texture, {blendMode: 'src', transform: Transform.translate(offset)})
   }
 
   private drawSelection() {
@@ -97,7 +97,7 @@ abstract class ShapeSelectTool extends Tool {
 
     const transform = renderer.transformToPicture
     context.setTransform(transform.m00, transform.m01, transform.m10, transform.m11, transform.m20, transform.m21)
-    context.fillStyle = "white"
+    context.fillStyle = 'white'
     context.beginPath()
     this.drawShape(context)
     context.closePath()
@@ -106,10 +106,10 @@ abstract class ShapeSelectTool extends Tool {
     this.canvasTexture.setImage(this.canvas)
 
     if (this.adding) {
-      drawTexture(selection.drawTarget, this.picture.selection.texture, {blendMode: "src"})
-      drawTexture(selection.drawTarget, this.canvasTexture, {blendMode: "src-over"})
+      drawTexture(selection.drawTarget, this.picture.selection.texture, {blendMode: 'src'})
+      drawTexture(selection.drawTarget, this.canvasTexture, {blendMode: 'src-over'})
     } else {
-      drawTexture(selection.drawTarget, this.canvasTexture, {blendMode: "src"})
+      drawTexture(selection.drawTarget, this.canvasTexture, {blendMode: 'src'})
     }
     selection.hasSelection = true
   }
@@ -155,7 +155,7 @@ abstract class ShapeSelectTool extends Tool {
 
   renderOverlayCanvas(context: CanvasRenderingContext2D) {
     if (this.drawing) {
-      context.strokeStyle = "#888"
+      context.strokeStyle = '#888'
       context.lineWidth = 1
       context.beginPath()
       this.drawShape(context)
