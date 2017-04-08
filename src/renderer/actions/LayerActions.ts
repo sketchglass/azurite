@@ -9,6 +9,7 @@ import {
   FillLayerCommand,
 } from '../commands/LayerCommand'
 import {ImageLayer, GroupLayer} from '../models/Layer'
+import {PictureExport} from '../services/PictureExport'
 import {PictureAction} from './Action'
 import ActionIDs from './ActionIDs'
 
@@ -34,6 +35,19 @@ export class AddGroupAction extends PictureAction {
     const {picture} = this
     if (picture) {
       picture.undoStack.push(new AddLayerCommand(picture, picture.insertPath, new GroupLayer(picture, {name: 'Group'}, [])))
+    }
+  }
+}
+
+@addAction
+export class FileImportAction extends PictureAction {
+  id = ActionIDs.layerImport
+  title = 'Import Image...'
+  async run() {
+    if (this.picture) {
+      const pictureExport = new PictureExport(this.picture)
+      await pictureExport.showImportDialog()
+      pictureExport.dispose()
     }
   }
 }
