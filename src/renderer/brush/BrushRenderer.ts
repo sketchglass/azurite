@@ -1,15 +1,15 @@
 import {reaction} from 'mobx'
-import {Rect, Vec2, Transform} from 'paintvec'
 import {ShapeModel, TextureDrawTarget, Shape, RectShape, Texture}  from 'paintgl'
+import {Rect, Vec2, Transform} from 'paintvec'
+import {appState} from '../app/AppState'
+import {ChangeLayerImageCommand} from '../commands/LayerCommand'
 import {context} from '../GLContext'
 import {drawTexture} from '../GLUtil'
 import Layer, {ImageLayer} from '../models/Layer'
 import TiledTexture, {Tile} from '../models/TiledTexture'
-import {ChangeLayerImageCommand} from '../commands/LayerCommand'
 import {renderer} from '../views/Renderer'
-import {Waypoint} from './Waypoint'
 import {BrushPreset} from './BrushPreset'
-import {appState} from '../app/AppState'
+import {Waypoint} from './Waypoint'
 const glsl = require('glslify')
 
 const brushShader = {

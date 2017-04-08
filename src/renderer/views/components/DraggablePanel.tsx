@@ -1,6 +1,6 @@
 import * as React from 'react'
-import PointerEvents from './PointerEvents'
 import './DraggablePanel.css'
+import PointerEvents from './PointerEvents'
 
 interface DraggablePanelProps {
   label: string

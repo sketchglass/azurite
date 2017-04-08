@@ -1,6 +1,6 @@
-import * as assert from 'power-assert'
-import {Vec2} from 'paintvec'
 import {Color} from 'paintgl'
+import {Vec2} from 'paintvec'
+import * as assert from 'power-assert'
 import TiledTexture from '../../renderer/models/TiledTexture'
 
 export default

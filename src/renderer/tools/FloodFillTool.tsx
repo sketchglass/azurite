@@ -1,9 +1,9 @@
 import {reaction, observable} from 'mobx'
 import * as React from 'react'
-import Tool, {ToolPointerEvent} from './Tool'
-import FloodFill from '../services/FloodFill'
 import {SelectionChangeCommand} from '../commands/SelectionCommand'
+import FloodFill from '../services/FloodFill'
 import FloodFillSettings from '../views/FloodFillSettings'
+import Tool, {ToolPointerEvent} from './Tool'
 import ToolIDs from './ToolIDs'
 
 export default

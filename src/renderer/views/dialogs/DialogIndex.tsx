@@ -1,10 +1,10 @@
+import {remote, ipcRenderer} from 'electron'
 import * as React from 'react'
 import * as ReactDOM from 'react-dom'
-import {remote, ipcRenderer} from 'electron'
+import '../common.css'
 import NewPictureDialog from './NewPictureDialog'
 import ResolutionChangeDialog from './ResolutionChangeDialog'
 import ToolShortcutsDialog from './ToolShortcutsDialog'
-import '../common.css'
 
 window.addEventListener('DOMContentLoaded', () => {
   const root = document.querySelector('.DialogRoot')!

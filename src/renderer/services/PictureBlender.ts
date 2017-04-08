@@ -1,11 +1,11 @@
 import {reaction} from 'mobx'
-import Picture from '../models/Picture'
-import {Vec2, Rect, Transform} from 'paintvec'
 import {Texture, TextureDrawTarget, Color} from 'paintgl'
-import {context} from '../GLContext'
-import TiledTexture, {Tile} from '../models/TiledTexture'
-import {drawTexture} from '../GLUtil'
+import {Vec2, Rect, Transform} from 'paintvec'
 import Dirtiness from '../../lib/Dirtiness'
+import {context} from '../GLContext'
+import {drawTexture} from '../GLUtil'
+import Picture from '../models/Picture'
+import TiledTexture, {Tile} from '../models/TiledTexture'
 import {layerBlender, TileHook} from './LayerBlender'
 
 export default

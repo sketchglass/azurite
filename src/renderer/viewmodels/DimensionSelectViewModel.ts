@@ -1,7 +1,7 @@
 import {observable, computed, action, observe} from 'mobx'
 import {Vec2} from 'paintvec'
-import {PictureDimension} from '../models/Picture'
 import {MAX_PICTURE_SIZE} from '../../common/constants'
+import {PictureDimension} from '../models/Picture'
 
 export
 type DimensionUnit = 'px' | 'mm' | 'inch' | 'percent'

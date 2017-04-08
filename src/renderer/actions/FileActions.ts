@@ -1,10 +1,10 @@
+import {addAction, actionRegistry} from '../app/ActionRegistry'
+import {appState} from '../app/AppState'
+import {formatRegistry} from '../app/FormatRegistry'
+import PictureFormat from '../formats/PictureFormat'
+import {PictureExport} from '../services/PictureExport'
 import Action, {PictureAction} from './Action'
 import ActionIDs from './ActionIDs'
-import {addAction, actionRegistry} from '../app/ActionRegistry'
-import PictureFormat from '../formats/PictureFormat'
-import {formatRegistry} from '../app/FormatRegistry'
-import {appState} from '../app/AppState'
-import {PictureExport} from '../services/PictureExport'
 
 @addAction
 export class FileNewAction extends Action {

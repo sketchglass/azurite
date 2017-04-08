@@ -1,7 +1,7 @@
 import {Vec2} from 'paintvec'
-import {Waypoint} from './Waypoint'
-import {WaypointFilter, WaypointConsumer} from './BrushPipeline'
 import {brushPresetManager} from '../app/BrushPresetManager'
+import {WaypointFilter, WaypointConsumer} from './BrushPipeline'
+import {Waypoint} from './Waypoint'
 
 function stabilizeWaypoint(waypoints: Waypoint[], level: number, index: number) {
   const nWaypoints = waypoints.length

@@ -1,13 +1,13 @@
-import {Transform, Rect} from 'paintvec'
 import {Color} from 'paintgl'
-import {UndoCommand, CompositeUndoCommand} from '../models/UndoStack'
-import Picture from '../models/Picture'
+import {Transform, Rect} from 'paintvec'
+import IndexPath from '../../lib/IndexPath'
 import Layer, {LayerProps, GroupLayer, ImageLayer} from '../models/Layer'
+import Picture from '../models/Picture'
 import TiledTexture from '../models/TiledTexture'
+import {UndoCommand, CompositeUndoCommand} from '../models/UndoStack'
+import {layerBlender} from '../services/LayerBlender'
 import LayerTransform from '../services/LayerTransform'
 import {SelectionChangeCommand} from './SelectionCommand'
-import IndexPath from '../../lib/IndexPath'
-import {layerBlender} from '../services/LayerBlender'
 
 export
 class MoveLayerCommand implements UndoCommand {

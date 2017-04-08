@@ -1,7 +1,7 @@
 import {Vec2} from 'paintvec'
+import KeyInput from '../../lib/KeyInput'
 import Tool, {ToolPointerEvent} from './Tool'
 import ToolIDs from './ToolIDs'
-import KeyInput from '../../lib/KeyInput'
 
 export default
 class PanTool extends Tool {

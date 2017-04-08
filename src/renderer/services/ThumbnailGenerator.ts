@@ -1,8 +1,8 @@
-import {Vec2, Rect} from 'paintvec'
 import {Texture, TextureDrawTarget, Color} from 'paintgl'
-import TiledTexture from '../models/TiledTexture'
+import {Vec2, Rect} from 'paintvec'
 import {context} from '../GLContext'
 import {drawTexture} from '../GLUtil'
+import TiledTexture from '../models/TiledTexture'
 
 function calcThumbnailSize(originalSize: Vec2, maxSize: Vec2) {
   const maxRatio = maxSize.width / maxSize.height

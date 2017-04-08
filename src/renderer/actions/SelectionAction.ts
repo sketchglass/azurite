@@ -1,9 +1,9 @@
 import {remote} from 'electron'
+import {addAction} from '../app/ActionRegistry'
+import {SelectAllCommand, ClearSelectionCommand, InvertSelectionCommand} from '../commands/SelectionCommand'
+import {currentFocus} from '../views/CurrentFocus'
 import {PictureAction} from './Action'
 import ActionIDs from './ActionIDs'
-import {addAction} from '../app/ActionRegistry'
-import {currentFocus} from '../views/CurrentFocus'
-import {SelectAllCommand, ClearSelectionCommand, InvertSelectionCommand} from '../commands/SelectionCommand'
 
 @addAction
 export class SelectionSelectAllAction extends PictureAction {

@@ -1,8 +1,8 @@
-import * as assert from 'power-assert'
-import Picture from '../../renderer/models/Picture'
-import Layer, {GroupLayer, ImageLayer} from '../../renderer/models/Layer'
-import IndexPath from '../../lib/IndexPath'
 import * as msgpack from 'msgpack-lite'
+import * as assert from 'power-assert'
+import IndexPath from '../../lib/IndexPath'
+import Layer, {GroupLayer, ImageLayer} from '../../renderer/models/Layer'
+import Picture from '../../renderer/models/Picture'
 
 function createImageLayer(picture: Picture) {
   // TODO: set tiled texture data

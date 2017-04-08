@@ -1,9 +1,9 @@
-import * as React from 'react'
 import {observable, computed, action} from 'mobx'
 import {Vec2, Rect, Transform} from 'paintvec'
-import Tool, {ToolPointerEvent} from './Tool'
+import * as React from 'react'
 import {UndoStack, UndoCommand} from '../models/UndoStack'
 import {renderer} from '../views/Renderer'
+import Tool, {ToolPointerEvent} from './Tool'
 
 export
 enum DragType {

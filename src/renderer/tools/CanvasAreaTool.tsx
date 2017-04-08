@@ -1,13 +1,13 @@
-import * as React from 'react'
 import {reaction, action, computed} from 'mobx'
 import {observer} from 'mobx-react'
 import {Vec2, Rect} from 'paintvec'
-import RectMoveTool, {DragType} from './RectMoveTool'
-import {ToolPointerEvent} from './Tool'
+import * as React from 'react'
 import {ChangeCanvasAreaCommand} from '../commands/PictureCommand'
 import DimensionSelectViewModel from '../viewmodels/DimensionSelectViewModel'
 import DimensionSelect from '../views/DimensionSelect'
 import {renderer} from '../views/Renderer'
+import RectMoveTool, {DragType} from './RectMoveTool'
+import {ToolPointerEvent} from './Tool'
 import ToolIDs from './ToolIDs'
 
 const HANDLE_RADIUS = 4

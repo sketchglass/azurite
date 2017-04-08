@@ -1,7 +1,7 @@
-import PictureFormat from './PictureFormat'
-import Picture from '../models/Picture'
-import Layer from '../models/Layer'
 import * as msgpack from 'msgpack-lite'
+import Layer from '../models/Layer'
+import Picture from '../models/Picture'
+import PictureFormat from './PictureFormat'
 
 export default
 class PictureFormatAzurite extends PictureFormat {

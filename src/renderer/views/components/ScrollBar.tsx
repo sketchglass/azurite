@@ -1,7 +1,7 @@
+import * as classNames from 'classnames'
 import * as React from 'react'
 import CSSVariables from './CSSVariables'
 import PointerEvents from './PointerEvents'
-import * as classNames from 'classnames'
 import './ScrollBar.css'
 
 export

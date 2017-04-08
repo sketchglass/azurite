@@ -1,6 +1,6 @@
-import {PictureDimension} from '../../models/Picture'
 import {ipcRenderer} from 'electron'
 import IPCChannels from '../../../common/IPCChannels'
+import {PictureDimension} from '../../models/Picture'
 import {ToolShortcutsDialogData} from './ToolShortcutsDialog'
 
 export default

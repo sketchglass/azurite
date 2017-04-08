@@ -4,14 +4,14 @@ import React = require('react')
 import * as classNames from 'classnames'
 import {Tree, TreeNode, NodeInfo} from 'react-draggable-tree'
 import 'react-draggable-tree/lib/index.css'
-import Layer, {GroupLayer} from '../../models/Layer'
+import IndexPath from '../../../lib/IndexPath'
+import {AddLayerAction, GroupLayerAction, RemoveLayerAction} from '../../actions/LayerActions'
+import {appState} from '../../app/AppState'
 import {MoveLayerCommand, CopyLayerCommand, ChangeLayerPropsCommand} from '../../commands/LayerCommand'
+import Layer, {GroupLayer} from '../../models/Layer'
 import ClickToEdit from '../components/ClickToEdit'
 import SVGIcon from '../components/SVGIcon'
 import LayerDetail from '../LayerDetail'
-import {appState} from '../../app/AppState'
-import IndexPath from '../../../lib/IndexPath'
-import {AddLayerAction, GroupLayerAction, RemoveLayerAction} from '../../actions/LayerActions'
 import './LayerPanel.css'
 
 interface LayerNode extends TreeNode {

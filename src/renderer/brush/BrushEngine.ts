@@ -1,6 +1,6 @@
+import {BrushPipeline} from './BrushPipeline'
 import {BrushPreset} from './BrushPreset'
 import {BrushRenderer} from './BrushRenderer'
-import {BrushPipeline} from './BrushPipeline'
 import {WaypointCurveFilter} from './WaypointCurveFilter'
 import {WaypointStabilizeFilter} from './WaypointStabilizeFilter'
 

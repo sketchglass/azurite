@@ -1,12 +1,12 @@
-import * as path from 'path'
 import {observable, computed, reaction} from 'mobx'
 import {Vec2, Rect} from 'paintvec'
-import Layer, {LayerData, GroupLayer} from './Layer'
+import * as path from 'path'
+import IndexPath from '../../lib/IndexPath'
 import PictureBlender from '../services/PictureBlender'
-import {UndoStack} from './UndoStack'
+import Layer, {LayerData, GroupLayer} from './Layer'
 import {Navigation} from './Navigation'
 import Selection from './Selection'
-import IndexPath from '../../lib/IndexPath'
+import {UndoStack} from './UndoStack'
 
 export
 interface PictureData {

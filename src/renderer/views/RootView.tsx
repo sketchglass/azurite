@@ -5,18 +5,18 @@ import DrawArea from './DrawArea'
 import {PictureTabBar} from './PictureTabBar'
 import ToolSelection from './ToolSelection'
 
-import ColorPanel from './panels/ColorPanel'
-import ToolSettingsPanel from './panels/ToolSettingsPanel'
-import NavigatorPanel from './panels/NavigatorPanel'
-import LayerPanel from './panels/LayerPanel'
 import BrushPresetsPanel from './panels/BrushPresetsPanel'
+import ColorPanel from './panels/ColorPanel'
+import LayerPanel from './panels/LayerPanel'
+import NavigatorPanel from './panels/NavigatorPanel'
+import ToolSettingsPanel from './panels/ToolSettingsPanel'
 
 import {appState} from '../app/AppState'
 import {toolManager} from '../app/ToolManager'
 
+import './common.css'
 import './KeyBindingHandler'
 import './MenuBar'
-import './common.css'
 import './RootView.css'
 
 @observer export default

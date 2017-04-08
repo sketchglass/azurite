@@ -1,11 +1,11 @@
-import * as React from 'react'
 import {observable, action} from 'mobx'
 import {observer} from 'mobx-react'
+import * as React from 'react'
 import {appState} from '../app/AppState'
 import {PictureState} from '../app/PictureState'
 const classNames = require('classnames')
-import PointerEvents from './components/PointerEvents'
 import CSSVariables from './components/CSSVariables'
+import PointerEvents from './components/PointerEvents'
 import './PictureTabBar.css'
 
 const TAB_WIDTH = 160

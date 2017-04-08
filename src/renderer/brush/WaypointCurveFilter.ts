@@ -1,5 +1,5 @@
-import {Waypoint} from './Waypoint'
 import {WaypointFilter, WaypointConsumer} from './BrushPipeline'
+import {Waypoint} from './Waypoint'
 
 export class WaypointCurveFilter implements WaypointFilter {
   lastWaypoints: Waypoint[] = []

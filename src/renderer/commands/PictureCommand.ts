@@ -1,8 +1,8 @@
 import {Vec2, Transform} from 'paintvec'
-import {UndoCommand} from '../models/UndoStack'
+import Layer, {ImageLayer} from '../models/Layer'
 import Picture, {PictureDimension} from '../models/Picture'
 import Selection from '../models/Selection'
-import Layer, {ImageLayer} from '../models/Layer'
+import {UndoCommand} from '../models/UndoStack'
 import {TransformLayerCommand} from './LayerCommand'
 
 function transformPicture(picture: Picture, newSize: Vec2, transform: Transform) {

@@ -1,10 +1,10 @@
 import {action} from 'mobx'
-import {actionRegistry} from '../app/ActionRegistry'
-import {keyBindingRegistry} from '../app/KeyBindingRegistry'
-import {toolManager} from '../app/ToolManager'
-import {brushPresetManager} from '../app/BrushPresetManager'
 import KeyInput from '../../lib/KeyInput'
 import KeyRecorder from '../../lib/KeyRecorder'
+import {actionRegistry} from '../app/ActionRegistry'
+import {brushPresetManager} from '../app/BrushPresetManager'
+import {keyBindingRegistry} from '../app/KeyBindingRegistry'
+import {toolManager} from '../app/ToolManager'
 import BrushTool from '../tools/BrushTool'
 
 class KeyBindingHandler {

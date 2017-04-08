@@ -1,9 +1,9 @@
 import {action} from 'mobx'
-import * as React from 'react'
 import {observer} from 'mobx-react'
+import * as React from 'react'
+import {ChangeLayerPropsCommand} from '../commands/LayerCommand'
 import Layer, {LayerBlendMode} from '../models/Layer'
 import RangeSlider from './components/RangeSlider'
-import {ChangeLayerPropsCommand} from '../commands/LayerCommand'
 
 const blendModes: LayerBlendMode[] = [
   'normal',
