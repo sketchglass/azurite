@@ -1,9 +1,22 @@
 import PSDReader from '../../lib/PSDReader'
-import {PSDColorMode, PSDSectionType} from '../../lib/PSDTypes'
+import {PSDColorMode, PSDSectionType, PSDBlendModeKey} from '../../lib/PSDTypes'
 import {addPictureFormat} from '../app/FormatRegistry'
-import Layer, {ImageLayer, GroupLayer} from '../models/Layer'
+import Layer, {ImageLayer, GroupLayer, LayerBlendMode} from '../models/Layer'
 import Picture from '../models/Picture'
 import PictureFormat from './PictureFormat'
+
+function parseBlendMode(mode: PSDBlendModeKey): LayerBlendMode {
+  switch (mode) {
+    default:
+    case 'norm':
+      return 'normal'
+    case 'mul ':
+      return 'multiply'
+    case 'lddg':
+      return 'plus'
+    // TODO: add more
+  }
+}
 
 @addPictureFormat
 export default
@@ -28,12 +41,13 @@ class PictureFormatPSD extends PictureFormat {
     let groupStack = [picture.rootLayer]
     for (const layerRecord of [...reader.layerRecords].reverse()) {
       const topGroup = groupStack[groupStack.length - 1]
-      const {sectionType, name, opacity, clipping, transparencyProtected, visible} = layerRecord
+      const {sectionType, name, opacity, clipping, transparencyProtected, visible, blendMode} = layerRecord
       const layerProps = {
         name, opacity,
         preserveOpacity: transparencyProtected,
         clippingGroup: clipping,
-        visible
+        visible,
+        blendMode: parseBlendMode(blendMode),
       }
       if (sectionType === PSDSectionType.Layer) {
         const layer = new ImageLayer(picture, layerProps)
