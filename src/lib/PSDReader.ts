@@ -1,6 +1,6 @@
-import {PSDColorMode, PSDLayerRecord, PSDChannelInfo, PSDBlendModeKey, PSDSectionType, PSDCompression} from "./PSDTypes"
-import {Rect, Vec2} from "paintvec"
-import * as iconv from "iconv-lite"
+import * as iconv from 'iconv-lite'
+import {Rect, Vec2} from 'paintvec'
+import {PSDColorMode, PSDLayerRecord, PSDChannelInfo, PSDBlendModeKey, PSDSectionType, PSDCompression} from './PSDTypes'
 
 class PSDBinaryReader {
   offset = 0
@@ -56,7 +56,7 @@ class PSDBinaryReader {
   popOffset() {
     const offset = this.savedOffsets.pop()
     if (offset == undefined) {
-      throw new Error("cannot pop offset")
+      throw new Error('cannot pop offset')
     }
     this.offset = offset
   }
@@ -110,11 +110,11 @@ class PSDReader {
   readFileHeader() {
     const {reader} = this
     const signature = reader.ascii(4)
-    if (signature != '8BPS') {
+    if (signature !== '8BPS') {
       throw new Error('Wrong signature')
     }
     const version = reader.uint16()
-    if (version != 1) {
+    if (version !== 1) {
       // TODO: PSB support
       throw new Error('Unsupported version')
     }
@@ -174,7 +174,7 @@ class PSDReader {
       })
     }
     const blendModeSig = reader.ascii(4)
-    if (blendModeSig != '8BIM') {
+    if (blendModeSig !== '8BIM') {
       throw new Error('Blend mode signature is wrong')
     }
     const blendMode = reader.ascii(4) as PSDBlendModeKey
@@ -225,16 +225,16 @@ class PSDReader {
     let unicodeName: string|undefined
     while (true) {
       const signature = reader.ascii(4)
-      if (signature != '8BIM' || signature != '8B64' as string) {
+      if (signature !== '8BIM' || signature !== '8B64' as string) {
         break
       }
       const key = reader.ascii(4)
       const len = reader.uint32()
       reader.pushOffset()
-      if (key == 'lsct') {
+      if (key === 'lsct') {
         // section type
         sectionType = reader.uint32() as PSDSectionType
-      } else if (key == 'luni') {
+      } else if (key === 'luni') {
         unicodeName = reader.unicodePascalString()
       }
       reader.popOffset()
@@ -261,7 +261,7 @@ class PSDReader {
     } else if (compression === PSDCompression.RLE) {
       return decodePackBits(data, rect.width * rect.height)
     } else {
-      throw new Error("Zip-encoded channel data is not supported")
+      throw new Error('Zip-encoded channel data is not supported')
     }
   }
 }
