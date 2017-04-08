@@ -1,8 +1,8 @@
 import {Vec2} from 'paintvec'
-import Tool, {ToolPointerEvent} from './Tool'
-import {renderer} from '../views/Renderer'
-import ToolIDs from './ToolIDs'
 import KeyInput from '../../lib/KeyInput'
+import {renderer} from '../views/Renderer'
+import Tool, {ToolPointerEvent} from './Tool'
+import ToolIDs from './ToolIDs'
 
 export default
 class RotateTool extends Tool {

@@ -1,5 +1,5 @@
-import {Vec2, Transform} from 'paintvec'
 import {observable, action, computed} from 'mobx'
+import {Vec2, Transform} from 'paintvec'
 
 const SCALE_STEPS = [
   0.125,

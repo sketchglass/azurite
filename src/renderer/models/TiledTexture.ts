@@ -1,9 +1,9 @@
-import * as zlib from 'zlib'
-import {Vec2, Rect, Transform} from 'paintvec'
 import {Color, Texture, DrawTarget, TextureDrawTarget, BlendMode, RectShape, ShapeModel, colorShader} from 'paintgl'
+import {Vec2, Rect, Transform} from 'paintvec'
+import * as zlib from 'zlib'
+import {float32ArrayTo16} from '../../lib/Float'
 import {context} from '../GLContext'
 import {drawTexture, drawVisibilityToBinary} from '../GLUtil'
-import {float32ArrayTo16} from '../../lib/Float'
 import {getBoundingRect} from './util'
 const glsl = require('glslify')
 

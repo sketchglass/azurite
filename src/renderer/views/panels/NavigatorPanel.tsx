@@ -1,13 +1,13 @@
-import {Transform, Vec2, Rect} from 'paintvec'
 import {computed, reaction, action} from 'mobx'
 import {observer} from 'mobx-react'
+import {Transform, Vec2, Rect} from 'paintvec'
 import React = require('react')
-import {appState} from '../../app/AppState'
-import {renderer} from '../Renderer'
 import {frameDebounce} from '../../../lib/Debounce'
+import {appState} from '../../app/AppState'
 import PointerEvents from '../components/PointerEvents'
-import SVGIcon from '../components/SVGIcon'
 import RangeSlider from '../components/RangeSlider'
+import SVGIcon from '../components/SVGIcon'
+import {renderer} from '../Renderer'
 import './NavigatorPanel.css'
 
 class NavigatorMinimap extends React.Component<{}, {} > {

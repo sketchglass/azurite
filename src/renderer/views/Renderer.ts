@@ -1,11 +1,11 @@
 import {observable, computed, reaction} from 'mobx'
-import {Vec2, Rect, Transform} from 'paintvec'
 import {Texture, ShapeModel, RectShape, textureShader, CanvasDrawTarget, Color, TextureFilter} from 'paintgl'
-import {context, canvas} from '../GLContext'
+import {Vec2, Rect, Transform} from 'paintvec'
 import {frameDebounce} from '../../lib/Debounce'
+import Dirtiness from '../../lib/Dirtiness'
+import {context, canvas} from '../GLContext'
 import Picture from '../models/Picture'
 import Selection from '../models/Selection'
-import Dirtiness from '../../lib/Dirtiness'
 const glsl = require('glslify')
 
 const boxShadowShader = {

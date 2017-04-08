@@ -1,5 +1,5 @@
-import {observable, computed, action, IObservableArray} from 'mobx'
 import {EventEmitter} from 'events'
+import {observable, computed, action, IObservableArray} from 'mobx'
 
 export
 interface UndoCommand {

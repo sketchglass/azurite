@@ -1,8 +1,8 @@
-import {action} from 'mobx'
-import * as React from 'react'
-import {observer} from 'mobx-react'
 import * as classNames from 'classnames'
 import {remote} from 'electron'
+import {action} from 'mobx'
+import {observer} from 'mobx-react'
+import * as React from 'react'
 const {Menu} = remote
 
 import KeyInput from '../../lib/KeyInput'

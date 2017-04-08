@@ -1,5 +1,5 @@
-import {Vec2, Rect, Transform} from 'paintvec'
 import {ShapeModel, Texture, RectShape, QuadShape, textureShader, DrawTarget, TextureDrawTarget, BlendMode} from 'paintgl'
+import {Vec2, Rect, Transform} from 'paintvec'
 import {context} from './GLContext'
 const glsl = require('glslify')
 

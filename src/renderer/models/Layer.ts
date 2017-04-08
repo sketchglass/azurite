@@ -1,7 +1,7 @@
 import {observable, reaction, action, IArrayChange, IArraySplice} from 'mobx'
+import IndexPath from '../../lib/IndexPath'
 import Picture from './Picture'
 import TiledTexture, {TiledTextureData} from './TiledTexture'
-import IndexPath from '../../lib/IndexPath'
 
 export
 type LayerBlendMode = 'normal' | 'plus' | 'multiply' // TODO: add more

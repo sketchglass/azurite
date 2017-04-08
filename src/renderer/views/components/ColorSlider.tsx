@@ -1,9 +1,9 @@
-import * as React from 'react'
 import {Color} from 'paintgl'
+import * as React from 'react'
 import {toHexColor} from '../../../lib/Color'
+import './ColorSlider.css'
 import CSSVariables from './CSSVariables'
 import PointerEvents from './PointerEvents'
-import './ColorSlider.css'
 
 interface ColorSliderProps {
   color: Color

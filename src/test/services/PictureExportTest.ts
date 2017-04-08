@@ -1,12 +1,12 @@
+import {remote} from 'electron'
+import {Vec2} from 'paintvec'
 import * as path from 'path'
 import * as assert from 'power-assert'
-import {Vec2} from 'paintvec'
-import Picture from '../../renderer/models/Picture'
-import {ImageLayer} from '../../renderer/models/Layer'
-import {PictureExport} from '../../renderer/services/PictureExport'
-import '../../renderer/formats/PictureFormatCanvasImage'
 import {formatRegistry} from '../../renderer/app/FormatRegistry'
-import {remote} from 'electron'
+import '../../renderer/formats/PictureFormatCanvasImage'
+import {ImageLayer} from '../../renderer/models/Layer'
+import Picture from '../../renderer/models/Picture'
+import {PictureExport} from '../../renderer/services/PictureExport'
 import TestPattern from '../util/TestPattern'
 
 const tempPath = remote.app.getPath('temp')

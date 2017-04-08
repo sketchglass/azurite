@@ -53,6 +53,13 @@
             "check-operator",
             "check-separator",
             "check-type"
+        ],
+        "ordered-imports": [
+            true,
+            {
+                "import-sources-order": "case-insensitive",
+                "named-imports-order": "any"
+            }
         ]
     }
 }

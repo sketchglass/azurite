@@ -1,7 +1,6 @@
-import * as assert from 'power-assert'
 import {Vec2} from 'paintvec'
-import Picture from '../../renderer/models/Picture'
-import {GroupLayer, ImageLayer} from '../../renderer/models/Layer'
+import * as assert from 'power-assert'
+import IndexPath from '../../lib/IndexPath'
 import {
   MoveLayerCommand,
   CopyLayerCommand,
@@ -12,7 +11,8 @@ import {
   ChangeLayerPropsCommand,
   ClearLayerCommand,
 } from '../../renderer/commands/LayerCommand'
-import IndexPath from '../../lib/IndexPath'
+import {GroupLayer, ImageLayer} from '../../renderer/models/Layer'
+import Picture from '../../renderer/models/Picture'
 import TestPattern from '../util/TestPattern'
 
 interface LayerInfo {

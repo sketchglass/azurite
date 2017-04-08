@@ -1,11 +1,11 @@
 import {Vec2} from 'paintvec'
 
-import PictureFormat from './PictureFormat'
 import {encodeCanvas, decodeToCanvas} from '../../lib/CanvasEncodeDecode'
 import {addPictureFormat} from '../app/FormatRegistry'
+import {ImageLayer} from '../models/Layer'
 import Picture from '../models/Picture'
 import TextureToCanvas from '../models/TextureToCanvas'
-import {ImageLayer} from '../models/Layer'
+import PictureFormat from './PictureFormat'
 
 function canvasToLayer(canvas: HTMLCanvasElement, name: string, picture: Picture) {
   const layer = new ImageLayer(picture, {name})

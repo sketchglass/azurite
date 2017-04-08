@@ -1,6 +1,6 @@
+import {reaction, computed} from 'mobx'
 import * as React from 'react'
 import {frameDebounce} from '../../../lib/Debounce'
-import {reaction, computed} from 'mobx'
 
 abstract class FrameDebounced<TProps, TState> extends React.Component<TProps, TState> {
   private updateDisposer: () => void

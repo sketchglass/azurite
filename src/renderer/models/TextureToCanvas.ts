@@ -1,5 +1,5 @@
-import {Vec2, Rect} from 'paintvec'
 import {ShapeModel, Texture, RectShape, TextureDrawTarget, Color} from 'paintgl'
+import {Vec2, Rect} from 'paintvec'
 import {context} from '../GLContext'
 
 const textureToCanvasShader = {

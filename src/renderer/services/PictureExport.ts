@@ -1,13 +1,13 @@
+import {remote} from 'electron'
 import Picture from '../models/Picture'
 import TextureToCanvas from '../models/TextureToCanvas'
-import {remote} from 'electron'
 const {dialog} = remote
 import * as fs from 'fs'
 import * as path from 'path'
+import {formatRegistry} from '../app/FormatRegistry'
+import {AddLayerCommand} from '../commands/LayerCommand'
 import PictureFormat from '../formats/PictureFormat'
 import {UndoCommand, CompositeUndoCommand} from '../models/UndoStack'
-import {AddLayerCommand} from '../commands/LayerCommand'
-import {formatRegistry} from '../app/FormatRegistry'
 
 export
 type PictureExportFormat = 'png'|'jpeg'|'bmp'

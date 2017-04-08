@@ -1,9 +1,9 @@
-import {Vec2, Rect, Transform} from 'paintvec'
 import {Texture, TextureDrawTarget, Color} from 'paintgl'
-import TiledTexture, {Tile} from '../models/TiledTexture'
-import Selection from '../models/Selection'
+import {Vec2, Rect, Transform} from 'paintvec'
 import {context} from '../GLContext'
 import {drawTexture} from '../GLUtil'
+import Selection from '../models/Selection'
+import TiledTexture, {Tile} from '../models/TiledTexture'
 
 const tileDrawTarget = new TextureDrawTarget(context)
 

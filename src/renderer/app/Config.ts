@@ -1,6 +1,6 @@
+import {remote} from 'electron'
 import * as fs from 'fs'
 import * as path from 'path'
-import {remote} from 'electron'
 const deepAssign = require('deep-assign')
 import {BrushPresetData} from '../brush/BrushPreset'
 import {ToolConfigData} from '../tools/Tool'

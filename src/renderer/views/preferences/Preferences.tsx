@@ -1,7 +1,7 @@
-import * as React from 'react'
 import {observer} from 'mobx-react'
-import DialogTitleBar from '../components/DialogTitleBar'
+import * as React from 'react'
 import PreferencesViewModel from '../../viewmodels/PreferencesViewModel'
+import DialogTitleBar from '../components/DialogTitleBar'
 import './Preferences.css'
 
 @observer

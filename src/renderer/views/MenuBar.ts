@@ -1,11 +1,11 @@
 import {remote} from 'electron'
 const {Menu, app} = remote
 import {computed, autorun} from 'mobx'
-import {appState} from '../app/AppState'
-import {actionRegistry} from '../app/ActionRegistry'
-import {keyBindingRegistry} from '../app/KeyBindingRegistry'
-import {formatRegistry} from '../app/FormatRegistry'
 import ActionIDs from '../actions/ActionIDs'
+import {actionRegistry} from '../app/ActionRegistry'
+import {appState} from '../app/AppState'
+import {formatRegistry} from '../app/FormatRegistry'
+import {keyBindingRegistry} from '../app/KeyBindingRegistry'
 
 interface MenuDescription extends Electron.MenuItemOptions {
   action?: string

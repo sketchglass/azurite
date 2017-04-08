@@ -1,6 +1,6 @@
-import {UndoCommand} from '../models/UndoStack'
 import Picture from '../models/Picture'
 import Selection from '../models/Selection'
+import {UndoCommand} from '../models/UndoStack'
 
 abstract class SelectionCommand implements UndoCommand {
   abstract title: string

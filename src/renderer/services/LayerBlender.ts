@@ -1,9 +1,9 @@
-import {Vec2, Rect} from 'paintvec'
 import {ShapeModel, TextureDrawTarget, RectShape, Color} from 'paintgl'
+import {Vec2, Rect} from 'paintvec'
 import {context} from '../GLContext'
-import TiledTexture, {Tile} from '../models/TiledTexture'
-import Layer, {LayerBlendMode, ImageLayer, GroupLayer} from '../models/Layer'
 import {drawTexture} from '../GLUtil'
+import Layer, {LayerBlendMode, ImageLayer, GroupLayer} from '../models/Layer'
+import TiledTexture, {Tile} from '../models/TiledTexture'
 
 const normalBlendShader = {
   fragment: `

@@ -1,6 +1,6 @@
 import {observable} from 'mobx'
-import {Vec2, Rect, Transform} from 'paintvec'
 import {Texture, TextureDrawTarget, Color} from 'paintgl'
+import {Vec2, Rect, Transform} from 'paintvec'
 import {context} from '../GLContext'
 import {drawTexture, drawVisibilityToBinary} from '../GLUtil'
 import {getBoundingRect} from './util'

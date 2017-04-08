@@ -1,8 +1,8 @@
 import React = require('react')
 import {observer} from 'mobx-react'
 import {PictureDimension} from '../../models/Picture'
-import DimensionSelect from '../DimensionSelect'
 import DimensionSelectViewModel from '../../viewmodels/DimensionSelectViewModel'
+import DimensionSelect from '../DimensionSelect'
 import DialogContainer from './DialogContainer'
 
 interface NewPictureDialogProps {

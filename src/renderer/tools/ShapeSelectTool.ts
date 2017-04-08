@@ -1,12 +1,12 @@
-import {Vec2, Transform} from 'paintvec'
 import {Texture, Color} from 'paintgl'
-import Selection from '../models/Selection'
-import {context} from '../GLContext'
-import {drawTexture} from '../GLUtil'
-import Tool, {ToolPointerEvent} from './Tool'
+import {Vec2, Transform} from 'paintvec'
 import {frameDebounce} from '../../lib/Debounce'
 import {SelectionChangeCommand} from '../commands/SelectionCommand'
+import {context} from '../GLContext'
+import {drawTexture} from '../GLUtil'
+import Selection from '../models/Selection'
 import {renderer} from '../views/Renderer'
+import Tool, {ToolPointerEvent} from './Tool'
 
 abstract class ShapeSelectTool extends Tool {
   commitDrawOnEnd = true

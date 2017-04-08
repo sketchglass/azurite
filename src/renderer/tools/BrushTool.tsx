@@ -1,12 +1,12 @@
-import * as React from 'react'
 import {observable, action, autorun, computed} from 'mobx'
 import {Vec2} from 'paintvec'
-import {Waypoint} from '../brush/Waypoint'
-import Tool, {ToolPointerEvent} from './Tool'
-import Layer, {ImageLayer} from '../models/Layer'
+import * as React from 'react'
 import {brushPresetManager} from '../app/BrushPresetManager'
-import BrushSettings from '../views/BrushSettings'
 import {BrushEngine} from '../brush/BrushEngine'
+import {Waypoint} from '../brush/Waypoint'
+import Layer, {ImageLayer} from '../models/Layer'
+import BrushSettings from '../views/BrushSettings'
+import Tool, {ToolPointerEvent} from './Tool'
 import ToolIDs from './ToolIDs'
 
 export default

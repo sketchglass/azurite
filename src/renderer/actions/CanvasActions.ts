@@ -1,8 +1,8 @@
+import {addAction} from '../app/ActionRegistry'
+import {FlipPictureCommand, Rotate90PictureCommand, Rotate180PictureCommand, ChangePictureResolutionCommand} from '../commands/PictureCommand'
+import {dialogLauncher} from '../views/dialogs/DialogLauncher'
 import {PictureAction} from './Action'
 import ActionIDs from './ActionIDs'
-import {addAction} from '../app/ActionRegistry'
-import {dialogLauncher} from '../views/dialogs/DialogLauncher'
-import {FlipPictureCommand, Rotate90PictureCommand, Rotate180PictureCommand, ChangePictureResolutionCommand} from '../commands/PictureCommand'
 
 @addAction
 export class CanvasChangeResolutionAction extends PictureAction {

@@ -1,9 +1,9 @@
 import {reaction, action} from 'mobx'
 import {Vec2} from 'paintvec'
-import Picture, {PictureUpdate} from '../models/Picture'
-import Layer, {ImageLayer} from '../models/Layer'
-import ThumbnailGenerator from '../services/ThumbnailGenerator'
 import ObservableWeakMap from '../../lib/ObservableWeakMap'
+import Layer, {ImageLayer} from '../models/Layer'
+import Picture, {PictureUpdate} from '../models/Picture'
+import ThumbnailGenerator from '../services/ThumbnailGenerator'
 
 const LAYER_THUMBNAIL_SIZE = new Vec2(40)
 const NAVIGATOR_THUMBNAIL_SIZE = new Vec2(96, 96)

@@ -1,7 +1,7 @@
 import {remote} from 'electron'
 import * as fs from 'fs'
-import Picture from '../models/Picture'
 import PictureFormatAzurite from '../formats/PictureFormatAzurite'
+import Picture from '../models/Picture'
 
 const {dialog} = remote
 

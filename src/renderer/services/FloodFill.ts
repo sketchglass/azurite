@@ -1,9 +1,9 @@
-import Picture from '../models/Picture'
-import Selection from '../models/Selection'
-import {Vec2, Rect} from 'paintvec'
 import {Texture, RectShape, ShapeModel, TextureDrawTarget} from 'paintgl'
+import {Vec2, Rect} from 'paintvec'
 import {context} from '../GLContext'
 import {drawTexture, drawVisibilityToBinary, drawBinaryToVisibility} from '../GLUtil'
+import Picture from '../models/Picture'
+import Selection from '../models/Selection'
 import nativelib = require('../../common/nativelib')
 
 const findFillableRegionShader = {

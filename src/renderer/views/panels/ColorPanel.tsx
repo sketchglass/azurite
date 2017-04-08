@@ -1,11 +1,11 @@
-import * as React from 'react'
 import {action} from 'mobx'
 import {observer} from 'mobx-react'
-import {appState} from '../../app/AppState'
+import * as React from 'react'
 import {HSVColor} from '../../../lib/Color'
+import {appState} from '../../app/AppState'
 import ColorPicker from '../components/ColorPicker'
-import RGBRangeSliders from '../components/RGBRangeSliders'
 import Palette from '../components/Palette'
+import RGBRangeSliders from '../components/RGBRangeSliders'
 import './ColorPanel.css'
 
 @observer
