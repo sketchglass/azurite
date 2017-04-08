@@ -177,7 +177,7 @@ class PSDReader {
     const channelInfos: PSDChannelInfo[] = []
     for (let i = 0; i < channelCount; ++i) {
       channelInfos.push({
-        id: reader.uint16(),
+        id: reader.int16(),
         dataLength: reader.uint32(),
       })
     }
@@ -265,7 +265,7 @@ class PSDReader {
   readChannelImageData(length: number, rect: Rect) {
     const {reader} = this
     const compression = reader.uint16() as PSDCompression
-    const data = reader.buffer(length)
+    const data = reader.buffer(length - 2)
     if (compression === PSDCompression.Raw) {
       return data
     } else if (compression === PSDCompression.RLE) {
