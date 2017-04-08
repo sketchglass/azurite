@@ -1,6 +1,7 @@
 import {remote} from "electron"
 const {dialog} = remote
 import Picture from "../models/Picture"
+import {ImageLayer} from "../models/Layer"
 import {PictureSave} from "../services/PictureSave"
 import {dialogLauncher} from "../views/dialogs/DialogLauncher"
 import ThumbnailManager from "./ThumbnailManager"
@@ -58,7 +59,12 @@ class PictureState {
   static async new() {
     const dimension = await dialogLauncher.openNewPictureDialog()
     if (dimension) {
-      return new PictureState(new Picture(dimension))
+      const picture = new Picture(dimension)
+      const layer = new ImageLayer(picture, {name: "Layer"})
+      picture.layers.replace([layer])
+      picture.selectedLayers.replace([layer])
+
+      return new PictureState(picture)
     }
   }
 }

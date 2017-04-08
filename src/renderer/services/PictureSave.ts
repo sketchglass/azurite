@@ -80,7 +80,7 @@ class PictureSave {
         }
       })
     })
-    const picture = await pictureFormat.import(fileData)
+    const picture = await pictureFormat.importPicture(fileData, "")
     picture.filePath = filePath
     return picture
   }

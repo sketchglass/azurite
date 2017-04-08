@@ -4,7 +4,7 @@ import {Vec2} from "paintvec"
 import Picture from "../../renderer/models/Picture"
 import {ImageLayer} from "../../renderer/models/Layer"
 import {PictureExport} from "../../renderer/services/PictureExport"
-import "../../renderer/formats/ImageFormats"
+import "../../renderer/formats/PictureFormatCanvasImage"
 import {formatRegistry} from "../../renderer/app/FormatRegistry"
 import {remote} from "electron"
 import TestPattern from "../util/TestPattern"
@@ -26,7 +26,7 @@ describe("PictureExport", () => {
       const filePath = path.join(tempPath, "test-export.png")
 
       const pictureExport1 = new PictureExport(picture1)
-      const format = formatRegistry.imageFormatForExtension("png")!
+      const format = formatRegistry.pictureFormatForExtension("png")!
       await pictureExport1.export(filePath, format)
       pictureExport1.dispose()
 
@@ -36,7 +36,7 @@ describe("PictureExport", () => {
       pictureExport2.dispose()
 
       const children2 = picture2.rootLayer.children
-      assert(children2.length === 2)
+      assert(children2.length === 1)
       const layer2 = children2[0] as ImageLayer
       assert(layer2.name == "test-export")
       assert(layer2.tiledTexture.keys().length > 0)

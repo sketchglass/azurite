@@ -1,12 +1,10 @@
-import {Vec2} from "paintvec"
 import Picture from "../models/Picture"
-import {ImageLayer} from "../models/Layer"
 import TextureToCanvas from "../models/TextureToCanvas"
 import {remote} from "electron"
 const {dialog} = remote
 import * as fs from "fs"
 import * as path from "path"
-import ImageFormat from "../formats/ImageFormat"
+import PictureFormat from "../formats/PictureFormat"
 import {UndoCommand, CompositeUndoCommand} from "../models/UndoStack"
 import {AddLayerCommand} from "../commands/LayerCommand"
 import {formatRegistry} from "../app/FormatRegistry"
@@ -21,7 +19,7 @@ class PictureExport {
   constructor(public picture: Picture) {
   }
 
-  async showExportDialog(format: ImageFormat) {
+  async showExportDialog(format: PictureFormat) {
     const filter = {name: format.title, extensions: format.extensions}
     const fileName = await new Promise<string|undefined>((resolve, reject) => {
       dialog.showSaveDialog(remote.getCurrentWindow(), {
@@ -35,7 +33,7 @@ class PictureExport {
   }
 
   async showImportDialog() {
-    const extensions = formatRegistry.imageExtensions()
+    const extensions = formatRegistry.pictureExtensions()
     const fileNames = await new Promise<string[]>((resolve, reject) => {
       dialog.showOpenDialog(remote.getCurrentWindow(), {
         title: "Import...",
@@ -45,10 +43,8 @@ class PictureExport {
     await this.import(fileNames)
   }
 
-  async export(fileName: string, format: ImageFormat) {
-    this.textureToCanvas.loadTexture(this.picture.blender.getBlendedTexture(), new Vec2(0))
-    this.textureToCanvas.updateCanvas()
-    const buffer = await format.export(this.textureToCanvas.canvas)
+  async export(fileName: string, format: PictureFormat) {
+    const buffer = await format.export(this.picture)
     fs.writeFileSync(fileName, buffer)
   }
 
@@ -61,12 +57,11 @@ class PictureExport {
 
     for (const fileName of fileNames) {
       const ext = path.extname(fileName)
-      const format = formatRegistry.imageFormatForExtension(ext.slice(1))
+      const format = formatRegistry.pictureFormatForExtension(ext.slice(1))
       if (format) {
         const buffer = fs.readFileSync(fileName)
-        const canvas = await format.import(buffer)
-        const layer = new ImageLayer(this.picture, {name: path.basename(fileName, ext)})
-        layer.tiledTexture.putImage(new Vec2(), canvas)
+        const name = path.basename(fileName, ext)
+        const layer =  await format.importLayer(buffer, name, this.picture)
         commands.push(new AddLayerCommand(this.picture, indexPath, layer))
       }
     }

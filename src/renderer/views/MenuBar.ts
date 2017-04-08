@@ -60,7 +60,7 @@ class MenuBar {
         {action: ActionIDs.fileSaveAs},
         {
           label: "Export",
-          submenu: formatRegistry.imageFormats.map(format => {
+          submenu: formatRegistry.pictureFormats.map(format => {
             return {
               action: `${ActionIDs.fileExport}:${format.mimeType}`,
               label: `${format.title}...`,

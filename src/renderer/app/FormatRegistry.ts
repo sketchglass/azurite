@@ -1,20 +1,20 @@
-import ImageFormat from "../formats/ImageFormat"
+import PictureFormat from "../formats/PictureFormat"
 
 export default
 class FormatRegistry {
-  imageFormats: ImageFormat[] = []
+  pictureFormats: PictureFormat[] = []
 
-  imageFormatForExtension(ext: string) {
-    return this.imageFormats.find(f => f.extensions.includes(ext))
+  pictureFormatForExtension(ext: string) {
+    return this.pictureFormats.find(f => f.extensions.includes(ext))
   }
 
-  imageExtensions() {
-    return this.imageFormats.map(f => f.extensions).reduce((a, b) => a.concat(b), [])
+  pictureExtensions() {
+    return this.pictureFormats.map(f => f.extensions).reduce((a, b) => a.concat(b), [])
   }
 }
 
 export const formatRegistry = new FormatRegistry()
 
-export function addImageFormat(klass: {new(): ImageFormat}) {
-  formatRegistry.imageFormats.push(new klass())
+export function addPictureFormat(klass: {new(): PictureFormat}) {
+  formatRegistry.pictureFormats.push(new klass())
 }
