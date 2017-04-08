@@ -154,7 +154,7 @@ class PSDReader {
 
   readLayerRecords() {
     for (let i = 0; i < this.numberOfLayers; ++i) {
-      this.readLayerRecord()
+      this.layerRecords.push(this.readLayerRecord())
     }
   }
 
@@ -193,7 +193,7 @@ class PSDReader {
     reader.popOffset()
     reader.skip(extraDataFieldLength)
 
-    return {
+    const record = {
       name: unicodeName != undefined ? unicodeName : name,
       opacity,
       clipping,
@@ -205,6 +205,8 @@ class PSDReader {
       channelInfos,
       channelDatas: [],
     }
+    console.log(record)
+    return record
   }
 
   readLayerMaskData() {
@@ -225,7 +227,7 @@ class PSDReader {
     let unicodeName: string|undefined
     while (true) {
       const signature = reader.ascii(4)
-      if (signature !== '8BIM' || signature !== '8B64' as string) {
+      if (signature !== '8BIM' && signature !== '8B64') {
         break
       }
       const key = reader.ascii(4)

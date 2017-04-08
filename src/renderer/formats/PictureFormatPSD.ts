@@ -1,8 +1,10 @@
 import PSDReader from '../../lib/PSDReader'
+import {addPictureFormat} from '../app/FormatRegistry'
 import Layer from '../models/Layer'
 import Picture from '../models/Picture'
 import PictureFormat from './PictureFormat'
 
+@addPictureFormat
 export default
 class PictureFormatPSD extends PictureFormat {
   title = 'Photoshop'
