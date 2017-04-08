@@ -190,7 +190,7 @@ class PSDReader {
     const clipping = reader.uint8() === 1
     const flags = reader.uint8()
     const transparencyProtected = (flags & 1) !== 0
-    const visible = (flags & (1 << 1)) !== 0
+    const visible = (flags & (1 << 1)) === 0
     reader.skip(1) // filler
     const extraDataFieldLength = reader.uint32()
     reader.pushOffset()
