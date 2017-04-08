@@ -186,7 +186,7 @@ class PSDReader {
       throw new Error('Blend mode signature is wrong')
     }
     const blendMode = reader.ascii(4) as PSDBlendModeKey
-    const opacity = reader.uint8()
+    const opacity = reader.uint8() / 255
     const clipping = reader.uint8() === 1
     const flags = reader.uint8()
     const transparencyProtected = (flags & 1) !== 0

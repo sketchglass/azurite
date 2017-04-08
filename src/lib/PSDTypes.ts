@@ -56,7 +56,7 @@ interface PSDChannelInfo {
 export
 interface PSDLayerRecord {
   name: string
-  opacity: number // 0...255
+  opacity: number
   clipping: boolean
   transparencyProtected: boolean
   visible: boolean

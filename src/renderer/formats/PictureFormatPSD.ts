@@ -1,7 +1,7 @@
 import PSDReader from '../../lib/PSDReader'
-import {PSDColorMode} from '../../lib/PSDTypes'
+import {PSDColorMode, PSDSectionType} from '../../lib/PSDTypes'
 import {addPictureFormat} from '../app/FormatRegistry'
-import Layer from '../models/Layer'
+import Layer, {ImageLayer, GroupLayer} from '../models/Layer'
 import Picture from '../models/Picture'
 import PictureFormat from './PictureFormat'
 
@@ -25,6 +25,29 @@ class PictureFormatPSD extends PictureFormat {
     }
 
     const picture = new Picture({width: reader.width, height: reader.height, dpi: 72})
+    let groupStack = [picture.rootLayer]
+    for (const layerRecord of [...reader.layerRecords].reverse()) {
+      const topGroup = groupStack[groupStack.length - 1]
+      const {sectionType, name, opacity, clipping, transparencyProtected, visible} = layerRecord
+      const layerProps = {
+        name, opacity,
+        preserveOpacity: transparencyProtected,
+        clippingGroup: clipping,
+        visible
+      }
+      if (sectionType === PSDSectionType.Layer) {
+        const layer = new ImageLayer(picture, layerProps)
+        topGroup.children.push(layer)
+      } else if (sectionType === PSDSectionType.OpenFolder || sectionType === PSDSectionType.ClosedFolder) {
+        const group = new GroupLayer(picture, layerProps, [])
+        group.collapsed = sectionType === PSDSectionType.ClosedFolder
+        topGroup.children.push(group)
+        groupStack.push(group)
+      } else if (sectionType === PSDSectionType.BoundingSectionDivider) {
+        groupStack.pop()
+      }
+    }
+
     return picture
   }
 
