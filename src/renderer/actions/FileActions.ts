@@ -44,19 +44,6 @@ export class FileSaveAsAction extends PictureAction {
   }
 }
 
-@addAction
-export class FileImportAction extends PictureAction {
-  id = ActionIDs.fileImport
-  title = 'Import...'
-  async run() {
-    if (this.picture) {
-      const pictureExport = new PictureExport(this.picture)
-      await pictureExport.showImportDialog()
-      pictureExport.dispose()
-    }
-  }
-}
-
 export class FileExportAction extends PictureAction {
   id = `${ActionIDs.fileExport}:${this.format.mimeType}`
   title = `Export ${this.format.title}...`

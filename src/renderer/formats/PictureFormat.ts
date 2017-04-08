@@ -9,6 +9,13 @@ abstract class PictureFormat {
   abstract importPicture(buffer: Buffer, name: string): Promise<Picture>
   abstract importLayer(buffer: Buffer, name: string, picture: Picture): Promise<Layer>
   abstract export(picture: Picture): Promise<Buffer>
+
+  get electronFileFilter() {
+    return {
+      name: this.title,
+      extensions: this.extensions
+    }
+  }
 }
 
 export default PictureFormat

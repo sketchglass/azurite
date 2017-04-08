@@ -4,7 +4,6 @@ export default {
 
   fileNew: 'file:new',
   fileOpen: 'file:open',
-  fileImport: 'file:import',
   fileSave: 'file:save',
   fileSaveAs: 'file:saveAs',
   fileExport: 'file:export',
@@ -23,6 +22,7 @@ export default {
 
   layerAdd: 'layer:add',
   layerAddGroup: 'layer:addGroup',
+  layerImport: 'layer:import',
   layerGroup: 'layer:group',
   layerRemove: 'layer:remove',
   layerMerge: 'layer:merge',

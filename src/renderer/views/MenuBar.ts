@@ -54,8 +54,6 @@ class MenuBar {
         {action: ActionIDs.fileNew},
         {action: ActionIDs.fileOpen},
         {type: 'separator'},
-        {action: ActionIDs.fileImport},
-        {type: 'separator'},
         {action: ActionIDs.fileSave},
         {action: ActionIDs.fileSaveAs},
         {
@@ -105,6 +103,8 @@ class MenuBar {
       submenu: [
         {action: ActionIDs.layerAdd},
         {action: ActionIDs.layerAddGroup},
+        {action: ActionIDs.layerImport},
+        {type: 'separator'},
         {action: ActionIDs.layerGroup},
         {action: ActionIDs.layerRemove},
         {type: 'separator'},
