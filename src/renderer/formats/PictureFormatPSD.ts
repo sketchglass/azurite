@@ -15,7 +15,7 @@ class PictureFormatPSD extends PictureFormat {
     const reader = new PSDReader(buffer)
     reader.read()
     // TODO
-    return new Picture({width: 0, height: 0, dpi: 72})
+    return new Picture({width: reader.width, height: reader.height, dpi: 72})
   }
 
   async importLayer(buffer: Buffer, name: string, picture: Picture): Promise<Layer> {

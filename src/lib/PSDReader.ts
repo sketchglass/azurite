@@ -161,7 +161,6 @@ class PSDReader {
   }
 
   readLayerRecords() {
-    console.log('layer count', this.layerCount)
     for (let i = 0; i < this.layerCount; ++i) {
       this.layerRecords.push(this.readLayerRecord())
     }
