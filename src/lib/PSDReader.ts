@@ -67,18 +67,19 @@ class PSDBinaryReader {
   }
 }
 
-function decodePackBits(src: Buffer, dstSize: number) {
-  const dst = Buffer.alloc(dstSize)
+function decodePackBits(src: Buffer, dst: Buffer) {
   let i = 0
   let j = 0
   while (i < src.length) {
     const count = src.readInt8(i)
     ++i
-    if (count >= 0) {
+    if (0 <= count) {
       const len = count + 1
-      dst.set(src.slice(i, len), j)
+      dst.set(src.slice(i, i + len), j)
       i += len
       j += len
+    } else if (count === -128) {
+      // do nothing
     } else {
       const c = src[i]
       const len = -count + 1
@@ -265,11 +266,24 @@ class PSDReader {
   readChannelImageData(length: number, rect: Rect) {
     const {reader} = this
     const compression = reader.uint16() as PSDCompression
-    const data = reader.buffer(length - 2)
     if (compression === PSDCompression.Raw) {
-      return data
+      return reader.buffer(length - 2)
     } else if (compression === PSDCompression.RLE) {
-      return decodePackBits(data, rect.width * rect.height)
+      reader.pushOffset()
+      const scanlineLengths: number[] = []
+      const {width, height} = rect
+      const data = Buffer.alloc(width * height)
+      for (let y = 0; y < height; ++y) {
+        scanlineLengths.push(reader.uint16())
+      }
+      for (let y = 0; y < height; ++y) {
+        const src = reader.buffer(scanlineLengths[y])
+        const dst = data.slice(y * width, (y + 1) * width)
+        decodePackBits(src, dst)
+      }
+      reader.popOffset()
+      reader.skip(length - 2)
+      return data
     } else {
       throw new Error('Zip-encoded channel data is not supported')
     }
