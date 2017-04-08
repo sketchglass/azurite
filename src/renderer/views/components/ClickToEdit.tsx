@@ -1,5 +1,5 @@
-import React = require("react")
-import "./ClickToEdit.css"
+import React = require('react')
+import './ClickToEdit.css'
 
 interface ClickToEditProps {
   text: string
@@ -30,7 +30,7 @@ class ClickToEdit extends React.Component<ClickToEditProps, ClickToEditState> {
     const {isEditing} = this.state
     return (
       <div className="ClickToEdit">
-        <div style={{visibility: isEditing ? "hidden" : "visible"}} className="ClickToEdit_text" onClick={this.onTextClick.bind(this)}>{text}</div>
+        <div style={{visibility: isEditing ? 'hidden' : 'visible'}} className="ClickToEdit_text" onClick={this.onTextClick.bind(this)}>{text}</div>
         <input ref="input" type="text" hidden={!isEditing} className="ClickToEdit_input" defaultValue={text}
           onBlur={this.onInputBlur.bind(this)}
           onKeyPress={this.onInputKeyPress.bind(this)}
@@ -40,7 +40,7 @@ class ClickToEdit extends React.Component<ClickToEditProps, ClickToEditState> {
   }
 
   get inputElem() {
-    return this.refs["input"] as HTMLInputElement
+    return this.refs['input'] as HTMLInputElement
   }
 
   onTextClick() {
@@ -50,7 +50,7 @@ class ClickToEdit extends React.Component<ClickToEditProps, ClickToEditState> {
     this.setState({
       isEditing: true
     })
-    this.inputElem.setSelectionRange(0, this.inputElem.value.length);
+    this.inputElem.setSelectionRange(0, this.inputElem.value.length)
   }
 
   onEditFinish(text: string) {
@@ -64,7 +64,7 @@ class ClickToEdit extends React.Component<ClickToEditProps, ClickToEditState> {
     this.onEditFinish(text)
   }
   onInputKeyPress(event: React.KeyboardEvent<HTMLInputElement>) {
-    if (event.key == "Enter") {
+    if (event.key === 'Enter') {
       const text = this.inputElem.value
       this.onEditFinish(text)
       event.preventDefault()

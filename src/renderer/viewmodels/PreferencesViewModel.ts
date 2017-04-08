@@ -1,6 +1,6 @@
-import {observable} from "mobx"
-import {ipcRenderer} from "electron"
-import IPCChannels from "../../common/IPCChannels"
+import {ipcRenderer} from 'electron'
+import {observable} from 'mobx'
+import IPCChannels from '../../common/IPCChannels'
 
 export interface PreferencesData {
   undoGroupingInterval: number

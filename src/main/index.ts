@@ -1,13 +1,13 @@
-import Electron = require("electron")
+import Electron = require('electron')
 type BrowserWindow = Electron.BrowserWindow
 const {app, BrowserWindow, ipcMain} = Electron
-import {TabletEventReceiver} from "receive-tablet-event"
-import IPCChannels from "../common/IPCChannels"
+import {TabletEventReceiver} from 'receive-tablet-event'
+import IPCChannels from '../common/IPCChannels'
 const argv = require('minimist')(process.argv.slice(2))
-import nativelib = require("../common/nativelib")
+import nativelib = require('../common/nativelib')
 const {WindowUtilMac} = nativelib
 
-let contentBase = argv.devserver ? "http://localhost:23000" : `file://${app.getAppPath()}/dist`
+let contentBase = argv.devserver ? 'http://localhost:23000' : `file://${app.getAppPath()}/dist`
 
 let mainWindow: BrowserWindow|undefined
 let dialogsWindow: BrowserWindow|undefined
@@ -25,7 +25,7 @@ function openDialogsWindow() {
     frame: false,
   })
   win.loadURL(`${contentBase}/dialogs.html`)
-  win.on("closed", () => {
+  win.on('closed', () => {
     dialogsWindow = undefined
   })
   ipcMain.on(IPCChannels.dialogOpen, (ev: Electron.IpcMainEvent, name: string, param: any) => {
@@ -36,7 +36,7 @@ function openDialogsWindow() {
       mainWindow.webContents.send(IPCChannels.dialogDone, result)
     }
   })
-  win.on("close", (e) => {
+  win.on('close', (e) => {
     e.preventDefault()
     win.hide()
     if (mainWindow) {
@@ -52,12 +52,12 @@ function openPreferencesWindow() {
     minWidth: 400,
     minHeight: 200,
     show: false,
-    titleBarStyle: "hidden",
-    title: "Preferences",
-    frame: process.platform == "darwin",
+    titleBarStyle: 'hidden',
+    title: 'Preferences',
+    frame: process.platform === 'darwin',
   })
   win.loadURL(`${contentBase}/preferences.html`)
-  win.on("closed", () => {
+  win.on('closed', () => {
     preferencesWindow = undefined
   })
   ipcMain.on(IPCChannels.preferencesOpen, (ev: Electron.IpcMainEvent, data: any) => {
@@ -71,7 +71,7 @@ function openPreferencesWindow() {
       mainWindow.webContents.send(IPCChannels.preferencesChange, data)
     }
   })
-  win.on("close", (e) => {
+  win.on('close', (e) => {
     e.preventDefault()
     win.hide()
     preferencesShown = false
@@ -80,7 +80,7 @@ function openPreferencesWindow() {
 
 async function openWindow() {
   if (argv.development) {
-    const {default: installExtension, REACT_DEVELOPER_TOOLS} = require("electron-devtools-installer");
+    const {default: installExtension, REACT_DEVELOPER_TOOLS} = require('electron-devtools-installer')
     await installExtension(REACT_DEVELOPER_TOOLS)
   }
 
@@ -91,12 +91,12 @@ async function openWindow() {
   })
 
   const resetTitleColor = () => {
-    if (process.platform == "darwin") {
+    if (process.platform === 'darwin') {
       WindowUtilMac.setTitleColor(win.getNativeWindowHandle(), 236 / 255, 237 / 255, 244 / 255, 1)
     }
   }
 
-  if (process.platform == "darwin") {
+  if (process.platform === 'darwin') {
     WindowUtilMac.initWindow(win.getNativeWindowHandle())
   }
   resetTitleColor()
@@ -109,31 +109,31 @@ async function openWindow() {
   const receiver = new TabletEventReceiver(win)
 
   ipcMain.on(IPCChannels.setTabletCaptureArea, (e, captureArea) => {
-    receiver.captureArea = captureArea;
+    receiver.captureArea = captureArea
   })
 
-  receiver.on("down", ev => {
+  receiver.on('down', ev => {
     win.webContents.send(IPCChannels.tabletDown, ev)
   })
-  receiver.on("move", ev => {
+  receiver.on('move', ev => {
     win.webContents.send(IPCChannels.tabletMove, ev)
   })
-  receiver.on("up", ev => {
+  receiver.on('up', ev => {
     win.webContents.send(IPCChannels.tabletUp, ev)
   })
 
-  for (const ev of ["resize", "enter-full-screen", "leave-full-screen", "maximize", "unmaximize"]) {
+  for (const ev of ['resize', 'enter-full-screen', 'leave-full-screen', 'maximize', 'unmaximize']) {
     win.on(ev, () => {
       win.webContents.send(IPCChannels.windowResize)
     })
   }
 
-  win.on("close", e => {
+  win.on('close', e => {
     e.preventDefault()
     win.webContents.send(IPCChannels.quit)
   })
 
-  win.on("closed", () => {
+  win.on('closed', () => {
     receiver.dispose()
     mainWindow = undefined
     if (dialogsWindow) {
@@ -144,11 +144,11 @@ async function openWindow() {
     }
   })
 
-  win.on("ready-to-show", () => {
+  win.on('ready-to-show', () => {
     win.show()
   })
 
-  win.on("leave-full-screen", resetTitleColor)
+  win.on('leave-full-screen', resetTitleColor)
 }
 
 function openTestWindow() {
@@ -158,10 +158,10 @@ function openTestWindow() {
   })
   win.loadURL(`${contentBase}/test.html`)
   win.webContents.openDevTools()
-  win.on("closed", () => {
+  win.on('closed', () => {
     testWindow = undefined
   })
-  ipcMain.on("testDone", (e, failCount) => {
+  ipcMain.on('testDone', (e, failCount) => {
     if (!argv.devserver) {
       setImmediate(() => {
         process.exit(failCount)
@@ -170,9 +170,9 @@ function openTestWindow() {
   })
 }
 
-app.commandLine.appendSwitch("enable-experimental-web-platform-features")
+app.commandLine.appendSwitch('enable-experimental-web-platform-features')
 
-app.on("ready", async () => {
+app.on('ready', async () => {
   if (argv.test) {
     openTestWindow()
   } else {
@@ -181,12 +181,12 @@ app.on("ready", async () => {
     openPreferencesWindow()
   }
 })
-app.on("browser-window-blur", () => {
+app.on('browser-window-blur', () => {
   if (preferencesShown && mainWindow && !mainWindow.isFocused() && preferencesWindow && !preferencesWindow.isFocused()) {
     preferencesWindow.hide()
   }
 })
-app.on("browser-window-focus", (ev, win) => {
+app.on('browser-window-focus', (ev, win) => {
   if (preferencesShown &&  preferencesWindow && !preferencesWindow.isVisible()) {
     preferencesWindow.show()
   }

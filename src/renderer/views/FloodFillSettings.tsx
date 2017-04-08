@@ -1,7 +1,7 @@
-import {observer} from "mobx-react"
-import React = require("react")
-import RangeSlider from "./components/RangeSlider"
-import FloodFillTool from "../tools/FloodFillTool"
+import {observer} from 'mobx-react'
+import React = require('react')
+import FloodFillTool from '../tools/FloodFillTool'
+import RangeSlider from './components/RangeSlider'
 
 @observer export default
 class FloodFillSettings extends React.Component<{tool: FloodFillTool}, void> {

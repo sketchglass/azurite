@@ -17,6 +17,7 @@
     "app": "electron . --devserver --development",
     "start": "npm-run-all build --parallel devserver app",
     "lint": "tslint 'src/**/*.{ts,tsx}'",
+    "lint:fix": "tslint --fix 'src/**/*.{ts,tsx}'",
     "test:dev": "electron . --devserver --test",
     "pretest": "npm run build",
     "test": "electron . --test",

@@ -1,14 +1,14 @@
-import {Vec2} from "paintvec"
-import ShapeSelectTool from "./ShapeSelectTool"
-import {ToolPointerEvent} from "./Tool"
-import ToolIDs from "./ToolIDs"
+import {Vec2} from 'paintvec'
+import ShapeSelectTool from './ShapeSelectTool'
+import {ToolPointerEvent} from './Tool'
+import ToolIDs from './ToolIDs'
 
 export default
 class FreehandSelectTool extends ShapeSelectTool {
   readonly id = ToolIDs.freehandSelect
-  readonly title = "Freehand Select"
+  readonly title = 'Freehand Select'
   get cursor() {
-    return "crosshair"
+    return 'crosshair'
   }
   positions: Vec2[] = []
 
@@ -24,7 +24,7 @@ class FreehandSelectTool extends ShapeSelectTool {
 
   drawShape(context: CanvasRenderingContext2D) {
     for (let [i, pos] of this.positions.entries()) {
-      if (i == 0) {
+      if (i === 0) {
         context.moveTo(pos.x, pos.y)
       } else {
         context.lineTo(pos.x, pos.y)

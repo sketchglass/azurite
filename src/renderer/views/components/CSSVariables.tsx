@@ -1,4 +1,4 @@
-import ElementContainer from "./ElementContainer"
+import ElementContainer from './ElementContainer'
 const decamelize = require('decamelize')
 
 interface CSSVariablesProps {
@@ -18,8 +18,8 @@ class CSSVariables extends ElementContainer<CSSVariablesProps, {}> {
   private setProperties(props: {[key: string]: string|number}) {
     if (this.element) {
       for (const key in props) {
-        if (["key", "ref", "children"].indexOf(key) < 0) {
-          if (this.oldProps[key] != props[key]) {
+        if (['key', 'ref', 'children'].indexOf(key) < 0) {
+          if (this.oldProps[key] !== props[key]) {
             this.element.style.setProperty(`--${decamelize(key, '-')}`, `${props[key]}`)
           }
         }

@@ -1,8 +1,8 @@
-import {Vec2, Rect} from "paintvec"
-import {Texture, TextureDrawTarget, Color} from "paintgl"
-import TiledTexture from "../models/TiledTexture"
-import {context} from "../GLContext"
-import {drawTexture} from "../GLUtil"
+import {Texture, TextureDrawTarget, Color} from 'paintgl'
+import {Vec2, Rect} from 'paintvec'
+import {context} from '../GLContext'
+import {drawTexture} from '../GLUtil'
+import TiledTexture from '../models/TiledTexture'
 
 function calcThumbnailSize(originalSize: Vec2, maxSize: Vec2) {
   const maxRatio = maxSize.width / maxSize.height
@@ -40,12 +40,12 @@ export default
 class ThumbnailGenerator {
   thumbnailSize = calcThumbnailSize(this.originalSize, this.maxThumbnailSize).size
   scale = calcThumbnailSize(this.originalSize, this.maxThumbnailSize).scale
-  private texture = new Texture(context, {size: getBoundingPowerOf2Size(this.originalSize), filter: "mipmap-bilinear"})
+  private texture = new Texture(context, {size: getBoundingPowerOf2Size(this.originalSize), filter: 'mipmap-bilinear'})
   private drawTarget = new TextureDrawTarget(context, this.texture)
   private thumbnailTexture = new Texture(context, {size: this.thumbnailSize})
   private thumbnailDrawTarget = new TextureDrawTarget(context, this.thumbnailTexture)
-  thumbnail = document.createElement("canvas")
-  private thumbnailContext = this.thumbnail.getContext("2d")!
+  thumbnail = document.createElement('canvas')
+  private thumbnailContext = this.thumbnail.getContext('2d')!
 
   constructor(public originalSize: Vec2, public maxThumbnailSize: Vec2) {
     this.thumbnail.width = this.thumbnailSize.width
@@ -54,13 +54,13 @@ class ThumbnailGenerator {
 
   loadTiledTexture(tiledTexture: TiledTexture) {
     this.clear()
-    tiledTexture.drawToDrawTarget(this.drawTarget, {offset: new Vec2(0), blendMode: "src-over"})
+    tiledTexture.drawToDrawTarget(this.drawTarget, {offset: new Vec2(0), blendMode: 'src-over'})
     this.readToThumbnail()
   }
 
   loadTexture(texture: Texture) {
     this.clear()
-    drawTexture(this.drawTarget, texture, {blendMode: "src-over"})
+    drawTexture(this.drawTarget, texture, {blendMode: 'src-over'})
     this.readToThumbnail()
   }
 
@@ -72,7 +72,7 @@ class ThumbnailGenerator {
     this.texture.generateMipmap()
 
     const rect = new Rect(new Vec2(0), this.thumbnailSize.mul(this.texture.size.div(this.originalSize)))
-    drawTexture(this.thumbnailDrawTarget, this.texture, {dstRect: rect, blendMode: "src"})
+    drawTexture(this.thumbnailDrawTarget, this.texture, {dstRect: rect, blendMode: 'src'})
 
     const {width, height} = rect
     const data = new ImageData(width, height)

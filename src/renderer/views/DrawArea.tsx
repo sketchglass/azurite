@@ -1,19 +1,19 @@
-import {observable, autorun, reaction} from "mobx"
-import {observer} from "mobx-react"
-import * as React from "react"
-import {ipcRenderer} from "electron"
-import Picture from "../models/Picture"
-import {Vec2, Rect} from "paintvec"
-import Tool, {ToolPointerEvent} from "../tools/Tool"
-import {TabletEvent} from "receive-tablet-event"
-import {canvas} from "../GLContext"
-import {renderer} from "./Renderer"
-import IPCChannels from "../../common/IPCChannels"
-import PointerEvents from "./components/PointerEvents"
-import ScrollBar, {ScrollBarDirection} from "./components/ScrollBar"
-import FrameDebounced from "./components/FrameDebounced"
-import {appState} from "../app/AppState"
-import "./DrawArea.css"
+import {ipcRenderer} from 'electron'
+import {observable, autorun, reaction} from 'mobx'
+import {observer} from 'mobx-react'
+import {Vec2, Rect} from 'paintvec'
+import * as React from 'react'
+import {TabletEvent} from 'receive-tablet-event'
+import IPCChannels from '../../common/IPCChannels'
+import {appState} from '../app/AppState'
+import {canvas} from '../GLContext'
+import Picture from '../models/Picture'
+import Tool, {ToolPointerEvent} from '../tools/Tool'
+import FrameDebounced from './components/FrameDebounced'
+import PointerEvents from './components/PointerEvents'
+import ScrollBar, {ScrollBarDirection} from './components/ScrollBar'
+import './DrawArea.css'
+import {renderer} from './Renderer'
 
 @observer
 class DrawAreaScroll extends FrameDebounced<{picture: Picture|undefined}, {}> {
@@ -118,15 +118,15 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     ipcRenderer.on(IPCChannels.tabletUp, this.onIPCTabletUp)
 
     this.resizeRenderer(true)
-    window.addEventListener("resize", this.onResize)
-    document.addEventListener("pointermove", this.onDocumentPointerMove)
+    window.addEventListener('resize', this.onResize)
+    document.addEventListener('pointermove', this.onDocumentPointerMove)
 
     this.disposers = [
       () => ipcRenderer.removeListener(IPCChannels.tabletDown, this.onIPCTabletDown),
       () => ipcRenderer.removeListener(IPCChannels.tabletMove, this.onIPCTabletMove),
       () => ipcRenderer.removeListener(IPCChannels.tabletUp, this.onIPCTabletUp),
-      () => window.removeEventListener("resize", this.onResize),
-      () => document.removeEventListener("pointermove", this.onDocumentPointerMove),
+      () => window.removeEventListener('resize', this.onResize),
+      () => document.removeEventListener('pointermove', this.onDocumentPointerMove),
       reaction(() => appState.uiVisible, () => setImmediate(() => this.onResize())),
       autorun(() => this.updateCursor()),
       reaction(() => this.tool.selectionShowMode, mode => {
@@ -146,7 +146,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     }
     renderer.cursorVisible = !!cursorImage
     if (cursorImage) {
-      this.element.style.cursor = "none"
+      this.element.style.cursor = 'none'
       renderer.cursorTexture.setImage(cursorImage)
       renderer.cursorSize = new Vec2(cursorImageSize)
     } else {

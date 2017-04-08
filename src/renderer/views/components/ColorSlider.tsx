@@ -1,9 +1,9 @@
-import * as React from "react"
-import {Color} from "paintgl"
-import {toHexColor} from "../../../lib/Color"
-import CSSVariables from "./CSSVariables"
-import PointerEvents from "./PointerEvents"
-import "./ColorSlider.css"
+import {Color} from 'paintgl'
+import * as React from 'react'
+import {toHexColor} from '../../../lib/Color'
+import './ColorSlider.css'
+import CSSVariables from './CSSVariables'
+import PointerEvents from './PointerEvents'
 
 interface ColorSliderProps {
   color: Color
@@ -42,7 +42,7 @@ class ColorSlider extends React.Component<ColorSliderProps, {}> {
   render() {
     const {color, value} = this.props
     const gradientSteps = this.props.gradientSteps.map(([color, pos]) => `${toHexColor(color)} ${pos * 100}%`)
-    const gradient = `linear-gradient(to right, ${gradientSteps.join(", ")})`
+    const gradient = `linear-gradient(to right, ${gradientSteps.join(', ')})`
     return (
       <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
         <CSSVariables value={value} color={toHexColor(color)} gradient={gradient}>

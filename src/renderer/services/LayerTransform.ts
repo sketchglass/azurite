@@ -1,9 +1,9 @@
-import {Vec2, Rect, Transform} from "paintvec"
-import {Texture, TextureDrawTarget, Color} from "paintgl"
-import TiledTexture, {Tile} from "../models/TiledTexture"
-import Selection from "../models/Selection"
-import {context} from "../GLContext"
-import {drawTexture} from "../GLUtil"
+import {Texture, TextureDrawTarget, Color} from 'paintgl'
+import {Vec2, Rect, Transform} from 'paintvec'
+import {context} from '../GLContext'
+import {drawTexture} from '../GLUtil'
+import Selection from '../models/Selection'
+import TiledTexture, {Tile} from '../models/TiledTexture'
 
 const tileDrawTarget = new TextureDrawTarget(context)
 
@@ -18,14 +18,14 @@ class LayerTransform {
     if (this.boundingRect) {
       // TODO: support image larger than max texture size
       const textureRect = this.boundingRect.inflate(2)
-      const texture = this.texture = new Texture(context, {size: textureRect.size, pixelType: "half-float"})
+      const texture = this.texture = new Texture(context, {size: textureRect.size, pixelType: 'half-float'})
       const drawTarget = new TextureDrawTarget(context, texture)
-      this.tiledTexture.drawToDrawTarget(drawTarget, {offset: textureRect.topLeft.neg(), blendMode: "src"})
+      this.tiledTexture.drawToDrawTarget(drawTarget, {offset: textureRect.topLeft.neg(), blendMode: 'src'})
       if (this.selection.hasSelection) {
         // clip with texture
-        drawTexture(drawTarget, this.selection.texture, {blendMode: "dst-in", transform: Transform.translate(textureRect.topLeft.neg())})
+        drawTexture(drawTarget, this.selection.texture, {blendMode: 'dst-in', transform: Transform.translate(textureRect.topLeft.neg())})
       }
-      texture.filter = "bilinear"
+      texture.filter = 'bilinear'
       this.textureSubrect = new Rect(new Vec2(), textureRect.size).inflate(-2)
       drawTarget.dispose()
     }
@@ -45,12 +45,12 @@ class LayerTransform {
     if (this.selection.hasSelection) {
       // draw original before draw transformed image
       if (this.tiledTexture.has(tileKey)) {
-        drawTexture(tileDrawTarget, this.tiledTexture.get(tileKey).texture, {blendMode: "src"})
-        drawTexture(tileDrawTarget, this.selection.texture, {blendMode: "dst-out", transform: Transform.translate(tileOffset)})
+        drawTexture(tileDrawTarget, this.tiledTexture.get(tileKey).texture, {blendMode: 'src'})
+        drawTexture(tileDrawTarget, this.selection.texture, {blendMode: 'dst-out', transform: Transform.translate(tileOffset)})
       }
-      drawTexture(tileDrawTarget, this.texture, {transform, blendMode: "src-over", bicubic: true, srcRect: this.textureSubrect})
+      drawTexture(tileDrawTarget, this.texture, {transform, blendMode: 'src-over', bicubic: true, srcRect: this.textureSubrect})
     } else {
-      drawTexture(tileDrawTarget, this.texture, {transform, blendMode: "src", bicubic: true, srcRect: this.textureSubrect})
+      drawTexture(tileDrawTarget, this.texture, {transform, blendMode: 'src', bicubic: true, srcRect: this.textureSubrect})
     }
     tileDrawTarget.texture = undefined
   }
@@ -80,7 +80,7 @@ class LayerTransform {
       return selection
     }
     const transform = Transform.translate(this.boundingRect.topLeft).merge(this.transform)
-    drawTexture(selection.drawTarget, this.texture, {transform, blendMode: "src", bicubic: true, srcRect: this.textureSubrect})
+    drawTexture(selection.drawTarget, this.texture, {transform, blendMode: 'src', bicubic: true, srcRect: this.textureSubrect})
     selection.checkHasSelection()
     return selection
   }

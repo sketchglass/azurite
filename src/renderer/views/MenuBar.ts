@@ -1,11 +1,11 @@
-import {remote} from "electron"
+import {remote} from 'electron'
 const {Menu, app} = remote
-import {computed, autorun} from "mobx"
-import {appState} from "../app/AppState"
-import {actionRegistry} from "../app/ActionRegistry"
-import {keyBindingRegistry} from "../app/KeyBindingRegistry"
-import {formatRegistry} from "../app/FormatRegistry"
-import ActionIDs from "../actions/ActionIDs"
+import {computed, autorun} from 'mobx'
+import ActionIDs from '../actions/ActionIDs'
+import {actionRegistry} from '../app/ActionRegistry'
+import {appState} from '../app/AppState'
+import {formatRegistry} from '../app/FormatRegistry'
+import {keyBindingRegistry} from '../app/KeyBindingRegistry'
 
 interface MenuDescription extends Electron.MenuItemOptions {
   action?: string
@@ -49,25 +49,25 @@ class MenuBar {
 
   render() {
     const fileMenu: MenuDescription = {
-      label: "File",
+      label: 'File',
       submenu: [
         {action: ActionIDs.fileNew},
         {action: ActionIDs.fileOpen},
-        {type: "separator"},
+        {type: 'separator'},
         {action: ActionIDs.fileImport},
-        {type: "separator"},
+        {type: 'separator'},
         {action: ActionIDs.fileSave},
         {action: ActionIDs.fileSaveAs},
         {
-          label: "Export",
-          submenu: formatRegistry.imageFormats.map(format => {
+          label: 'Export',
+          submenu: formatRegistry.pictureFormats.map(format => {
             return {
               action: `${ActionIDs.fileExport}:${format.mimeType}`,
               label: `${format.title}...`,
             }
           }),
         },
-        {type: "separator"},
+        {type: 'separator'},
         {action: ActionIDs.fileClose},
       ],
     }
@@ -84,15 +84,15 @@ class MenuBar {
         {action: ActionIDs.editDelete},
       ]
     }
-    if (process.platform == "win32") {
+    if (process.platform === 'win32') {
       editMenu.submenu!.push(
-        {type: "separator"},
+        {type: 'separator'},
         {action: ActionIDs.appPreferences},
       )
     }
 
     const selectionMenu: MenuDescription = {
-      label: "Selection",
+      label: 'Selection',
       submenu: [
         {action: ActionIDs.selectionSelectAll},
         {action: ActionIDs.selectionClear},
@@ -101,29 +101,29 @@ class MenuBar {
     }
 
     const layerMenu: MenuDescription = {
-      label: "Layer",
+      label: 'Layer',
       submenu: [
         {action: ActionIDs.layerAdd},
         {action: ActionIDs.layerAddGroup},
         {action: ActionIDs.layerGroup},
         {action: ActionIDs.layerRemove},
-        {type: "separator"},
+        {type: 'separator'},
         {action: ActionIDs.layerMerge},
-        {type: "separator"},
+        {type: 'separator'},
         {action: ActionIDs.layerClear},
         {action: ActionIDs.layerFill},
       ],
     }
 
     const canvasMenu: MenuDescription = {
-      label: "Canvas",
+      label: 'Canvas',
       submenu: [
         {action: ActionIDs.canvasChangeResolution},
-        {type: "separator"},
+        {type: 'separator'},
         {action: ActionIDs.canvasRotateLeft},
         {action: ActionIDs.canvasRotateRight},
         {action: ActionIDs.canvasRotate180},
-        {type: "separator"},
+        {type: 'separator'},
         {action: ActionIDs.canvasFlipHorizontally},
         {action: ActionIDs.canvasFlipVertically},
       ],

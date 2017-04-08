@@ -1,16 +1,16 @@
-import {reaction} from "mobx"
-import {Rect, Vec2, Transform} from "paintvec"
-import {ShapeModel, TextureDrawTarget, Shape, RectShape, Texture}  from "paintgl"
-import {context} from "../GLContext"
-import {drawTexture} from "../GLUtil"
-import Layer, {ImageLayer} from "../models/Layer"
-import TiledTexture, {Tile} from "../models/TiledTexture"
-import {ChangeLayerImageCommand} from "../commands/LayerCommand"
-import {renderer} from "../views/Renderer"
-import {Waypoint} from "./Waypoint"
-import {BrushPreset} from "./BrushPreset"
-import {appState} from "../app/AppState"
-const glsl = require("glslify")
+import {reaction} from 'mobx'
+import {ShapeModel, TextureDrawTarget, Shape, RectShape, Texture}  from 'paintgl'
+import {Rect, Vec2, Transform} from 'paintvec'
+import {appState} from '../app/AppState'
+import {ChangeLayerImageCommand} from '../commands/LayerCommand'
+import {context} from '../GLContext'
+import {drawTexture} from '../GLUtil'
+import Layer, {ImageLayer} from '../models/Layer'
+import TiledTexture, {Tile} from '../models/TiledTexture'
+import {renderer} from '../views/Renderer'
+import {BrushPreset} from './BrushPreset'
+import {Waypoint} from './Waypoint'
+const glsl = require('glslify')
 
 const brushShader = {
   vertex: glsl`
@@ -245,19 +245,19 @@ export class BrushRenderer {
   private brushModel: ShapeModel
   private drawTarget = new TextureDrawTarget(context)
   private dabShape = new RectShape(context, {rect: new Rect()})
-  private mixModel = new ShapeModel(context, {shape: this.dabShape, blendMode: "src", shader: watercolorShader})
-  private originalTexture = new Texture(context, {pixelType: "half-float"})
+  private mixModel = new ShapeModel(context, {shape: this.dabShape, blendMode: 'src', shader: watercolorShader})
+  private originalTexture = new Texture(context, {pixelType: 'half-float'})
   private originalDrawTarget = new TextureDrawTarget(context, this.originalTexture)
-  private shapeClipTexture = new Texture(context, {pixelType: "half-float", filter: "mipmap-nearest"})
+  private shapeClipTexture = new Texture(context, {pixelType: 'half-float', filter: 'mipmap-nearest'})
   private shapeClipDrawTarget = new TextureDrawTarget(context, this.shapeClipTexture)
-  private shapeModel = new ShapeModel(context, {shape: this.dabShape, blendMode: "src", shader: shapeShader})
-  private clipModel = new ShapeModel(context, {shape: this.dabShape, blendMode: "src", shader: clipShader})
+  private shapeModel = new ShapeModel(context, {shape: this.dabShape, blendMode: 'src', shader: shapeShader})
+  private clipModel = new ShapeModel(context, {shape: this.dabShape, blendMode: 'src', shader: clipShader})
 
   private sampleSize = 0
 
   constructor(public preset: BrushPreset) {
     this.brushShape = new Shape(context)
-    this.brushShape.setVec2Attributes("aCenter", [])
+    this.brushShape.setVec2Attributes('aCenter', [])
     this.brushModel = new ShapeModel(context, {shape: this.brushShape, shader: brushShader})
     setImmediate(() => {
       reaction(() => appState.currentPicture, picture => {
@@ -268,11 +268,11 @@ export class BrushRenderer {
           const beforeUndoRedo = () => {
             this.commit()
           }
-          picture.undoStack.on("beforeUndo", beforeUndoRedo)
-          picture.undoStack.on("beforeRedo", beforeUndoRedo)
+          picture.undoStack.on('beforeUndo', beforeUndoRedo)
+          picture.undoStack.on('beforeRedo', beforeUndoRedo)
           this.disconnectPicture = () => {
-            picture.undoStack.removeListener("beforeUndo", beforeUndoRedo)
-            picture.undoStack.removeListener("beforeRedo", beforeUndoRedo)
+            picture.undoStack.removeListener('beforeUndo', beforeUndoRedo)
+            picture.undoStack.removeListener('beforeRedo', beforeUndoRedo)
           }
         }
       })
@@ -314,7 +314,7 @@ export class BrushRenderer {
   }
 
   previewLayerTile(layer: Layer, tileKey: Vec2) {
-    if (this.layer && layer == this.layer) {
+    if (this.layer && layer === this.layer) {
       if (this.newTiledTexture.has(tileKey)) {
         return {tile: this.newTiledTexture.get(tileKey)}
       } else if (this.layer.tiledTexture.has(tileKey)) {
@@ -326,7 +326,7 @@ export class BrushRenderer {
   }
 
   get blendingEnabled() {
-    return this.preset.type == "normal" && this.preset.blending > 0
+    return this.preset.type === 'normal' && this.preset.blending > 0
   }
 
   start(layer: ImageLayer) {
@@ -334,7 +334,7 @@ export class BrushRenderer {
       this.clearCommitTimeout()
       this.clearCommitTimeout = undefined
     }
-    if (this.layer != layer) {
+    if (this.layer !== layer) {
       this.commit()
       this.layer = layer
     }
@@ -387,7 +387,7 @@ export class BrushRenderer {
     }
     this.layer = undefined
     const {picture} = layer
-    const command = new ChangeLayerImageCommand(picture, layer.path, "Brush", this.newTiledTexture, rect)
+    const command = new ChangeLayerImageCommand(picture, layer.path, 'Brush', this.newTiledTexture, rect)
     this.newTiledTexture = new TiledTexture()
     picture.undoStack.push(command)
   }
@@ -421,11 +421,11 @@ export class BrushRenderer {
     if (this.blendingEnabled) {
       for (let i = 0; i < waypoints.length; ++i) {
         const waypoint = waypoints[i]
-        this.shapeModel.uniforms["uCenter"] = waypoint.pos
-        this.shapeModel.uniforms["uPressure"] = waypoint.pressure
-        this.clipModel.uniforms["uCenter"] = waypoint.pos
-        this.clipModel.uniforms["uPressure"] = waypoint.pressure
-        this.mixModel.uniforms["uPressure"] = waypoint.pressure
+        this.shapeModel.uniforms['uCenter'] = waypoint.pos
+        this.shapeModel.uniforms['uPressure'] = waypoint.pressure
+        this.clipModel.uniforms['uCenter'] = waypoint.pos
+        this.clipModel.uniforms['uPressure'] = waypoint.pressure
+        this.mixModel.uniforms['uPressure'] = waypoint.pressure
 
         const topLeft = waypoint.pos.floor().sub(new Vec2(this.sampleSize / 2))
 
@@ -435,18 +435,18 @@ export class BrushRenderer {
             continue
           }
           const offset = key.mulScalar(Tile.width).sub(topLeft)
-          drawTexture(this.originalDrawTarget, tile.texture, {blendMode: "src", transform: Transform.translate(offset)})
+          drawTexture(this.originalDrawTarget, tile.texture, {blendMode: 'src', transform: Transform.translate(offset)})
         }
 
-        this.shapeModel.uniforms["uOriginalTexture"] = this.originalTexture
-        this.clipModel.uniforms["uOriginalTexture"] = this.originalTexture
+        this.shapeModel.uniforms['uOriginalTexture'] = this.originalTexture
+        this.clipModel.uniforms['uOriginalTexture'] = this.originalTexture
         this.shapeClipDrawTarget.draw(this.shapeModel)
         this.shapeClipDrawTarget.draw(this.clipModel)
 
         this.shapeClipTexture.generateMipmap()
 
-        this.mixModel.uniforms["uOriginalTexture"] = this.originalTexture
-        this.mixModel.uniforms["uShapeClipTexture"] = this.shapeClipTexture
+        this.mixModel.uniforms['uOriginalTexture'] = this.originalTexture
+        this.mixModel.uniforms['uShapeClipTexture'] = this.shapeClipTexture
 
         for (const key of TiledTexture.keysForRect(rect)) {
           const tile = this.prepareTile(key)
@@ -486,10 +486,10 @@ export class BrushRenderer {
       }
       this.brushShape.positions = positions
       this.brushShape.texCoords = texCoords
-      this.brushShape.setVec2Attributes("aCenter", centers)
+      this.brushShape.setVec2Attributes('aCenter', centers)
       this.brushShape.indices = indices
 
-      this.brushModel.blendMode = this.preset.type == "eraser" ? "dst-out" : (layer.preserveOpacity ? "src-atop" : "src-over")
+      this.brushModel.blendMode = this.preset.type === 'eraser' ? 'dst-out' : (layer.preserveOpacity ? 'src-atop' : 'src-over')
 
       for (const key of TiledTexture.keysForRect(rect)) {
         const tile = this.prepareTile(key)

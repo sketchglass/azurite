@@ -1,5 +1,5 @@
-import {Waypoint} from "./Waypoint"
-import {WaypointFilter, WaypointConsumer} from "./BrushPipeline"
+import {WaypointFilter, WaypointConsumer} from './BrushPipeline'
+import {Waypoint} from './Waypoint'
 
 export class WaypointCurveFilter implements WaypointFilter {
   lastWaypoints: Waypoint[] = []
@@ -15,7 +15,7 @@ export class WaypointCurveFilter implements WaypointFilter {
 
   nextWaypoint(waypoint: Waypoint) {
     const {lastWaypoints, brushSpacing} = this
-    if (lastWaypoints.length == 4) {
+    if (lastWaypoints.length === 4) {
       lastWaypoints.shift()
     }
     lastWaypoints.push(waypoint)
@@ -35,7 +35,7 @@ export class WaypointCurveFilter implements WaypointFilter {
 
     this.nextDabOffset = nextOffset
 
-    if (waypoints.length != 0) {
+    if (waypoints.length !== 0) {
       this.outlet.nextWaypoints(waypoints)
     }
   }
@@ -46,16 +46,16 @@ export class WaypointCurveFilter implements WaypointFilter {
       return
     }
     const {waypoints} = (() => {
-      if (lastWaypoints.length == 2) {
+      if (lastWaypoints.length === 2) {
         return Waypoint.subdivide(lastWaypoints[0], lastWaypoints[1], brushSpacing, this.nextDabOffset)
-      } else if (lastWaypoints.length == 3) {
+      } else if (lastWaypoints.length === 3) {
         return Waypoint.subdivideCurve(lastWaypoints[0], lastWaypoints[1], lastWaypoints[2], lastWaypoints[2], brushSpacing, this.nextDabOffset)
       } else {
         return Waypoint.subdivideCurve(lastWaypoints[1], lastWaypoints[2], lastWaypoints[3], lastWaypoints[3], brushSpacing, this.nextDabOffset)
       }
     })()
 
-    if (waypoints.length != 0) {
+    if (waypoints.length !== 0) {
       this.outlet.nextWaypoints(waypoints)
     }
     this.outlet.endWaypoint()

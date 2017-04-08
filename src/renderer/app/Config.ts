@@ -1,9 +1,9 @@
-import * as fs from "fs"
-import * as path from "path"
-import {remote} from "electron"
-const deepAssign = require('deep-assign');
-import {BrushPresetData} from "../brush/BrushPreset"
-import {ToolConfigData} from "../tools/Tool"
+import {remote} from 'electron'
+import * as fs from 'fs'
+import * as path from 'path'
+const deepAssign = require('deep-assign')
+import {BrushPresetData} from '../brush/BrushPreset'
+import {ToolConfigData} from '../tools/Tool'
 
 interface RectData {
   x: number
@@ -46,14 +46,14 @@ class Config {
     },
     tools: {
     },
-    currentTool: "",
+    currentTool: '',
     color: {h: 0, s: 0, v: 0},
     palette: [],
     files: [],
     brushPresets: [],
     currentBrushPreset: 0,
   }
-  path = path.join(remote.app.getPath("userData"), "config.json")
+  path = path.join(remote.app.getPath('userData'), 'config.json')
 
   get values() {
     return this._values
@@ -66,7 +66,7 @@ class Config {
 
   constructor() {
     try {
-      const data = fs.readFileSync(this.path, "utf8")
+      const data = fs.readFileSync(this.path, 'utf8')
       deepAssign(this.values, JSON.parse(data))
     } catch (e) {
     }

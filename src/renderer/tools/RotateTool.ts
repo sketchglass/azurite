@@ -1,27 +1,27 @@
-import {Vec2} from "paintvec"
+import {Vec2} from 'paintvec'
+import KeyInput from '../../lib/KeyInput'
+import {renderer} from '../views/Renderer'
 import Tool, {ToolPointerEvent} from './Tool'
-import {renderer} from "../views/Renderer"
-import ToolIDs from "./ToolIDs"
-import KeyInput from "../../lib/KeyInput"
+import ToolIDs from './ToolIDs'
 
 export default
 class RotateTool extends Tool {
   readonly id = ToolIDs.rotate
-  readonly title = "Rotate"
+  readonly title = 'Rotate'
   get cursor() {
-    return "ew-resize" // TODO: use more rotate-like cursor
+    return 'ew-resize' // TODO: use more rotate-like cursor
   }
   private dragging = false
   private originalAngle = 0
   private originalRotation = 0
 
-  tempShortcut = new KeyInput(["Shift"], "Space")
+  tempShortcut = new KeyInput(['Shift'], 'Space')
 
   start(ev: ToolPointerEvent) {
     if (!this.picture) {
       return
     }
-    if (ev.button == 2) {
+    if (ev.button === 2) {
       this.picture.navigation.resetRotation()
       return
     }

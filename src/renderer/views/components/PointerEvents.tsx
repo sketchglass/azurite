@@ -1,4 +1,4 @@
-import ElementContainer from "./ElementContainer"
+import ElementContainer from './ElementContainer'
 
 interface PointerEventsProps {
   onPointerDown?: (ev: PointerEvent) => void
@@ -10,16 +10,16 @@ export default
 class PointerEvents extends ElementContainer<PointerEventsProps, {}> {
   componentDidMount() {
     if (this.element) {
-      this.element.addEventListener("pointerup", this.onPointerUp)
-      this.element.addEventListener("pointerdown", this.onPointerDown)
-      this.element.addEventListener("pointermove", this.onPointerMove)
+      this.element.addEventListener('pointerup', this.onPointerUp)
+      this.element.addEventListener('pointerdown', this.onPointerDown)
+      this.element.addEventListener('pointermove', this.onPointerMove)
     }
   }
   componentWillUnmount() {
     if (this.element) {
-      this.element.removeEventListener("pointerup", this.onPointerUp)
-      this.element.removeEventListener("pointerdown", this.onPointerDown)
-      this.element.removeEventListener("pointermove", this.onPointerMove)
+      this.element.removeEventListener('pointerup', this.onPointerUp)
+      this.element.removeEventListener('pointerdown', this.onPointerDown)
+      this.element.removeEventListener('pointermove', this.onPointerMove)
     }
   }
   onPointerUp = (e: PointerEvent) => {

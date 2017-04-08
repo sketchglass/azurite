@@ -1,9 +1,9 @@
-import * as React from "react"
-import {observable, computed, action} from "mobx"
-import {Vec2, Rect, Transform} from "paintvec"
+import {observable, computed, action} from 'mobx'
+import {Vec2, Rect, Transform} from 'paintvec'
+import * as React from 'react'
+import {UndoStack, UndoCommand} from '../models/UndoStack'
+import {renderer} from '../views/Renderer'
 import Tool, {ToolPointerEvent} from './Tool'
-import {UndoStack, UndoCommand} from "../models/UndoStack"
-import {renderer} from "../views/Renderer"
 
 export
 enum DragType {
@@ -28,7 +28,7 @@ class TransformChangeCommand implements UndoCommand {
     public newTranslation: Vec2, public newRect: Rect, public newAdditionalTransform: Transform
   ) {}
 
-  title = "Change Transform"
+  title = 'Change Transform'
 
   redo() {
     this.tool.translation = this.newTranslation
@@ -253,7 +253,7 @@ abstract class RectMoveTool extends Tool {
   }
 
   end() {
-    if (this.dragType != DragType.None && this.modal) {
+    if (this.dragType !== DragType.None && this.modal) {
       const command = new TransformChangeCommand(
         this,
         this.lastTranslation, this.lastRect, this.lastAdditionalTransform,
@@ -267,16 +267,16 @@ abstract class RectMoveTool extends Tool {
   @action keyDown(ev: React.KeyboardEvent<HTMLElement>) {
     super.keyDown(ev)
     switch (ev.key) {
-      case "ArrowLeft":
+      case 'ArrowLeft':
         this.translation = this.translation.add(new Vec2(-1, 0))
         break
-      case "ArrowRight":
+      case 'ArrowRight':
         this.translation = this.translation.add(new Vec2(1, 0))
         break
-      case "ArrowUp":
+      case 'ArrowUp':
         this.translation = this.translation.add(new Vec2(0, -1))
         break
-      case "ArrowDown":
+      case 'ArrowDown':
         this.translation = this.translation.add(new Vec2(0, 1))
         break
     }

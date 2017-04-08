@@ -1,7 +1,7 @@
-import * as React from "react"
-import {observer} from "mobx-react"
-import {brushPresetManager} from "../app/BrushPresetManager"
-import RangeSlider from "./components/RangeSlider"
+import {observer} from 'mobx-react'
+import * as React from 'react'
+import {brushPresetManager} from '../app/BrushPresetManager'
+import RangeSlider from './components/RangeSlider'
 
 function PercentSlider(props: {value: number, onChange: (value: number) => void}) {
   const onPercentChange = (value: number) => {
@@ -19,7 +19,7 @@ class BrushSettings extends React.Component<{}, {}> {
       return <table className="BrushSettings" />
     }
     const onEraserModeChange = (ev: React.FormEvent<HTMLInputElement>) => {
-      preset.type = ev.currentTarget.checked ? "eraser" : "normal"
+      preset.type = ev.currentTarget.checked ? 'eraser' : 'normal'
     }
     return (
       <table className="BrushSettings">
@@ -50,7 +50,7 @@ class BrushSettings extends React.Component<{}, {}> {
           </tr>
           <tr>
             <td>Eraser</td>
-            <td><label><input type="checkbox" onChange={onEraserModeChange} checked={preset.type == "eraser"} /> Eraser Mode</label></td>
+            <td><label><input type="checkbox" onChange={onEraserModeChange} checked={preset.type === 'eraser'} /> Eraser Mode</label></td>
           </tr>
           <tr>
             <td>Stabilizing</td>

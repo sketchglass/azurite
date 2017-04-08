@@ -1,9 +1,9 @@
-import React = require("react")
-import {observable} from "mobx"
-import {observer} from "mobx-react"
-import DialogContainer from "./DialogContainer"
-import KeyInput, {KeyInputData} from "../../../lib/KeyInput"
-import ShortcutEdit from "../components/ShortcutEdit"
+import React = require('react')
+import {observable} from 'mobx'
+import {observer} from 'mobx-react'
+import KeyInput, {KeyInputData} from '../../../lib/KeyInput'
+import ShortcutEdit from '../components/ShortcutEdit'
+import DialogContainer from './DialogContainer'
 
 export interface ToolShortcutsDialogData {
   noTemp?: boolean

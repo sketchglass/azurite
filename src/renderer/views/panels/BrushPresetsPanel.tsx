@@ -1,21 +1,21 @@
-import * as React from "react"
-import {action, observable, reaction} from "mobx"
-import {observer} from "mobx-react"
-import * as classNames from "classnames"
-import {Tree, TreeNode, NodeInfo} from "react-draggable-tree"
-import "react-draggable-tree/lib/index.css"
-import {remote} from "electron"
+import * as classNames from 'classnames'
+import {remote} from 'electron'
+import {action, observable, reaction} from 'mobx'
+import {observer} from 'mobx-react'
+import * as React from 'react'
+import {Tree, TreeNode, NodeInfo} from 'react-draggable-tree'
+import 'react-draggable-tree/lib/index.css'
 const {Menu} = remote
-import KeyInput from "../../../lib/KeyInput"
-import {BrushPreset} from "../../brush/BrushPreset"
-import {brushPresetManager} from "../../app/BrushPresetManager"
-import {toolManager} from "../../app/ToolManager"
-import {defaultBrushPresets} from "../../brush/DefaultBrushPresets"
-import BrushTool from "../../tools/BrushTool"
-import SVGIcon from "../components/SVGIcon"
-import ClickToEdit from "../components/ClickToEdit"
-import {dialogLauncher} from "../dialogs/DialogLauncher"
-import "./BrushPresetsPanel.css"
+import KeyInput from '../../../lib/KeyInput'
+import {brushPresetManager} from '../../app/BrushPresetManager'
+import {toolManager} from '../../app/ToolManager'
+import {BrushPreset} from '../../brush/BrushPreset'
+import {defaultBrushPresets} from '../../brush/DefaultBrushPresets'
+import BrushTool from '../../tools/BrushTool'
+import ClickToEdit from '../components/ClickToEdit'
+import SVGIcon from '../components/SVGIcon'
+import {dialogLauncher} from '../dialogs/DialogLauncher'
+import './BrushPresetsPanel.css'
 
 interface BrushPresetNode extends TreeNode {
   preset: BrushPreset
@@ -62,7 +62,7 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
     })
     const root: TreeNode = {key: -1, children}
     const brushToolActive = toolManager.currentTool instanceof BrushTool
-    const className = classNames("BrushPresetsPanel", {"BrushPresetsPanel-brushToolActive": brushToolActive})
+    const className = classNames('BrushPresetsPanel', {'BrushPresetsPanel-brushToolActive': brushToolActive})
     return (
       <div className={className}>
         <BrushPresetTree
@@ -123,15 +123,15 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
       }
     })
     const removePresets = action(() => {
-      const selectedIndices = Array.from(this.selectedKeys).map(key => brushPresetManager.presets.findIndex(p => p.internalKey == key))
+      const selectedIndices = Array.from(this.selectedKeys).map(key => brushPresetManager.presets.findIndex(p => p.internalKey === key))
       selectedIndices.sort()
       for (let i = selectedIndices.length - 1; i >= 0; --i) {
         brushPresetManager.presets.splice(selectedIndices[i], 1)
       }
     })
     const menuTemplate: Electron.MenuItemOptions[] = [
-      {label: "Add", submenu: addPresetItems},
-      {label: "Remove", click: removePresets}
+      {label: 'Add', submenu: addPresetItems},
+      {label: 'Remove', click: removePresets}
     ]
     if (index < brushPresetManager.presets.length) {
       const preset = brushPresetManager.presets[index]
@@ -147,8 +147,8 @@ export default class BrushPresetsPanel extends React.Component<{}, {}> {
         }
       })
       menuTemplate.push(
-        {type: "separator"},
-        {label: "Shortcut...", click: editShortcut},
+        {type: 'separator'},
+        {label: 'Shortcut...', click: editShortcut},
       )
     }
     const menu = Menu.buildFromTemplate(menuTemplate)

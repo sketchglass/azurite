@@ -1,6 +1,5 @@
-import {PictureAction} from "./Action"
-import ActionIDs from "./ActionIDs"
-import {addAction} from "../app/ActionRegistry"
+import {addAction} from '../app/ActionRegistry'
+import {appState} from '../app/AppState'
 import {
   MergeLayerCommand,
   AddLayerCommand,
@@ -8,19 +7,20 @@ import {
   RemoveLayerCommand,
   ClearLayerCommand,
   FillLayerCommand,
-} from "../commands/LayerCommand"
-import {ImageLayer, GroupLayer} from "../models/Layer"
-import {appState} from "../app/AppState"
+} from '../commands/LayerCommand'
+import {ImageLayer, GroupLayer} from '../models/Layer'
+import {PictureAction} from './Action'
+import ActionIDs from './ActionIDs'
 
 @addAction
 export class AddLayerAction extends PictureAction {
   id = ActionIDs.layerAdd
-  title = "Add Layer"
+  title = 'Add Layer'
 
   run() {
     const {picture} = this
     if (picture) {
-      picture.undoStack.push(new AddLayerCommand(picture, picture.insertPath, new ImageLayer(picture, {name: "Layer"})))
+      picture.undoStack.push(new AddLayerCommand(picture, picture.insertPath, new ImageLayer(picture, {name: 'Layer'})))
     }
   }
 }
@@ -28,12 +28,12 @@ export class AddLayerAction extends PictureAction {
 @addAction
 export class AddGroupAction extends PictureAction {
   id = ActionIDs.layerAddGroup
-  title = "Add Group"
+  title = 'Add Group'
 
   run() {
     const {picture} = this
     if (picture) {
-      picture.undoStack.push(new AddLayerCommand(picture, picture.insertPath, new GroupLayer(picture, {name: "Group"}, [])))
+      picture.undoStack.push(new AddLayerCommand(picture, picture.insertPath, new GroupLayer(picture, {name: 'Group'}, [])))
     }
   }
 }
@@ -41,7 +41,7 @@ export class AddGroupAction extends PictureAction {
 @addAction
 export class GroupLayerAction extends PictureAction {
   id = ActionIDs.layerGroup
-  title = "Group Layers"
+  title = 'Group Layers'
 
   run() {
     const {picture} = this
@@ -54,7 +54,7 @@ export class GroupLayerAction extends PictureAction {
 @addAction
 export class RemoveLayerAction extends PictureAction {
   id = ActionIDs.layerRemove
-  title = "Remove Layer"
+  title = 'Remove Layer'
 
   run() {
     const {picture} = this
@@ -67,7 +67,7 @@ export class RemoveLayerAction extends PictureAction {
 @addAction
 export class MergeLayerAction extends PictureAction {
   id = ActionIDs.layerMerge
-  title = "Merge Layers"
+  title = 'Merge Layers'
 
   get enabled() {
     const {picture} = this
@@ -76,7 +76,7 @@ export class MergeLayerAction extends PictureAction {
       if (selectedLayers.length > 1) {
         return true
       }
-      if (selectedLayers.length == 1 && selectedLayers[0] instanceof GroupLayer) {
+      if (selectedLayers.length === 1 && selectedLayers[0] instanceof GroupLayer) {
         return true
       }
     }
@@ -97,7 +97,7 @@ export class MergeLayerAction extends PictureAction {
 @addAction
 export class ClearLayerAction extends PictureAction {
   id = ActionIDs.layerClear
-  title = "Clear Layer"
+  title = 'Clear Layer'
 
   run() {
     const {picture} = this
@@ -110,7 +110,7 @@ export class ClearLayerAction extends PictureAction {
 @addAction
 export class FillLayerAction extends PictureAction {
   id = ActionIDs.layerFill
-  title = "Fill Layer"
+  title = 'Fill Layer'
 
   run() {
     const {picture} = this

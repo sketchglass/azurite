@@ -1,6 +1,6 @@
-import * as React from "react"
-import PointerEvents from "./PointerEvents"
-import "./DraggablePanel.css"
+import * as React from 'react'
+import './DraggablePanel.css'
+import PointerEvents from './PointerEvents'
 
 interface DraggablePanelProps {
   label: string
@@ -42,7 +42,7 @@ class Panel extends React.Component<PanelProps, void> {
     this.window.style.width = `${width}px`
     this.window.style.left = `${left}px`
     this.window.style.top = `${top}px`
-    this.window.style.zIndex = zIndex ? `${zIndex}` : "auto"
+    this.window.style.zIndex = zIndex ? `${zIndex}` : 'auto'
   }
   onDrag = (e: PointerEvent) => {
     const {pageX, pageY} = e
@@ -103,7 +103,7 @@ const PreviewPanel = (props: PreviewState) => {
     width: `${props.width}px`,
     height: `${props.height}px`,
     zIndex: 100,
-    visibility: props.visibility ? "visible" : "hidden"
+    visibility: props.visibility ? 'visible' : 'hidden'
   }
   return (
     <div style={style} className="PreviewPanel">
@@ -131,7 +131,7 @@ export class DraggablePanelContainer extends React.Component<DraggablePanelConta
   previewState: PreviewState
   componentWillMount() {
     React.Children.forEach(this.props.children!, (_child, i) => {
-      if (_child["props"] && _child["props"]["label"]) {
+      if (_child['props'] && _child['props']['label']) {
         const child = _child as React.ReactElement<DraggablePanelProps & { children?: React.ReactNode }>
         const order = i
         this.childrenState[i] = {
@@ -208,7 +208,7 @@ export class DraggablePanelContainer extends React.Component<DraggablePanelConta
   }
   render() {
     const children = React.Children.map(this.props.children!, (_child, i) => {
-      if (_child["props"] && _child["props"]["label"]) {
+      if (_child['props'] && _child['props']['label']) {
         const child = _child as React.ReactElement<DraggablePanelProps & { children?: React.ReactNode }>
         const currentIndex = i
         const result = (

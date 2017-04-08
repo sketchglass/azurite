@@ -1,9 +1,9 @@
-import {remote} from "electron"
-import Action from "./Action"
-import ActionIDs from "./ActionIDs"
-import {addAction} from "../app/ActionRegistry"
-import {currentFocus} from "../views/CurrentFocus"
-import {appState} from "../app/AppState"
+import {remote} from 'electron'
+import {addAction} from '../app/ActionRegistry'
+import {appState} from '../app/AppState'
+import {currentFocus} from '../views/CurrentFocus'
+import Action from './Action'
+import ActionIDs from './ActionIDs'
 
 @addAction
 export class EditUndoAction extends Action {
@@ -15,7 +15,7 @@ export class EditUndoAction extends Action {
         return `Undo ${undoCommand.title}`
       }
     }
-    return "Undo"
+    return 'Undo'
   }
   get enabled() {
     if (currentFocus.isTextInput) {
@@ -44,7 +44,7 @@ export class EditRedoAction extends Action {
         return `Redo ${redoCommand.title}`
       }
     }
-    return "Redo"
+    return 'Redo'
   }
   get enabled() {
     if (currentFocus.isTextInput) {
@@ -66,7 +66,7 @@ export class EditRedoAction extends Action {
 @addAction
 export class EditCutAction extends Action {
   id = ActionIDs.editCut
-  title = "Cut"
+  title = 'Cut'
   enabled = true
   run() {
     remote.getCurrentWebContents().cut()
@@ -76,7 +76,7 @@ export class EditCutAction extends Action {
 @addAction
 export class EditCopyAction extends Action {
   id = ActionIDs.editCopy
-  title = "Copy"
+  title = 'Copy'
   enabled = true
   run() {
     remote.getCurrentWebContents().copy()
@@ -86,7 +86,7 @@ export class EditCopyAction extends Action {
 @addAction
 export class EditPasteAction extends Action {
   id = ActionIDs.editPaste
-  title = "Paste"
+  title = 'Paste'
   enabled = true
   run() {
     remote.getCurrentWebContents().paste()
@@ -96,7 +96,7 @@ export class EditPasteAction extends Action {
 @addAction
 export class EditDeleteAction extends Action {
   id = ActionIDs.editDelete
-  title = "Delete"
+  title = 'Delete'
   enabled = true
   run() {
     remote.getCurrentWebContents().delete()

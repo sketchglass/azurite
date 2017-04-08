@@ -20,15 +20,15 @@
             "check-whitespace"
         ],
         "quotemark": [
-            false,
-            "double"
+            true,
+            "single"
         ],
         "semicolon": [
-            false,
-            "always"
+            true,
+            "never"
         ],
         "triple-equals": [
-            false,
+            true,
             "allow-null-check",
             "allow-undefined-check"
         ],
@@ -53,6 +53,13 @@
             "check-operator",
             "check-separator",
             "check-type"
+        ],
+        "ordered-imports": [
+            true,
+            {
+                "import-sources-order": "case-insensitive",
+                "named-imports-order": "any"
+            }
         ]
     }
 }

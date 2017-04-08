@@ -1,15 +1,15 @@
+import * as msgpack from 'msgpack-lite'
 import * as assert from 'power-assert'
-import Picture from "../../renderer/models/Picture"
-import Layer, {GroupLayer, ImageLayer} from "../../renderer/models/Layer"
-import IndexPath from "../../lib/IndexPath"
-import * as msgpack from "msgpack-lite"
+import IndexPath from '../../lib/IndexPath'
+import Layer, {GroupLayer, ImageLayer} from '../../renderer/models/Layer'
+import Picture from '../../renderer/models/Picture'
 
 function createImageLayer(picture: Picture) {
   // TODO: set tiled texture data
   return new ImageLayer(picture, {
-    name: "Foobar",
+    name: 'Foobar',
     visible: false,
-    blendMode: "plus",
+    blendMode: 'plus',
     opacity: 0.9,
     preserveOpacity: true,
     clippingGroup: true
@@ -18,9 +18,9 @@ function createImageLayer(picture: Picture) {
 
 function createGroupLayer(picture: Picture, children: Layer[]) {
   return new GroupLayer(picture, {
-    name: "Nyan",
+    name: 'Nyan',
     visible: false,
-    blendMode: "multiply",
+    blendMode: 'multiply',
     opacity: 0.8,
     preserveOpacity: true,
     clippingGroup: true
@@ -37,7 +37,7 @@ function compareLayers(actual: Layer, expected: Layer) {
   assert(actual.preserveOpacity === expected.preserveOpacity)
   assert(actual.clippingGroup === expected.clippingGroup)
   if (actual instanceof ImageLayer && expected instanceof ImageLayer) {
-    assert(actual.tiledTexture != expected.tiledTexture)
+    assert(actual.tiledTexture !== expected.tiledTexture)
     assert.deepEqual(msgpack.encode(actual.tiledTexture.toData()), msgpack.encode(expected.tiledTexture.toData()))
   }
   if (actual instanceof GroupLayer && expected instanceof GroupLayer) {
@@ -48,7 +48,7 @@ function compareLayers(actual: Layer, expected: Layer) {
   }
 }
 
-describe("ImageLayer", () => {
+describe('ImageLayer', () => {
   let picture: Picture
   let layer: ImageLayer
   beforeEach(() => {
@@ -56,26 +56,26 @@ describe("ImageLayer", () => {
     layer = createImageLayer(picture)
   })
 
-  describe("constructor", () => {
-    it("sets layer props correctly", () => {
-      assert(layer.name == "Foobar")
-      assert(layer.visible == false)
-      assert(layer.blendMode == "plus")
-      assert(layer.opacity == 0.9)
-      assert(layer.preserveOpacity == true)
-      assert(layer.clippingGroup == true)
+  describe('constructor', () => {
+    it('sets layer props correctly', () => {
+      assert(layer.name === 'Foobar')
+      assert(layer.visible === false)
+      assert(layer.blendMode === 'plus')
+      assert(layer.opacity === 0.9)
+      assert(layer.preserveOpacity === true)
+      assert(layer.clippingGroup === true)
     })
   })
 
-  describe("clone", () => {
-    it("clones layer", () => {
+  describe('clone', () => {
+    it('clones layer', () => {
       const cloned = layer.clone()
       compareLayers(cloned, layer)
     })
   })
 
-  describe("toData/fromData", () => {
-    it("converts layer <-> data", () => {
+  describe('toData/fromData', () => {
+    it('converts layer <-> data', () => {
       const data = layer.toData()
       const cloned = ImageLayer.fromData(picture, data)
       compareLayers(cloned, layer)
@@ -83,7 +83,7 @@ describe("ImageLayer", () => {
   })
 })
 
-describe("GroupLayer", () => {
+describe('GroupLayer', () => {
   let picture: Picture
   let layer: GroupLayer
 
@@ -99,23 +99,23 @@ describe("GroupLayer", () => {
     ])
   })
 
-  describe("clone", () => {
-    it("deep clones layer", () => {
+  describe('clone', () => {
+    it('deep clones layer', () => {
       const cloned = layer.clone()
       compareLayers(layer, cloned)
     })
   })
 
-  describe("toData/fromData", () => {
-    it("convers layer <-> data", () => {
+  describe('toData/fromData', () => {
+    it('convers layer <-> data', () => {
       const data = layer.toData()
       const cloned = GroupLayer.fromData(picture, data)
       compareLayers(layer, cloned)
     })
   })
 
-  describe("forEachDescendant", () => {
-    it("iterates descendant", () => {
+  describe('forEachDescendant', () => {
+    it('iterates descendant', () => {
       let layers: Layer[] = []
       layer.forEachDescendant(l => layers.push(l))
       assert.deepEqual(layers, [
@@ -127,8 +127,8 @@ describe("GroupLayer", () => {
       ])
     })
   })
-  describe("descendantFromPath", () => {
-    it("finds describe from path", () => {
+  describe('descendantFromPath', () => {
+    it('finds describe from path', () => {
       assert(layer.descendantForPath(new IndexPath([])) === layer)
       assert(layer.descendantForPath(new IndexPath([0])) === layer.children[0])
       assert(layer.descendantForPath(new IndexPath([1, 1])) === (layer.children[1] as GroupLayer).children[1])

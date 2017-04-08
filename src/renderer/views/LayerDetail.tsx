@@ -1,20 +1,20 @@
-import {action} from "mobx"
-import * as React from "react"
-import {observer} from "mobx-react"
-import Layer, {LayerBlendMode} from "../models/Layer"
-import RangeSlider from "./components/RangeSlider"
-import {ChangeLayerPropsCommand} from "../commands/LayerCommand"
+import {action} from 'mobx'
+import {observer} from 'mobx-react'
+import * as React from 'react'
+import {ChangeLayerPropsCommand} from '../commands/LayerCommand'
+import Layer, {LayerBlendMode} from '../models/Layer'
+import RangeSlider from './components/RangeSlider'
 
 const blendModes: LayerBlendMode[] = [
-  "normal",
-  "plus",
-  "multiply"
+  'normal',
+  'plus',
+  'multiply'
 ]
 
 const blendModeTexts = new Map<LayerBlendMode, string>([
-  ["normal", "Normal"],
-  ["plus", "Plus"],
-  ["multiply", "Multiply"],
+  ['normal', 'Normal'],
+  ['plus', 'Plus'],
+  ['multiply', 'Multiply'],
 ])
 
 interface LayerDetailProps {
@@ -30,7 +30,7 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
     if (layer) {
       const {picture} = layer
       const blendMode = (e.target as HTMLSelectElement).value as LayerBlendMode
-      picture.undoStack.push(new ChangeLayerPropsCommand(picture, layer.path, "Change Layer Blend Mode", {blendMode}))
+      picture.undoStack.push(new ChangeLayerPropsCommand(picture, layer.path, 'Change Layer Blend Mode', {blendMode}))
     }
   })
   onOpaictyChangeBegin = action(() => {
@@ -49,7 +49,7 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
       const {picture} = layer
       const opacity = value / 100
       layer.opacity = this.oldOpacity
-      picture.undoStack.push(new ChangeLayerPropsCommand(picture, layer.path, "Change Layer Opacity", {opacity}))
+      picture.undoStack.push(new ChangeLayerPropsCommand(picture, layer.path, 'Change Layer Opacity', {opacity}))
     }
   })
   onPreserveOpacityChange = action((e: React.FormEvent<HTMLInputElement>) => {
@@ -57,7 +57,7 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
     if (layer) {
       const {picture} = layer
       const preserveOpacity = (e.target as HTMLInputElement).checked
-      picture.undoStack.push(new ChangeLayerPropsCommand(picture, layer.path, "Change Layer Preserve Opacity", {preserveOpacity}))
+      picture.undoStack.push(new ChangeLayerPropsCommand(picture, layer.path, 'Change Layer Preserve Opacity', {preserveOpacity}))
     }
   })
   onClippingGroupChange = action((e: React.FormEvent<HTMLInputElement>) => {
@@ -65,13 +65,13 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
     if (layer) {
       const {picture} = layer
       const clippingGroup = (e.target as HTMLInputElement).checked
-      picture.undoStack.push(new ChangeLayerPropsCommand(picture, layer.path, "Change Layer Clipping Group", {clippingGroup}))
+      picture.undoStack.push(new ChangeLayerPropsCommand(picture, layer.path, 'Change Layer Clipping Group', {clippingGroup}))
     }
   })
 
   render() {
     const {layer} = this.props
-    const blendMode = layer ? layer.blendMode : "normal"
+    const blendMode = layer ? layer.blendMode : 'normal'
     const opacity = layer ? layer.opacity : 1
     const preserveOpacity = layer ? layer.preserveOpacity : false
     const clippingGroup = layer ? layer.clippingGroup : false

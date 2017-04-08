@@ -1,6 +1,6 @@
-import * as React from "react"
-import {remote} from "electron"
-import "./DialogTitleBar.css"
+import {remote} from 'electron'
+import * as React from 'react'
+import './DialogTitleBar.css'
 
 export default
 function DialogTitleBar(props: {title: string}) {

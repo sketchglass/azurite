@@ -1,12 +1,12 @@
-import * as path from "path"
-import {observable, computed, reaction} from "mobx"
-import {Vec2, Rect} from "paintvec"
-import Layer, {LayerData, ImageLayer, GroupLayer} from "./Layer"
-import PictureBlender from "../services/PictureBlender"
-import {UndoStack} from "./UndoStack"
-import {Navigation} from "./Navigation"
-import Selection from "./Selection"
-import IndexPath from "../../lib/IndexPath"
+import {observable, computed, reaction} from 'mobx'
+import {Vec2, Rect} from 'paintvec'
+import * as path from 'path'
+import IndexPath from '../../lib/IndexPath'
+import PictureBlender from '../services/PictureBlender'
+import Layer, {LayerData, GroupLayer} from './Layer'
+import {Navigation} from './Navigation'
+import Selection from './Selection'
+import {UndoStack} from './UndoStack'
 
 export
 interface PictureData {
@@ -43,7 +43,7 @@ class Picture {
 
   selection: Selection
 
-  readonly rootLayer = new GroupLayer(this, "root", [])
+  readonly rootLayer = new GroupLayer(this, 'root', [])
   readonly selectedLayers = observable<Layer>([])
   readonly blender = new PictureBlender(this)
   @computed get layers() {
@@ -54,13 +54,13 @@ class Picture {
   readonly navigation = new Navigation()
 
   @observable lastUpdate: PictureUpdate = {}
-  @observable filePath = ""
+  @observable filePath = ''
   @observable edited = false
   @computed get fileName() {
     if (this.filePath) {
       return path.basename(this.filePath)
     } else {
-      return "Untitled"
+      return 'Untitled'
     }
   }
 
@@ -68,10 +68,6 @@ class Picture {
     this.dimension = dimension
 
     this.selection = new Selection(this.size)
-
-    const defaultLayer = new ImageLayer(this, {name: "Layer"})
-    this.layers.push(defaultLayer)
-    this.selectedLayers.push(defaultLayer)
 
     reaction(() => this.lastUpdate, update => {
       if (update.rect) {
@@ -114,11 +110,11 @@ class Picture {
   spliceLayers(path: IndexPath, count: number, ...layers: Layer[]) {
     const parentPath = path.parent
     if (!parentPath) {
-      throw new Error("invalid path")
+      throw new Error('invalid path')
     }
     const parent = this.layerForPath(parentPath)
     if (!(parent && parent instanceof GroupLayer)) {
-      throw new Error("invalid path")
+      throw new Error('invalid path')
     }
     return parent.children.splice(path.last, count, ...layers)
   }

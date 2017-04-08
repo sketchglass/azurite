@@ -1,9 +1,9 @@
-import {Vec2, Transform} from "paintvec"
-import {UndoCommand} from "../models/UndoStack"
-import Picture, {PictureDimension} from "../models/Picture"
-import Selection from "../models/Selection"
-import Layer, {ImageLayer} from "../models/Layer"
-import {TransformLayerCommand} from "./LayerCommand"
+import {Vec2, Transform} from 'paintvec'
+import Layer, {ImageLayer} from '../models/Layer'
+import Picture, {PictureDimension} from '../models/Picture'
+import Selection from '../models/Selection'
+import {UndoCommand} from '../models/UndoStack'
+import {TransformLayerCommand} from './LayerCommand'
 
 function transformPicture(picture: Picture, newSize: Vec2, transform: Transform) {
   picture.forEachLayer(layer => {
@@ -21,15 +21,15 @@ function transformPicture(picture: Picture, newSize: Vec2, transform: Transform)
 
 export
 class FlipPictureCommand {
-  title = this.orientation == "horizontal" ? "Flip Canvas Horizontally" : "Flip Canvas Vertically"
+  title = this.orientation === 'horizontal' ? 'Flip Canvas Horizontally' : 'Flip Canvas Vertically'
 
-  constructor(public picture: Picture, public orientation: "horizontal"|"vertical") {
+  constructor(public picture: Picture, public orientation: 'horizontal'|'vertical') {
   }
 
   flipPicture() {
     const {width, height} = this.picture.size
     let transform: Transform
-    if (this.orientation == "horizontal") {
+    if (this.orientation === 'horizontal') {
       // x' = width - x
       // y' = y
       transform = new Transform(-1, 0, 0, 0, 1, 0, width, 0, 1)
@@ -51,15 +51,15 @@ class FlipPictureCommand {
 
 export
 class Rotate90PictureCommand {
-  title = this.direction == "left" ? "Rotate Canvas 90° Left" : "Rotate Canvas 90° Right"
+  title = this.direction === 'left' ? 'Rotate Canvas 90° Left' : 'Rotate Canvas 90° Right'
 
-  constructor(public picture: Picture, public direction: "left"|"right") {
+  constructor(public picture: Picture, public direction: 'left'|'right') {
   }
 
-  rotatePicture(direction: "left"|"right") {
+  rotatePicture(direction: 'left'|'right') {
     const {width, height} = this.picture.size
     let transform: Transform
-    if (direction == "left") {
+    if (direction === 'left') {
       // x' = y
       // y' = width - x
       transform = new Transform(0, -1, 0, 1, 0, 0, 0, width, 1)
@@ -72,7 +72,7 @@ class Rotate90PictureCommand {
   }
 
   undo() {
-    this.rotatePicture(this.direction == "left" ? "right" : "left")
+    this.rotatePicture(this.direction === 'left' ? 'right' : 'left')
   }
   redo() {
     this.rotatePicture(this.direction)
@@ -81,7 +81,7 @@ class Rotate90PictureCommand {
 
 export
 class Rotate180PictureCommand {
-  title = "Rotate Canvas 180°"
+  title = 'Rotate Canvas 180°'
 
   constructor(public picture: Picture) {
   }
@@ -102,7 +102,7 @@ class Rotate180PictureCommand {
 
 export
 class ChangePictureResolutionCommand {
-  title = "Change Canvas Resolution"
+  title = 'Change Canvas Resolution'
   oldDimension: PictureDimension
   transformCommands: UndoCommand[] = []
   oldSelection: Selection
@@ -124,7 +124,7 @@ class ChangePictureResolutionCommand {
     const dimension = this.newDimension
     this.transformCommands = []
 
-    if (oldDimension.width != dimension.width || oldDimension.height != dimension.height) {
+    if (oldDimension.width !== dimension.width || oldDimension.height !== dimension.height) {
       const transform = Transform.scale(new Vec2(dimension.width / oldDimension.width, dimension.height / oldDimension.height))
       this.picture.forEachLayer(layer => {
         const transformCommand = new TransformLayerCommand(this.picture, layer.path, transform, false)
@@ -143,7 +143,7 @@ class ChangePictureResolutionCommand {
 
 export
 class ChangeCanvasAreaCommand {
-  title = "Change Canvas Area"
+  title = 'Change Canvas Area'
   oldDimension: PictureDimension
   oldSelection: Selection
 

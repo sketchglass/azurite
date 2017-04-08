@@ -1,7 +1,7 @@
-import {remote} from "electron"
-import * as fs from "fs"
-import Picture from "../models/Picture"
-import PictureFormatAzurite from "../formats/PictureFormatAzurite"
+import {remote} from 'electron'
+import * as fs from 'fs'
+import PictureFormatAzurite from '../formats/PictureFormatAzurite'
+import Picture from '../models/Picture'
 
 const {dialog} = remote
 
@@ -32,7 +32,7 @@ class PictureSave {
   async saveAs() {
     const filePath = await new Promise<string|undefined>((resolve, reject) => {
       dialog.showSaveDialog(remote.getCurrentWindow(), {
-        title: "Save As...",
+        title: 'Save As...',
         filters: [fileFilter],
       }, resolve)
     })
@@ -61,7 +61,7 @@ class PictureSave {
   static async getOpenPath() {
     const filePaths = await new Promise<string[]|undefined>((resolve, reject) => {
       dialog.showOpenDialog(remote.getCurrentWindow(), {
-        title: "Open",
+        title: 'Open',
         filters: [fileFilter],
       }, resolve)
     })
@@ -80,7 +80,7 @@ class PictureSave {
         }
       })
     })
-    const picture = await pictureFormat.import(fileData)
+    const picture = await pictureFormat.importPicture(fileData, '')
     picture.filePath = filePath
     return picture
   }

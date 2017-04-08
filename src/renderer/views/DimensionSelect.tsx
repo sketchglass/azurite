@@ -1,7 +1,7 @@
-import * as React from "react"
-import {observer} from "mobx-react"
-import DimensionSelectViewModel, {DimensionUnit} from "../viewmodels/DimensionSelectViewModel"
-import "./DimensionSelect.css"
+import {observer} from 'mobx-react'
+import * as React from 'react'
+import DimensionSelectViewModel, {DimensionUnit} from '../viewmodels/DimensionSelectViewModel'
+import './DimensionSelect.css'
 
 interface DimensionSelectProps {
   percent?: boolean
@@ -18,11 +18,11 @@ export default
 class DimensionSelect extends React.Component<DimensionSelectProps, {} > {
   private digitsForUnit(unit: DimensionUnit) {
     switch (unit) {
-      case "px":
-      case "mm":
+      case 'px':
+      case 'mm':
         return 0
-      case "inch":
-      case "percent":
+      case 'inch':
+      case 'percent':
         return 1
     }
   }

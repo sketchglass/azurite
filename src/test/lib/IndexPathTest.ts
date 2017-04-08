@@ -1,10 +1,10 @@
-import * as assert from "power-assert"
-import IndexPath from "../../lib/IndexPath"
+import * as assert from 'power-assert'
+import IndexPath from '../../lib/IndexPath'
 
-describe("IndexPath", () => {
+describe('IndexPath', () => {
 
-  describe("empty", () => {
-    it("returns if empty", () => {
+  describe('empty', () => {
+    it('returns if empty', () => {
       const path1 = new IndexPath([1, 2, 3])
       const path2 = new IndexPath([])
       assert(!path1.empty)
@@ -12,15 +12,15 @@ describe("IndexPath", () => {
     })
   })
 
-  describe("length", () => {
-    it("returns its length", () => {
+  describe('length', () => {
+    it('returns its length', () => {
       const path = new IndexPath([1, 2, 3])
-      assert(path.length == 3)
+      assert(path.length === 3)
     })
   })
 
-  describe("parent", () => {
-    it("returns parent", () => {
+  describe('parent', () => {
+    it('returns parent', () => {
       const path1 = new IndexPath([1, 2, 3])
       assert.deepEqual(path1.parent!.indices, [1, 2])
       const path2 = new IndexPath([])
@@ -28,37 +28,37 @@ describe("IndexPath", () => {
     })
   })
 
-  describe("at", () => {
-    it("returns index at position", () => {
+  describe('at', () => {
+    it('returns index at position', () => {
       const path = new IndexPath([1, 2, 3])
-      assert(path.at(1) == 2)
+      assert(path.at(1) === 2)
     })
   })
 
-  describe("last", () => {
-    it("returns last index", () => {
+  describe('last', () => {
+    it('returns last index', () => {
       const path = new IndexPath([1, 2, 3])
-      assert(path.last == 3)
+      assert(path.last === 3)
     })
   })
 
-  describe("slice", () => {
-    it("returns sliced indices", () => {
+  describe('slice', () => {
+    it('returns sliced indices', () => {
       const path = new IndexPath([1, 2, 3, 4])
       assert.deepEqual(path.slice(1, -1).indices, [2, 3])
       assert.deepEqual(path.slice(2, 4).indices, [3, 4])
     })
   })
 
-  describe("child", () => {
-    it("returns child with index", () => {
+  describe('child', () => {
+    it('returns child with index', () => {
       const path = new IndexPath([1, 2, 3])
       assert.deepEqual(path.child(4).indices, [1, 2, 3, 4])
     })
   })
 
-  describe("equals", () => {
-    it("returns if equals", () => {
+  describe('equals', () => {
+    it('returns if equals', () => {
       const path1 = new IndexPath([1, 2, 3])
       const path2 = new IndexPath([1, 2, 3])
       const path3 = new IndexPath([3, 2, 1])
@@ -69,13 +69,13 @@ describe("IndexPath", () => {
     })
   })
 
-  describe("compare", () => {
-    it("does lexicographic comparison", () => {
+  describe('compare', () => {
+    it('does lexicographic comparison', () => {
       const path1 = new IndexPath([1, 2, 3])
       const path2 = new IndexPath([1, 2, 3])
       const path3 = new IndexPath([3, 2, 1])
       const path4 = new IndexPath([1, 2])
-      assert(path2.compare(path1) == 0)
+      assert(path2.compare(path1) === 0)
       assert(path3.compare(path1) > 0)
       assert(path1.compare(path3) < 0)
       assert(path4.compare(path1) < 0)
@@ -83,17 +83,17 @@ describe("IndexPath", () => {
     })
   })
 
-  describe("clone", () => {
-    it("clones path", () => {
+  describe('clone', () => {
+    it('clones path', () => {
       const path = new IndexPath([1, 2, 3])
       const cloned = path.clone()
-      assert(cloned != path)
+      assert(cloned !== path)
       assert.deepEqual(cloned.indices, path.indices)
     })
   })
 
-  describe("isSibling", () => {
-    it("returns if sibling", () => {
+  describe('isSibling', () => {
+    it('returns if sibling', () => {
       const path1 = new IndexPath([1, 2, 3])
       const path2 = new IndexPath([1, 2, 4])
       const path3 = new IndexPath([3, 2, 1])
@@ -102,8 +102,8 @@ describe("IndexPath", () => {
     })
   })
 
-  describe("afterRemove", () => {
-    it("returns new index path after some items are removed", () => {
+  describe('afterRemove', () => {
+    it('returns new index path after some items are removed', () => {
       const path = new IndexPath([1, 2, 3, 4])
       const newPath = path.afterRemove([
         new IndexPath([1, 2, 1]),

@@ -1,4 +1,4 @@
-import {Rect} from "paintvec"
+import {Rect} from 'paintvec'
 
 export default
 class Dirtiness {

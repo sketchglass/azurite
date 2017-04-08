@@ -1,8 +1,8 @@
-import {observable} from "mobx"
-import KeyInput, {KeyInputData} from "../../lib/KeyInput"
+import {observable} from 'mobx'
+import KeyInput, {KeyInputData} from '../../lib/KeyInput'
 
-export type BrushIconType = "paint-brush"|"pen"|"eraser"
-export type BrushType = "normal"|"eraser"
+export type BrushIconType = 'paint-brush'|'pen'|'eraser'
+export type BrushType = 'normal'|'eraser'
 
 export interface BrushPresetData {
   title: string
@@ -21,9 +21,9 @@ export class BrushPreset implements BrushPresetData {
   static nextInternalKey = 0
   readonly internalKey = BrushPreset.nextInternalKey++
 
-  @observable title = "Brush"
+  @observable title = 'Brush'
   // brush type
-  @observable type: BrushType = "normal"
+  @observable type: BrushType = 'normal'
   // brush width (diameter)
   @observable width = 10
   // brush opacity
@@ -64,13 +64,13 @@ export class BrushPreset implements BrushPresetData {
   }
 
   get iconType(): BrushIconType {
-    if (this.type == "eraser") {
-      return "eraser"
+    if (this.type === 'eraser') {
+      return 'eraser'
     }
-    if (this.blending == 0) {
-      return "pen"
+    if (this.blending === 0) {
+      return 'pen'
     } else {
-      return "paint-brush"
+      return 'paint-brush'
     }
   }
 }

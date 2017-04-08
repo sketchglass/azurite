@@ -1,18 +1,18 @@
-import {Vec2} from "paintvec"
+import {Vec2} from 'paintvec'
+import KeyInput from '../../lib/KeyInput'
 import Tool, {ToolPointerEvent} from './Tool'
-import ToolIDs from "./ToolIDs"
-import KeyInput from "../../lib/KeyInput"
+import ToolIDs from './ToolIDs'
 
 export default
 class PanTool extends Tool {
   readonly id = ToolIDs.pan
-  readonly title = "Pan"
+  readonly title = 'Pan'
   get cursor() {
-    return "all-scroll"
+    return 'all-scroll'
   }
   originalPos = new Vec2(0)
   originalTranslation = new Vec2(0)
-  tempShortcut = new KeyInput([], "Space")
+  tempShortcut = new KeyInput([], 'Space')
 
   start(ev: ToolPointerEvent) {
     if (!this.picture) {

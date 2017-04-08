@@ -1,16 +1,16 @@
-import * as React from "react"
-import {reaction, computed, action} from "mobx"
-import {observer} from "mobx-react"
-import {Vec2} from "paintvec"
-import Layer, {ImageLayer} from "../models/Layer"
-import {Tile} from "../models/TiledTexture"
+import {reaction, computed, action} from 'mobx'
+import {observer} from 'mobx-react'
+import {Vec2} from 'paintvec'
+import * as React from 'react'
+import {appState} from '../app/AppState'
+import {TransformLayerCommand} from '../commands/LayerCommand'
+import Layer, {ImageLayer} from '../models/Layer'
+import {Tile} from '../models/TiledTexture'
+import LayerTransform from '../services/LayerTransform'
+import {renderer} from '../views/Renderer'
+import RectMoveTool, {DragType} from './RectMoveTool'
 import {ToolPointerEvent} from './Tool'
-import {appState} from "../app/AppState"
-import {TransformLayerCommand} from "../commands/LayerCommand"
-import RectMoveTool, {DragType} from "./RectMoveTool"
-import LayerTransform from "../services/LayerTransform"
-import {renderer} from "../views/Renderer"
-import ToolIDs from "./ToolIDs"
+import ToolIDs from './ToolIDs'
 
 const HANDLE_RADIUS = 4
 
@@ -31,7 +31,7 @@ const transformedTile = new Tile()
 export default
 class TransformLayerTool extends RectMoveTool {
   readonly id = ToolIDs.transformLayer
-  readonly title = "Transform Layer"
+  readonly title = 'Transform Layer'
 
   handleRadius = HANDLE_RADIUS
 
@@ -39,9 +39,9 @@ class TransformLayerTool extends RectMoveTool {
 
   @computed get selectionShowMode() {
     if (this.modal) {
-      return "none"
+      return 'none'
     } else {
-      return "normal"
+      return 'normal'
     }
   }
 
@@ -75,17 +75,17 @@ class TransformLayerTool extends RectMoveTool {
 
   @action start(e: ToolPointerEvent) {
     super.start(e)
-    if (this.dragType != DragType.None) {
+    if (this.dragType !== DragType.None) {
       this.startEditing()
     }
   }
 
   @action keyDown(ev: React.KeyboardEvent<HTMLElement>) {
     super.keyDown(ev)
-    if (ev.key == "Enter") {
+    if (ev.key === 'Enter') {
       this.endEditing()
     }
-    if (ev.key == "Escape") {
+    if (ev.key === 'Escape') {
       this.cancelEditing()
     }
   }
@@ -117,7 +117,7 @@ class TransformLayerTool extends RectMoveTool {
   }
 
   previewLayerTile(layer: Layer, tileKey: Vec2) {
-    if (this.modal && layer == this.currentImageLayer && this.layerTransform) {
+    if (this.modal && layer === this.currentImageLayer && this.layerTransform) {
       this.layerTransform.transform = this.transform
       this.layerTransform.transformToTile(transformedTile, tileKey)
       return {tile: transformedTile}
@@ -143,10 +143,10 @@ class TransformLayerTool extends RectMoveTool {
     const vertices = originalRect.vertices().map(transformPos)
 
     context.lineWidth = 1 * devicePixelRatio
-    context.strokeStyle = "#888"
+    context.strokeStyle = '#888'
     context.beginPath()
     for (const [i, p] of vertices.entries()) {
-      if (i == 0) {
+      if (i === 0) {
         context.moveTo(p.x, p.y)
       } else {
         context.lineTo(p.x, p.y)
@@ -169,8 +169,8 @@ class TransformLayerTool extends RectMoveTool {
 
     const handleRadius = HANDLE_RADIUS * devicePixelRatio
     for (const handle of handlePositions) {
-      context.strokeStyle = "#888"
-      context.fillStyle = "#fff"
+      context.strokeStyle = '#888'
+      context.fillStyle = '#fff'
       context.beginPath()
       context.ellipse(handle.x, handle.y, handleRadius, handleRadius, 0, 0, 2 * Math.PI)
       context.fill()

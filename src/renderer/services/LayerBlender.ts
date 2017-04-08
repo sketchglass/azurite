@@ -1,9 +1,9 @@
-import {Vec2, Rect} from "paintvec"
-import {ShapeModel, TextureDrawTarget, RectShape, Color} from "paintgl"
-import {context} from "../GLContext"
-import TiledTexture, {Tile} from "../models/TiledTexture"
-import Layer, {LayerBlendMode, ImageLayer, GroupLayer} from "../models/Layer"
-import {drawTexture} from "../GLUtil"
+import {ShapeModel, TextureDrawTarget, RectShape, Color} from 'paintgl'
+import {Vec2, Rect} from 'paintvec'
+import {context} from '../GLContext'
+import {drawTexture} from '../GLUtil'
+import Layer, {LayerBlendMode, ImageLayer, GroupLayer} from '../models/Layer'
+import TiledTexture, {Tile} from '../models/TiledTexture'
 
 const normalBlendShader = {
   fragment: `
@@ -53,10 +53,10 @@ function makeBlendShader(blendOp: string) {
 }
 
 const blendOps = new Map<LayerBlendMode, string>([
-  ["plus", `
+  ['plus', `
     return src + dst;
   `],
-  ["multiply", `
+  ['multiply', `
     return src * dst;
   `]
 ])
@@ -69,7 +69,7 @@ const tileBlendModels = new Map(Array.from(blendOps).map(([type, op]) => {
   const model = new ShapeModel(context, {
     shape: tileShape,
     shader: shader,
-    blendMode: "src",
+    blendMode: 'src',
   })
   return [type, model] as [LayerBlendMode, ShapeModel]
 }))
@@ -113,7 +113,7 @@ class TileBlender {
 
     if (startClipping) {
       this.clipping = true
-      drawTexture(this.clipBaseDrawTarget, this.currentTile.texture, {blendMode: "src"})
+      drawTexture(this.clipBaseDrawTarget, this.currentTile.texture, {blendMode: 'src'})
     }
 
     if (tile) {
@@ -132,7 +132,7 @@ class TileBlender {
           srcTexture: tile.texture,
           opacity,
         }
-        tileNormalModel.blendMode = startClipping ? "src" : (this.clipping ? "src-atop" : "src-over")
+        tileNormalModel.blendMode = startClipping ? 'src' : (this.clipping ? 'src-atop' : 'src-over')
         this.currentDrawTarget.draw(tileNormalModel)
       }
     } else {
@@ -143,7 +143,7 @@ class TileBlender {
 
     if (endClipping) {
       this.clipping = false
-      drawTexture(this.currentDrawTarget, this.clipBaseTile.texture, {blendMode: "dst-over"})
+      drawTexture(this.currentDrawTarget, this.clipBaseTile.texture, {blendMode: 'dst-over'})
     }
   }
 

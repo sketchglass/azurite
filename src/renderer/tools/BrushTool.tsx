@@ -1,26 +1,26 @@
-import * as React from "react"
-import {observable, action, autorun, computed} from "mobx"
-import {Vec2} from "paintvec"
-import {Waypoint} from "../brush/Waypoint"
-import Tool, {ToolPointerEvent} from "./Tool"
-import Layer, {ImageLayer} from "../models/Layer"
-import {brushPresetManager} from "../app/BrushPresetManager"
-import BrushSettings from "../views/BrushSettings"
-import {BrushEngine} from "../brush/BrushEngine"
-import ToolIDs from "./ToolIDs"
+import {observable, action, autorun, computed} from 'mobx'
+import {Vec2} from 'paintvec'
+import * as React from 'react'
+import {brushPresetManager} from '../app/BrushPresetManager'
+import {BrushEngine} from '../brush/BrushEngine'
+import {Waypoint} from '../brush/Waypoint'
+import Layer, {ImageLayer} from '../models/Layer'
+import BrushSettings from '../views/BrushSettings'
+import Tool, {ToolPointerEvent} from './Tool'
+import ToolIDs from './ToolIDs'
 
 export default
 class BrushTool extends Tool {
   readonly id = ToolIDs.brush
-  readonly title = "Brush"
+  readonly title = 'Brush'
   @observable dragged = false
 
-  private _cursorImage = document.createElement("canvas")
+  private _cursorImage = document.createElement('canvas')
   @observable private _cursorImageSize = 0
-  private cursorContext = this._cursorImage.getContext("2d")!
+  private cursorContext = this._cursorImage.getContext('2d')!
 
   get cursor() {
-    return "not-allowed"
+    return 'not-allowed'
   }
   @computed get cursorImage() {
     if (this.currentLayer && this.currentLayer instanceof ImageLayer) {
@@ -33,9 +33,9 @@ class BrushTool extends Tool {
 
   @computed get selectionShowMode() {
     if (this.dragged) {
-      return "stopped"
+      return 'stopped'
     } else {
-      return "normal"
+      return 'normal'
     }
   }
 
@@ -66,13 +66,13 @@ class BrushTool extends Tool {
     const context = this.cursorContext
 
     context.lineWidth = dpr
-    context.strokeStyle = "rgba(0,0,0,0.5)"
+    context.strokeStyle = 'rgba(0,0,0,0.5)'
 
     context.beginPath()
     context.ellipse(center, center, radius, radius, 0, 0, 2 * Math.PI)
     context.stroke()
 
-    context.strokeStyle = "rgba(255,255,255,0.5)"
+    context.strokeStyle = 'rgba(255,255,255,0.5)'
     context.beginPath()
     context.ellipse(center, center, radius + dpr, radius + dpr, 0, 0, 2 * Math.PI)
     context.stroke()

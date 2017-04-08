@@ -1,7 +1,7 @@
-import {ipcRenderer} from "electron"
-import IPCChannels from "../../../common/IPCChannels"
-import {PreferencesData} from "../../viewmodels/PreferencesViewModel"
-import {appState} from "../../app/AppState"
+import {ipcRenderer} from 'electron'
+import IPCChannels from '../../../common/IPCChannels'
+import {appState} from '../../app/AppState'
+import {PreferencesData} from '../../viewmodels/PreferencesViewModel'
 
 export default
 class PreferencesLauncher {

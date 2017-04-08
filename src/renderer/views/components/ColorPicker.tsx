@@ -1,8 +1,8 @@
-import React = require("react")
-import {Vec2} from "paintvec"
-import {HSVColor} from "../../../lib/Color"
-import {frameDebounce} from "../../../lib/Debounce"
-import PointerEvents from "./PointerEvents"
+import React = require('react')
+import {Vec2} from 'paintvec'
+import {HSVColor} from '../../../lib/Color'
+import {frameDebounce} from '../../../lib/Debounce'
+import PointerEvents from './PointerEvents'
 
 const wheelWidth = Math.round(16 * devicePixelRatio)
 const squareSize = Math.round(96 * devicePixelRatio)
@@ -37,11 +37,11 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
   draggingSquare = false
 
   constructor() {
-    super();
+    super()
   }
 
   componentDidMount() {
-    this.context = this.canvas.getContext("2d")!
+    this.context = this.canvas.getContext('2d')!
     this.wheelGradient = this.createWheelGradient()
     this.squareGradient = this.context.createImageData(squareSize, squareSize)
     this.update()
@@ -103,7 +103,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
   }
 
   posToHue(pos: Vec2) {
-    return atan2ToHue(pos.angle());
+    return atan2ToHue(pos.angle())
   }
   posToSV(pos: Vec2) {
     const s = clamp(pos.x / squareSize + 0.5, 0, 1)
@@ -133,9 +133,9 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
   }
 
   createWheelGradient() {
-    const canvas = document.createElement("canvas")
+    const canvas = document.createElement('canvas')
     canvas.width = canvas.height = wheelSize
-    const context = canvas.getContext("2d", {alpha: false})!
+    const context = canvas.getContext('2d', {alpha: false})!
     const image = new ImageData(wheelSize, wheelSize)
     const center = new Vec2(wheelSize / 2, wheelSize / 2)
 
@@ -149,7 +149,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
     }
     context.putImageData(image, 0, 0)
 
-    context.globalCompositeOperation = "destination-in"
+    context.globalCompositeOperation = 'destination-in'
     context.lineWidth = wheelWidth
 
     const radius = wheelSize / 2
@@ -186,7 +186,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
     const y = (wheelSize - squareSize) / 2 + (1 - v) * squareSize
 
     context.lineWidth = lineWidth
-    context.strokeStyle = "white"
+    context.strokeStyle = 'white'
     context.fillStyle = this.props.color.toString()
     context.beginPath()
     context.arc(x, y, wheelWidth / 2, 0, 2 * Math.PI)
@@ -203,7 +203,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
     const y = wheelSize / 2 + Math.sin(arg) * r
 
     context.lineWidth = lineWidth
-    context.strokeStyle = "white"
+    context.strokeStyle = 'white'
     context.fillStyle = new HSVColor(h, 1, 1).toString()
     context.beginPath()
     context.arc(x, y, wheelWidth / 2, 0, 2 * Math.PI)
