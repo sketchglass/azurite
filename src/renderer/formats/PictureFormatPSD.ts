@@ -1,4 +1,5 @@
 import PSDReader from '../../lib/PSDReader'
+import {PSDColorMode} from '../../lib/PSDTypes'
 import {addPictureFormat} from '../app/FormatRegistry'
 import Layer from '../models/Layer'
 import Picture from '../models/Picture'
@@ -14,8 +15,17 @@ class PictureFormatPSD extends PictureFormat {
   async importPicture(buffer: Buffer, name: string) {
     const reader = new PSDReader(buffer)
     reader.read()
-    // TODO
-    return new Picture({width: reader.width, height: reader.height, dpi: 72})
+
+    if (reader.colorMode !== PSDColorMode.RGB) {
+      // improve error message
+      throw new Error('Only RGB is supported')
+    }
+    if (![8, 16, 32].includes(reader.depth)) {
+      throw new Error('Binary image is not supported')
+    }
+
+    const picture = new Picture({width: reader.width, height: reader.height, dpi: 72})
+    return picture
   }
 
   async importLayer(buffer: Buffer, name: string, picture: Picture): Promise<Layer> {
