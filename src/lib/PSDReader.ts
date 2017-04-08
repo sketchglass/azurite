@@ -25,6 +25,11 @@ class PSDBinaryReader {
     this.offset += 2
     return this.data.readUInt16BE(i)
   }
+  int16() {
+    const i = this.offset
+    this.offset += 2
+    return this.data.readInt16BE(i)
+  }
   uint32() {
     const i = this.offset
     this.offset += 4
@@ -89,12 +94,13 @@ function decodePackBits(src: Buffer, dstSize: number) {
 export default
 class PSDReader {
   reader = new PSDBinaryReader(this.data)
-  numberOfChannels: number
+  channelCount: number
   height: number
   width: number
   depth: number
   colorMode: PSDColorMode
-  numberOfLayers: number
+  layerCount: number
+  imageDataHasAlpha: boolean
   layerRecords: PSDLayerRecord[] = []
 
   constructor(public data: Buffer) {
@@ -119,7 +125,7 @@ class PSDReader {
       throw new Error('Unsupported version')
     }
     reader.skip(6)
-    this.numberOfChannels = reader.uint16()
+    this.channelCount = reader.uint16()
     this.height = reader.uint32()
     this.width = reader.uint32()
     this.depth = reader.uint16()
@@ -147,13 +153,16 @@ class PSDReader {
   readLayerInfo() {
     const {reader} = this
     reader.uint32() // length
-    this.numberOfLayers = reader.uint16()
+    const layerCount = reader.int16()
+    this.imageDataHasAlpha = layerCount < 0
+    this.layerCount = Math.abs(layerCount)
     this.readLayerRecords()
     this.readChannelImageDatas()
   }
 
   readLayerRecords() {
-    for (let i = 0; i < this.numberOfLayers; ++i) {
+    console.log('layer count', this.layerCount)
+    for (let i = 0; i < this.layerCount; ++i) {
       this.layerRecords.push(this.readLayerRecord())
     }
   }
