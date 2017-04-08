@@ -1,12 +1,12 @@
-import {observable, computed, reaction} from "mobx"
-import {Vec2, Rect, Transform} from "paintvec"
-import {Texture, ShapeModel, RectShape, textureShader, CanvasDrawTarget, Color, TextureFilter} from "paintgl"
-import {context, canvas} from "../GLContext"
-import {frameDebounce} from "../../lib/Debounce"
-import Picture from "../models/Picture"
-import Selection from "../models/Selection"
-import Dirtiness from "../../lib/Dirtiness"
-const glsl = require("glslify")
+import {observable, computed, reaction} from 'mobx'
+import {Vec2, Rect, Transform} from 'paintvec'
+import {Texture, ShapeModel, RectShape, textureShader, CanvasDrawTarget, Color, TextureFilter} from 'paintgl'
+import {context, canvas} from '../GLContext'
+import {frameDebounce} from '../../lib/Debounce'
+import Picture from '../models/Picture'
+import Selection from '../models/Selection'
+import Dirtiness from '../../lib/Dirtiness'
+const glsl = require('glslify')
 
 const boxShadowShader = {
   vertex: `
@@ -105,7 +105,7 @@ interface RendererOverlay {
 }
 
 export
-type SelectionShowMode = "normal"|"stopped"|"none"
+type SelectionShowMode = 'normal'|'stopped'|'none'
 
 export default
 class Renderer {
@@ -114,7 +114,7 @@ class Renderer {
 
   @observable picture: Picture|undefined
   private readonly pictureShape = new RectShape(context, {
-    usage: "static",
+    usage: 'static',
   })
   private readonly pictureModel = new ShapeModel(context, {
     shape: this.pictureShape,
@@ -124,10 +124,10 @@ class Renderer {
   @observable size = new Vec2(100, 100)
   readonly background = new Color(31  / 255, 31 / 255, 31 / 255, 1)
 
-  @observable selectionShowMode: SelectionShowMode = "normal"
+  @observable selectionShowMode: SelectionShowMode = 'normal'
 
   private readonly rendererShape = new RectShape(context, {
-    usage: "static",
+    usage: 'static',
   })
   private readonly boxShadowModel = new ShapeModel(context, {
     shape: this.rendererShape,
@@ -139,7 +139,7 @@ class Renderer {
   })
 
   private readonly cursorShape = new RectShape(context, {
-    usage: "static",
+    usage: 'static',
     rect: new Rect(new Vec2(0), new Vec2(1)),
   })
   readonly cursorTexture = new Texture(context, {})
@@ -172,8 +172,8 @@ class Renderer {
 
   private lastCursorRect: Rect|undefined
 
-  private readonly overlayCanvas = document.createElement("canvas")
-  private readonly overlayCanvasContext = this.overlayCanvas.getContext("2d")!
+  private readonly overlayCanvas = document.createElement('canvas')
+  private readonly overlayCanvasContext = this.overlayCanvas.getContext('2d')!
   private readonly overlayTexture = new Texture(context, {})
   private readonly overlayModel = new ShapeModel(context, {
     shape: this.rendererShape,
@@ -247,7 +247,7 @@ class Renderer {
       this.update()
     })
     setInterval(() => {
-      if (this.picture && this.picture.selection.hasSelection && this.selectionShowMode == "normal") {
+      if (this.picture && this.picture.selection.hasSelection && this.selectionShowMode === 'normal') {
         this.dirtiness.addWhole()
         this.update()
       }
@@ -293,9 +293,9 @@ class Renderer {
 
       // render picture
 
-      const filter: TextureFilter = this.picture.navigation.scale < 2 ? "bilinear" : "nearest"
+      const filter: TextureFilter = this.picture.navigation.scale < 2 ? 'bilinear' : 'nearest'
       const texture = this.picture.blender.getBlendedTexture()
-      if (texture.filter != filter) {
+      if (texture.filter !== filter) {
         texture.filter = filter
       }
       this.pictureModel.transform = this.transformFromPicture
@@ -303,11 +303,11 @@ class Renderer {
 
       // render selection
       let previewSelection = this.previewSelection()
-      const selection = previewSelection != false ? previewSelection : this.picture.selection
+      const selection = previewSelection !== false ? previewSelection : this.picture.selection
 
-      if (selection.hasSelection && this.selectionShowMode != "none") {
+      if (selection.hasSelection && this.selectionShowMode !== 'none') {
         const milliseconds = Date.now() - this.startupTime
-        if (selection.texture.filter != filter) {
+        if (selection.texture.filter !== filter) {
           selection.texture.filter = filter
         }
         this.selectionModel.uniforms = {

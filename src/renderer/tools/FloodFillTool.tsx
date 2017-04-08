@@ -1,15 +1,15 @@
-import {reaction, observable} from "mobx"
-import * as React from "react"
+import {reaction, observable} from 'mobx'
+import * as React from 'react'
 import Tool, {ToolPointerEvent} from './Tool'
-import FloodFill from "../services/FloodFill"
-import {SelectionChangeCommand} from "../commands/SelectionCommand"
-import FloodFillSettings from "../views/FloodFillSettings"
-import ToolIDs from "./ToolIDs"
+import FloodFill from '../services/FloodFill'
+import {SelectionChangeCommand} from '../commands/SelectionCommand'
+import FloodFillSettings from '../views/FloodFillSettings'
+import ToolIDs from './ToolIDs'
 
 export default
 class FloodFillTool extends Tool {
   readonly id = ToolIDs.floodFill
-  readonly title = "Flood Fill"
+  readonly title = 'Flood Fill'
   @observable tolerance = 0 // 0 ... 255
   private floodFill: FloodFill|undefined
 

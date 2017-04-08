@@ -1,19 +1,19 @@
-import {Transform, Rect} from "paintvec"
-import {Color} from "paintgl"
-import {UndoCommand, CompositeUndoCommand} from "../models/UndoStack"
-import Picture from "../models/Picture"
-import Layer, {LayerProps, GroupLayer, ImageLayer} from "../models/Layer"
-import TiledTexture from "../models/TiledTexture"
-import LayerTransform from "../services/LayerTransform"
-import {SelectionChangeCommand} from "./SelectionCommand"
-import IndexPath from "../../lib/IndexPath"
-import {layerBlender} from "../services/LayerBlender"
+import {Transform, Rect} from 'paintvec'
+import {Color} from 'paintgl'
+import {UndoCommand, CompositeUndoCommand} from '../models/UndoStack'
+import Picture from '../models/Picture'
+import Layer, {LayerProps, GroupLayer, ImageLayer} from '../models/Layer'
+import TiledTexture from '../models/TiledTexture'
+import LayerTransform from '../services/LayerTransform'
+import {SelectionChangeCommand} from './SelectionCommand'
+import IndexPath from '../../lib/IndexPath'
+import {layerBlender} from '../services/LayerBlender'
 
 export
 class MoveLayerCommand implements UndoCommand {
   dstPathAfter = this.dstPath.afterRemove(this.srcPaths)
 
-  title = "Move Layers"
+  title = 'Move Layers'
 
   constructor(public readonly picture: Picture, public readonly srcPaths: IndexPath[], public readonly dstPath: IndexPath) {
   }
@@ -41,7 +41,7 @@ class MoveLayerCommand implements UndoCommand {
 
 export
 class CopyLayerCommand implements UndoCommand {
-  title = "Copy Layers"
+  title = 'Copy Layers'
 
   constructor(public readonly picture: Picture, public readonly srcPaths: IndexPath[], public readonly dstPath: IndexPath) {
   }
@@ -63,7 +63,7 @@ class CopyLayerCommand implements UndoCommand {
 
 export
 class GroupLayerCommand implements UndoCommand {
-  title = "Group Layers"
+  title = 'Group Layers'
 
   constructor(public readonly picture: Picture, public readonly srcPaths: IndexPath[]) {
   }
@@ -90,7 +90,7 @@ class GroupLayerCommand implements UndoCommand {
       const src = this.picture.spliceLayers(srcPath, 1)[0]
       srcs.unshift(src)
     }
-    const group = new GroupLayer(this.picture, {name: "Group"}, srcs)
+    const group = new GroupLayer(this.picture, {name: 'Group'}, srcs)
 
     this.picture.spliceLayers(this.srcPaths[0], 0, group)
     this.picture.selectedLayers.replace([group])
@@ -99,7 +99,7 @@ class GroupLayerCommand implements UndoCommand {
 
 export
 class MergeLayerCommand implements UndoCommand {
-  title = "Merge Layers"
+  title = 'Merge Layers'
   srcs: Layer[] = []
 
   constructor(public readonly picture: Picture, public readonly srcPaths: IndexPath[]) {
@@ -124,11 +124,11 @@ class MergeLayerCommand implements UndoCommand {
     }
     this.srcs = srcs
     let merged: ImageLayer
-    if (srcs.length == 1 && srcs[0] instanceof GroupLayer) {
+    if (srcs.length === 1 && srcs[0] instanceof GroupLayer) {
       const group = srcs[0] as GroupLayer
       merged = new ImageLayer(this.picture, group.props, layerBlender.blendToTiledTexture(group.children))
     } else {
-      merged = new ImageLayer(this.picture, {name: "Merged"}, layerBlender.blendToTiledTexture(srcs))
+      merged = new ImageLayer(this.picture, {name: 'Merged'}, layerBlender.blendToTiledTexture(srcs))
     }
 
     this.picture.spliceLayers(this.srcPaths[0], 0, merged)
@@ -138,7 +138,7 @@ class MergeLayerCommand implements UndoCommand {
 
 export
 class AddLayerCommand implements UndoCommand {
-  title = "Add Layer"
+  title = 'Add Layer'
 
   constructor(public readonly picture: Picture, public readonly path: IndexPath, public layer: Layer) {
   }
@@ -158,7 +158,7 @@ class AddLayerCommand implements UndoCommand {
 
 export
 class RemoveLayerCommand implements UndoCommand {
-  title = "Remove Layers"
+  title = 'Remove Layers'
 
   removedLayers: Layer[] = []
   constructor(public picture: Picture, public paths: IndexPath[]) {
@@ -292,7 +292,7 @@ abstract class ReplaceLayerImageCommand implements UndoCommand {
 
 export
 class TransformLayerCommand implements UndoCommand {
-  title = "Transform Layer"
+  title = 'Transform Layer'
   oldTiledTexture: TiledTexture|undefined
   selectionChangeCommand: SelectionChangeCommand|undefined
 
@@ -342,7 +342,7 @@ class TransformLayerCommand implements UndoCommand {
 
 export
 class FillLayerCommand extends ReplaceLayerImageCommand {
-  title = "Fill Layer"
+  title = 'Fill Layer'
 
   constructor(picture: Picture, path: IndexPath, public color: Color) {
     super(picture, path)
@@ -360,7 +360,7 @@ class FillLayerCommand extends ReplaceLayerImageCommand {
 
 export
 class ClearLayerCommand extends ReplaceLayerImageCommand {
-  title = "Clear Layer"
+  title = 'Clear Layer'
 
   constructor(picture: Picture, path: IndexPath) {
     super(picture, path)
@@ -372,7 +372,7 @@ class ClearLayerCommand extends ReplaceLayerImageCommand {
       const tiledTexture = original.clone()
       tiledTexture.fill(new Color(1, 1, 1, 1), this.picture.rect, {
         clip: selection.texture,
-        blendMode: "dst-out",
+        blendMode: 'dst-out',
       })
       return tiledTexture
     } else {
@@ -384,6 +384,6 @@ class ClearLayerCommand extends ReplaceLayerImageCommand {
 export
 class ClearLayersCommand extends CompositeUndoCommand {
   constructor(public picture: Picture, public paths: IndexPath[]) {
-    super("Clear Layers", paths.map(path => new ClearLayerCommand(picture, path)))
+    super('Clear Layers', paths.map(path => new ClearLayerCommand(picture, path)))
   }
 }

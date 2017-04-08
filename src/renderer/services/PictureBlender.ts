@@ -1,19 +1,19 @@
-import {reaction} from "mobx"
-import Picture from "../models/Picture"
-import {Vec2, Rect, Transform} from "paintvec"
-import {Texture, TextureDrawTarget, Color} from "paintgl"
-import {context} from "../GLContext"
-import TiledTexture, {Tile} from "../models/TiledTexture"
-import {drawTexture} from "../GLUtil"
-import Dirtiness from "../../lib/Dirtiness"
-import {layerBlender, TileHook} from "./LayerBlender"
+import {reaction} from 'mobx'
+import Picture from '../models/Picture'
+import {Vec2, Rect, Transform} from 'paintvec'
+import {Texture, TextureDrawTarget, Color} from 'paintgl'
+import {context} from '../GLContext'
+import TiledTexture, {Tile} from '../models/TiledTexture'
+import {drawTexture} from '../GLUtil'
+import Dirtiness from '../../lib/Dirtiness'
+import {layerBlender, TileHook} from './LayerBlender'
 
 export default
 class PictureBlender {
   private blendedTexture = new Texture(context, {
     size: this.picture.size,
-    pixelFormat: "rgb",
-    pixelType: "byte",
+    pixelFormat: 'rgb',
+    pixelType: 'byte',
   })
   private drawTarget = new TextureDrawTarget(context, this.blendedTexture)
 
@@ -41,7 +41,7 @@ class PictureBlender {
       const tileScissor = rect && rect.translate(offset.neg()).intersection(Tile.rect)
       const rendered = layerBlender.blendTile(this.picture.layers, key, tileScissor)
       if (rendered) {
-        drawTexture(this.drawTarget, layerBlender.blendedTile.texture, {transform: Transform.translate(offset), blendMode: "src-over"})
+        drawTexture(this.drawTarget, layerBlender.blendedTile.texture, {transform: Transform.translate(offset), blendMode: 'src-over'})
       }
     }
     this.dirtiness.clear()

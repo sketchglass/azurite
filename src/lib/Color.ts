@@ -1,4 +1,4 @@
-import {Color} from "paintgl"
+import {Color} from 'paintgl'
 
 export function parseHexColor(color: string) {
   const r = parseInt(color.substr(1, 2), 16) / 255
@@ -9,10 +9,10 @@ export function parseHexColor(color: string) {
 
 export function toHexColor(color: Color) {
   const {r, g, b} = color
-  return "#" + [r, g, b].map(c => {
+  return '#' + [r, g, b].map(c => {
     const str = Math.round(c * 255).toString(16)
-    return str.length === 1 ? "0" + str : str
-  }).join("")
+    return str.length === 1 ? '0' + str : str
+  }).join('')
 }
 
 // http://www.rapidtables.com/convert/color/hsv-to-rgb.htm

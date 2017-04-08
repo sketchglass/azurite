@@ -1,7 +1,7 @@
-import React = require("react")
-import {observer} from "mobx-react"
-import {HSVColor} from "../../../lib/Color"
-import "./Palette.css"
+import React = require('react')
+import {observer} from 'mobx-react'
+import {HSVColor} from '../../../lib/Color'
+import './Palette.css'
 
 interface PaletteProps {
   palette: (HSVColor|undefined)[]

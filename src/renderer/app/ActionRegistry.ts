@@ -1,4 +1,4 @@
-import Action from "../actions/Action"
+import Action from '../actions/Action'
 
 export default
 class ActionRegistry {

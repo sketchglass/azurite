@@ -1,11 +1,11 @@
-import * as zlib from "zlib"
-import {Vec2, Rect, Transform} from "paintvec"
-import {Color, Texture, DrawTarget, TextureDrawTarget, BlendMode, RectShape, ShapeModel, colorShader} from "paintgl"
-import {context} from "../GLContext"
-import {drawTexture, drawVisibilityToBinary} from "../GLUtil"
-import {float32ArrayTo16} from "../../lib/Float"
-import {getBoundingRect} from "./util"
-const glsl = require("glslify")
+import * as zlib from 'zlib'
+import {Vec2, Rect, Transform} from 'paintvec'
+import {Color, Texture, DrawTarget, TextureDrawTarget, BlendMode, RectShape, ShapeModel, colorShader} from 'paintgl'
+import {context} from '../GLContext'
+import {drawTexture, drawVisibilityToBinary} from '../GLUtil'
+import {float32ArrayTo16} from '../../lib/Float'
+import {getBoundingRect} from './util'
+const glsl = require('glslify')
 
 export
 class Tile {
@@ -17,13 +17,13 @@ class Tile {
   constructor(data?: Uint16Array) {
     this.texture = new Texture(context, {
       size: Tile.size,
-      pixelType: "half-float",
+      pixelType: 'half-float',
       data
     })
   }
 
   colorAt(pos: Vec2) {
-    drawTexture(floatDrawTarget, this.texture, {blendMode: "src"})
+    drawTexture(floatDrawTarget, this.texture, {blendMode: 'src'})
     const data = new Float32Array(4)
     floatDrawTarget.readPixels(Rect.fromSize(pos, new Vec2(1)), data)
     return new Color(data[0], data[1], data[2], data[3])
@@ -36,7 +36,7 @@ class Tile {
   }
 
   toData() {
-    drawTexture(floatDrawTarget, this.texture, {blendMode: "src"})
+    drawTexture(floatDrawTarget, this.texture, {blendMode: 'src'})
     floatDrawTarget.readPixels(Tile.rect, floatData)
     return float32ArrayTo16(floatData)
   }
@@ -44,7 +44,7 @@ class Tile {
   clone() {
     const cloned = new Tile()
     tileDrawTarget.texture = cloned.texture
-    drawTexture(tileDrawTarget, this.texture, {blendMode: "src"})
+    drawTexture(tileDrawTarget, this.texture, {blendMode: 'src'})
     return cloned
   }
 
@@ -130,7 +130,7 @@ class TiledTexture {
       model = fillModel
       fillModel.uniforms = {color}
     }
-    model.blendMode = opts.blendMode || "src-over"
+    model.blendMode = opts.blendMode || 'src-over'
     for (const key of TiledTexture.keysForRect(rect)) {
       tileDrawTarget.texture = this.get(key).texture
       model.transform = Transform.translate(key.mulScalar(-Tile.width)),
@@ -141,7 +141,7 @@ class TiledTexture {
   putImage(offset: Vec2, image: ImageData|HTMLVideoElement|HTMLImageElement|HTMLCanvasElement) {
     const texture = new Texture(context, {size: new Vec2(image.width, image.height)})
     texture.setImage(image)
-    this.drawTexture(texture, {transform: Transform.translate(offset), blendMode: "src"})
+    this.drawTexture(texture, {transform: Transform.translate(offset), blendMode: 'src'})
     texture.dispose()
   }
 
@@ -179,9 +179,9 @@ class TiledTexture {
   }
 
   cropToTexture(rect: Rect) {
-    const texture = new Texture(context, {size: rect.size, pixelType: "half-float"})
+    const texture = new Texture(context, {size: rect.size, pixelType: 'half-float'})
     const drawTarget = new TextureDrawTarget(context, texture)
-    this.drawToDrawTarget(drawTarget, {offset: rect.topLeft.neg(), blendMode: "src"})
+    this.drawToDrawTarget(drawTarget, {offset: rect.topLeft.neg(), blendMode: 'src'})
     drawTarget.dispose()
     return texture
   }
@@ -200,7 +200,7 @@ class TiledTexture {
     for (const key of TiledTexture.keysForRect(newRect)) {
       const tile = new Tile()
       drawTarget.texture = tile.texture
-      this.drawToDrawTarget(drawTarget, {offset: key.mulScalar(-Tile.width), blendMode: "src", transform: transform})
+      this.drawToDrawTarget(drawTarget, {offset: key.mulScalar(-Tile.width), blendMode: 'src', transform: transform})
       result.set(key, tile)
     }
     result.shrink()
@@ -262,8 +262,8 @@ class TiledTexture {
   }
 
   static fromData(data: TiledTextureData) {
-    if (data.tileSize != Tile.width) {
-      throw new Error("tile size incompatible")
+    if (data.tileSize !== Tile.width) {
+      throw new Error('tile size incompatible')
     }
     const tiles = data.tiles.map(([[x, y], compressed]) => {
       const buffer = zlib.inflateSync(compressed)
@@ -279,8 +279,8 @@ class TiledTexture {
   }
 
   static fromRawData(data: TiledTextureRawData) {
-    if (data.tileSize != Tile.width) {
-      throw new Error("tile size incompatible")
+    if (data.tileSize !== Tile.width) {
+      throw new Error('tile size incompatible')
     }
     const tiles = data.tiles.map(([[x, y], data]) => {
       const tile = new Tile(data)
@@ -334,16 +334,16 @@ function keyToString(key: Vec2) {
 }
 
 function stringToKey(str: string) {
-  const strs = str.split(",")
+  const strs = str.split(',')
   return new Vec2(parseInt(strs[0]), parseInt(strs[1]))
 }
 
 const floatData = new Float32Array(Tile.width * Tile.width * 4)
-const floatTile = new Texture(context, {size: Tile.size, pixelType: "float"})
+const floatTile = new Texture(context, {size: Tile.size, pixelType: 'float'})
 const floatDrawTarget = new TextureDrawTarget(context, floatTile)
 
 const binaryData = new Int32Array(Tile.width / 32 * Tile.width)
-const binaryTexture = new Texture(context, {size: new Vec2(Tile.width / 32, Tile.width), pixelType: "byte"})
+const binaryTexture = new Texture(context, {size: new Vec2(Tile.width / 32, Tile.width), pixelType: 'byte'})
 const binaryDrawTarget = new TextureDrawTarget(context, binaryTexture)
 
 const tileDrawTarget = new TextureDrawTarget(context)

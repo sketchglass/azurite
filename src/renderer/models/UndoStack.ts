@@ -1,5 +1,5 @@
-import {observable, computed, action, IObservableArray} from "mobx"
-import {EventEmitter} from "events"
+import {observable, computed, action, IObservableArray} from 'mobx'
+import {EventEmitter} from 'events'
 
 export
 interface UndoCommand {
@@ -49,7 +49,7 @@ class UndoStack extends EventEmitter {
   }
 
   @action undo() {
-    this.emit("beforeUndo")
+    this.emit('beforeUndo')
     const command = this.undoCommand
     if (command) {
       command.undo()
@@ -57,7 +57,7 @@ class UndoStack extends EventEmitter {
     }
   }
   @action redo() {
-    this.emit("beforeRedo")
+    this.emit('beforeRedo')
     const command = this.redoCommand
     if (command) {
       command.redo()

@@ -1,10 +1,10 @@
-import Picture from "../models/Picture"
-import Selection from "../models/Selection"
-import {Vec2, Rect} from "paintvec"
-import {Texture, RectShape, ShapeModel, TextureDrawTarget} from "paintgl"
-import {context} from "../GLContext"
-import {drawTexture, drawVisibilityToBinary, drawBinaryToVisibility} from "../GLUtil"
-import nativelib = require("../../common/nativelib")
+import Picture from '../models/Picture'
+import Selection from '../models/Selection'
+import {Vec2, Rect} from 'paintvec'
+import {Texture, RectShape, ShapeModel, TextureDrawTarget} from 'paintgl'
+import {context} from '../GLContext'
+import {drawTexture, drawVisibilityToBinary, drawBinaryToVisibility} from '../GLUtil'
+import nativelib = require('../../common/nativelib')
 
 const findFillableRegionShader = {
   vertex: `
@@ -39,7 +39,7 @@ class FloodFill {
   private readonly findFillableRegionModel = new ShapeModel(context, {
     shape: this.shape,
     shader: findFillableRegionShader,
-    blendMode: "src",
+    blendMode: 'src',
   })
   private readonly binaryTexture = new Texture(context, {
     size: new Vec2(Math.ceil(this.picture.size.width / 32), this.picture.size.height)
@@ -85,8 +85,8 @@ class FloodFill {
 
     this.drawTarget.texture = this.filledTexture
     drawBinaryToVisibility(this.drawTarget, this.binaryTexture)
-    drawTexture(this.drawTarget, this.fillableRegionTexture, {blendMode: "src-in"})
-    drawTexture(selection.drawTarget, this.filledTexture, {blendMode: "src-over"})
+    drawTexture(this.drawTarget, this.fillableRegionTexture, {blendMode: 'src-in'})
+    drawTexture(selection.drawTarget, this.filledTexture, {blendMode: 'src-over'})
     selection.checkHasSelection()
   }
 }

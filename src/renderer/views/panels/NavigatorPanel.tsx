@@ -1,14 +1,14 @@
-import {Transform, Vec2, Rect} from "paintvec"
-import {computed, reaction, action} from "mobx"
-import {observer} from "mobx-react"
-import React = require("react")
-import {appState} from "../../app/AppState"
-import {renderer} from "../Renderer"
-import {frameDebounce} from "../../../lib/Debounce"
-import PointerEvents from "../components/PointerEvents"
-import SVGIcon from "../components/SVGIcon"
-import RangeSlider from "../components/RangeSlider"
-import "./NavigatorPanel.css"
+import {Transform, Vec2, Rect} from 'paintvec'
+import {computed, reaction, action} from 'mobx'
+import {observer} from 'mobx-react'
+import React = require('react')
+import {appState} from '../../app/AppState'
+import {renderer} from '../Renderer'
+import {frameDebounce} from '../../../lib/Debounce'
+import PointerEvents from '../components/PointerEvents'
+import SVGIcon from '../components/SVGIcon'
+import RangeSlider from '../components/RangeSlider'
+import './NavigatorPanel.css'
 
 class NavigatorMinimap extends React.Component<{}, {} > {
   private minimap: HTMLCanvasElement
@@ -60,7 +60,7 @@ class NavigatorMinimap extends React.Component<{}, {} > {
     const rendererRect = new Rect(rendererTopLeft, rendererBottomRight)
     const vertices = rendererRect.vertices().map(p => p.transform(transform))
 
-    context.strokeStyle = "grey"
+    context.strokeStyle = 'grey'
     context.lineWidth = devicePixelRatio
     context.beginPath()
     context.moveTo(vertices[3].x, vertices[3].y)

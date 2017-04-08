@@ -1,1 +1,1 @@
-export = require("nbind").init().lib
+export = require('nbind').init().lib

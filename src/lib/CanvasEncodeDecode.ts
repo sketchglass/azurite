@@ -1,9 +1,9 @@
 async function blobToBuffer(blob: Blob) {
   return new Promise<Buffer>((resolve, reject) => {
     const reader = new FileReader()
-    reader.addEventListener("loadend", (ev) => {
-      if (ev["error"]) {
-        reject(ev["error"])
+    reader.addEventListener('loadend', (ev) => {
+      if (ev['error']) {
+        reject(ev['error'])
       } else {
         resolve(new Buffer(reader.result))
       }
@@ -23,7 +23,7 @@ export async function encodeCanvas(canvas: HTMLCanvasElement, mimeType: string) 
   if (blob) {
     return blobToBuffer(blob)
   } else {
-    throw new Error("Failed to encode image")
+    throw new Error('Failed to encode image')
   }
 }
 
@@ -46,10 +46,10 @@ export async function decodeToCanvas(buffer: Buffer, mimeType: string) {
   const image = await imageFromURL(url)
   const {width, height} = image
 
-  const canvas = document.createElement("canvas")
+  const canvas = document.createElement('canvas')
   canvas.width = width
   canvas.height = height
-  const context = canvas.getContext("2d")!
+  const context = canvas.getContext('2d')!
   context.drawImage(image, 0, 0)
 
   return canvas

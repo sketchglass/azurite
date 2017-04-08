@@ -1,15 +1,15 @@
-import {Vec2} from "paintvec"
-import ShapeSelectTool from "./ShapeSelectTool"
-import {ToolPointerEvent} from "./Tool"
-import ToolIDs from "./ToolIDs"
+import {Vec2} from 'paintvec'
+import ShapeSelectTool from './ShapeSelectTool'
+import {ToolPointerEvent} from './Tool'
+import ToolIDs from './ToolIDs'
 
 export default
 class PolygonSelectTool extends ShapeSelectTool {
   commitDrawOnEnd = false
   readonly id = ToolIDs.polygonSelect
-  readonly title = "Polygon Select"
+  readonly title = 'Polygon Select'
   get cursor() {
-    return "crosshair"
+    return 'crosshair'
   }
   positions: Vec2[] = []
 
@@ -32,7 +32,7 @@ class PolygonSelectTool extends ShapeSelectTool {
 
   drawShape(context: CanvasRenderingContext2D) {
     for (let [i, pos] of this.positions.entries()) {
-      if (i == 0) {
+      if (i === 0) {
         context.moveTo(pos.x, pos.y)
       } else {
         context.lineTo(pos.x, pos.y)
@@ -42,11 +42,11 @@ class PolygonSelectTool extends ShapeSelectTool {
 
   keyDown(ev: React.KeyboardEvent<HTMLElement>) {
     super.keyDown(ev)
-    if (ev.key == "Enter") {
+    if (ev.key === 'Enter') {
       this.commit()
       this.positions = []
     }
-    if (ev.key == "Escape") {
+    if (ev.key === 'Escape') {
       this.positions = []
     }
   }

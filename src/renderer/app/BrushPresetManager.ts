@@ -1,7 +1,7 @@
-import {observable, computed} from "mobx"
-import {BrushPreset} from "../brush/BrushPreset"
-import {ConfigValues} from "./Config"
-import {defaultBrushPresets} from "../brush/DefaultBrushPresets"
+import {observable, computed} from 'mobx'
+import {BrushPreset} from '../brush/BrushPreset'
+import {ConfigValues} from './Config'
+import {defaultBrushPresets} from '../brush/DefaultBrushPresets'
 
 export
 class BrushPresetManager {

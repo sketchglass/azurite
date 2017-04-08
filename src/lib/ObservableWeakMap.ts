@@ -1,4 +1,4 @@
-import {observable} from "mobx"
+import {observable} from 'mobx'
 
 class ObservableWeakMapContainer<T> {
   @observable value: T

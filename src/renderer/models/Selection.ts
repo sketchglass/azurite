@@ -1,9 +1,9 @@
-import {observable} from "mobx"
-import {Vec2, Rect, Transform} from "paintvec"
-import {Texture, TextureDrawTarget, Color} from "paintgl"
-import {context} from "../GLContext"
-import {drawTexture, drawVisibilityToBinary} from "../GLUtil"
-import {getBoundingRect} from "./util"
+import {observable} from 'mobx'
+import {Vec2, Rect, Transform} from 'paintvec'
+import {Texture, TextureDrawTarget, Color} from 'paintgl'
+import {context} from '../GLContext'
+import {drawTexture, drawVisibilityToBinary} from '../GLUtil'
+import {getBoundingRect} from './util'
 
 const binaryTexture = new Texture(context, {})
 const binaryDrawTarget = new TextureDrawTarget(context, binaryTexture)
@@ -53,7 +53,7 @@ class Selection {
     selection.hasSelection = this.hasSelection
     if (this.hasSelection) {
       selection.drawTarget.clear(new Color(1, 1, 1, 1))
-      drawTexture(selection.drawTarget, this.texture, {blendMode: "dst-out"})
+      drawTexture(selection.drawTarget, this.texture, {blendMode: 'dst-out'})
       selection.checkHasSelection()
     } else {
       selection.selectAll()
@@ -66,11 +66,11 @@ class Selection {
     selection.hasSelection = this.hasSelection
     if (this.hasSelection) {
       if (opts.bicubic) {
-        this.texture.filter = "bilinear"
+        this.texture.filter = 'bilinear'
       }
-      drawTexture(selection.drawTarget, this.texture, {blendMode: "src", transform, ...opts})
+      drawTexture(selection.drawTarget, this.texture, {blendMode: 'src', transform, ...opts})
       if (opts.bicubic) {
-        this.texture.filter = "nearest"
+        this.texture.filter = 'nearest'
       }
       selection.checkHasSelection()
     }
@@ -81,7 +81,7 @@ class Selection {
     const selection = new Selection(this.size)
     selection.hasSelection = this.hasSelection
     if (this.hasSelection) {
-      drawTexture(selection.drawTarget, this.texture, {blendMode: "src"})
+      drawTexture(selection.drawTarget, this.texture, {blendMode: 'src'})
     }
     return selection
   }

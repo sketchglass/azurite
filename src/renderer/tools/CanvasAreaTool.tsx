@@ -1,14 +1,14 @@
-import * as React from "react"
-import {reaction, action, computed} from "mobx"
-import {observer} from "mobx-react"
-import {Vec2, Rect} from "paintvec"
-import RectMoveTool, {DragType} from "./RectMoveTool"
-import {ToolPointerEvent} from "./Tool"
-import {ChangeCanvasAreaCommand} from "../commands/PictureCommand"
-import DimensionSelectViewModel from "../viewmodels/DimensionSelectViewModel"
-import DimensionSelect from "../views/DimensionSelect"
-import {renderer} from "../views/Renderer"
-import ToolIDs from "./ToolIDs"
+import * as React from 'react'
+import {reaction, action, computed} from 'mobx'
+import {observer} from 'mobx-react'
+import {Vec2, Rect} from 'paintvec'
+import RectMoveTool, {DragType} from './RectMoveTool'
+import {ToolPointerEvent} from './Tool'
+import {ChangeCanvasAreaCommand} from '../commands/PictureCommand'
+import DimensionSelectViewModel from '../viewmodels/DimensionSelectViewModel'
+import DimensionSelect from '../views/DimensionSelect'
+import {renderer} from '../views/Renderer'
+import ToolIDs from './ToolIDs'
 
 const HANDLE_RADIUS = 4
 
@@ -30,7 +30,7 @@ const CanvasAreaToolSettings = observer((props: {tool: CanvasAreaTool}) => {
 export default
 class CanvasAreaTool extends RectMoveTool {
   readonly id = ToolIDs.canvasArea
-  readonly title = "Canvas Area"
+  readonly title = 'Canvas Area'
   handleRadius = HANDLE_RADIUS
   canRotate = false
   canDistort = false
@@ -75,24 +75,24 @@ class CanvasAreaTool extends RectMoveTool {
   reset() {
     if (this.picture) {
       this.dimensionSelectViewModel.reset(this.picture.dimension)
-      this.dimensionSelectViewModel.unit = "percent"
+      this.dimensionSelectViewModel.unit = 'percent'
       this.resetRect(new Rect(new Vec2(), this.picture.size))
     }
   }
 
   @action start(e: ToolPointerEvent) {
     super.start(e)
-    if (this.dragType != DragType.None) {
+    if (this.dragType !== DragType.None) {
       this.startEditing()
     }
   }
 
   @action keyDown(ev: React.KeyboardEvent<HTMLElement>) {
     super.keyDown(ev)
-    if (ev.key == "Enter") {
+    if (ev.key === 'Enter') {
       this.endEditing()
     }
-    if (ev.key == "Escape") {
+    if (ev.key === 'Escape') {
       this.cancelEditing()
     }
   }
@@ -134,14 +134,14 @@ class CanvasAreaTool extends RectMoveTool {
 
     const vertices = originalRect.vertices().map(transformPos)
 
-    context.fillStyle = "rgba(0,0,0,0.5)"
+    context.fillStyle = 'rgba(0,0,0,0.5)'
     context.fillRect(0, 0, context.canvas.width, context.canvas.height)
 
-    context.fillStyle = "#fff"
-    context.globalCompositeOperation = "destination-out"
+    context.fillStyle = '#fff'
+    context.globalCompositeOperation = 'destination-out'
     context.beginPath()
     for (const [i, p] of vertices.entries()) {
-      if (i == 0) {
+      if (i === 0) {
         context.moveTo(p.x, p.y)
       } else {
         context.lineTo(p.x, p.y)
@@ -149,7 +149,7 @@ class CanvasAreaTool extends RectMoveTool {
     }
     context.closePath()
     context.fill()
-    context.globalCompositeOperation = "source-over"
+    context.globalCompositeOperation = 'source-over'
 
     const [topLeft, topRight, bottomRight, bottomLeft] = vertices
     const handlePositions = [
@@ -165,8 +165,8 @@ class CanvasAreaTool extends RectMoveTool {
 
     const handleRadius = HANDLE_RADIUS * devicePixelRatio
     for (const handle of handlePositions) {
-      context.strokeStyle = "#888"
-      context.fillStyle = "#fff"
+      context.strokeStyle = '#888'
+      context.fillStyle = '#fff'
       context.lineWidth = 1 * devicePixelRatio
       context.beginPath()
       context.ellipse(handle.x, handle.y, handleRadius, handleRadius, 0, 0, 2 * Math.PI)

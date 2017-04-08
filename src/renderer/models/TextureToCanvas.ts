@@ -1,6 +1,6 @@
-import {Vec2, Rect} from "paintvec"
-import {ShapeModel, Texture, RectShape, TextureDrawTarget, Color} from "paintgl"
-import {context} from "../GLContext"
+import {Vec2, Rect} from 'paintvec'
+import {ShapeModel, Texture, RectShape, TextureDrawTarget, Color} from 'paintgl'
+import {context} from '../GLContext'
 
 const textureToCanvasShader = {
   fragment: `
@@ -18,14 +18,14 @@ const textureToCanvasShader = {
 // render texture content to canvas element
 export default
 class TextureToCanvas {
-  canvas = document.createElement("canvas")
-  context = this.canvas.getContext("2d")!
+  canvas = document.createElement('canvas')
+  context = this.canvas.getContext('2d')!
   backgroundColor = new Color(1, 1, 1, 1)
   imageData = new ImageData(this.size.width, this.size.height)
   texture = new Texture(context, {size: this.size})
   drawTarget = new TextureDrawTarget(context, this.texture)
   shape = new RectShape(context, {
-    usage: "static",
+    usage: 'static',
     rect: new Rect(new Vec2(), this.size),
   })
   model = new ShapeModel(context, {

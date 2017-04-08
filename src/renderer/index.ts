@@ -1,2 +1,2 @@
-import "./initState"
-import "./initView"
+import './initState'
+import './initView'

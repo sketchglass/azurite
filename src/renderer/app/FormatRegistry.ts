@@ -1,4 +1,4 @@
-import PictureFormat from "../formats/PictureFormat"
+import PictureFormat from '../formats/PictureFormat'
 
 export default
 class FormatRegistry {

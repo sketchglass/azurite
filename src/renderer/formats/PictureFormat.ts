@@ -1,5 +1,5 @@
-import Picture from "../models/Picture"
-import Layer from "../models/Layer"
+import Picture from '../models/Picture'
+import Layer from '../models/Layer'
 
 abstract class PictureFormat {
   abstract title: string

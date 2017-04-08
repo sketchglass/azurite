@@ -1,9 +1,9 @@
-import React = require("react")
-import {observer} from "mobx-react"
-import {PictureDimension} from "../../models/Picture"
-import DimensionSelect from "../DimensionSelect"
-import DimensionSelectViewModel from "../../viewmodels/DimensionSelectViewModel"
-import DialogContainer from "./DialogContainer"
+import React = require('react')
+import {observer} from 'mobx-react'
+import {PictureDimension} from '../../models/Picture'
+import DimensionSelect from '../DimensionSelect'
+import DimensionSelectViewModel from '../../viewmodels/DimensionSelectViewModel'
+import DialogContainer from './DialogContainer'
 
 interface ResolutionChangeDialogProps {
   init: PictureDimension
@@ -19,7 +19,7 @@ class ResolutionChangeDialog extends React.Component<ResolutionChangeDialogProps
   constructor(props: ResolutionChangeDialogProps) {
     super(props)
     this.dimensionSelectViewModel = new DimensionSelectViewModel(props.init)
-    this.dimensionSelectViewModel.unit = "percent"
+    this.dimensionSelectViewModel.unit = 'percent'
   }
 
   render() {
