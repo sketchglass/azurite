@@ -147,18 +147,28 @@ class PSDReader {
 
   readLayerAndMasInformation() {
     const {reader} = this
-    reader.uint32() // length
+    const len = reader.uint32()
+    reader.pushOffset()
+
     this.readLayerInfo()
+
+    reader.popOffset()
+    reader.skip(len)
   }
 
   readLayerInfo() {
     const {reader} = this
-    reader.uint32() // length
+    const len = reader.uint32()
+    reader.pushOffset()
+
     const layerCount = reader.int16()
     this.imageDataHasAlpha = layerCount < 0
     this.layerCount = Math.abs(layerCount)
     this.readLayerRecords()
     this.readChannelImageDatas()
+
+    reader.popOffset()
+    reader.skip(len)
   }
 
   readLayerRecords() {
@@ -169,11 +179,14 @@ class PSDReader {
 
   readLayerRecord(): PSDLayerRecord {
     const {reader} = this
+
     const top = reader.uint32()
     const left = reader.uint32()
     const bottom = reader.uint32()
     const right = reader.uint32()
+
     const rect = new Rect(new Vec2(left, top), new Vec2(right, bottom))
+
     const channelCount = reader.uint16()
     const channelInfos: PSDChannelInfo[] = []
     for (let i = 0; i < channelCount; ++i) {
@@ -182,23 +195,29 @@ class PSDReader {
         dataLength: reader.uint32(),
       })
     }
+
     const blendModeSig = reader.ascii(4)
     if (blendModeSig !== '8BIM') {
       throw new Error('Blend mode signature is wrong')
     }
+
     const blendMode = reader.ascii(4) as PSDBlendModeKey
     const opacity = reader.uint8() / 255
     const clipping = reader.uint8() === 1
     const flags = reader.uint8()
     const transparencyProtected = (flags & 1) !== 0
     const visible = (flags & (1 << 1)) === 0
+
     reader.skip(1) // filler
+
     const extraDataFieldLength = reader.uint32()
     reader.pushOffset()
+
     this.readLayerMaskData()
     this.readLayerBlendingRangesData()
     const name = reader.pascalString(4)
     const {sectionType, unicodeName} = this.readAdditionalLayerInfo()
+
     reader.popOffset()
     reader.skip(extraDataFieldLength)
 
@@ -270,6 +289,7 @@ class PSDReader {
       return reader.buffer(length - 2)
     } else if (compression === PSDCompression.RLE) {
       reader.pushOffset()
+
       const scanlineLengths: number[] = []
       const {width, height} = rect
       const data = Buffer.alloc(width * height)
@@ -281,6 +301,7 @@ class PSDReader {
         const dst = data.slice(y * width, (y + 1) * width)
         decodePackBits(src, dst)
       }
+
       reader.popOffset()
       reader.skip(length - 2)
       return data
