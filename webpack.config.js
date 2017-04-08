@@ -96,7 +96,7 @@ module.exports = {
     new webpack.NamedModulesPlugin(),
     require("webpack-fail-plugin"),
   ],
-  devtool: "eval-cheap-module-source-map",
+  devtool: "inline-source-map",
   devServer: {
     contentBase: './dist',
     port: 23000,
