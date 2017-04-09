@@ -46,9 +46,9 @@ class PSDBinaryWriter {
     this.offset += 2
   }
   uint32(value: number) {
-    this.grow(this.offset + 1)
+    this.grow(this.offset + 4)
     this.data.writeUInt32BE(value, this.offset)
-    this.offset += 1
+    this.offset += 4
   }
   ascii(str: string, len: number) {
     this.grow(this.offset + len)
