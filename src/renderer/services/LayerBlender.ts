@@ -25,9 +25,7 @@ function makeBlendShader(blendOp: string) {
       uniform bool clipping;
       uniform bool startClipping;
 
-      vec3 blendOp(vec3 src, vec3 dst) {
-        ${blendOp}
-      }
+      ${blendOp}
 
       vec3 getColor(vec4 pixel) {
         return pixel.a < 0.0001 ? vec3(0.0) : pixel.rgb / pixel.a;
@@ -54,11 +52,124 @@ function makeBlendShader(blendOp: string) {
 
 const blendOps = new Map<LayerBlendMode, string>([
   ['plus', `
-    return src + dst;
+    vec3 blendOp(vec3 src, vec3 dst) {
+      return src + dst;
+    }
   `],
   ['multiply', `
-    return src * dst;
-  `]
+    vec3 blendOp(vec3 src, vec3 dst) {
+      return src * dst;
+    }
+  `],
+  ['screen', `
+    vec3 blendOp(vec3 src, vec3 dst) {
+      return src + dst - (src * dst);
+    }
+  `],
+  ['overlay', `
+    float singleOp(float src, float dst) {
+      if (dst <= 0.5) {
+        return 2.0 * src * dst;
+      } else {
+        return 1.0 - 2.0 * (1.0 - dst) * (1.0 - src);
+      }
+    }
+    vec3 blendOp(vec3 src, vec3 dst) {
+      return vec3(
+        singleOp(src.r, dst.r),
+        singleOp(src.g, dst.g),
+        singleOp(src.b, dst.b)
+      );
+    }
+  `],
+  ['darken', `
+    vec3 blendOp(vec3 src, vec3 dst) {
+      return min(src, dst);
+    }
+  `],
+  ['lighten', `
+    vec3 blendOp(vec3 src, vec3 dst) {
+      return max(src, dst);
+    }
+  `],
+  ['color-dodge', `
+    float singleOp(float src, float dst) {
+      if (src > 0.999) {
+        return 1.0;
+      } else {
+        return min(1.0, dst / (1.0 - src));
+      }
+    }
+    vec3 blendOp(vec3 src, vec3 dst) {
+      return vec3(
+        singleOp(src.r, dst.r),
+        singleOp(src.g, dst.g),
+        singleOp(src.b, dst.b)
+      );
+    }
+  `],
+  ['color-burn', `
+    float singleOp(float src, float dst) {
+      if (src < 0.001) {
+        return 0.0;
+      } else {
+        return 1.0 - min(1.0, (1.0 - dst) / src);
+      }
+    }
+    vec3 blendOp(vec3 src, vec3 dst) {
+      return vec3(
+        singleOp(src.r, dst.r),
+        singleOp(src.g, dst.g),
+        singleOp(src.b, dst.b)
+      );
+    }
+  `],
+  ['hard-light', `
+    float singleOp(float src, float dst) {
+      if (src <= 0.5) {
+        return 2.0 * src * dst;
+      } else {
+        return 1.0 - 2.0 * (1.0 - dst) * (1.0 - src);
+      }
+    }
+    vec3 blendOp(vec3 src, vec3 dst) {
+      return vec3(
+        singleOp(src.r, dst.r),
+        singleOp(src.g, dst.g),
+        singleOp(src.b, dst.b)
+      );
+    }
+  `],
+  ['soft-light', `
+    float singleOp(float src, float dst) {
+      if (src <= 0.5) {
+        return dst - (1.0 - 2.0 * src) * dst * (1.0 - dst);
+      } else {
+        if (dst <= 0.25) {
+          return dst + (2.0 * src - 1.0) * (4.0 * dst * (4.0 * dst + 1.0) * (dst - 1.0) + 7.0 * dst);
+        } else {
+          return dst + (2.0 * src - 1.0) * (sqrt(dst) - dst);
+        }
+      }
+    }
+    vec3 blendOp(vec3 src, vec3 dst) {
+      return vec3(
+        singleOp(src.r, dst.r),
+        singleOp(src.g, dst.g),
+        singleOp(src.b, dst.b)
+      );
+    }
+  `],
+  ['difference', `
+    vec3 blendOp(vec3 src, vec3 dst) {
+      return abs(dst - src);
+    }
+  `],
+  ['exclusion', `
+    vec3 blendOp(vec3 src, vec3 dst) {
+      return src + dst - 2.0 * src * dst;
+    }
+  `],
 ])
 
 const tileShape = new RectShape(context, {

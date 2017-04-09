@@ -4,7 +4,37 @@ import Picture from './Picture'
 import TiledTexture, {TiledTextureData} from './TiledTexture'
 
 export
-type LayerBlendMode = 'normal' | 'plus' | 'multiply' // TODO: add more
+type LayerBlendMode
+  = 'normal'
+  | 'plus'
+  | 'multiply'
+  | 'screen'
+  | 'overlay'
+  | 'darken'
+  | 'lighten'
+  | 'color-dodge'
+  | 'color-burn'
+  | 'hard-light'
+  | 'soft-light'
+  | 'difference'
+  | 'exclusion'
+
+export
+const layerBlendModes: LayerBlendMode[] = [
+  'normal',
+  'plus',
+  'multiply',
+  'screen',
+  'overlay',
+  'darken',
+  'lighten',
+  'color-dodge',
+  'color-burn',
+  'hard-light',
+  'soft-light',
+  'difference',
+  'exclusion',
+]
 
 export
 interface LayerProps {

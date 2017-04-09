@@ -2,19 +2,23 @@ import {action} from 'mobx'
 import {observer} from 'mobx-react'
 import * as React from 'react'
 import {ChangeLayerPropsCommand} from '../commands/LayerCommand'
-import Layer, {LayerBlendMode} from '../models/Layer'
+import Layer, {LayerBlendMode, layerBlendModes} from '../models/Layer'
 import RangeSlider from './components/RangeSlider'
-
-const blendModes: LayerBlendMode[] = [
-  'normal',
-  'plus',
-  'multiply'
-]
 
 const blendModeTexts = new Map<LayerBlendMode, string>([
   ['normal', 'Normal'],
   ['plus', 'Plus'],
   ['multiply', 'Multiply'],
+  ['screen', 'Screen'],
+  ['overlay', 'Overlay'],
+  ['darken', 'Darken'],
+  ['lighten', 'Lighten'],
+  ['color-dodge', 'Color Dodge'],
+  ['color-burn', 'Color Burn'],
+  ['hard-light', 'Hard Light'],
+  ['soft-light', 'Soft Light'],
+  ['difference', 'Difference'],
+  ['exclusion', 'Exclusion'],
 ])
 
 interface LayerDetailProps {
@@ -81,7 +85,7 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
         <div>
           <label>Blend</label>
           <select className="Select" value={blendMode} onChange={this.onBlendModeChange}>
-            {blendModes.map(mode => <option key={mode} value={mode}>{blendModeTexts.get(mode)}</option>)}
+            {layerBlendModes.map(mode => <option key={mode} value={mode}>{blendModeTexts.get(mode)}</option>)}
           </select>
         </div>
         <div>
