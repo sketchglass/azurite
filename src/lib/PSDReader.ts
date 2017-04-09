@@ -1,6 +1,17 @@
 import * as iconv from 'iconv-lite'
 import {Rect, Vec2} from 'paintvec'
-import {PSDColorMode, PSDLayerRecord, PSDChannelInfo, PSDBlendModeKey, PSDSectionType, PSDCompression} from './PSDTypes'
+import {
+  PSDColorMode,
+  PSDLayerRecord,
+  PSDChannelInfo,
+  PSDBlendModeKey,
+  PSDSectionType,
+  PSDCompression,
+  PSDImageResourceID,
+  PSDResolutionUnit,
+  PSDDimensionUnit,
+  PSDResolutionInfo,
+} from './PSDTypes'
 
 class PSDBinaryReader {
   offset = 0
@@ -100,6 +111,7 @@ class PSDReader {
   width: number
   depth: number
   colorMode: PSDColorMode
+  resolutionInfo: PSDResolutionInfo
   layerCount: number
   imageDataHasAlpha: boolean
   layerRecords: PSDLayerRecord[] = []
@@ -142,7 +154,42 @@ class PSDReader {
   readImageResouces() {
     const {reader} = this
     const len = reader.uint32()
+    reader.pushOffset()
+
+    while (true) {
+      const signature = reader.ascii(4)
+      if (signature !== '8BIM') {
+        break
+      }
+      const id = reader.uint16()
+      const name = reader.pascalString(2)
+      const size = reader.uint32()
+      reader.pushOffset()
+      if (id === PSDImageResourceID.ResolutionInfo) {
+        this.resolutionInfo = this.readResolutionInfo()
+      }
+      reader.popOffset()
+      reader.skip(size)
+      console.log(id, name)
+    }
+
+    reader.popOffset()
     reader.skip(len) // TODO
+  }
+
+  readResolutionInfo(): PSDResolutionInfo {
+    const {reader} = this
+    const hres = reader.uint32() / 0x10000
+    const hresUnit = reader.uint16() as PSDResolutionUnit
+    const widthUnit = reader.uint16() as PSDDimensionUnit
+    const vres = reader.uint32() / 0x10000
+    const vresUnit = reader.uint16() as PSDResolutionUnit
+    const heightUnit = reader.uint16() as PSDDimensionUnit
+    const resolutionInfo = {
+      hres, hresUnit, widthUnit, vres, vresUnit, heightUnit
+    }
+    console.log(resolutionInfo)
+    return resolutionInfo
   }
 
   readLayerAndMasInformation() {

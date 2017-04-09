@@ -10,6 +10,32 @@ enum PSDColorMode {
   Multichannel = 7,
 }
 
+export enum PSDImageResourceID {
+  ResolutionInfo = 1005,
+}
+
+export enum PSDResolutionUnit {
+  PixelPerInch = 1,
+  PixelPerCM = 2,
+}
+
+export enum PSDDimensionUnit {
+  Inch = 1,
+  CM = 2,
+  Point = 3,
+  Pica = 4,
+  Column = 5,
+}
+
+export interface PSDResolutionInfo {
+  hres: number
+  hresUnit: PSDResolutionUnit
+  widthUnit: PSDDimensionUnit
+  vres: number
+  vresUnit: PSDResolutionUnit
+  heightUnit: PSDDimensionUnit
+}
+
 export enum PSDSectionType {
   Layer = 0,
   OpenFolder = 1,
