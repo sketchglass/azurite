@@ -25,29 +25,38 @@ import Layer, {ImageLayer, GroupLayer, LayerBlendMode} from '../models/Layer'
 import Picture from '../models/Picture'
 import PictureFormat from './PictureFormat'
 
+const blendModePairs: [PSDBlendModeKey, LayerBlendMode][] = [
+  ['norm', 'normal'],
+  ['lddg', 'plus'],
+  ['mul ', 'multiply'],
+  ['scrn', 'screen'],
+  ['over', 'overlay'],
+  ['dark', 'darken'],
+  ['lite', 'lighten'],
+  ['div ', 'color-dodge'],
+  ['idiv', 'color-burn'],
+  ['hLit', 'hard-light'],
+  ['sLit', 'soft-light'],
+  ['diff', 'difference'],
+  ['smud', 'exclusion'],
+]
+
 function parseBlendMode(mode: PSDBlendModeKey): LayerBlendMode {
-  switch (mode) {
-    default:
-    case 'norm':
-      return 'normal'
-    case 'mul ':
-      return 'multiply'
-    case 'lddg':
-      return 'plus'
-    // TODO: add more
+  for (const pair of blendModePairs) {
+    if (pair[0] === mode) {
+      return pair[1]
+    }
   }
+  return 'normal'
 }
 
 function emitBlendMode(mode: LayerBlendMode): PSDBlendModeKey {
-  switch (mode) {
-    default:
-    case 'normal':
-      return 'norm'
-    case 'multiply':
-      return 'mul '
-    case 'plus':
-      return 'lddg'
+  for (const pair of blendModePairs) {
+    if (pair[1] === mode) {
+      return pair[0]
+    }
   }
+  return 'norm'
 }
 
 @addPictureFormat
