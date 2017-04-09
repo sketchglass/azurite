@@ -3,6 +3,15 @@ import {observable, computed, reaction} from 'mobx'
 import * as path from 'path'
 import IPCChannels from '../../common/IPCChannels'
 import {HSVColor} from '../../lib/Color'
+import Picture from '../models/Picture'
+import {PictureSave} from '../services/PictureSave'
+import {brushPresetManager} from './BrushPresetManager'
+import {config, ConfigValues} from './Config'
+import {PictureState} from './PictureState'
+import {toolManager} from './ToolManager'
+
+import '../formats/PictureFormatCanvasImage'
+
 import '../actions/AppActions'
 import '../actions/CanvasActions'
 import '../actions/EditActions'
@@ -12,12 +21,6 @@ import '../actions/SelectionAction'
 import '../actions/ViewActions'
 import '../formats/PictureFormatCanvasImage'
 import '../formats/PictureFormatPSD'
-import Picture from '../models/Picture'
-import {PictureSave} from '../services/PictureSave'
-import {brushPresetManager} from './BrushPresetManager'
-import {config, ConfigValues} from './Config'
-import {PictureState} from './PictureState'
-import {toolManager} from './ToolManager'
 
 export
 class AppState {
