@@ -331,12 +331,19 @@ class PSDReader {
 
   readChannelImageData(length: number, rect: Rect) {
     const {reader} = this
+    reader.pushOffset()
+    const data = this.readImageData(rect)
+    reader.popOffset()
+    reader.skip(length)
+    return data
+  }
+
+  readImageData(rect: Rect) {
+    const {reader} = this
     const compression = reader.uint16() as PSDCompression
     if (compression === PSDCompression.Raw) {
-      return reader.buffer(length - 2)
+      return reader.buffer(rect.width * rect.height)
     } else if (compression === PSDCompression.RLE) {
-      reader.pushOffset()
-
       const scanlineLengths: number[] = []
       const {width, height} = rect
       const data = Buffer.alloc(width * height)
@@ -348,9 +355,6 @@ class PSDReader {
         const dst = data.slice(y * width, (y + 1) * width)
         decodePackBits(src, dst)
       }
-
-      reader.popOffset()
-      reader.skip(length - 2)
       return data
     } else {
       throw new Error('Zip-encoded channel data is not supported')
