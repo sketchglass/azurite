@@ -11,6 +11,8 @@ import {
   PSDResolutionUnit,
   PSDDimensionUnit,
   PSDResolutionInfo,
+  PSDDepth,
+  PSDData,
 } from './PSDTypes'
 
 class PSDBinaryReader {
@@ -106,26 +108,20 @@ function decodePackBits(src: Buffer, dst: Buffer) {
 export default
 class PSDReader {
   reader = new PSDBinaryReader(this.data)
-  channelCount: number
-  height: number
-  width: number
-  depth: number
-  colorMode: PSDColorMode
-  resolutionInfo: PSDResolutionInfo
-  layerCount: number
-  imageDataHasAlpha: boolean
-  layerRecords: PSDLayerRecord[] = []
-  imageData: Buffer
 
   constructor(public data: Buffer) {
   }
 
-  read() {
-    this.readFileHeader()
+  read(): PSDData {
+    const {channelCount, height, width, depth, colorMode} = this.readFileHeader()
     this.readColorModeData()
-    this.readImageResouces()
-    this.readLayerAndMasInformation()
-    this.readImageDataSection()
+    const {resolutionInfo} =  this.readImageResouces()
+    const {imageDataHasAlpha, layerRecords} = this.readLayerAndMasInformation()
+    const imageData = this.readImageDataSection(width, height, channelCount)
+    return {
+      channelCount, height, width, depth, colorMode, resolutionInfo,
+      imageDataHasAlpha, layerRecords, imageData
+    }
   }
 
   readFileHeader() {
@@ -140,11 +136,13 @@ class PSDReader {
       throw new Error('Unsupported version')
     }
     reader.skip(6)
-    this.channelCount = reader.uint16()
-    this.height = reader.uint32()
-    this.width = reader.uint32()
-    this.depth = reader.uint16()
-    this.colorMode = reader.uint16()
+    return {
+      channelCount: reader.uint16(),
+      height: reader.uint32(),
+      width: reader.uint32(),
+      depth: reader.uint16() as PSDDepth,
+      colorMode: reader.uint16() as PSDColorMode,
+    }
   }
 
   readColorModeData() {
@@ -158,6 +156,8 @@ class PSDReader {
     const len = reader.uint32()
     reader.pushOffset()
 
+    let resolutionInfo: PSDResolutionInfo|undefined
+
     while (true) {
       const signature = reader.ascii(4)
       if (signature !== '8BIM') {
@@ -168,7 +168,7 @@ class PSDReader {
       const size = reader.uint32()
       reader.pushOffset()
       if (id === PSDImageResourceID.ResolutionInfo) {
-        this.resolutionInfo = this.readResolutionInfo()
+        resolutionInfo = this.readResolutionInfo()
       }
       reader.popOffset()
       reader.skip(size)
@@ -177,6 +177,8 @@ class PSDReader {
 
     reader.popOffset()
     reader.skip(len) // TODO
+
+    return {resolutionInfo}
   }
 
   readResolutionInfo(): PSDResolutionInfo {
@@ -199,10 +201,12 @@ class PSDReader {
     const len = reader.uint32()
     reader.pushOffset()
 
-    this.readLayerInfo()
+    const result = this.readLayerInfo()
 
     reader.popOffset()
     reader.skip(len)
+
+    return result
   }
 
   readLayerInfo() {
@@ -211,19 +215,22 @@ class PSDReader {
     reader.pushOffset()
 
     const layerCount = reader.int16()
-    this.imageDataHasAlpha = layerCount < 0
-    this.layerCount = Math.abs(layerCount)
-    this.readLayerRecords()
-    this.readChannelImageDatas()
+    const imageDataHasAlpha = layerCount < 0
+    const layerRecords = this.readLayerRecords(Math.abs(layerCount))
+    this.readChannelImageDatas(layerRecords)
 
     reader.popOffset()
     reader.skip(len)
+
+    return {imageDataHasAlpha, layerRecords}
   }
 
-  readLayerRecords() {
-    for (let i = 0; i < this.layerCount; ++i) {
-      this.layerRecords.push(this.readLayerRecord())
+  readLayerRecords(layerCount: number) {
+    const layerRecords: PSDLayerRecord[] = []
+    for (let i = 0; i < layerCount; ++i) {
+      layerRecords.push(this.readLayerRecord())
     }
+    return layerRecords
   }
 
   readLayerRecord(): PSDLayerRecord {
@@ -322,8 +329,8 @@ class PSDReader {
     return {sectionType, unicodeName}
   }
 
-  readChannelImageDatas() {
-    for (const record of this.layerRecords) {
+  readChannelImageDatas(layerRecords: PSDLayerRecord[]) {
+    for (const record of layerRecords) {
       for (const channelInfo of record.channelInfos) {
         const data = this.readChannelImageData(channelInfo.dataLength, record.rect.width, record.rect.height)
         record.channelDatas.push(data)
@@ -362,7 +369,7 @@ class PSDReader {
     }
   }
 
-  readImageDataSection() {
-    this.imageData = this.readImageData(this.width, this.height * this.channelCount)
+  readImageDataSection(width: number, height: number, channelCount: number) {
+    return this.readImageData(width, height * channelCount)
   }
 }

@@ -98,24 +98,29 @@ class PictureFormatPSD extends PictureFormat {
 
   async importPicture(buffer: Buffer, name: string) {
     const reader = new PSDReader(buffer)
-    reader.read()
+    const result = reader.read()
 
-    if (reader.colorMode !== PSDColorMode.RGB) {
+    if (result.colorMode !== PSDColorMode.RGB) {
       // improve error message
       throw new Error('Only RGB is supported')
     }
-    const {depth} = reader
+    const {depth} = result
     if (depth !== 8 && depth !== 16 && depth !== 32) {
       throw new Error('Binary image is not supported')
     }
 
-    const res = reader.resolutionInfo.hres
-    const resUnit = reader.resolutionInfo.hresUnit
-    const dpi = Math.round(resUnit === PSDResolutionUnit.PixelPerCM ? res * 2.56 : res)
+    let dpi: number
+    if (result.resolutionInfo) {
+      const res = result.resolutionInfo.hres
+      const resUnit = result.resolutionInfo.hresUnit
+      dpi = Math.round(resUnit === PSDResolutionUnit.PixelPerCM ? res * 2.56 : res)
+    } else {
+      dpi = 72
+    }
 
-    const picture = new Picture({width: reader.width, height: reader.height, dpi})
+    const picture = new Picture({width: result.width, height: result.height, dpi})
     let groupStack = [picture.rootLayer]
-    for (const layerRecord of [...reader.layerRecords].reverse()) {
+    for (const layerRecord of [...result.layerRecords].reverse()) {
       const topGroup = groupStack[groupStack.length - 1]
       const {sectionType, name, opacity, clipping, transparencyProtected, visible, blendMode} = layerRecord
       const layerProps = {
@@ -151,19 +156,19 @@ class PictureFormatPSD extends PictureFormat {
 
   async importLayer(buffer: Buffer, name: string, picture: Picture): Promise<Layer> {
     const reader = new PSDReader(buffer)
-    reader.read()
+    const result = reader.read()
 
-    if (reader.colorMode !== PSDColorMode.RGB) {
+    if (result.colorMode !== PSDColorMode.RGB) {
       // improve error message
       throw new Error('Only RGB is supported')
     }
-    const {depth} = reader
+    const {depth} = result
     if (depth !== 8 && depth !== 16 && depth !== 32) {
       throw new Error('Binary image is not supported')
     }
 
-    const size = new Vec2(reader.width, reader.height)
-    const data = parseImageData(depth, reader.channelCount, size, reader.imageData)
+    const size = new Vec2(result.width, result.height)
+    const data = parseImageData(depth, result.channelCount, size, result.imageData)
     const texture = new Texture(context, {size, data, pixelType: 'float'})
 
     const layer = new ImageLayer(picture, {name})

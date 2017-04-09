@@ -1,7 +1,6 @@
 import {Rect} from 'paintvec'
 
-export
-enum PSDColorMode {
+export enum PSDColorMode {
   Bitmap = 0,
   Grayscale = 1,
   Indexed = 2,
@@ -73,14 +72,12 @@ export type PSDBlendModeKey
   | 'colr' // color
   | 'lum ' // luminosity
 
-export
-interface PSDChannelInfo {
+export interface PSDChannelInfo {
   id: number
   dataLength: number
 }
 
-export
-interface PSDLayerRecord {
+export interface PSDLayerRecord {
   name: string
   opacity: number
   clipping: boolean
@@ -99,4 +96,18 @@ enum PSDCompression {
   RLE = 1,
   ZipWithoutPrediction = 2,
   ZipWithPrediction = 3,
+}
+
+export type PSDDepth = 1|8|16|32
+
+export interface PSDData {
+  channelCount: number
+  height: number
+  width: number
+  depth: PSDDepth
+  colorMode: PSDColorMode
+  resolutionInfo?: PSDResolutionInfo
+  imageDataHasAlpha: boolean
+  layerRecords: PSDLayerRecord[]
+  imageData: Buffer
 }
