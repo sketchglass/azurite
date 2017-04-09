@@ -1,5 +1,5 @@
 import {Texture} from 'paintgl'
-import {Transform} from 'paintvec'
+import {Vec2} from 'paintvec'
 import PSDReader from '../../lib/PSDReader'
 import {PSDColorMode, PSDSectionType, PSDBlendModeKey, PSDLayerRecord, PSDResolutionUnit} from '../../lib/PSDTypes'
 import {addPictureFormat} from '../app/FormatRegistry'
@@ -21,7 +21,7 @@ function parseBlendMode(mode: PSDBlendModeKey): LayerBlendMode {
   }
 }
 
-function parseChannelData(depth: number, layerRecord: PSDLayerRecord) {
+function parseChannelData(depth: 8|16|32, layerRecord: PSDLayerRecord) {
   const {channelInfos, channelDatas, rect} = layerRecord
   const size = rect.width * rect.height
   const data = new Float32Array(size * 4)
@@ -61,6 +61,34 @@ function parseChannelData(depth: number, layerRecord: PSDLayerRecord) {
   return data
 }
 
+function parseImageData(depth: 8|16|32, channelCount: number, size: Vec2, src: Buffer) {
+  const area = size.width * size.height
+  const data = new Float32Array(area * 4)
+  for (let ch = 0; ch < 4; ++ch) {
+    const offset = area * ch
+    if (ch < channelCount) {
+      if (depth === 32) {
+        for (let i = 0; i < area; ++i) {
+          data[i * 4 + ch] = src.readUInt32BE((offset + i) * 4) / 0xFFFFFFFF
+        }
+      } else if (depth === 16) {
+        for (let i = 0; i < area; ++i) {
+          data[i * 4 + ch] = src.readUInt16BE((offset + i) * 2) / 0xFFFF
+        }
+      } else {
+        for (let i = 0; i < area; ++i) {
+          data[i * 4 + ch] = src.readUInt8(offset + i) / 0xFF
+        }
+      }
+    } else {
+      for (let i = 0; i < area; ++i) {
+        data[i * 4 + ch] = 1
+      }
+    }
+  }
+  return data
+}
+
 @addPictureFormat
 export default
 class PictureFormatPSD extends PictureFormat {
@@ -76,7 +104,8 @@ class PictureFormatPSD extends PictureFormat {
       // improve error message
       throw new Error('Only RGB is supported')
     }
-    if (![8, 16, 32].includes(reader.depth)) {
+    const {depth} = reader
+    if (depth !== 8 && depth !== 16 && depth !== 32) {
       throw new Error('Binary image is not supported')
     }
 
@@ -99,16 +128,13 @@ class PictureFormatPSD extends PictureFormat {
       if (sectionType === PSDSectionType.Layer) {
         const layer = new ImageLayer(picture, layerProps)
         const {rect} = layerRecord
-        const data = parseChannelData(reader.depth, layerRecord)
+        const data = parseChannelData(depth, layerRecord)
         const texture = new Texture(context, {
           size: rect.size,
           pixelType: 'float',
           data,
         })
-        layer.tiledTexture.drawTexture(texture, {
-          transform: Transform.translate(rect.topLeft),
-          blendMode: 'src',
-        })
+        layer.tiledTexture.putTexture(new Vec2(0), texture)
         topGroup.children.push(layer)
       } else if (sectionType === PSDSectionType.OpenFolder || sectionType === PSDSectionType.ClosedFolder) {
         const group = new GroupLayer(picture, layerProps, [])
@@ -124,8 +150,25 @@ class PictureFormatPSD extends PictureFormat {
   }
 
   async importLayer(buffer: Buffer, name: string, picture: Picture): Promise<Layer> {
-    // TODO
-    throw new Error('not implemented yet')
+    const reader = new PSDReader(buffer)
+    reader.read()
+
+    if (reader.colorMode !== PSDColorMode.RGB) {
+      // improve error message
+      throw new Error('Only RGB is supported')
+    }
+    const {depth} = reader
+    if (depth !== 8 && depth !== 16 && depth !== 32) {
+      throw new Error('Binary image is not supported')
+    }
+
+    const size = new Vec2(reader.width, reader.height)
+    const data = parseImageData(depth, reader.channelCount, size, reader.imageData)
+    const texture = new Texture(context, {size, data, pixelType: 'float'})
+
+    const layer = new ImageLayer(picture, {name})
+    layer.tiledTexture.putTexture(new Vec2(0), texture)
+    return layer
   }
   async export(picture: Picture) {
     // TODO
