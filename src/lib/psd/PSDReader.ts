@@ -109,12 +109,14 @@ function decodePackBits(src: Buffer, dst: Buffer) {
 export default
 class PSDReader {
   reader = new PSDBinaryReader(this.data)
+  depth: number
 
   constructor(public data: Buffer) {
   }
 
   read(): PSDData {
     const {channelCount, height, width, depth, colorMode} = this.readFileHeader()
+    this.depth = depth
     this.readColorModeData()
     const {resolutionInfo} =  this.readImageResouces()
     const {imageDataHasAlpha, layerRecords} = this.readLayerAndMasInformation()
@@ -352,7 +354,7 @@ class PSDReader {
     const {reader} = this
     const compression = reader.uint16() as PSDCompression
     if (compression === PSDCompression.Raw) {
-      return reader.buffer(width * height)
+      return reader.buffer(width * height * this.depth / 8)
     } else if (compression === PSDCompression.RLE) {
       const scanlineLengths: number[] = []
       const data = Buffer.alloc(width * height)
