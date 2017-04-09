@@ -185,7 +185,7 @@ class PictureFormatPSD extends PictureFormat {
         channelDatas,
       }
 
-      layerRecords.push(record)
+      layerRecords.unshift(record)
       if (layer instanceof GroupLayer) {
         layer.children.forEach(addLayerRecord)
       }
