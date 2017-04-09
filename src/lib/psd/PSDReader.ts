@@ -6,6 +6,7 @@ import {
   PSDChannelInfo,
   PSDBlendModeKey,
   PSDSectionType,
+  PSDAdditionalLayerInfoKey,
   PSDCompression,
   PSDImageResourceID,
   PSDResolutionUnit,
@@ -314,7 +315,7 @@ class PSDReader {
       if (signature !== '8BIM' && signature !== '8B64') {
         break
       }
-      const key = reader.ascii(4)
+      const key = reader.ascii(4) as PSDAdditionalLayerInfoKey
       const len = reader.uint32()
       reader.pushOffset()
       if (key === 'lsct') {

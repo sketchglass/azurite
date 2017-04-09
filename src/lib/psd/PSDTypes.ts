@@ -90,6 +90,10 @@ export interface PSDLayerRecord {
   channelDatas: Buffer[]
 }
 
+export type PSDAdditionalLayerInfoKey
+  = 'lsct'
+  | 'luni'
+
 export
 enum PSDCompression {
   Raw = 0,
