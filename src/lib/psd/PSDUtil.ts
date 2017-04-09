@@ -95,7 +95,7 @@ export function floatRGBAToChannelData16(src: Float32Array, width: number, heigh
   for (let ch = 0; ch < 4; ++ch) {
     const channelData = Buffer.alloc(area * 2)
     for (let i = 0; i < area; ++i) {
-      const value = Math.round(src[i * 4 + ch] * 0xFF)
+      const value = Math.round(src[i * 4 + ch] * 0xFFFF)
       channelData.writeUInt16BE(value, i * 2)
     }
     channelDatas.push(channelData)
@@ -110,7 +110,7 @@ export function floatRGBAToImageData16(src: Float32Array, width: number, height:
   for (let ch = 0; ch < 4; ++ch) {
     const offset = ch * area * 2
     for (let i = 0; i < area; ++i) {
-      const value = Math.round(src[i * 4 + ch] * 0xFF)
+      const value = Math.round(src[i * 4 + ch] * 0xFFFF)
       imageData.writeUInt16BE(value, offset + i * 2)
     }
   }
