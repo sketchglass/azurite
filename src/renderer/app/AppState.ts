@@ -11,6 +11,7 @@ import {PictureState} from './PictureState'
 import {toolManager} from './ToolManager'
 
 import '../formats/PictureFormatCanvasImage'
+import '../formats/PictureFormatPSD'
 
 import '../actions/AppActions'
 import '../actions/CanvasActions'
@@ -19,8 +20,6 @@ import '../actions/FileActions'
 import '../actions/LayerActions'
 import '../actions/SelectionAction'
 import '../actions/ViewActions'
-import '../formats/PictureFormatCanvasImage'
-import '../formats/PictureFormatPSD'
 
 export
 class AppState {
