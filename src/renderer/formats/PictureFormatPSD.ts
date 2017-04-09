@@ -1,7 +1,8 @@
 import {Texture} from 'paintgl'
 import {Vec2} from 'paintvec'
 import PSDReader from '../../lib/psd/PSDReader'
-import {PSDColorMode, PSDSectionType, PSDBlendModeKey, PSDLayerRecord, PSDResolutionUnit} from '../../lib/psd/PSDTypes'
+import {PSDColorMode, PSDSectionType, PSDBlendModeKey, PSDResolutionUnit} from '../../lib/psd/PSDTypes'
+import {channelDataToFloatRGBA, imageDataToFloatRGBA} from '../../lib/psd/PSDUtil'
 import {addPictureFormat} from '../app/FormatRegistry'
 import {context} from '../GLContext'
 import Layer, {ImageLayer, GroupLayer, LayerBlendMode} from '../models/Layer'
@@ -19,74 +20,6 @@ function parseBlendMode(mode: PSDBlendModeKey): LayerBlendMode {
       return 'plus'
     // TODO: add more
   }
-}
-
-function parseChannelData(depth: 8|16|32, layerRecord: PSDLayerRecord) {
-  const {channelInfos, channelDatas, rect} = layerRecord
-  const size = rect.width * rect.height
-  const data = new Float32Array(size * 4)
-
-  for (const [i, channelInfo] of channelInfos.entries()) {
-    let offset: number
-    if (channelInfo.id >= 0) { // RGB
-      offset = channelInfo.id
-    } else if (channelInfo.id === -1) { // alpha
-      offset = 3
-    } else {
-      continue
-    }
-    const channelData = channelDatas[i]
-    if (depth === 32) {
-      for (let i = 0; i < size; ++i) {
-        data[i * 4 + offset] = channelData.readUInt32BE(i * 4) / 0xFFFFFFFF
-      }
-    } else if (depth === 16) {
-      for (let i = 0; i < size; ++i) {
-        data[i * 4 + offset] = channelData.readUInt16BE(i * 2) / 0xFFFF
-      }
-    } else {
-      for (let i = 0; i < size; ++i) {
-        data[i * 4 + offset] = channelData.readUInt8(i) / 0xFF
-      }
-    }
-  }
-
-  for (let i = 0; i < size; ++i) {
-    const a = data[i * 4 + 3]
-    data[i * 4] *= a
-    data[i * 4 + 1] *= a
-    data[i * 4 + 2] *= a
-  }
-
-  return data
-}
-
-function parseImageData(depth: 8|16|32, channelCount: number, size: Vec2, src: Buffer) {
-  const area = size.width * size.height
-  const data = new Float32Array(area * 4)
-  for (let ch = 0; ch < 4; ++ch) {
-    const offset = area * ch
-    if (ch < channelCount) {
-      if (depth === 32) {
-        for (let i = 0; i < area; ++i) {
-          data[i * 4 + ch] = src.readUInt32BE((offset + i) * 4) / 0xFFFFFFFF
-        }
-      } else if (depth === 16) {
-        for (let i = 0; i < area; ++i) {
-          data[i * 4 + ch] = src.readUInt16BE((offset + i) * 2) / 0xFFFF
-        }
-      } else {
-        for (let i = 0; i < area; ++i) {
-          data[i * 4 + ch] = src.readUInt8(offset + i) / 0xFF
-        }
-      }
-    } else {
-      for (let i = 0; i < area; ++i) {
-        data[i * 4 + ch] = 1
-      }
-    }
-  }
-  return data
 }
 
 @addPictureFormat
@@ -133,13 +66,13 @@ class PictureFormatPSD extends PictureFormat {
       if (sectionType === PSDSectionType.Layer) {
         const layer = new ImageLayer(picture, layerProps)
         const {rect} = layerRecord
-        const data = parseChannelData(depth, layerRecord)
+        const data = channelDataToFloatRGBA(result, layerRecord)
         const texture = new Texture(context, {
           size: rect.size,
           pixelType: 'float',
           data,
         })
-        layer.tiledTexture.putTexture(new Vec2(0), texture)
+        layer.tiledTexture.putTexture(rect.topLeft, texture)
         topGroup.children.push(layer)
       } else if (sectionType === PSDSectionType.OpenFolder || sectionType === PSDSectionType.ClosedFolder) {
         const group = new GroupLayer(picture, layerProps, [])
@@ -168,7 +101,7 @@ class PictureFormatPSD extends PictureFormat {
     }
 
     const size = new Vec2(result.width, result.height)
-    const data = parseImageData(depth, result.channelCount, size, result.imageData)
+    const data = imageDataToFloatRGBA(result)
     const texture = new Texture(context, {size, data, pixelType: 'float'})
 
     const layer = new ImageLayer(picture, {name})
