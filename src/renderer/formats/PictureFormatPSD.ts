@@ -1,7 +1,7 @@
 import {Texture} from 'paintgl'
 import {Transform} from 'paintvec'
 import PSDReader from '../../lib/PSDReader'
-import {PSDColorMode, PSDSectionType, PSDBlendModeKey, PSDLayerRecord} from '../../lib/PSDTypes'
+import {PSDColorMode, PSDSectionType, PSDBlendModeKey, PSDLayerRecord, PSDResolutionUnit} from '../../lib/PSDTypes'
 import {addPictureFormat} from '../app/FormatRegistry'
 import {context} from '../GLContext'
 import Layer, {ImageLayer, GroupLayer, LayerBlendMode} from '../models/Layer'
@@ -80,7 +80,11 @@ class PictureFormatPSD extends PictureFormat {
       throw new Error('Binary image is not supported')
     }
 
-    const picture = new Picture({width: reader.width, height: reader.height, dpi: 72})
+    const res = reader.resolutionInfo.hres
+    const resUnit = reader.resolutionInfo.hresUnit
+    const dpi = resUnit === PSDResolutionUnit.PixelPerCM ? res * 2.56 : res
+
+    const picture = new Picture({width: reader.width, height: reader.height, dpi})
     let groupStack = [picture.rootLayer]
     for (const layerRecord of [...reader.layerRecords].reverse()) {
       const topGroup = groupStack[groupStack.length - 1]
