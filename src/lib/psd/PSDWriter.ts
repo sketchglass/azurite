@@ -107,6 +107,10 @@ export default
 class PSDWriter {
   writer = new PSDBinaryWriter()
 
+  get data() {
+    return this.writer.data
+  }
+
   write(psd: PSDData) {
     this.writeFileHeader(psd)
     this.writeColorModeData()

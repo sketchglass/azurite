@@ -47,6 +47,7 @@ class PictureBlender {
     this.dirtiness.clear()
   }
 
+  // TODO: add half-float version
   getBlendedTexture() {
     this.renderNow()
     return this.blendedTexture

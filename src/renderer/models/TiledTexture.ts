@@ -1,4 +1,4 @@
-import {Color, Texture, DrawTarget, TextureDrawTarget, BlendMode, RectShape, ShapeModel, colorShader} from 'paintgl'
+import {Color, Texture, DrawTarget, TextureDrawTarget, BlendMode, RectShape, ShapeModel, colorShader, PixelType} from 'paintgl'
 import {Vec2, Rect, Transform} from 'paintvec'
 import * as zlib from 'zlib'
 import {float32ArrayTo16} from '../../lib/Float'
@@ -182,8 +182,11 @@ class TiledTexture {
     }
   }
 
-  cropToTexture(rect: Rect) {
-    const texture = new Texture(context, {size: rect.size, pixelType: 'half-float'})
+  cropToTexture(rect: Rect, opts: {pixelType?: PixelType} = {}) {
+    const texture = new Texture(context, {
+      size: rect.size,
+      pixelType: opts.pixelType || 'half-float'
+    })
     const drawTarget = new TextureDrawTarget(context, texture)
     this.drawToDrawTarget(drawTarget, {offset: rect.topLeft.neg(), blendMode: 'src'})
     drawTarget.dispose()

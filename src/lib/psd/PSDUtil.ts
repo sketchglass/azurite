@@ -9,6 +9,17 @@ function premultiply(dst: Float32Array, area: number) {
   }
 }
 
+function unmultiply(dst: Float32Array, area: number) {
+  for (let i = 0; i < area; ++i) {
+    const a = dst[i * 4 + 3]
+    if (a >= 0.001) {
+      dst[i * 4] /= a
+      dst[i * 4 + 1] /= a
+      dst[i * 4 + 2] /= a
+    }
+  }
+}
+
 function setChannelData(dst: Float32Array, depth: 8|16|32, area: number, ch: number, src: Buffer) {
   if (depth === 32) {
     for (let i = 0; i < area; ++i) {
@@ -75,4 +86,33 @@ function imageDataToFloatRGBA(psd: PSDData) {
 
   premultiply(dst, area)
   return dst
+}
+
+export function floatRGBAToChannelData16(src: Float32Array, width: number, height: number) {
+  const area = width * height
+  unmultiply(src, area)
+  const channelDatas: Buffer[] = []
+  for (let ch = 0; ch < 4; ++ch) {
+    const channelData = Buffer.alloc(area * 2)
+    for (let i = 0; i < area; ++i) {
+      const value = Math.round(src[i * 4 + ch] * 0xFF)
+      channelData.writeUInt16BE(value, i * 2)
+    }
+    channelDatas.push(channelData)
+  }
+  return channelDatas
+}
+
+export function floatRGBAToImageData16(src: Float32Array, width: number, height: number) {
+  const area = width * height
+  unmultiply(src, area)
+  const imageData = Buffer.alloc(area * 2 * 4)
+  for (let ch = 0; ch < 4; ++ch) {
+    const offset = ch * area * 2
+    for (let i = 0; i < area; ++i) {
+      const value = Math.round(src[i * 4 + ch] * 0xFF)
+      imageData.writeUInt16BE(value, offset + i * 2)
+    }
+  }
+  return imageData
 }

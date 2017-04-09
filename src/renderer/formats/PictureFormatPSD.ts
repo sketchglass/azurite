@@ -1,10 +1,26 @@
-import {Texture} from 'paintgl'
-import {Vec2} from 'paintvec'
+import {Texture, TextureDrawTarget} from 'paintgl'
+import {Vec2, Rect} from 'paintvec'
 import PSDReader from '../../lib/psd/PSDReader'
-import {PSDColorMode, PSDSectionType, PSDBlendModeKey, PSDResolutionUnit} from '../../lib/psd/PSDTypes'
-import {channelDataToFloatRGBA, imageDataToFloatRGBA} from '../../lib/psd/PSDUtil'
+import {
+  PSDColorMode,
+  PSDSectionType,
+  PSDBlendModeKey,
+  PSDResolutionInfo,
+  PSDResolutionUnit,
+  PSDDimensionUnit,
+  PSDLayerRecord,
+  PSDData,
+} from '../../lib/psd/PSDTypes'
+import {
+  channelDataToFloatRGBA,
+  imageDataToFloatRGBA,
+  floatRGBAToChannelData16,
+  floatRGBAToImageData16,
+} from '../../lib/psd/PSDUtil'
+import PSDWriter from '../../lib/psd/PSDWriter'
 import {addPictureFormat} from '../app/FormatRegistry'
 import {context} from '../GLContext'
+import {drawTexture} from '../GLUtil'
 import Layer, {ImageLayer, GroupLayer, LayerBlendMode} from '../models/Layer'
 import Picture from '../models/Picture'
 import PictureFormat from './PictureFormat'
@@ -19,6 +35,18 @@ function parseBlendMode(mode: PSDBlendModeKey): LayerBlendMode {
     case 'lddg':
       return 'plus'
     // TODO: add more
+  }
+}
+
+function emitBlendMode(mode: LayerBlendMode): PSDBlendModeKey {
+  switch (mode) {
+    default:
+    case 'normal':
+      return 'norm'
+    case 'multiply':
+      return 'mul '
+    case 'plus':
+      return 'lddg'
   }
 }
 
@@ -108,8 +136,97 @@ class PictureFormatPSD extends PictureFormat {
     layer.tiledTexture.putTexture(new Vec2(0), texture)
     return layer
   }
+
   async export(picture: Picture) {
-    // TODO
-    return Buffer.alloc(0)
+    const writer = new PSDWriter()
+
+    const layerRecords: PSDLayerRecord[] = []
+
+    const addLayerRecord = (layer: Layer) => {
+      let rect = Rect.fromWidthHeight(0, 0, 0, 0)
+      let sectionType = PSDSectionType.Layer
+      let channelDatas: Buffer[] = Array(4).fill(Buffer.alloc(0))
+
+      if (layer instanceof ImageLayer) {
+        const boundingRect = layer.tiledTexture.boundingRect()
+        if (boundingRect) {
+          rect = boundingRect
+          const texture = layer.tiledTexture.cropToTexture(rect, {pixelType: 'float'})
+          const drawTarget = new TextureDrawTarget(context, texture)
+          const data = new Float32Array(rect.width * rect.height * 4)
+          drawTarget.readPixels(new Rect(new Vec2(), rect.size), data)
+          drawTarget.dispose()
+          texture.dispose()
+          channelDatas = floatRGBAToChannelData16(data, rect.width, rect.height)
+        }
+      } else if (layer instanceof GroupLayer) {
+        if (layer.collapsed) {
+          sectionType = PSDSectionType.ClosedFolder
+        } else {
+          sectionType = PSDSectionType.OpenFolder
+        }
+      }
+
+      const record: PSDLayerRecord = {
+        name: layer.name,
+        opacity: layer.opacity,
+        clipping: layer.clippingGroup,
+        transparencyProtected: layer.preserveOpacity,
+        visible: layer.visible,
+        rect,
+        blendMode: emitBlendMode(layer.blendMode),
+        sectionType,
+        channelInfos: [
+          {id: 0, dataLength: 0},
+          {id: 1, dataLength: 0},
+          {id: 2, dataLength: 0},
+          {id: -1, dataLength: 0},
+        ],
+        channelDatas,
+      }
+
+      layerRecords.push(record)
+      if (layer instanceof GroupLayer) {
+        layer.children.forEach(addLayerRecord)
+      }
+    }
+    picture.layers.forEach(addLayerRecord)
+
+    const resolutionInfo: PSDResolutionInfo = {
+      hres: picture.dimension.dpi,
+      hresUnit: PSDResolutionUnit.PixelPerInch,
+      widthUnit: PSDDimensionUnit.Inch,
+      vres: picture.dimension.dpi,
+      vresUnit: PSDResolutionUnit.PixelPerInch,
+      heightUnit: PSDDimensionUnit.Inch,
+    }
+    const {width, height} = picture.dimension
+
+    const floatTexture = new Texture(context, {
+      size: picture.size,
+      pixelType: 'float'
+    })
+    const drawTarget = new TextureDrawTarget(context, floatTexture)
+    drawTexture(drawTarget, picture.blender.getBlendedTexture(), {
+      blendMode: 'src'
+    })
+    const floatImageData = new Float32Array(width * height * 4)
+    drawTarget.readPixels(Rect.fromWidthHeight(0, 0, width, height), floatImageData)
+    const imageData = floatRGBAToImageData16(floatImageData, width, height)
+
+    const psd: PSDData = {
+      channelCount: 4,
+      height,
+      width,
+      depth: 16,
+      colorMode: PSDColorMode.RGB,
+      resolutionInfo,
+      imageDataHasAlpha: true,
+      layerRecords,
+      imageData,
+    }
+    writer.write(psd)
+
+    return writer.data
   }
 }
