@@ -115,6 +115,7 @@ class PSDReader {
   layerCount: number
   imageDataHasAlpha: boolean
   layerRecords: PSDLayerRecord[] = []
+  imageData: Buffer
 
   constructor(public data: Buffer) {
   }
@@ -124,6 +125,7 @@ class PSDReader {
     this.readColorModeData()
     this.readImageResouces()
     this.readLayerAndMasInformation()
+    this.readImageDataSection()
   }
 
   readFileHeader() {
@@ -323,29 +325,28 @@ class PSDReader {
   readChannelImageDatas() {
     for (const record of this.layerRecords) {
       for (const channelInfo of record.channelInfos) {
-        const data = this.readChannelImageData(channelInfo.dataLength, record.rect)
+        const data = this.readChannelImageData(channelInfo.dataLength, record.rect.width, record.rect.height)
         record.channelDatas.push(data)
       }
     }
   }
 
-  readChannelImageData(length: number, rect: Rect) {
+  readChannelImageData(length: number, width: number, height: number) {
     const {reader} = this
     reader.pushOffset()
-    const data = this.readImageData(rect)
+    const data = this.readImageData(width, height)
     reader.popOffset()
     reader.skip(length)
     return data
   }
 
-  readImageData(rect: Rect) {
+  readImageData(width: number, height: number) {
     const {reader} = this
     const compression = reader.uint16() as PSDCompression
     if (compression === PSDCompression.Raw) {
-      return reader.buffer(rect.width * rect.height)
+      return reader.buffer(width * height)
     } else if (compression === PSDCompression.RLE) {
       const scanlineLengths: number[] = []
-      const {width, height} = rect
       const data = Buffer.alloc(width * height)
       for (let y = 0; y < height; ++y) {
         scanlineLengths.push(reader.uint16())
@@ -359,5 +360,9 @@ class PSDReader {
     } else {
       throw new Error('Zip-encoded channel data is not supported')
     }
+  }
+
+  readImageDataSection() {
+    this.imageData = this.readImageData(this.width, this.height * this.channelCount)
   }
 }
