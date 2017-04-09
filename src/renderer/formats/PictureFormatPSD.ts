@@ -82,7 +82,7 @@ class PictureFormatPSD extends PictureFormat {
 
     const res = reader.resolutionInfo.hres
     const resUnit = reader.resolutionInfo.hresUnit
-    const dpi = resUnit === PSDResolutionUnit.PixelPerCM ? res * 2.56 : res
+    const dpi = Math.round(resUnit === PSDResolutionUnit.PixelPerCM ? res * 2.56 : res)
 
     const picture = new Picture({width: reader.width, height: reader.height, dpi})
     let groupStack = [picture.rootLayer]
