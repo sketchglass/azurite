@@ -14,8 +14,8 @@ import {
 import {
   channelDataToFloatRGBA,
   imageDataToFloatRGBA,
-  floatRGBAToChannelData16,
-  floatRGBAToImageData16,
+  floatRGBAToChannelData8,
+  floatRGBAToImageData8,
 } from '../../lib/psd/PSDUtil'
 import PSDWriter from '../../lib/psd/PSDWriter'
 import {addPictureFormat} from '../app/FormatRegistry'
@@ -157,7 +157,7 @@ class PictureFormatPSD extends PictureFormat {
           drawTarget.readPixels(new Rect(new Vec2(), rect.size), data)
           drawTarget.dispose()
           texture.dispose()
-          channelDatas = floatRGBAToChannelData16(data, rect.width, rect.height)
+          channelDatas = floatRGBAToChannelData8(data, rect.width, rect.height)
         }
       } else if (layer instanceof GroupLayer) {
         if (layer.collapsed) {
@@ -226,13 +226,13 @@ class PictureFormatPSD extends PictureFormat {
     })
     const floatImageData = new Float32Array(width * height * 4)
     drawTarget.readPixels(Rect.fromWidthHeight(0, 0, width, height), floatImageData)
-    const imageData = floatRGBAToImageData16(floatImageData, width, height)
+    const imageData = floatRGBAToImageData8(floatImageData, width, height)
 
     const psd: PSDData = {
       channelCount: 4,
       height,
       width,
-      depth: 16,
+      depth: 8, // emit in 8bit as many apps only supports 8bit
       colorMode: PSDColorMode.RGB,
       resolutionInfo,
       imageDataHasAlpha: true,

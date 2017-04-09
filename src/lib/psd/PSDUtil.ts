@@ -88,30 +88,30 @@ function imageDataToFloatRGBA(psd: PSDData) {
   return dst
 }
 
-export function floatRGBAToChannelData16(src: Float32Array, width: number, height: number) {
+export function floatRGBAToChannelData8(src: Float32Array, width: number, height: number) {
   const area = width * height
   unmultiply(src, area)
   const channelDatas: Buffer[] = []
   for (let ch = 0; ch < 4; ++ch) {
-    const channelData = Buffer.alloc(area * 2)
+    const channelData = Buffer.alloc(area)
     for (let i = 0; i < area; ++i) {
-      const value = Math.round(src[i * 4 + ch] * 0xFFFF)
-      channelData.writeUInt16BE(value, i * 2)
+      const value = Math.round(src[i * 4 + ch] * 0xFF)
+      channelData.writeUInt8(value, i)
     }
     channelDatas.push(channelData)
   }
   return channelDatas
 }
 
-export function floatRGBAToImageData16(src: Float32Array, width: number, height: number) {
+export function floatRGBAToImageData8(src: Float32Array, width: number, height: number) {
   const area = width * height
   unmultiply(src, area)
-  const imageData = Buffer.alloc(area * 2 * 4)
+  const imageData = Buffer.alloc(area * 4)
   for (let ch = 0; ch < 4; ++ch) {
-    const offset = ch * area * 2
+    const offset = ch * area
     for (let i = 0; i < area; ++i) {
-      const value = Math.round(src[i * 4 + ch] * 0xFFFF)
-      imageData.writeUInt16BE(value, offset + i * 2)
+      const value = Math.round(src[i * 4 + ch] * 0xFF)
+      imageData.writeUInt8(value, offset + i)
     }
   }
   return imageData
