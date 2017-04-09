@@ -166,6 +166,12 @@ class PictureFormatPSD extends PictureFormat {
           sectionType = PSDSectionType.OpenFolder
         }
       }
+      const channelInfos = [
+        {id: 0, dataLength: 0},
+        {id: 1, dataLength: 0},
+        {id: 2, dataLength: 0},
+        {id: -1, dataLength: 0},
+      ]
 
       const record: PSDLayerRecord = {
         name: layer.name,
@@ -176,18 +182,26 @@ class PictureFormatPSD extends PictureFormat {
         rect,
         blendMode: emitBlendMode(layer.blendMode),
         sectionType,
-        channelInfos: [
-          {id: 0, dataLength: 0},
-          {id: 1, dataLength: 0},
-          {id: 2, dataLength: 0},
-          {id: -1, dataLength: 0},
-        ],
+        channelInfos,
         channelDatas,
       }
 
       layerRecords.unshift(record)
       if (layer instanceof GroupLayer) {
         layer.children.forEach(addLayerRecord)
+        const sectionDivider: PSDLayerRecord = {
+          name: 'End of Group',
+          opacity: 1,
+          clipping: false,
+          transparencyProtected: false,
+          visible: true,
+          rect,
+          blendMode: 'norm',
+          sectionType: PSDSectionType.BoundingSectionDivider,
+          channelInfos,
+          channelDatas,
+        }
+        layerRecords.unshift(sectionDivider)
       }
     }
     picture.layers.forEach(addLayerRecord)
