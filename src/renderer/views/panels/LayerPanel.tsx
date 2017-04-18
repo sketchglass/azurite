@@ -2,7 +2,7 @@ import {action} from 'mobx'
 import {observer} from 'mobx-react'
 import React = require('react')
 import * as classNames from 'classnames'
-import {Tree, TreeNode, NodeInfo} from 'react-draggable-tree'
+import {TreeView, TreeDelegate, TreeRowInfo} from 'react-draggable-tree'
 import 'react-draggable-tree/lib/index.css'
 import IndexPath from '../../../lib/IndexPath'
 import {AddLayerAction, GroupLayerAction, RemoveLayerAction} from '../../actions/LayerActions'
@@ -14,32 +14,76 @@ import SVGIcon from '../components/SVGIcon'
 import LayerDetail from '../LayerDetail'
 import './LayerPanel.css'
 
-interface LayerNode extends TreeNode {
-  layer: Layer
-}
-
 const layerKeys = new WeakMap<Layer, number>()
 let currentLayerKey = 0
 
-function getLayerKey(layer: Layer) {
-  if (!layerKeys.has(layer)) {
-    layerKeys.set(layer, currentLayerKey++)
+class LayerTreeDelegate implements TreeDelegate<Layer> {
+  getKey(layer: Layer) {
+    if (!layerKeys.has(layer)) {
+      layerKeys.set(layer, currentLayerKey++)
+    }
+    return layerKeys.get(layer)!
   }
-  return layerKeys.get(layer)!
-}
-
-function layerToNode(layer: Layer): LayerNode {
-  let children: LayerNode[] | undefined
-  let collapsed = false
-  if (layer instanceof GroupLayer) {
-    children = layer.children.map(layerToNode)
-    collapsed = layer.collapsed
-  } else {
-    children = undefined
+  getChildren(layer: Layer) {
+    if (layer instanceof GroupLayer) {
+      return layer.children
+    }
   }
-  const key = getLayerKey(layer)
+  getCollapsed(layer: Layer) {
+    if (layer instanceof GroupLayer) {
+      return layer.collapsed
+    } else {
+      return false
+    }
+  }
+  getDroppable(layer: Layer) {
+    return true
+  }
 
-  return {key, children, collapsed, layer}
+  renderRow(info: TreeRowInfo<Layer>) {
+    return <LayerListItem layer={info.item} selected={info.selected} />
+  }
+
+  @action onSelectedKeysChange(selectedKeys: Set<number>, selectedNodeInfos: TreeRowInfo<Layer>[]) {
+    const picture = appState.currentPicture
+    if (picture) {
+      picture.selectedLayers.replace(selectedNodeInfos.map(info => info.item))
+    }
+  }
+  @action onCollapsedChange(info: TreeRowInfo<Layer>, collapsed: boolean) {
+    const layer = info.item
+    if (layer instanceof GroupLayer) {
+      layer.collapsed = collapsed
+    }
+  }
+  @action onContextMenu(info: TreeRowInfo<Layer>|undefined, ev: React.MouseEvent<HTMLElement>) {
+    // TODO
+  }
+  @action onMove(src: TreeRowInfo<Layer>[], dest: TreeRowInfo<Layer>, destIndex: number) {
+    const picture = appState.currentPicture
+    if (picture) {
+      const srcPaths = src.map(info => new IndexPath(info.path))
+      const destPath = new IndexPath(dest.path).child(destIndex)
+      const command = new MoveLayerCommand(picture, srcPaths, destPath)
+      picture.undoStack.push(command)
+    }
+  }
+  @action onCopy(src: TreeRowInfo<Layer>[], dest: TreeRowInfo<Layer>, destIndex: number) {
+    const picture = appState.currentPicture
+    if (picture) {
+      const srcPaths = src.map(info => new IndexPath(info.path))
+      const destPath = new IndexPath(dest.path).child(destIndex)
+      const command = new CopyLayerCommand(picture, srcPaths, destPath)
+      picture.undoStack.push(command)
+      const copiedLayers: Layer[] = []
+      for (let i = 0; i < srcPaths.length; ++i) {
+        const path = new IndexPath(dest.path).child(destIndex + i)
+        const layer = picture.layerForPath(path)!
+        copiedLayers.push(layer)
+      }
+      picture.selectedLayers.replace(copiedLayers)
+    }
+  }
 }
 
 const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
@@ -74,69 +118,28 @@ const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
   )
 })
 
-class LayerTree extends Tree<LayerNode> {
-}
-
 @observer export default
 class LayerPanel extends React.Component<{}, {}> {
-
-  onSelectedKeysChange = action((selectedKeys: Set<number>, selectedNodeInfos: NodeInfo<LayerNode>[]) => {
-    const picture = appState.currentPicture
-    if (picture) {
-      picture.selectedLayers.replace(selectedNodeInfos.map(info => info.node.layer))
-    }
-  })
-  onCollapsedChange = action((nodeInfo: NodeInfo<LayerNode>, collapsed: boolean) => {
-    const {layer} = nodeInfo.node
-    if (layer instanceof GroupLayer) {
-      layer.collapsed = collapsed
-    }
-  })
-  onMove = action((src: NodeInfo<LayerNode>[], dest: NodeInfo<LayerNode>, destIndex: number) => {
-    const picture = appState.currentPicture
-    if (picture) {
-      const srcPaths = src.map(info => new IndexPath(info.path))
-      const destPath = new IndexPath(dest.path).child(destIndex)
-      const command = new MoveLayerCommand(picture, srcPaths, destPath)
-      picture.undoStack.push(command)
-    }
-  })
-  onCopy = action((src: NodeInfo<LayerNode>[], dest: NodeInfo<LayerNode>, destIndex: number) => {
-    const picture = appState.currentPicture
-    if (picture) {
-      const srcPaths = src.map(info => new IndexPath(info.path))
-      const destPath = new IndexPath(dest.path).child(destIndex)
-      const command = new CopyLayerCommand(picture, srcPaths, destPath)
-      picture.undoStack.push(command)
-      const copiedLayers: Layer[] = []
-      for (let i = 0; i < srcPaths.length; ++i) {
-        const path = new IndexPath(dest.path).child(destIndex + i)
-        const layer = picture.layerForPath(path)!
-        copiedLayers.push(layer)
-      }
-      picture.selectedLayers.replace(copiedLayers)
-    }
-  })
+  delegate = new LayerTreeDelegate()
 
   render() {
     const picture = appState.currentPicture
-    const dummyRoot = {key: 0} as LayerNode
-    const root = picture ? layerToNode(picture.rootLayer) : dummyRoot
-    const selectedKeys = picture ? picture.selectedLayers.map(getLayerKey) : []
+    let tree: JSX.Element|undefined
+    if (picture) {
+      const selectedKeys = picture.selectedLayers.map(layer => this.delegate.getKey(layer))
+      const LayerTreeView = TreeView as new () => TreeView<Layer>
+      tree = <LayerTreeView
+        root={picture.rootLayer}
+        selectedKeys={new Set(selectedKeys)}
+        rowHeight={48}
+        delegate={this.delegate}
+      />
+    }
 
     return (
       <div className="LayerPanel">
         <div className="LayerPanel_scroll">
-          <LayerTree
-            root={root}
-            selectedKeys={new Set(selectedKeys)}
-            rowHeight={48}
-            rowContent={({node, selected}) => <LayerListItem layer={node.layer} selected={selected} />}
-            onSelectedKeysChange={this.onSelectedKeysChange}
-            onCollapsedChange={this.onCollapsedChange}
-            onMove={this.onMove}
-            onCopy={this.onCopy}
-          />
+          {tree}
         </div>
         <div className="LayerPanel_buttons">
           <button onClick={this.addLayer.bind(this)}><SVGIcon className="add" /></button>
