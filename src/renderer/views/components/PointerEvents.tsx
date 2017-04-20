@@ -1,4 +1,5 @@
-import ElementContainer from './ElementContainer'
+import * as React from 'react'
+import * as ReactDOM from 'react-dom'
 
 interface PointerEventsProps {
   onPointerDown?: (ev: PointerEvent) => void
@@ -7,8 +8,11 @@ interface PointerEventsProps {
 }
 
 export default
-class PointerEvents extends ElementContainer<PointerEventsProps, {}> {
+class PointerEvents extends React.Component<PointerEventsProps, {}> {
+  private element: HTMLElement|undefined
+
   componentDidMount() {
+    this.element = ReactDOM.findDOMNode(this) as HTMLElement
     if (this.element) {
       this.element.addEventListener('pointerup', this.onPointerUp)
       this.element.addEventListener('pointerdown', this.onPointerDown)
@@ -22,17 +26,20 @@ class PointerEvents extends ElementContainer<PointerEventsProps, {}> {
       this.element.removeEventListener('pointermove', this.onPointerMove)
     }
   }
-  onPointerUp = (e: PointerEvent) => {
+  render() {
+    return React.Children.only(this.props.children)
+  }
+  private onPointerUp = (e: PointerEvent) => {
     if (this.props.onPointerUp) {
       this.props.onPointerUp(e)
     }
   }
-  onPointerMove = (e: PointerEvent) => {
+  private onPointerMove = (e: PointerEvent) => {
     if (this.props.onPointerMove) {
       this.props.onPointerMove(e)
     }
   }
-  onPointerDown = (e: PointerEvent) => {
+  private onPointerDown = (e: PointerEvent) => {
     if (this.props.onPointerDown) {
       this.props.onPointerDown(e)
     }
