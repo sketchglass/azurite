@@ -81,28 +81,28 @@ class LayerDetail extends React.Component<LayerDetailProps, {}> {
     const clippingGroup = layer ? layer.clippingGroup : false
 
     return (
-      <div className="LayerDetail">
+      <div className='LayerDetail'>
         <div>
           <label>Blend</label>
-          <select className="Select" value={blendMode} onChange={this.onBlendModeChange}>
+          <select className='Select' value={blendMode} onChange={this.onBlendModeChange}>
             {layerBlendModes.map(mode => <option key={mode} value={mode}>{blendModeTexts.get(mode)}</option>)}
           </select>
         </div>
         <div>
           <label>Opacity</label>
-          <RangeSlider onChangeBegin={this.onOpaictyChangeBegin} onChange={this.onOpacityChange} onChangeEnd={this.onOpacityChangeEnd} min={0} max={100} value={Math.round(opacity * 100)} postfix="%" />
+          <RangeSlider onChangeBegin={this.onOpaictyChangeBegin} onChange={this.onOpacityChange} onChangeEnd={this.onOpacityChangeEnd} min={0} max={100} value={Math.round(opacity * 100)} postfix='%' />
         </div>
         <div>
           <label></label>
           <label>
-            <input type="checkbox" onChange={this.onPreserveOpacityChange} checked={preserveOpacity} />
+            <input type='checkbox' onChange={this.onPreserveOpacityChange} checked={preserveOpacity} />
             Preserve Opacity
           </label>
         </div>
         <div>
           <label></label>
           <label>
-            <input type="checkbox" onChange={this.onClippingGroupChange} checked={clippingGroup} />
+            <input type='checkbox' onChange={this.onClippingGroupChange} checked={clippingGroup} />
             Clipping Group
           </label>
         </div>

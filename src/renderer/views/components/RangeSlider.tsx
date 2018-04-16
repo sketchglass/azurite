@@ -96,16 +96,16 @@ export default class RangeSlider extends React.Component<RangeSliderProps, {}> {
     const ratio = (value - min) / (max - min)
     const className = this.props.disabled ? 'RangeSlider RangeSlider-disabled' : 'RangeSlider' // TODO: change behavior
     const background = BackgroundComponent ?
-      <BackgroundComponent width={this.backgroundWidth} height={this.backgroundHeight} {...backgroundComponentProps} /> : <div className="RangeSlider_fill" />
+      <BackgroundComponent width={this.backgroundWidth} height={this.backgroundHeight} {...backgroundComponentProps} /> : <div className='RangeSlider_fill' />
     return (
       <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
         <CSSVariables sliderRatio={ratio}>
           <div className={className}>
-            <div className="RangeSlider_border" ref={s => { this.slider = s! }}>
+            <div className='RangeSlider_border' ref={s => { this.slider = s! }}>
               { background }
             </div>
-            <div className="RangeSlider_text">{value}{postfix}</div>
-            <div className="RangeSlider_handle" />
+            <div className='RangeSlider_text'>{value}{postfix}</div>
+            <div className='RangeSlider_handle' />
           </div>
         </CSSVariables>
       </PointerEvents>

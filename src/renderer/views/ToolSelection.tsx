@@ -42,7 +42,7 @@ class ToolSelection extends React.Component<{hidden: boolean}, {}> {
     const {hidden} = this.props
     const {tools, currentTool} = toolManager
     return (
-      <div className="ToolSelection" hidden={hidden}>{
+      <div className='ToolSelection' hidden={hidden}>{
         tools.map((tool, i) => {
           const selected = tool === currentTool
           const className = classNames('ToolSelection_button', {'ToolSelection_button-selected': selected})

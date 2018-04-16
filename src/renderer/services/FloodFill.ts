@@ -1,10 +1,10 @@
 import {Texture, RectShape, ShapeModel, TextureDrawTarget} from 'paintgl'
 import {Vec2, Rect} from 'paintvec'
+import nativelib = require('../../common/nativelib')
 import {context} from '../GLContext'
 import {drawTexture, drawVisibilityToBinary, drawBinaryToVisibility} from '../GLUtil'
 import Picture from '../models/Picture'
 import Selection from '../models/Selection'
-import nativelib = require('../../common/nativelib')
 
 const findFillableRegionShader = {
   vertex: `

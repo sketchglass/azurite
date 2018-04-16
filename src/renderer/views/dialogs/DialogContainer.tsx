@@ -14,13 +14,13 @@ export default
 class DialogContainer extends React.Component<DialogContainerProps, {}> {
   render() {
     return (
-      <div className="DialogContainer">
+      <div className='DialogContainer'>
         {process.platform === 'win32' ? <DialogTitleBar title={this.props.title} /> : undefined}
-        <div className="DialogContainer_content">
+        <div className='DialogContainer_content'>
           {this.props.children}
-          <div className="DialogContainer_buttons">
-            <button className="Button" onClick={this.props.onCancel}>Cancel</button>
-            <button className="Button Button-primary" onClick={this.props.onOK} disabled={!this.props.canOK}>{this.props.okText}</button>
+          <div className='DialogContainer_buttons'>
+            <button className='Button' onClick={this.props.onCancel}>Cancel</button>
+            <button className='Button Button-primary' onClick={this.props.onOK} disabled={!this.props.canOK}>{this.props.okText}</button>
           </div>
         </div>
       </div>

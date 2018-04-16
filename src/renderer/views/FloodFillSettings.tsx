@@ -11,7 +11,7 @@ class FloodFillSettings extends React.Component<{tool: FloodFillTool}, {}> {
       tool.tolerance = value
     }
     return (
-      <table className="BrushSettings">
+      <table className='BrushSettings'>
         <tbody>
           <tr>
             <td>Tolerance</td>

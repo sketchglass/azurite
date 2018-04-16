@@ -15,7 +15,7 @@ class ColorPanel extends React.Component<{}, {}> {
     const {color, paletteIndex, palette} = appState
 
     return (
-      <div className="ColorPanel">
+      <div className='ColorPanel'>
         <ColorPicker color={color} onChange={this.onColorChange} />
         <RGBRangeSliders color={color} onChange={this.onColorChange} />
         <Palette palette={palette} paletteIndex={paletteIndex} onChange={this.onPaletteChange} />

@@ -19,9 +19,9 @@ const TransformLayerSettings = observer((props: {tool: TransformLayerTool}) => {
   const onOK = () => tool.endEditing()
   const onCancel = () => tool.cancelEditing()
   return (
-    <div className="TransformLayerSettings" hidden={!tool.modal}>
-      <button className="Button Button-primary" onClick={onOK}>OK</button>
-      <button className="Button" onClick={onCancel}>Cancel</button>
+    <div className='TransformLayerSettings' hidden={!tool.modal}>
+      <button className='Button Button-primary' onClick={onOK}>OK</button>
+      <button className='Button' onClick={onCancel}>Cancel</button>
     </div>
   )
 })

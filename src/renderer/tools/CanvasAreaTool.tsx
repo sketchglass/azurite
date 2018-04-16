@@ -17,11 +17,11 @@ const CanvasAreaToolSettings = observer((props: {tool: CanvasAreaTool}) => {
   const onOK = () => tool.endEditing()
   const onCancel = () => tool.cancelEditing()
   return (
-    <div className="CanvasAreaToolSettings" hidden={!tool.picture}>
+    <div className='CanvasAreaToolSettings' hidden={!tool.picture}>
       <DimensionSelect viewModel={tool.dimensionSelectViewModel} percent={true} />
-      <div className="CanvasAreaToolSettings_buttons">
-        <button className="Button" onClick={onCancel}>Cancel</button>
-        <button className="Button Button-primary" onClick={onOK}>OK</button>
+      <div className='CanvasAreaToolSettings_buttons'>
+        <button className='Button' onClick={onCancel}>Cancel</button>
+        <button className='Button Button-primary' onClick={onOK}>OK</button>
       </div>
     </div>
   )

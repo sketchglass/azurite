@@ -83,7 +83,7 @@ class ScrollBar extends React.Component<ScrollBarProps, {}> {
       <CSSVariables handleStart={handleStart} handleEnd={handleEnd}>
         <div className={className} ref={e => this.element = e!} onClick={this.onClick}>
           <PointerEvents onPointerDown={this.onHandlePointerDown} onPointerMove={this.onHandlePointerMove} onPointerUp={this.onHandlePointerUp}>
-            <div className="ScrollBar_handle" ref={e => this.handle = e!} onClick={this.onHandleClick} />
+            <div className='ScrollBar_handle' ref={e => this.handle = e!} onClick={this.onHandleClick} />
           </PointerEvents>
         </div>
       </CSSVariables>

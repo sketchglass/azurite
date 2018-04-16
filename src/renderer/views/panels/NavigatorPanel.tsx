@@ -119,7 +119,7 @@ class NavigatorMinimap extends React.Component<{}, {} > {
     const height = 120 * devicePixelRatio
     return (
       <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
-        <canvas className="NavigatorPanel_minimap" width={width} height={height} ref={e => this.minimap = e!} />
+        <canvas className='NavigatorPanel_minimap' width={width} height={height} ref={e => this.minimap = e!} />
       </PointerEvents>
     )
   }
@@ -203,23 +203,23 @@ class NavigatorPanel extends React.Component<{}, {}> {
     const rotationDeg = rotation / Math.PI * 180
 
     return (
-      <div className="NavigatorPanel">
+      <div className='NavigatorPanel'>
         <NavigatorMinimap />
-        <div className="NavigatorPanel_sliderRow">
-          <button onClick={this.onZoomOut}><SVGIcon className="zoom-out" /></button>
+        <div className='NavigatorPanel_sliderRow'>
+          <button onClick={this.onZoomOut}><SVGIcon className='zoom-out' /></button>
           <RangeSlider min={-3} max={5} step={1 / 8} onChangeBegin={this.onSliderBegin} onChange={this.onScaleChange} value={scaleLog} />
-          <button onClick={this.onZoomIn}><SVGIcon className="zoom-in" /></button>
-          <button className="NavigatorPanel_reset" onClick={this.onZoomReset} />
+          <button onClick={this.onZoomIn}><SVGIcon className='zoom-in' /></button>
+          <button className='NavigatorPanel_reset' onClick={this.onZoomReset} />
           {(scale * 100).toFixed(scale < 1 ? 1 : 0)}%
         </div>
-        <div className="NavigatorPanel_sliderRow">
-          <button onClick={this.onRotateLeft}><SVGIcon className="rotate-left" /></button>
+        <div className='NavigatorPanel_sliderRow'>
+          <button onClick={this.onRotateLeft}><SVGIcon className='rotate-left' /></button>
           <RangeSlider min={-180} max={180} step={3} onChangeBegin={this.onSliderBegin} onChange={this.onRotationChange} value={rotationDeg} />
-          <button onClick={this.onRotateRight}><SVGIcon className="rotate-right" /></button>
-          <button className="NavigatorPanel_reset" onClick={this.onRotateReset} />
+          <button onClick={this.onRotateRight}><SVGIcon className='rotate-right' /></button>
+          <button className='NavigatorPanel_reset' onClick={this.onRotateReset} />
           {rotationDeg.toFixed(0)}°
         </div>
-        <label className="NavigatorPanel_check"><input type="checkbox" checked={horizontalFlip} onChange={this.onHorizontalFlipChange} />Flip Horizontally</label>
+        <label className='NavigatorPanel_check'><input type='checkbox' checked={horizontalFlip} onChange={this.onHorizontalFlipChange} />Flip Horizontally</label>
       </div>
     )
   }

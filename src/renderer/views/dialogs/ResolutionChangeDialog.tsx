@@ -1,5 +1,5 @@
-import React = require('react')
 import {observer} from 'mobx-react'
+import React = require('react')
 import {PictureDimension} from '../../models/Picture'
 import DimensionSelectViewModel from '../../viewmodels/DimensionSelectViewModel'
 import DimensionSelect from '../DimensionSelect'
@@ -24,7 +24,7 @@ class ResolutionChangeDialog extends React.Component<ResolutionChangeDialogProps
 
   render() {
     return (
-      <DialogContainer title="Change Canvas Resolution" okText="Change" canOK={this.dimensionSelectViewModel.isValid} onOK={this.onOK} onCancel={this.onCancel}>
+      <DialogContainer title='Change Canvas Resolution' okText='Change' canOK={this.dimensionSelectViewModel.isValid} onOK={this.onOK} onCancel={this.onCancel}>
         <DimensionSelect viewModel={this.dimensionSelectViewModel} percent={true}/>
       </DialogContainer>
     )

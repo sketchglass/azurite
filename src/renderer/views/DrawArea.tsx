@@ -188,12 +188,12 @@ class DrawArea extends React.Component<DrawAreaProps, {}> {
 
   render() {
     return (
-      <div className="DrawArea">
+      <div className='DrawArea'>
         <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
-          <div ref={e => this.element = e!} className="DrawArea_content" tabIndex={-1} onKeyDown={this.onKeyDown} />
+          <div ref={e => this.element = e!} className='DrawArea_content' tabIndex={-1} onKeyDown={this.onKeyDown} />
         </PointerEvents>
         <DrawAreaScroll picture={this.picture} />
-        <div className="DrawArea_blank" hidden={!!this.picture} />
+        <div className='DrawArea_blank' hidden={!!this.picture} />
       </div>
     )
   }

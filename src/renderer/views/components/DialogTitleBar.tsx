@@ -12,7 +12,7 @@ function DialogTitleBar(props: {title: string}) {
   return (
     <div className={className}>
       {title}
-      <div className="DialogTitleBar_close" onClick={onClose} />
+      <div className='DialogTitleBar_close' onClick={onClose} />
     </div>
   )
 }

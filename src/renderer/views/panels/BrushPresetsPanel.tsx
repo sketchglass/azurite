@@ -28,7 +28,7 @@ const BrushPresetItem = observer((props: {index: number, selected: boolean}) => 
     preset.title = title
   })
   return (
-    <div className="BrushPresetItem" onClick={onClick}>
+    <div className='BrushPresetItem' onClick={onClick}>
       <SVGIcon className={preset.iconType} />
       <ClickToEdit text={title} onChange={onTitleChange} editable={selected} />
     </div>

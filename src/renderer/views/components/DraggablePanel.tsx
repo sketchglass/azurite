@@ -76,13 +76,13 @@ class Panel extends React.Component<PanelProps, {}> {
   }
   render() {
     return (
-      <div className="DraggablePanel" ref={w => { this.window = w! }}>
+      <div className='DraggablePanel' ref={w => { this.window = w! }}>
         <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
-          <div className="DraggablePanel_label" ref={l => { this.label = l! }}>
+          <div className='DraggablePanel_label' ref={l => { this.label = l! }}>
             {this.props.label}
           </div>
         </PointerEvents>
-        <div className="DraggablePanel_contents">
+        <div className='DraggablePanel_contents'>
           {this.props.children}
         </div>
       </div>
@@ -106,7 +106,7 @@ const PreviewPanel = (props: PreviewState) => {
     visibility: props.visibility ? 'visible' : 'hidden'
   }
   return (
-    <div style={style} className="PreviewPanel">
+    <div style={style} className='PreviewPanel'>
     </div>
   )
 }
@@ -222,7 +222,7 @@ export class DraggablePanelContainer extends React.Component<DraggablePanelConta
       }
     })
     return (
-      <div className="DraggablePanelContainer">
+      <div className='DraggablePanelContainer'>
         {children}
         <PreviewPanel top={this.previewState.top} left={this.previewState.left}
           visibility={this.previewState.visibility} width={this.previewState.width} height={this.previewState.height} />

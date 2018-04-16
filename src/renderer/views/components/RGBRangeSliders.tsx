@@ -1,5 +1,5 @@
-import React = require('react')
 import { Color } from 'paintgl'
+import React = require('react')
 import { HSVColor } from '../../../lib/Color'
 import ColorSlider from './ColorSlider'
 import './RGBRangeSliders.css'
@@ -41,7 +41,7 @@ class RGBRangeSliders extends React.Component<RGBRangeSlidersProps, {}> {
     const {color} = this
     const {r, g, b} = color
     return (
-      <div className="RGBRangeSliders">
+      <div className='RGBRangeSliders'>
         <ColorSlider color={color} value={color.r} onChange={this.onChangeR} gradientSteps={[[new Color(0, g, b, 1), 0], [new Color(1, g, b, 1), 1]]} />
         <ColorSlider color={color} value={color.g} onChange={this.onChangeG} gradientSteps={[[new Color(r, 0, b, 1), 0], [new Color(r, 1, b, 1), 1]]} />
         <ColorSlider color={color} value={color.b} onChange={this.onChangeB} gradientSteps={[[new Color(r, g, 0, 1), 0], [new Color(r, g, 1, 1), 1]]} />

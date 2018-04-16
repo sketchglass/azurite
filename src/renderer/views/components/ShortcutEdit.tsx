@@ -15,9 +15,9 @@ class ShortcutEdit extends React.Component<ShortcutEditProps, {}> {
   render() {
     const {shortcut} = this.props
     return (
-      <div className="ShortcutEdit" tabIndex={-1} onKeyDown={this.onKeyDown} onKeyUp={this.onKeyUp} >
+      <div className='ShortcutEdit' tabIndex={-1} onKeyDown={this.onKeyDown} onKeyUp={this.onKeyUp} >
         {shortcut ? shortcut.toElectronAccelerator() : ''}
-        <div className="ShortcutEdit_clear" onClick={this.onClear} />
+        <div className='ShortcutEdit_clear' onClick={this.onClear} />
       </div>
     )
   }

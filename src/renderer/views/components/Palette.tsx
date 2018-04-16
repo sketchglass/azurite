@@ -1,5 +1,5 @@
-import React = require('react')
 import {observer} from 'mobx-react'
+import React = require('react')
 import {HSVColor} from '../../../lib/Color'
 import './Palette.css'
 
@@ -25,15 +25,15 @@ const Palette = observer((props: PaletteProps) => {
         props.onChange(e, i)
       }
       const colorElem = color
-        ? <div className="Palette-color" style={{backgroundColor: color.toString()}} />
-        : <div className="Palette-color Palette-color-transparent" />
-      return <div className="Palette-button" key={x} onClick={onClick}>{colorElem}</div>
+        ? <div className='Palette-color' style={{backgroundColor: color.toString()}} />
+        : <div className='Palette-color Palette-color-transparent' />
+      return <div className='Palette-button' key={x} onClick={onClick}>{colorElem}</div>
     })
-    return <div className="Palette-row" key={y}>{buttons}</div>
+    return <div className='Palette-row' key={y}>{buttons}</div>
   })
 
   return (
-    <div className="Palette">
+    <div className='Palette'>
       {rowElems}
     </div>
   )
