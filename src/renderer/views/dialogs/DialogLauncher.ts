@@ -21,7 +21,7 @@ class DialogLauncher {
   async open<TResult, TParam>(name: string, param: TParam): Promise<TResult|undefined> {
     let callback: any
     const result = await new Promise<TResult|undefined>((resolve, reject) => {
-      callback = (e: Electron.IpcRendererEvent, result: TResult|undefined) => {
+      callback = (e: Electron.IpcMessageEvent, result: TResult|undefined) => {
         resolve(result)
       }
       ipcRenderer.on(IPCChannels.dialogDone, callback)

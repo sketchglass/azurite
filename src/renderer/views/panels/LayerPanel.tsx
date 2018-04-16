@@ -1,7 +1,7 @@
+import * as classNames from 'classnames'
 import {action} from 'mobx'
 import {observer} from 'mobx-react'
 import React = require('react')
-import * as classNames from 'classnames'
 import {TreeView, TreeDelegate, TreeRowInfo} from 'react-draggable-tree'
 import 'react-draggable-tree/lib/index.css'
 import IndexPath from '../../../lib/IndexPath'
@@ -113,7 +113,7 @@ const LayerListItem = observer((props: {layer: Layer, selected: boolean}) => {
     <div className={className}>
       <img src={thumbnail} />
       <ClickToEdit text={layer.name} onChange={rename} editable={selected}/>
-      <input type="checkbox" checked={layer.visible} onChange={onVisibleToggle} onClick={onVisibleClick} />
+      <input type='checkbox' checked={layer.visible} onChange={onVisibleToggle} onClick={onVisibleClick} />
     </div>
   )
 })
@@ -137,14 +137,14 @@ class LayerPanel extends React.Component<{}, {}> {
     }
 
     return (
-      <div className="LayerPanel">
-        <div className="LayerPanel_scroll">
+      <div className='LayerPanel'>
+        <div className='LayerPanel_scroll'>
           {tree}
         </div>
-        <div className="LayerPanel_buttons">
-          <button onClick={this.addLayer.bind(this)}><SVGIcon className="add" /></button>
-          <button onClick={this.groupLayer.bind(this)}><SVGIcon className="folder" /></button>
-          <button onClick={this.removeLayer.bind(this)}><SVGIcon className="subtract" /></button>
+        <div className='LayerPanel_buttons'>
+          <button onClick={this.addLayer.bind(this)}><SVGIcon className='add' /></button>
+          <button onClick={this.groupLayer.bind(this)}><SVGIcon className='folder' /></button>
+          <button onClick={this.removeLayer.bind(this)}><SVGIcon className='subtract' /></button>
         </div>
         <LayerDetail layer={picture && picture.currentLayer} />
       </div>

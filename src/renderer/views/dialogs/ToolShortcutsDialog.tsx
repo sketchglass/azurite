@@ -1,6 +1,6 @@
-import React = require('react')
 import {observable} from 'mobx'
 import {observer} from 'mobx-react'
+import React = require('react')
 import KeyInput, {KeyInputData} from '../../../lib/KeyInput'
 import ShortcutEdit from '../components/ShortcutEdit'
 import DialogContainer from './DialogContainer'
@@ -32,7 +32,7 @@ class ToolShortcutsDialog extends React.Component<ToolShortcutsDialogProps, {}> 
 
   render() {
     return (
-      <DialogContainer title="Tool Shortcuts" okText="OK" canOK={true} onOK={this.onOK} onCancel={this.onCancel}>
+      <DialogContainer title='Tool Shortcuts' okText='OK' canOK={true} onOK={this.onOK} onCancel={this.onCancel}>
         <table>
           <tr>
             <td>Toggle</td>

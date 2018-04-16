@@ -28,7 +28,7 @@ const BrushPresetItem = observer((props: {index: number, selected: boolean}) => 
     preset.title = title
   })
   return (
-    <div className="BrushPresetItem" onClick={onClick}>
+    <div className='BrushPresetItem' onClick={onClick}>
       <SVGIcon className={preset.iconType} />
       <ClickToEdit text={title} onChange={onTitleChange} editable={selected} />
     </div>
@@ -78,7 +78,7 @@ class BrushPresetListDelegate implements ListDelegate<BrushPreset> {
   @action onContextMenu(nodeInfo: ListRowInfo<BrushPreset>|undefined, event: React.MouseEvent<Element>) {
     const index = nodeInfo ? nodeInfo.index : brushPresetManager.presets.length
 
-    const addPresetItems: Electron.MenuItemOptions[] = defaultBrushPresets().map(data => {
+    const addPresetItems: Electron.MenuItemConstructorOptions[] = defaultBrushPresets().map(data => {
       return {
         label: data.title,
         click: action(() => {
@@ -96,7 +96,7 @@ class BrushPresetListDelegate implements ListDelegate<BrushPreset> {
         brushPresetManager.presets.splice(selectedIndices[i], 1)
       }
     })
-    const menuTemplate: Electron.MenuItemOptions[] = [
+    const menuTemplate: Electron.MenuItemConstructorOptions[] = [
       {label: 'Add', submenu: addPresetItems},
       {label: 'Remove', click: removePresets}
     ]

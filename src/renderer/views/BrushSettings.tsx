@@ -7,7 +7,7 @@ function PercentSlider(props: {value: number, onChange: (value: number) => void}
   const onPercentChange = (value: number) => {
     props.onChange(value / 100)
   }
-  return <RangeSlider onChange={onPercentChange} min={0} max={100} value={Math.round(props.value * 100)} postfix="%" />
+  return <RangeSlider onChange={onPercentChange} min={0} max={100} value={Math.round(props.value * 100)} postfix='%' />
 }
 
 @observer
@@ -16,13 +16,13 @@ class BrushSettings extends React.Component<{}, {}> {
   render() {
     const preset = brushPresetManager.currentPreset
     if (!preset) {
-      return <table className="BrushSettings" />
+      return <table className='BrushSettings' />
     }
     const onEraserModeChange = (ev: React.FormEvent<HTMLInputElement>) => {
       preset.type = ev.currentTarget.checked ? 'eraser' : 'normal'
     }
     return (
-      <table className="BrushSettings">
+      <table className='BrushSettings'>
         <tbody>
           <tr>
             <td>Opacity</td>
@@ -38,7 +38,7 @@ class BrushSettings extends React.Component<{}, {}> {
           </tr>
           <tr>
             <td>Width</td>
-            <td><RangeSlider min={0} max={100} value={preset.width} postfix="px" onChange={x => preset.width = x} /></td>
+            <td><RangeSlider min={0} max={100} value={preset.width} postfix='px' onChange={x => preset.width = x} /></td>
           </tr>
           <tr>
             <td>Min Width</td>
@@ -50,7 +50,7 @@ class BrushSettings extends React.Component<{}, {}> {
           </tr>
           <tr>
             <td>Eraser</td>
-            <td><label><input type="checkbox" onChange={onEraserModeChange} checked={preset.type === 'eraser'} /> Eraser Mode</label></td>
+            <td><label><input type='checkbox' onChange={onEraserModeChange} checked={preset.type === 'eraser'} /> Eraser Mode</label></td>
           </tr>
           <tr>
             <td>Stabilizing</td>

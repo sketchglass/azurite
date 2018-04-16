@@ -1,13 +1,13 @@
 import {computed, observable} from 'mobx'
 import {Vec2} from 'paintvec'
-import Layer from '../models/Layer'
-import Selection from '../models/Selection'
-import {Tile} from '../models/TiledTexture'
-import {UndoStack} from '../models/UndoStack'
 import React = require('react')
 import KeyInput, {KeyInputData} from '../../lib/KeyInput'
 import {appState} from '../app/AppState'
 import {toolManager} from '../app/ToolManager'
+import Layer from '../models/Layer'
+import Selection from '../models/Selection'
+import {Tile} from '../models/TiledTexture'
+import {UndoStack} from '../models/UndoStack'
 import {SelectionShowMode} from '../views/Renderer'
 
 export

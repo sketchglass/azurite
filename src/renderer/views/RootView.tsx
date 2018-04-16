@@ -1,5 +1,5 @@
-import React = require('react')
 import {observer} from 'mobx-react'
+import React = require('react')
 
 import DrawArea from './DrawArea'
 import {PictureTabBar} from './PictureTabBar'
@@ -26,26 +26,26 @@ class RootView extends React.Component<{}, {}> {
     const {uiVisible} = appState
     const picture = appState.currentPicture
     return (
-      <div className="RootView">
-        {process.platform === 'darwin' ? <div className="TitleBarPaddingMac" /> : undefined}
-        <div className="WindowContent">
+      <div className='RootView'>
+        {process.platform === 'darwin' ? <div className='TitleBarPaddingMac' /> : undefined}
+        <div className='WindowContent'>
           <ToolSelection hidden={!uiVisible} />
-          <aside className="Sidebar Sidebar-left" hidden={!uiVisible}>
-            <div className="PanelTitle">Color</div>
+          <aside className='Sidebar Sidebar-left' hidden={!uiVisible}>
+            <div className='PanelTitle'>Color</div>
             <ColorPanel />
-            <div className="PanelTitle">Brushes</div>
+            <div className='PanelTitle'>Brushes</div>
             <BrushPresetsPanel />
-            <div className="PanelTitle">Tool</div>
+            <div className='PanelTitle'>Tool</div>
             <ToolSettingsPanel />
           </aside>
-          <div className="CenterArea">
+          <div className='CenterArea'>
             <PictureTabBar hidden={!uiVisible} />
             <DrawArea tool={overrideTool ? overrideTool : currentTool} picture={picture} />
           </div>
-          <aside className="Sidebar Sidebar-right" hidden={!uiVisible}>
-            <div className="PanelTitle">Navigator</div>
+          <aside className='Sidebar Sidebar-right' hidden={!uiVisible}>
+            <div className='PanelTitle'>Navigator</div>
             <NavigatorPanel />
-            <div className="PanelTitle">Layers</div>
+            <div className='PanelTitle'>Layers</div>
             <LayerPanel />
           </aside>
         </div>

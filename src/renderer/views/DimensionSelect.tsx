@@ -38,55 +38,55 @@ class DimensionSelect extends React.Component<DimensionSelectProps, {} > {
     const widthCurrentUnitRounded = toFixedNumber(widthCurrentUnit, digits)
     const heightCurrentUnitRounded = toFixedNumber(heightCurrentUnit, digits)
 
-    const unitSelect = <select className="Select" value={unit} onChange={this.onUnitChange}>
-      {this.props.percent ? <option value="percent">%</option> : undefined}
-      <option value="px">px</option>
-      <option value="mm">mm</option>
-      <option value="inch">"</option>
+    const unitSelect = <select className='Select' value={unit} onChange={this.onUnitChange}>
+      {this.props.percent ? <option value='percent'>%</option> : undefined}
+      <option value='px'>px</option>
+      <option value='mm'>mm</option>
+      <option value='inch'>"</option>
     </select>
 
     return (
-      <div className="DimensionSelect">
-        <div className="DimensionSelect_Row">
+      <div className='DimensionSelect'>
+        <div className='DimensionSelect_Row'>
           <label>Preset</label>
-          <select className="Select" value={lastSelectedPreset} autoFocus onChange={this.onPresetSelect}>
+          <select className='Select' value={lastSelectedPreset} autoFocus onChange={this.onPresetSelect}>
             {presets.map((preset, i) => <option key={i} value={i}>{preset.name}</option>)}
             <option value={-1}>Custom</option>
           </select>
         </div>
-        <div className="DimensionSelect_Row">
+        <div className='DimensionSelect_Row'>
           <label>Width</label>
-          <div className="DimensionSelect_Value">
-            <input className="TextInput" type="number" value={widthCurrentUnitRounded} step={step} min={1} onChange={this.onWidthChange} />
+          <div className='DimensionSelect_Value'>
+            <input className='TextInput' type='number' value={widthCurrentUnitRounded} step={step} min={1} onChange={this.onWidthChange} />
             {unitSelect}
           </div>
         </div>
-        <div className="DimensionSelect_Row">
+        <div className='DimensionSelect_Row'>
           <label>Height</label>
-          <div className="DimensionSelect_Value">
-            <input className="TextInput" type="number" value={heightCurrentUnitRounded} step={step} min={1} onChange={this.onHeightChange} />
+          <div className='DimensionSelect_Value'>
+            <input className='TextInput' type='number' value={heightCurrentUnitRounded} step={step} min={1} onChange={this.onHeightChange} />
             {unitSelect}
           </div>
         </div>
-        <div className="DimensionSelect_Row">
+        <div className='DimensionSelect_Row'>
           <label>Resolution</label>
-          <div className="DimensionSelect_Value">
-            <input className="TextInput" type="number" value={dpi} min={1} onChange={this.onDpiChange} />
+          <div className='DimensionSelect_Value'>
+            <input className='TextInput' type='number' value={dpi} min={1} onChange={this.onDpiChange} />
             DPI
           </div>
         </div>
-        <div className="DimensionSelect_Row">
+        <div className='DimensionSelect_Row'>
           <label></label>
           <label>
-            <input type="checkbox" checked={keepRatio} onChange={this.onKeepRatioToggle}/>
+            <input type='checkbox' checked={keepRatio} onChange={this.onKeepRatioToggle}/>
             Keep Ratio
           </label>
         </div>
-        <div className="DimensionSelect_Row">
+        <div className='DimensionSelect_Row'>
           <label></label>
-          <span className="DimensionSelect_PixelSize">
+          <span className='DimensionSelect_PixelSize'>
             {widthRounded || 0} x {heightRounded || 0} px
-            <span className="DimensionSelect_TooLarge" hidden={!tooLarge}>Too Large</span>
+            <span className='DimensionSelect_TooLarge' hidden={!tooLarge}>Too Large</span>
           </span>
         </div>
       </div>

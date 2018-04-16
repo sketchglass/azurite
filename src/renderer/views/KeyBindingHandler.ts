@@ -36,7 +36,7 @@ class KeyBindingHandler {
         return
       }
     }
-    const brushTool = toolManager.tools.find(t => t instanceof BrushTool)
+    const brushTool = toolManager.tools.find(t => t instanceof BrushTool)!
     for (const [index, brush] of brushPresetManager.presets.entries()) {
       if (brush.shortcut && brush.shortcut.equals(keyInput)) {
         toolManager.currentTool = brushTool

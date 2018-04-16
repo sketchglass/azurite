@@ -46,9 +46,9 @@ class ColorSlider extends React.Component<ColorSliderProps, {}> {
     return (
       <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
         <CSSVariables value={value} color={toHexColor(color)} gradient={gradient}>
-          <div className="ColorSlider" ref={e => this.element = e}>
-            <div className="ColorSlider_gradient" />
-            <div className="ColorSlider_handle" />
+          <div className='ColorSlider' ref={e => this.element = e!}>
+            <div className='ColorSlider_gradient' />
+            <div className='ColorSlider_handle' />
           </div>
         </CSSVariables>
       </PointerEvents>

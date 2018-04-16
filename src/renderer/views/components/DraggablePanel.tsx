@@ -21,7 +21,7 @@ interface PanelProps extends DraggablePanelProps {
   onDrop: (x: number, y: number) => void
   zIndex?: number
 }
-class Panel extends React.Component<PanelProps, void> {
+class Panel extends React.Component<PanelProps, {}> {
   dragging = false
   window: HTMLDivElement
   label: HTMLDivElement
@@ -76,13 +76,13 @@ class Panel extends React.Component<PanelProps, void> {
   }
   render() {
     return (
-      <div className="DraggablePanel" ref={w => { this.window = w }}>
+      <div className='DraggablePanel' ref={w => { this.window = w! }}>
         <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
-          <div className="DraggablePanel_label" ref={l => { this.label = l }}>
+          <div className='DraggablePanel_label' ref={l => { this.label = l! }}>
             {this.props.label}
           </div>
         </PointerEvents>
-        <div className="DraggablePanel_contents">
+        <div className='DraggablePanel_contents'>
           {this.props.children}
         </div>
       </div>
@@ -106,7 +106,7 @@ const PreviewPanel = (props: PreviewState) => {
     visibility: props.visibility ? 'visible' : 'hidden'
   }
   return (
-    <div style={style} className="PreviewPanel">
+    <div style={style} className='PreviewPanel'>
     </div>
   )
 }
@@ -126,7 +126,7 @@ interface DraggablePanelContainerProps {
   top: number
   left: number
 }
-export class DraggablePanelContainer extends React.Component<DraggablePanelContainerProps, void> {
+export class DraggablePanelContainer extends React.Component<DraggablePanelContainerProps, {}> {
   childrenState: ChildState[] = []
   previewState: PreviewState
   componentWillMount() {
@@ -222,7 +222,7 @@ export class DraggablePanelContainer extends React.Component<DraggablePanelConta
       }
     })
     return (
-      <div className="DraggablePanelContainer">
+      <div className='DraggablePanelContainer'>
         {children}
         <PreviewPanel top={this.previewState.top} left={this.previewState.left}
           visibility={this.previewState.visibility} width={this.previewState.width} height={this.previewState.height} />

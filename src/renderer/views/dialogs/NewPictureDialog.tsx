@@ -1,5 +1,5 @@
-import React = require('react')
 import {observer} from 'mobx-react'
+import React = require('react')
 import {PictureDimension} from '../../models/Picture'
 import DimensionSelectViewModel from '../../viewmodels/DimensionSelectViewModel'
 import DimensionSelect from '../DimensionSelect'
@@ -17,7 +17,7 @@ class NewPictureDialog extends React.Component<NewPictureDialogProps, {}> {
 
   render() {
     return (
-      <DialogContainer title="New Picture" okText="New" canOK={this.dimensionSelectViewModel.isValid} onOK={this.onOK} onCancel={this.onCancel}>
+      <DialogContainer title='New Picture' okText='New' canOK={this.dimensionSelectViewModel.isValid} onOK={this.onOK} onCancel={this.onCancel}>
         <DimensionSelect viewModel={this.dimensionSelectViewModel} />
       </DialogContainer>
     )

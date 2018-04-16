@@ -60,9 +60,9 @@ class PictureTab extends React.Component<PictureTabProps, {}> {
     return (
       <CSSVariables offset={offset + 'px'} width={TAB_WIDTH + 'px'}>
         <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
-          <div className={className} ref={e => this.element = e}>
-            <span className="PictureTab_title">{pictureState.picture.fileName}</span>
-            <span className="PictureTab_close" onClick={this.onCloseClick}>x</span>
+          <div className={className} ref={e => this.element = e!}>
+            <span className='PictureTab_title'>{pictureState.picture.fileName}</span>
+            <span className='PictureTab_close' onClick={this.onCloseClick}>x</span>
           </div>
         </PointerEvents>
       </CSSVariables>
@@ -83,7 +83,7 @@ class PictureTabBar extends React.Component<{hidden: boolean}, {}> {
   render() {
     const {pictureStates, currentPictureIndex} = appState
     return (
-      <div className="PictureTabBar" hidden={this.props.hidden}>
+      <div className='PictureTabBar' hidden={this.props.hidden}>
         {
           pictureStates.map((p, i) => {
             const current = i === currentPictureIndex
@@ -113,7 +113,7 @@ class PictureTabBar extends React.Component<{hidden: boolean}, {}> {
             return <PictureTab key={p.picture.id} pictureState={p} shift={shift} current={current} onClose={onClose} onClick={onClick} onMove={onMove} onMoveEnd={onMoveEnd}/>
           })
         }
-        <div className="PictureTabFill"></div>
+        <div className='PictureTabFill'></div>
       </div>
     )
   }
