@@ -21,7 +21,7 @@ interface PanelProps extends DraggablePanelProps {
   onDrop: (x: number, y: number) => void
   zIndex?: number
 }
-class Panel extends React.Component<PanelProps, void> {
+class Panel extends React.Component<PanelProps, {}> {
   dragging = false
   window: HTMLDivElement
   label: HTMLDivElement
@@ -76,9 +76,9 @@ class Panel extends React.Component<PanelProps, void> {
   }
   render() {
     return (
-      <div className="DraggablePanel" ref={w => { this.window = w }}>
+      <div className="DraggablePanel" ref={w => { this.window = w! }}>
         <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
-          <div className="DraggablePanel_label" ref={l => { this.label = l }}>
+          <div className="DraggablePanel_label" ref={l => { this.label = l! }}>
             {this.props.label}
           </div>
         </PointerEvents>
@@ -126,7 +126,7 @@ interface DraggablePanelContainerProps {
   top: number
   left: number
 }
-export class DraggablePanelContainer extends React.Component<DraggablePanelContainerProps, void> {
+export class DraggablePanelContainer extends React.Component<DraggablePanelContainerProps, {}> {
   childrenState: ChildState[] = []
   previewState: PreviewState
   componentWillMount() {

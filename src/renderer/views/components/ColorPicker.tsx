@@ -51,7 +51,7 @@ class ColorPicker extends React.Component<ColorPickerProps, {}> {
     this.update()
     return (
       <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
-        <canvas className="ColorPicker" ref={e => this.canvas = e} width={wheelSize} height={wheelSize} style={{width: logicalWheelSize, height: logicalWheelSize}}/>
+        <canvas className="ColorPicker" ref={e => this.canvas = e!} width={wheelSize} height={wheelSize} style={{width: logicalWheelSize, height: logicalWheelSize}}/>
       </PointerEvents>
     )
   }

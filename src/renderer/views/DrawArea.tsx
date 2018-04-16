@@ -74,7 +74,7 @@ interface DrawAreaProps {
 
 @observer
 export default
-class DrawArea extends React.Component<DrawAreaProps, void> {
+class DrawArea extends React.Component<DrawAreaProps, {}> {
   element: HTMLElement|undefined
   @observable tool: Tool
   @observable picture: Picture|undefined
@@ -190,7 +190,7 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     return (
       <div className="DrawArea">
         <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
-          <div ref={e => this.element = e} className="DrawArea_content" tabIndex={-1} onKeyDown={this.onKeyDown} />
+          <div ref={e => this.element = e!} className="DrawArea_content" tabIndex={-1} onKeyDown={this.onKeyDown} />
         </PointerEvents>
         <DrawAreaScroll picture={this.picture} />
         <div className="DrawArea_blank" hidden={!!this.picture} />
@@ -217,16 +217,16 @@ class DrawArea extends React.Component<DrawAreaProps, void> {
     }
   }
 
-  onIPCTabletDown = (e: Electron.IpcRendererEvent, tabletEvent: TabletEvent) => {
+  onIPCTabletDown = (e: Electron.IpcMessageEvent, tabletEvent: TabletEvent) => {
     this.usingTablet = true
     this.onDown(this.toToolEvent(tabletEvent))
   }
-  onIPCTabletMove = (e: Electron.IpcRendererEvent, tabletEvent: TabletEvent) => {
+  onIPCTabletMove = (e: Electron.IpcMessageEvent, tabletEvent: TabletEvent) => {
     const toolEv = this.toToolEvent(tabletEvent)
     renderer.cursorPosition = toolEv.rendererPos
     this.onMove(toolEv)
   }
-  onIPCTabletUp = (e: Electron.IpcRendererEvent, tabletEvent: TabletEvent) => {
+  onIPCTabletUp = (e: Electron.IpcMessageEvent, tabletEvent: TabletEvent) => {
     this.usingTablet = false
     this.onUp(this.toToolEvent(tabletEvent))
   }

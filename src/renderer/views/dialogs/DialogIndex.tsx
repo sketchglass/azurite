@@ -25,7 +25,7 @@ window.addEventListener('DOMContentLoaded', () => {
     ipcRenderer.send('dialogDone', result)
   }
 
-  ipcRenderer.on('dialogOpen', (ev: Electron.IpcRendererEvent, name: string, param: any) => {
+  ipcRenderer.on('dialogOpen', (ev: Electron.IpcMessageEvent, name: string, param: any) => {
     ReactDOM.unmountComponentAtNode(root)
     let dialog: JSX.Element|undefined
     switch (name) {

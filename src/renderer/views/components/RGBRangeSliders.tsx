@@ -10,7 +10,7 @@ interface RGBRangeSlidersProps {
 }
 
 export default
-class RGBRangeSliders extends React.Component<RGBRangeSlidersProps, void> {
+class RGBRangeSliders extends React.Component<RGBRangeSlidersProps, {}> {
   color: Color
   constructor(props: RGBRangeSlidersProps) {
     super(props)

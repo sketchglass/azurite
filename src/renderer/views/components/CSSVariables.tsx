@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom'
 const decamelize = require('decamelize')
 
 interface CSSVariablesProps {
-  [key: string]: string|number
+  [key: string]: string|number|React.ReactChild
 }
 
 export default
@@ -17,7 +17,7 @@ class CSSVariables extends React.Component<CSSVariablesProps, {}> {
   componentWillReceiveProps(props: CSSVariablesProps) {
     this.setProperties(props)
   }
-  private setProperties(props: {[key: string]: string|number}) {
+  private setProperties(props: CSSVariablesProps) {
     this.element = ReactDOM.findDOMNode(this) as HTMLElement
     if (this.element) {
       for (const key in props) {

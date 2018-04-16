@@ -21,7 +21,7 @@ export interface RangeSliderProps {
   backgroundComponentProps?: any
 }
 
-export default class RangeSlider extends React.Component<RangeSliderProps, void> {
+export default class RangeSlider extends React.Component<RangeSliderProps, {}> {
   clicking = false
   fillWidth = 0
   handleLeft = 0
@@ -101,7 +101,7 @@ export default class RangeSlider extends React.Component<RangeSliderProps, void>
       <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
         <CSSVariables sliderRatio={ratio}>
           <div className={className}>
-            <div className="RangeSlider_border" ref={s => { this.slider = s }}>
+            <div className="RangeSlider_border" ref={s => { this.slider = s! }}>
               { background }
             </div>
             <div className="RangeSlider_text">{value}{postfix}</div>

@@ -7,13 +7,13 @@ import {appState} from '../app/AppState'
 import {formatRegistry} from '../app/FormatRegistry'
 import {keyBindingRegistry} from '../app/KeyBindingRegistry'
 
-interface MenuDescription extends Electron.MenuItemOptions {
+interface MenuDescription extends Electron.MenuItemConstructorOptions {
   action?: string
   submenu?: MenuDescription[]
 }
 
-function menuDescriptionToElectron(description: MenuDescription): Electron.MenuItemOptions {
-  const options: Electron.MenuItemOptions = {}
+function menuDescriptionToElectron(description: MenuDescription): Electron.MenuItemConstructorOptions {
+  const options: Electron.MenuItemConstructorOptions = {}
   Object.assign(options, description)
   if (description.action) {
     const action = actionRegistry.actions.get(description.action)

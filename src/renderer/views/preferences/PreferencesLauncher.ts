@@ -6,7 +6,7 @@ import {PreferencesData} from '../../viewmodels/PreferencesViewModel'
 export default
 class PreferencesLauncher {
   constructor() {
-    ipcRenderer.on(IPCChannels.preferencesChange, (e: Electron.IpcRendererEvent, data: PreferencesData) => {
+    ipcRenderer.on(IPCChannels.preferencesChange, (e: Electron.IpcMessageEvent, data: PreferencesData) => {
       appState.undoGroupingInterval = data.undoGroupingInterval
     })
   }

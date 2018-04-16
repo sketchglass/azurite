@@ -43,7 +43,7 @@ class Picture {
 
   selection: Selection
 
-  readonly rootLayer = new GroupLayer(this, 'root', [])
+  readonly rootLayer = new GroupLayer(this, {name: 'root'}, [])
   readonly selectedLayers = observable<Layer>([])
   readonly blender = new PictureBlender(this)
   @computed get layers() {

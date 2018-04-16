@@ -28,10 +28,10 @@ function openDialogsWindow() {
   win.on('closed', () => {
     dialogsWindow = undefined
   })
-  ipcMain.on(IPCChannels.dialogOpen, (ev: Electron.IpcMainEvent, name: string, param: any) => {
+  ipcMain.on(IPCChannels.dialogOpen, (ev: Electron.IpcMessageEvent, name: string, param: any) => {
     win.webContents.send(IPCChannels.dialogOpen, name, param)
   })
-  ipcMain.on(IPCChannels.dialogDone, (ev: Electron.IpcMainEvent, result: any) => {
+  ipcMain.on(IPCChannels.dialogDone, (ev: Electron.IpcMessageEvent, result: any) => {
     if (mainWindow) {
       mainWindow.webContents.send(IPCChannels.dialogDone, result)
     }
@@ -60,13 +60,13 @@ function openPreferencesWindow() {
   win.on('closed', () => {
     preferencesWindow = undefined
   })
-  ipcMain.on(IPCChannels.preferencesOpen, (ev: Electron.IpcMainEvent, data: any) => {
+  ipcMain.on(IPCChannels.preferencesOpen, (ev: Electron.IpcMessageEvent, data: any) => {
     win.webContents.send(IPCChannels.preferencesOpen, data)
     win.setAlwaysOnTop(true)
     win.show()
     preferencesShown = true
   })
-  ipcMain.on(IPCChannels.preferencesChange, (ev: Electron.IpcMainEvent, data: any) => {
+  ipcMain.on(IPCChannels.preferencesChange, (ev: Electron.IpcMessageEvent, data: any) => {
     if (mainWindow) {
       mainWindow.webContents.send(IPCChannels.preferencesChange, data)
     }
@@ -108,7 +108,7 @@ async function openWindow() {
 
   const receiver = new TabletEventReceiver(win)
 
-  ipcMain.on(IPCChannels.setTabletCaptureArea, (e, captureArea) => {
+  ipcMain.on(IPCChannels.setTabletCaptureArea, (e: Electron.IpcMessageEvent, captureArea: any) => {
     receiver.captureArea = captureArea
   })
 
@@ -123,7 +123,7 @@ async function openWindow() {
   })
 
   for (const ev of ['resize', 'enter-full-screen', 'leave-full-screen', 'maximize', 'unmaximize']) {
-    win.on(ev, () => {
+    win.on(ev as any, () => {
       win.webContents.send(IPCChannels.windowResize)
     })
   }
@@ -161,7 +161,7 @@ function openTestWindow() {
   win.on('closed', () => {
     testWindow = undefined
   })
-  ipcMain.on('testDone', (e, failCount) => {
+  ipcMain.on('testDone', (e: Electron.IpcMessageEvent, failCount: number) => {
     if (!argv.devserver) {
       setImmediate(() => {
         process.exit(failCount)

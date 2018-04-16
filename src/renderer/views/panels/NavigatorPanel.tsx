@@ -16,7 +16,6 @@ class NavigatorMinimap extends React.Component<{}, {} > {
   private dragging = false
   private dragStartTranslation = new Vec2()
   private originalTranslation = new Vec2()
-  private originalTransformFromPicture = new Transform()
 
   @computed private get picture() {
     return appState.currentPicture
@@ -97,7 +96,6 @@ class NavigatorMinimap extends React.Component<{}, {} > {
     this.dragging = true
     this.dragStartTranslation = translation
     this.originalTranslation = this.picture.navigation.translation
-    this.originalTransformFromPicture = renderer.transformFromPicture
   }
 
   private onPointerMove = (e: PointerEvent) => {
@@ -121,7 +119,7 @@ class NavigatorMinimap extends React.Component<{}, {} > {
     const height = 120 * devicePixelRatio
     return (
       <PointerEvents onPointerDown={this.onPointerDown} onPointerMove={this.onPointerMove} onPointerUp={this.onPointerUp}>
-        <canvas className="NavigatorPanel_minimap" width={width} height={height} ref={e => this.minimap = e} />
+        <canvas className="NavigatorPanel_minimap" width={width} height={height} ref={e => this.minimap = e!} />
       </PointerEvents>
     )
   }
