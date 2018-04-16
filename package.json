@@ -5,8 +5,8 @@
   "main": "dist/assets/main.js",
   "scripts": {
     "build:autogypi": "autogypi",
-    "node-gyp:rebuild": "node-gyp rebuild --target=1.6.3 --arch=x64 --dist-url=https://atom.io/download/atom-shell",
-    "node-gyp:build": "node-gyp build --target=1.6.3 --arch=x64 --dist-url=https://atom.io/download/atom-shell",
+    "node-gyp:rebuild": "node-gyp rebuild --target=1.8.4 --arch=x64 --dist-url=https://atom.io/download/atom-shell",
+    "node-gyp:build": "node-gyp build --target=1.8.4 --arch=x64 --dist-url=https://atom.io/download/atom-shell",
     "build:nativelib": "npm-run-all build:autogypi node-gyp:rebuild",
     "build:main": "webpack --config webpack.config.main.js",
     "build:renderer": "webpack",
@@ -37,7 +37,6 @@
   "private": true,
   "devDependencies": {
     "@types/classnames": "0.0.32",
-    "@types/electron": "^1.4.35",
     "@types/electron-devtools-installer": "^2.0.2",
     "@types/mocha": "^2.2.40",
     "@types/msgpack-lite": "^0.1.4",
@@ -53,7 +52,7 @@
     "babel-plugin-espower": "^2.3.2",
     "babel-plugin-glslify": "github:glslify/babel-plugin-glslify",
     "css-loader": "^0.28.0",
-    "electron": "1.6.3",
+    "electron": "1.8.4",
     "electron-devtools-installer": "^2.2.0",
     "electron-packager": "^8.6.0",
     "electron-rebuild": "^1.5.7",
