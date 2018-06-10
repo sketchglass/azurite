@@ -80,10 +80,13 @@
     "webpack-fail-plugin": "^1.0.6"
   },
   "dependencies": {
+    "@types/glob": "^5.0.35",
+    "@types/shelljs": "^0.8.0",
     "classnames": "^2.2.5",
     "decamelize": "^1.2.0",
     "deep-assign": "^2.0.0",
     "deep-equal": "^1.0.1",
+    "glob": "^7.1.2",
     "glslify": "^6.0.2",
     "keyboard-layout": "^2.0.11",
     "minimist": "^1.2.0",
