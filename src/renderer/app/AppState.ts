@@ -11,6 +11,7 @@ import {PictureState} from './PictureState'
 import {toolManager} from './ToolManager'
 
 import '../formats/PictureFormatCanvasImage'
+import '../formats/PictureFormatPSD'
 
 import '../actions/AppActions'
 import '../actions/CanvasActions'
